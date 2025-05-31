@@ -1,30 +1,59 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
-  Alert,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { useTheme } from "../utils/ThemeContext";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  withDelay,
+  withRepeat,
+  withTiming,
+  withSequence,
+  Easing,
 } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
 
 export default function PremiumScreen() {
   const { theme } = useTheme();
   const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState("yearly");
+
+  // Animation values
+  const buttonScale = useSharedValue(1);
+  const featureOpacity = useSharedValue(0);
+  const featureTranslateY = useSharedValue(20);
+
+  // Start animations
+  buttonScale.value = withRepeat(
+    withSequence(
+      withTiming(1.05, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+      withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.ease) })
+    ),
+    -1,
+    true
+  );
+
+  // Animate features in
+  featureOpacity.value = withTiming(1, { duration: 800 });
+  featureTranslateY.value = withTiming(0, { duration: 800 });
+
+  const buttonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: buttonScale.value }],
+  }));
+
+  const featureAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: featureOpacity.value,
+    transform: [{ translateY: featureTranslateY.value }],
+  }));
 
   const plans = [
     {
@@ -33,7 +62,6 @@ export default function PremiumScreen() {
       price: "$9.99",
       period: "/month",
       savings: null,
-      popular: false,
     },
     {
       id: "yearly",
@@ -43,187 +71,40 @@ export default function PremiumScreen() {
       savings: "Save 50%",
       popular: true,
     },
-    {
-      id: "lifetime",
-      name: "Lifetime",
-      price: "$199.99",
-      period: "one-time",
-      savings: "Best Value",
-      popular: false,
-    },
   ];
 
   const features = [
     {
-      icon: "infinite",
-      title: "Unlimited Quizzes",
-      description: "Access to all quiz questions and practice tests",
-      free: false,
+      icon: "book",
+      title: "Unlimited Practice Tests",
+      description: "Access to all past exam papers and practice questions",
+    },
+    {
+      icon: "bulb",
+      title: "Detailed Explanations",
+      description: "Step-by-step solutions for every question",
     },
     {
       icon: "analytics",
       title: "Advanced Analytics",
-      description: "Detailed performance insights and progress tracking",
-      free: false,
+      description: "Track your progress with detailed performance insights",
     },
     {
       icon: "download",
-      title: "Offline Mode",
-      description: "Download content for offline studying",
-      free: false,
-    },
-    {
-      icon: "school",
-      title: "Expert Explanations",
-      description: "Detailed explanations for every question",
-      free: false,
-    },
-    {
-      icon: "trophy",
-      title: "Priority Support",
-      description: "Get help faster with premium support",
-      free: false,
-    },
-    {
-      icon: "remove-circle",
-      title: "Ad-Free Experience",
-      description: "Study without interruptions",
-      free: false,
+      title: "Offline Access",
+      description: "Download content to study without internet",
     },
     {
       icon: "people",
-      title: "Study Groups",
-      description: "Join exclusive study groups and competitions",
-      free: false,
+      title: "Priority Support",
+      description: "Get help from our expert tutors",
     },
     {
-      icon: "calendar",
-      title: "Custom Study Plans",
-      description: "AI-powered personalized study schedules",
-      free: false,
+      icon: "trophy",
+      title: "Exclusive Content",
+      description: "Access premium study materials and video lessons",
     },
   ];
-
-  const handleSubscribe = () => {
-    const plan = plans.find((p) => p.id === selectedPlan);
-    Alert.alert(
-      "Subscribe to Premium",
-      `You're about to subscribe to the ${plan?.name} plan for ${plan?.price}${plan?.period}. This will unlock all premium features.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Subscribe",
-          onPress: () => {
-            Alert.alert(
-              "Success! 🎉",
-              "Welcome to ExamPrep Premium! All features are now unlocked."
-            );
-            router.back();
-          },
-        },
-      ]
-    );
-  };
-
-  const handleRestorePurchases = () => {
-    Alert.alert("Restore Purchases", "No previous purchases found.");
-  };
-
-  const AnimatedCard = ({
-    children,
-    delay = 0,
-  }: {
-    children: React.ReactNode;
-    delay?: number;
-  }) => {
-    const translateY = useSharedValue(50);
-    const opacity = useSharedValue(0);
-
-    React.useEffect(() => {
-      translateY.value = withDelay(delay, withSpring(0));
-      opacity.value = withDelay(delay, withSpring(1));
-    }, [delay, opacity, translateY]);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-      transform: [{ translateY: translateY.value }],
-      opacity: opacity.value,
-    }));
-
-    return <Animated.View style={animatedStyle}>{children}</Animated.View>;
-  };
-
-  const PlanCard = ({ plan, index }: { plan: any; index: number }) => {
-    const isSelected = selectedPlan === plan.id;
-
-    return (
-      <AnimatedCard delay={200 + index * 100}>
-        <TouchableOpacity
-          style={[
-            styles.planCard,
-            isSelected && styles.planCardSelected,
-            plan.popular && styles.planCardPopular,
-          ]}
-          onPress={() => setSelectedPlan(plan.id)}
-        >
-          {plan.popular && (
-            <View style={styles.popularBadge}>
-              <Text style={styles.popularBadgeText}>Most Popular</Text>
-            </View>
-          )}
-
-          <View style={styles.planHeader}>
-            <Text style={styles.planName}>{plan.name}</Text>
-            {plan.savings && (
-              <View style={styles.savingsBadge}>
-                <Text style={styles.savingsText}>{plan.savings}</Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.planPricing}>
-            <Text style={styles.planPrice}>{plan.price}</Text>
-            <Text style={styles.planPeriod}>{plan.period}</Text>
-          </View>
-
-          <View style={styles.planSelection}>
-            <View
-              style={[
-                styles.radioButton,
-                isSelected && styles.radioButtonSelected,
-              ]}
-            >
-              {isSelected && <View style={styles.radioButtonInner} />}
-            </View>
-          </View>
-        </TouchableOpacity>
-      </AnimatedCard>
-    );
-  };
-
-  const FeatureItem = ({ feature, index }: { feature: any; index: number }) => (
-    <AnimatedCard delay={400 + index * 50}>
-      <View style={styles.featureItem}>
-        <View style={styles.featureIcon}>
-          <Ionicons
-            name={feature.icon as any}
-            size={24}
-            color={theme.colors.primary}
-          />
-        </View>
-        <View style={styles.featureContent}>
-          <Text style={styles.featureTitle}>{feature.title}</Text>
-          <Text style={styles.featureDescription}>{feature.description}</Text>
-        </View>
-        <View style={styles.featureStatus}>
-          <Ionicons
-            name="checkmark-circle"
-            size={20}
-            color={theme.colors.success}
-          />
-        </View>
-      </View>
-    </AnimatedCard>
-  );
 
   const styles = StyleSheet.create({
     container: {
@@ -231,170 +112,133 @@ export default function PremiumScreen() {
       backgroundColor: theme.colors.background,
     },
     header: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingTop: theme.spacing.md,
-      paddingBottom: theme.spacing.lg,
-    },
-    headerTop: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: theme.spacing.lg,
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
     },
     backButton: {
-      padding: theme.spacing.sm,
-      marginRight: theme.spacing.md,
+      marginRight: 16,
     },
     headerTitle: {
       fontSize: 20,
       fontWeight: "600",
       color: theme.colors.text,
+    },
+    content: {
       flex: 1,
     },
     heroSection: {
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.xl,
-      marginBottom: theme.spacing.lg,
+      padding: 24,
+      alignItems: "center",
     },
-    heroIcon: {
-      alignSelf: "center",
-      marginBottom: theme.spacing.lg,
+    diamondIcon: {
+      width: 80,
+      height: 80,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 16,
     },
     heroTitle: {
       fontSize: 28,
       fontWeight: "bold",
-      color: "white",
+      color: theme.colors.text,
       textAlign: "center",
-      marginBottom: theme.spacing.md,
+      marginBottom: 12,
     },
     heroSubtitle: {
       fontSize: 16,
-      color: "rgba(255,255,255,0.9)",
+      color: theme.colors.textSecondary,
       textAlign: "center",
       lineHeight: 24,
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: theme.spacing.lg,
-    },
-    sectionTitle: {
-      fontSize: 22,
-      fontWeight: "600",
-      color: theme.colors.text,
-      marginBottom: theme.spacing.lg,
-      textAlign: "center",
+      marginBottom: 24,
     },
     plansContainer: {
-      marginBottom: theme.spacing.xl,
+      paddingHorizontal: 20,
+      marginBottom: 24,
+    },
+    plansTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: theme.colors.text,
+      marginBottom: 16,
     },
     planCard: {
       backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      marginBottom: theme.spacing.md,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 12,
       borderWidth: 2,
       borderColor: theme.colors.border,
-      position: "relative",
     },
-    planCardSelected: {
+    selectedPlan: {
       borderColor: theme.colors.primary,
       backgroundColor: theme.colors.primary + "10",
-    },
-    planCardPopular: {
-      borderColor: theme.colors.secondary,
     },
     popularBadge: {
       position: "absolute",
       top: -10,
-      left: theme.spacing.lg,
-      backgroundColor: theme.colors.secondary,
+      right: 16,
+      backgroundColor: theme.colors.warning,
       borderRadius: 12,
-      paddingHorizontal: theme.spacing.md,
+      paddingHorizontal: 12,
       paddingVertical: 4,
     },
-    popularBadgeText: {
-      color: "white",
+    popularText: {
       fontSize: 12,
       fontWeight: "600",
+      color: "white",
     },
     planHeader: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: theme.spacing.md,
+      marginBottom: 8,
     },
     planName: {
-      fontSize: 20,
+      fontSize: 18,
       fontWeight: "600",
       color: theme.colors.text,
-    },
-    savingsBadge: {
-      backgroundColor: theme.colors.success + "20",
-      borderRadius: 8,
-      paddingHorizontal: theme.spacing.sm,
-      paddingVertical: 4,
-    },
-    savingsText: {
-      color: theme.colors.success,
-      fontSize: 12,
-      fontWeight: "600",
-    },
-    planPricing: {
-      flexDirection: "row",
-      alignItems: "baseline",
-      marginBottom: theme.spacing.md,
     },
     planPrice: {
-      fontSize: 32,
+      fontSize: 24,
       fontWeight: "bold",
-      color: theme.colors.text,
+      color: theme.colors.primary,
     },
     planPeriod: {
-      fontSize: 16,
+      fontSize: 14,
       color: theme.colors.textSecondary,
-      marginLeft: 4,
     },
-    planSelection: {
-      alignItems: "flex-end",
-    },
-    radioButton: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      borderWidth: 2,
-      borderColor: theme.colors.border,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    radioButtonSelected: {
-      borderColor: theme.colors.primary,
-    },
-    radioButtonInner: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-      backgroundColor: theme.colors.primary,
+    planSavings: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: theme.colors.success,
     },
     featuresContainer: {
-      marginBottom: theme.spacing.xl,
+      paddingHorizontal: 20,
+      marginBottom: 24,
+    },
+    featuresTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: theme.colors.text,
+      marginBottom: 16,
     },
     featureItem: {
       flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.md,
-      marginBottom: theme.spacing.sm,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
+      alignItems: "flex-start",
+      marginBottom: 20,
     },
     featureIcon: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
       backgroundColor: theme.colors.primary + "20",
       justifyContent: "center",
       alignItems: "center",
-      marginRight: theme.spacing.md,
+      marginRight: 16,
     },
     featureContent: {
       flex: 1,
@@ -410,123 +254,368 @@ export default function PremiumScreen() {
       color: theme.colors.textSecondary,
       lineHeight: 20,
     },
-    featureStatus: {
-      marginLeft: theme.spacing.sm,
+    testimonialsContainer: {
+      paddingHorizontal: 20,
+      marginBottom: 24,
     },
-    footer: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingBottom: theme.spacing.xl,
-    },
-    subscribeButton: {
-      borderRadius: theme.borderRadius.md,
-      paddingVertical: theme.spacing.md,
-      alignItems: "center",
-      marginBottom: theme.spacing.md,
-    },
-    subscribeButtonText: {
-      color: "white",
+    testimonialsTitle: {
       fontSize: 18,
       fontWeight: "600",
+      color: theme.colors.text,
+      marginBottom: 16,
     },
-    restoreButton: {
-      alignItems: "center",
-      paddingVertical: theme.spacing.sm,
+    testimonialCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
     },
-    restoreButtonText: {
+    testimonialText: {
+      fontSize: 14,
+      color: theme.colors.text,
+      fontStyle: "italic",
+      lineHeight: 22,
+      marginBottom: 12,
+    },
+    testimonialAuthor: {
+      fontSize: 14,
+      fontWeight: "600",
       color: theme.colors.primary,
-      fontSize: 16,
-      fontWeight: "500",
     },
-    disclaimer: {
-      marginTop: theme.spacing.lg,
-      paddingTop: theme.spacing.lg,
+    footer: {
+      padding: 20,
       borderTopWidth: 1,
       borderTopColor: theme.colors.border,
     },
-    disclaimerText: {
+    upgradeButton: {
+      borderRadius: 12,
+      padding: 16,
+      alignItems: "center",
+      marginBottom: 12,
+    },
+    upgradeButtonText: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: "white",
+    },
+    restoreButton: {
+      alignItems: "center",
+      paddingVertical: 12,
+    },
+    restoreText: {
+      fontSize: 14,
+      color: theme.colors.primary,
+      fontWeight: "500",
+    },
+    termsText: {
       fontSize: 12,
       color: theme.colors.textSecondary,
       textAlign: "center",
-      lineHeight: 18,
+      lineHeight: 16,
+      marginTop: 12,
+    },
+    comparisonContainer: {
+      paddingHorizontal: 20,
+      marginBottom: 24,
+    },
+    comparisonTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: theme.colors.text,
+      marginBottom: 16,
+    },
+    comparisonTable: {
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 12,
+      overflow: "hidden",
+    },
+    tableHeader: {
+      flexDirection: "row",
+      backgroundColor: theme.colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    tableHeaderCell: {
+      flex: 1,
+      padding: 12,
+      alignItems: "center",
+    },
+    tableHeaderText: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: theme.colors.text,
+    },
+    tableRow: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    tableLastRow: {
+      borderBottomWidth: 0,
+    },
+    tableCell: {
+      flex: 1,
+      padding: 12,
+      alignItems: "center",
+    },
+    tableCellText: {
+      fontSize: 14,
+      color: theme.colors.text,
+    },
+    guaranteeContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.colors.success + "20",
+      borderRadius: 12,
+      padding: 16,
+      marginHorizontal: 20,
+      marginBottom: 24,
+    },
+    guaranteeIcon: {
+      marginRight: 16,
+    },
+    guaranteeText: {
+      flex: 1,
+      fontSize: 14,
+      color: theme.colors.success,
+      lineHeight: 20,
     },
   });
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>ExamPrep Premium</Text>
-        </View>
-
-        <LinearGradient
-          colors={[theme.colors.primary, theme.colors.secondary]}
-          style={styles.heroSection}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
         >
-          <View style={styles.heroIcon}>
-            <Ionicons name="diamond" size={64} color="white" />
-          </View>
+          <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>ExamPrep Premium</Text>
+      </View>
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.heroSection}>
+          <LinearGradient
+            colors={[theme.colors.primary, theme.colors.secondary]}
+            style={styles.diamondIcon}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Ionicons name="diamond" size={40} color="white" />
+          </LinearGradient>
           <Text style={styles.heroTitle}>Unlock Your Full Potential</Text>
           <Text style={styles.heroSubtitle}>
             Get unlimited access to all features and accelerate your exam
             preparation with premium tools and content.
           </Text>
-        </LinearGradient>
-      </View>
+        </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <AnimatedCard delay={100}>
-          <Text style={styles.sectionTitle}>Choose Your Plan</Text>
-        </AnimatedCard>
+        <Animated.View style={featureAnimatedStyle}>
+          <View style={styles.comparisonContainer}>
+            <Text style={styles.comparisonTitle}>Free vs Premium</Text>
+            <View style={styles.comparisonTable}>
+              <View style={styles.tableHeader}>
+                <View style={styles.tableHeaderCell}>
+                  <Text style={styles.tableHeaderText}>Feature</Text>
+                </View>
+                <View style={styles.tableHeaderCell}>
+                  <Text style={styles.tableHeaderText}>Free</Text>
+                </View>
+                <View style={styles.tableHeaderCell}>
+                  <Text style={styles.tableHeaderText}>Premium</Text>
+                </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCell}>
+                  <Text style={styles.tableCellText}>Practice Tests</Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text style={styles.tableCellText}>Limited</Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text
+                    style={[
+                      styles.tableCellText,
+                      { color: theme.colors.success },
+                    ]}
+                  >
+                    Unlimited
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCell}>
+                  <Text style={styles.tableCellText}>Detailed Solutions</Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Ionicons name="close" size={20} color={theme.colors.error} />
+                </View>
+                <View style={styles.tableCell}>
+                  <Ionicons
+                    name="checkmark"
+                    size={20}
+                    color={theme.colors.success}
+                  />
+                </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCell}>
+                  <Text style={styles.tableCellText}>
+                    Performance Analytics
+                  </Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text style={styles.tableCellText}>Basic</Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text
+                    style={[
+                      styles.tableCellText,
+                      { color: theme.colors.success },
+                    ]}
+                  >
+                    Advanced
+                  </Text>
+                </View>
+              </View>
+              <View style={[styles.tableRow, styles.tableLastRow]}>
+                <View style={styles.tableCell}>
+                  <Text style={styles.tableCellText}>Offline Access</Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Ionicons name="close" size={20} color={theme.colors.error} />
+                </View>
+                <View style={styles.tableCell}>
+                  <Ionicons
+                    name="checkmark"
+                    size={20}
+                    color={theme.colors.success}
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        </Animated.View>
 
         <View style={styles.plansContainer}>
-          {plans.map((plan, index) => (
-            <PlanCard key={plan.id} plan={plan} index={index} />
+          <Text style={styles.plansTitle}>Choose Your Plan</Text>
+          {plans.map((plan) => (
+            <TouchableOpacity
+              key={plan.id}
+              style={[
+                styles.planCard,
+                selectedPlan === plan.id && styles.selectedPlan,
+              ]}
+              onPress={() => setSelectedPlan(plan.id)}
+            >
+              {plan.popular && (
+                <View style={styles.popularBadge}>
+                  <Text style={styles.popularText}>MOST POPULAR</Text>
+                </View>
+              )}
+              <View style={styles.planHeader}>
+                <Text style={styles.planName}>{plan.name}</Text>
+                <View style={{ alignItems: "flex-end" }}>
+                  <View
+                    style={{ flexDirection: "row", alignItems: "baseline" }}
+                  >
+                    <Text style={styles.planPrice}>{plan.price}</Text>
+                    <Text style={styles.planPeriod}>{plan.period}</Text>
+                  </View>
+                  {plan.savings && (
+                    <Text style={styles.planSavings}>{plan.savings}</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
           ))}
         </View>
 
-        <AnimatedCard delay={300}>
-          <Text style={styles.sectionTitle}>Premium Features</Text>
-        </AnimatedCard>
+        <Animated.View style={featureAnimatedStyle}>
+          <View style={styles.featuresContainer}>
+            <Text style={styles.featuresTitle}>Premium Features</Text>
+            {features.map((feature, index) => (
+              <View key={index} style={styles.featureItem}>
+                <View style={styles.featureIcon}>
+                  <Ionicons
+                    name={feature.icon as any}
+                    size={20}
+                    color={theme.colors.primary}
+                  />
+                </View>
+                <View style={styles.featureContent}>
+                  <Text style={styles.featureTitle}>{feature.title}</Text>
+                  <Text style={styles.featureDescription}>
+                    {feature.description}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </Animated.View>
 
-        <View style={styles.featuresContainer}>
-          {features.map((feature, index) => (
-            <FeatureItem key={index} feature={feature} index={index} />
-          ))}
+        <View style={styles.guaranteeContainer}>
+          <Ionicons
+            name="shield-checkmark"
+            size={24}
+            color={theme.colors.success}
+            style={styles.guaranteeIcon}
+          />
+          <Text style={styles.guaranteeText}>
+            7-day money-back guarantee. Not satisfied? Get a full refund, no
+            questions asked.
+          </Text>
+        </View>
+
+        <View style={styles.testimonialsContainer}>
+          <Text style={styles.testimonialsTitle}>What Our Users Say</Text>
+          <View style={styles.testimonialCard}>
+            <Text style={styles.testimonialText}>
+              &quot;The detailed explanations helped me understand complex concepts.
+              I improved my grades significantly!&quot;
+            </Text>
+            <Text style={styles.testimonialAuthor}>- Sarah K.</Text>
+          </View>
+          <View style={styles.testimonialCard}>
+            <Text style={styles.testimonialText}>
+              &quot;The practice tests are exactly like the real exams. I felt so
+              prepared on exam day.&quot;
+            </Text>
+            <Text style={styles.testimonialAuthor}>- Michael O.</Text>
+          </View>
         </View>
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity onPress={handleSubscribe}>
-          <LinearGradient
-            colors={[theme.colors.primary, theme.colors.secondary]}
-            style={styles.subscribeButton}
+        <Animated.View style={buttonAnimatedStyle}>
+          <TouchableOpacity
+            style={styles.upgradeButton}
+            onPress={() => router.back()}
           >
-            <Text style={styles.subscribeButtonText}>
-              Start Premium - {plans.find((p) => p.id === selectedPlan)?.price}
+            <LinearGradient
+              colors={[theme.colors.primary, theme.colors.secondary]}
+              style={StyleSheet.absoluteFillObject}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
+            <Text style={styles.upgradeButtonText}>
+              Start Premium -{" "}
+              {selectedPlan === "yearly" ? "$59.99/year" : "$9.99/month"}
             </Text>
-          </LinearGradient>
+          </TouchableOpacity>
+        </Animated.View>
+        <TouchableOpacity style={styles.restoreButton}>
+          <Text style={styles.restoreText}>Restore Purchases</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.restoreButton}
-          onPress={handleRestorePurchases}
-        >
-          <Text style={styles.restoreButtonText}>Restore Purchases</Text>
-        </TouchableOpacity>
-
-        <View style={styles.disclaimer}>
-          <Text style={styles.disclaimerText}>
-            Subscription automatically renews unless auto-renew is turned off at
-            least 24 hours before the end of the current period. You can manage
-            your subscription in your account settings.
-          </Text>
-        </View>
+        <Text style={styles.termsText}>
+          Subscription automatically renews unless auto-renew is turned off at
+          least 24 hours before the end of the current period. You can manage
+          your subscription in your account settings.
+        </Text>
       </View>
     </SafeAreaView>
   );
