@@ -1,29 +1,48 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+"use client"
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Stack } from "expo-router"
+import { StatusBar } from "expo-status-bar"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
+import { SafeAreaProvider } from "react-native-safe-area-context"
+import { ThemeProvider } from "../src/utils/ThemeContext"
+import { UserProvider } from "../src/utils/UserContext"
+import { useFonts } from "expo-font"
+import * as SplashScreen from "expo-splash-screen"
+import { useEffect } from "react"
+
+SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+    "Inter-Regular": require("../src/assets/fonts/Inter_28pt-Regular.ttf"),
+    "Inter-Bold": require("../src/assets/fonts/Inter_28pt-Bold.ttf"),
+    "Inter-SemiBold": require("../src/assets/fonts/Inter_28pt-SemiBold.ttf"),
+  })
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync()
+    }
+  }, [loaded])
 
   if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
+    return null
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <UserProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="(routes)" />
+            </Stack>
+            <StatusBar style="auto" />
+          </UserProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  )
 }

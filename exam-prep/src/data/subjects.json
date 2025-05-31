@@ -1,0 +1,82 @@
+[
+  {
+    "id": "mathematics",
+    "name": "Mathematics",
+    "icon": "calculator",
+    "color": "#6366f1",
+    "description": "Numbers, algebra, geometry, and statistics",
+    "examIds": ["waec", "jamb", "igcse", "bac", "bef"]
+  },
+  {
+    "id": "english",
+    "name": "English Language",
+    "icon": "book",
+    "color": "#8b5cf6",
+    "description": "Grammar, comprehension, and essay writing",
+    "examIds": ["waec", "jamb", "igcse", "bef"]
+  },
+  {
+    "id": "physics",
+    "name": "Physics",
+    "icon": "flash",
+    "color": "#06d6a0",
+    "description": "Mechanics, electricity, waves, and modern physics",
+    "examIds": ["waec", "jamb", "igcse", "bac"]
+  },
+  {
+    "id": "chemistry",
+    "name": "Chemistry",
+    "icon": "flask",
+    "color": "#f59e0b",
+    "description": "Atomic structure, bonding, and chemical reactions",
+    "examIds": ["waec", "jamb", "igcse", "bac"]
+  },
+  {
+    "id": "biology",
+    "name": "Biology",
+    "icon": "leaf",
+    "color": "#10b981",
+    "description": "Life processes, genetics, and ecology",
+    "examIds": ["waec", "jamb", "igcse", "bac"]
+  },
+  {
+    "id": "geography",
+    "name": "Geography",
+    "icon": "earth",
+    "color": "#3b82f6",
+    "description": "Physical and human geography",
+    "examIds": ["waec", "jamb", "igcse", "bac", "bef"]
+  },
+  {
+    "id": "history",
+    "name": "History",
+    "icon": "time",
+    "color": "#ef4444",
+    "description": "World history and African history",
+    "examIds": ["waec", "igcse", "bac", "bef"]
+  },
+  {
+    "id": "economics",
+    "name": "Economics",
+    "icon": "trending-up",
+    "color": "#f97316",
+    "description": "Microeconomics and macroeconomics",
+    "examIds": ["waec", "jamb", "igcse", "bac"]
+  },
+  {
+    "id": "french",
+    "name": "French Language",
+    "icon": "chatbubble",
+    "color": "#ec4899",
+    "description": "French grammar, vocabulary, and literature",
+    "examIds": ["bac", "bef"]
+  },
+  {
+    "id": "philosophy",
+    "name": "Philosophy",
+    "icon": "bulb",
+    "color": "#8b5cf6",
+    "description": "Logic, ethics, and metaphysics",
+    "examIds": ["bac"]
+  }
+]

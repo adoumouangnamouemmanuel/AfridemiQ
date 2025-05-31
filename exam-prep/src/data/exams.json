@@ -1,0 +1,77 @@
+[
+  {
+    "id": "waec",
+    "name": "WAEC",
+    "description": "West African Examinations Council - Senior School Certificate Examination",
+    "icon": "school",
+    "color": "#6366f1",
+    "duration": "3 weeks",
+    "subjects": [
+      "Mathematics",
+      "English",
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "Geography",
+      "History",
+      "Economics",
+      "Literature"
+    ]
+  },
+  {
+    "id": "jamb",
+    "name": "JAMB UTME",
+    "description": "Joint Admissions and Matriculation Board - Unified Tertiary Matriculation Examination",
+    "icon": "library",
+    "color": "#8b5cf6",
+    "duration": "1 day",
+    "subjects": ["Mathematics", "English", "Physics", "Chemistry", "Biology", "Geography", "Economics", "Government"]
+  },
+  {
+    "id": "igcse",
+    "name": "IGCSE",
+    "description": "International General Certificate of Secondary Education",
+    "icon": "globe",
+    "color": "#06d6a0",
+    "duration": "2 months",
+    "subjects": [
+      "Mathematics",
+      "English",
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "Geography",
+      "History",
+      "Economics",
+      "Computer Science"
+    ]
+  },
+  {
+    "id": "bac",
+    "name": "Baccalauréat",
+    "description": "French Baccalaureate - Academic qualification for university entrance",
+    "icon": "medal",
+    "color": "#f59e0b",
+    "duration": "1 week",
+    "subjects": [
+      "Mathematics",
+      "French",
+      "Philosophy",
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "Geography",
+      "History",
+      "Economics"
+    ]
+  },
+  {
+    "id": "bef",
+    "name": "BEF",
+    "description": "Brevet d'Études du Premier Cycle - Junior Secondary Certificate",
+    "icon": "bookmark",
+    "color": "#ef4444",
+    "duration": "3 days",
+    "subjects": ["Mathematics", "French", "English", "Science", "Geography", "History", "Civic Education"]
+  }
+]

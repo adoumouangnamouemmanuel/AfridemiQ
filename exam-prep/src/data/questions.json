@@ -1,0 +1,68 @@
+[
+  {
+    "id": "q1",
+    "topicId": "algebra_basics",
+    "subject": "Mathematics",
+    "question": "Solve for x: 2x + 5 = 13",
+    "options": ["x = 3", "x = 4", "x = 5", "x = 6"],
+    "correctAnswer": 1,
+    "explanation": "Subtract 5 from both sides: 2x = 8, then divide by 2: x = 4",
+    "difficulty": "Easy",
+    "points": 10
+  },
+  {
+    "id": "q2",
+    "topicId": "quadratic_equations",
+    "subject": "Mathematics",
+    "question": "What are the roots of x² - 5x + 6 = 0?",
+    "options": ["x = 1, 6", "x = 2, 3", "x = -2, -3", "x = 1, -6"],
+    "correctAnswer": 1,
+    "explanation": "Factor: (x-2)(x-3) = 0, so x = 2 or x = 3",
+    "difficulty": "Medium",
+    "points": 15
+  },
+  {
+    "id": "q3",
+    "topicId": "grammar_basics",
+    "subject": "English",
+    "question": "Which of the following is a proper noun?",
+    "options": ["city", "Lagos", "building", "school"],
+    "correctAnswer": 1,
+    "explanation": "Lagos is a proper noun as it's the name of a specific place",
+    "difficulty": "Easy",
+    "points": 10
+  },
+  {
+    "id": "q4",
+    "topicId": "mechanics",
+    "subject": "Physics",
+    "question": "What is the SI unit of force?",
+    "options": ["Joule", "Newton", "Watt", "Pascal"],
+    "correctAnswer": 1,
+    "explanation": "The Newton (N) is the SI unit of force, named after Isaac Newton",
+    "difficulty": "Easy",
+    "points": 10
+  },
+  {
+    "id": "q5",
+    "topicId": "atomic_structure",
+    "subject": "Chemistry",
+    "question": "How many protons does a carbon atom have?",
+    "options": ["4", "6", "8", "12"],
+    "correctAnswer": 1,
+    "explanation": "Carbon has atomic number 6, which means it has 6 protons",
+    "difficulty": "Easy",
+    "points": 10
+  },
+  {
+    "id": "q6",
+    "topicId": "cell_biology",
+    "subject": "Biology",
+    "question": "Which organelle is known as the 'powerhouse of the cell'?",
+    "options": ["Nucleus", "Mitochondria", "Ribosome", "Golgi apparatus"],
+    "correctAnswer": 1,
+    "explanation": "Mitochondria produce ATP, the cell's main energy currency",
+    "difficulty": "Easy",
+    "points": 10
+  }
+]

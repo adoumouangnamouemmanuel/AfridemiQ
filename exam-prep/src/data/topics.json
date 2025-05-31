@@ -1,0 +1,102 @@
+[
+  {
+    "id": "algebra_basics",
+    "name": "Algebra Basics",
+    "subjectId": "mathematics",
+    "description": "Introduction to algebraic expressions and equations",
+    "difficulty": "Easy",
+    "estimatedTime": 30,
+    "completed": false,
+    "progress": 0
+  },
+  {
+    "id": "quadratic_equations",
+    "name": "Quadratic Equations",
+    "subjectId": "mathematics",
+    "description": "Solving quadratic equations using various methods",
+    "difficulty": "Medium",
+    "estimatedTime": 45,
+    "completed": false,
+    "progress": 0
+  },
+  {
+    "id": "trigonometry",
+    "name": "Trigonometry",
+    "subjectId": "mathematics",
+    "description": "Sine, cosine, tangent and their applications",
+    "difficulty": "Hard",
+    "estimatedTime": 60,
+    "completed": false,
+    "progress": 0
+  },
+  {
+    "id": "grammar_basics",
+    "name": "Grammar Fundamentals",
+    "subjectId": "english",
+    "description": "Parts of speech, sentence structure, and punctuation",
+    "difficulty": "Easy",
+    "estimatedTime": 25,
+    "completed": true,
+    "progress": 100
+  },
+  {
+    "id": "essay_writing",
+    "name": "Essay Writing",
+    "subjectId": "english",
+    "description": "Structure, argumentation, and style in essay writing",
+    "difficulty": "Medium",
+    "estimatedTime": 40,
+    "completed": false,
+    "progress": 60
+  },
+  {
+    "id": "mechanics",
+    "name": "Mechanics",
+    "subjectId": "physics",
+    "description": "Motion, forces, and energy",
+    "difficulty": "Medium",
+    "estimatedTime": 50,
+    "completed": false,
+    "progress": 30
+  },
+  {
+    "id": "electricity",
+    "name": "Electricity and Magnetism",
+    "subjectId": "physics",
+    "description": "Electric circuits, magnetic fields, and electromagnetic induction",
+    "difficulty": "Hard",
+    "estimatedTime": 55,
+    "completed": false,
+    "progress": 0
+  },
+  {
+    "id": "atomic_structure",
+    "name": "Atomic Structure",
+    "subjectId": "chemistry",
+    "description": "Atoms, electrons, and the periodic table",
+    "difficulty": "Medium",
+    "estimatedTime": 35,
+    "completed": false,
+    "progress": 45
+  },
+  {
+    "id": "chemical_bonding",
+    "name": "Chemical Bonding",
+    "subjectId": "chemistry",
+    "description": "Ionic, covalent, and metallic bonding",
+    "difficulty": "Hard",
+    "estimatedTime": 45,
+    "completed": false,
+    "progress": 0
+  },
+  {
+    "id": "cell_biology",
+    "name": "Cell Biology",
+    "subjectId": "biology",
+    "description": "Cell structure, organelles, and cellular processes",
+    "difficulty": "Easy",
+    "estimatedTime": 30,
+    "completed": true,
+    "progress": 100
+  }
+]
