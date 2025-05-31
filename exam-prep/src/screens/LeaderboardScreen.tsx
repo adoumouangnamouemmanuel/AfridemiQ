@@ -76,7 +76,7 @@ export default function LeaderboardScreen() {
     React.useEffect(() => {
       translateY.value = withDelay(delay, withSpring(0));
       opacity.value = withDelay(delay, withSpring(1));
-    }, []);
+    }, [delay, opacity, translateY]);
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ translateY: translateY.value }],
@@ -182,7 +182,7 @@ export default function LeaderboardScreen() {
               </View>
               <View style={styles.userRankStat}>
                 <Text style={styles.userRankStatValue}>
-                  {user.badges.length}
+                  {user.badges?.length}
                 </Text>
                 <Text style={styles.userRankStatLabel}>Badges</Text>
               </View>
@@ -464,11 +464,11 @@ export default function LeaderboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {topThree.length > 0 && <TopThreeCard players={topThree} />}
+        {topThree?.length > 0 && <TopThreeCard players={topThree} />}
 
         <UserRankCard />
 
-        {remainingPlayers.length > 0 ? (
+        {remainingPlayers?.length > 0 ? (
           <>
             <Text style={styles.sectionTitle}>All Rankings</Text>
             <View style={styles.leaderboardList}>

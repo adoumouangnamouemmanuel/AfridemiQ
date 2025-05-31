@@ -142,7 +142,7 @@ export default function PremiumScreen() {
     React.useEffect(() => {
       translateY.value = withDelay(delay, withSpring(0));
       opacity.value = withDelay(delay, withSpring(1));
-    }, []);
+    }, [delay, opacity, translateY]);
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ translateY: translateY.value }],

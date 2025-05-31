@@ -43,14 +43,14 @@ export default function StudyScreen() {
       (topic) => topic.subjectId === subjectId
     );
     const completedTopics = subjectTopics.filter((topic) => topic.completed);
-    const totalTopics = subjectTopics.length;
+    const totalTopics = subjectTopics?.length;
     const progress =
-      totalTopics > 0 ? (completedTopics.length / totalTopics) * 100 : 0;
+      totalTopics > 0 ? (completedTopics?.length / totalTopics) * 100 : 0;
 
     return {
       progress,
       totalTopics,
-      completedTopics: completedTopics.length,
+      completedTopics: completedTopics?.length,
     };
   };
 
@@ -110,7 +110,7 @@ export default function StudyScreen() {
     React.useEffect(() => {
       translateY.value = withDelay(delay, withSpring(0));
       opacity.value = withDelay(delay, withSpring(1));
-    }, []);
+    }, [delay, opacity, translateY]);
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ translateY: translateY.value }],
@@ -253,14 +253,14 @@ export default function StudyScreen() {
   // Calculate overall stats
   const totalSubjects = subjectsData.filter((s) =>
     user?.selectedExam ? s.examIds.includes(user.selectedExam) : true
-  ).length;
+  )?.length;
   const completedSubjects = filteredSubjects.filter(
     (s) => getSubjectProgress(s.id).progress === 100
-  ).length;
+  )?.length;
   const inProgressSubjects = filteredSubjects.filter((s) => {
     const progress = getSubjectProgress(s.id).progress;
     return progress > 0 && progress < 100;
-  }).length;
+  })?.length;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -343,7 +343,7 @@ export default function StudyScreen() {
 
         <Text style={styles.sectionTitle}>Your Subjects</Text>
 
-        {filteredSubjects.length === 0 ? (
+        {filteredSubjects?.length === 0 ? (
           <AnimatedCard delay={200}>
             <View style={styles.emptyState}>
               <View style={styles.emptyStateIcon}>

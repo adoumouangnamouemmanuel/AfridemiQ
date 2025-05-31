@@ -6,7 +6,7 @@ import { ActivityIndicator, View } from "react-native";
 import { useTheme } from "../src/utils/ThemeContext";
 
 export default function Index() {
-  const { user, setUser } = useUser();
+  const {setUser } = useUser();
   const { theme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [authState, setAuthState] = useState<
@@ -14,38 +14,38 @@ export default function Index() {
   >("loading");
 
   useEffect(() => {
-    checkAuthState();
-  }, []);
+    const checkAuthState = async () => {
+      try {
+        // Check if user is logged in (persisted in storage)
+        const userData = await AsyncStorage.getItem("user");
+        const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
 
-  const checkAuthState = async () => {
-    try {
-      // Check if user is logged in (persisted in storage)
-      const userData = await AsyncStorage.getItem("user");
-      const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
+        if (userData) {
+          // User is logged in
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
 
-      if (userData) {
-        // User is logged in
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-
-        if (hasOnboarded) {
-          // User is logged in and has completed onboarding
-          setAuthState("home");
+          if (hasOnboarded) {
+            // User is logged in and has completed onboarding
+            setAuthState("home");
+          } else {
+            // User is logged in but hasn't completed onboarding
+            setAuthState("onboarding");
+          }
         } else {
-          // User is logged in but hasn't completed onboarding
-          setAuthState("onboarding");
+          // No user found, go to login
+          setAuthState("login");
         }
-      } else {
-        // No user found, go to login
+      } catch (error) {
+        console.error("Error checking auth state:", error);
         setAuthState("login");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error checking auth state:", error);
-      setAuthState("login");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    checkAuthState();
+  }, [setUser]);
 
   if (isLoading) {
     return (
