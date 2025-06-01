@@ -9,7 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
@@ -30,8 +30,6 @@ import ExplanationModal from "../components/quiz/ExplanationModal";
 
 export default function QuizScreen() {
   const router = useRouter();
-  const { id, mode } = useLocalSearchParams();
-  const isPracticeMode = mode === "practice";
   const insets = useSafeAreaInsets();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -62,6 +60,7 @@ export default function QuizScreen() {
   // Animations
   const progressAnimation = useSharedValue(0);
   const questionAnimation = useSharedValue(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const optionAnimations = [
     useSharedValue(0),
     useSharedValue(0),
@@ -138,13 +137,13 @@ export default function QuizScreen() {
       3,
       false
     );
-  }, [currentQuestionIndex, currentQuestion]);
+  }, [currentQuestionIndex, currentQuestion, progressAnimation, questions.length, questionAnimation, helpButtonPulse, optionAnimations]);
 
   useEffect(() => {
     setSelectedOption(null);
     setShowFeedback(false);
     feedbackAnimation.value = 0;
-  }, [currentQuestionIndex]);
+  }, [currentQuestionIndex, feedbackAnimation]);
 
   const handleOptionSelect = (optionIndex: number) => {
     if (showFeedback) return;
@@ -228,11 +227,11 @@ export default function QuizScreen() {
   };
 
   const handleQuizComplete = () => {
-    const correctAnswers = answers.reduce((total, answer, index) => {
+    const correctAnswers = answers.reduce((total: number, answer, index) => {
       return total + (answer === questions[index].correctAnswer ? 1 : 0);
     }, 0);
 
-    const score = Math.round((correctAnswers / questions.length) * 100);
+    const score = Math.round(((correctAnswers ?? 0) / questions.length) * 100);
 
     let totalXP = 0;
     answers.forEach((answer, index) => {

@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../utils/ThemeContext";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,6 +26,7 @@ export default function PremiumScreen() {
   const { theme } = useTheme();
   const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState("yearly");
+  const insets = useSafeAreaInsets();
 
   // Animation values
   const buttonScale = useSharedValue(1);
@@ -110,6 +111,7 @@ export default function PremiumScreen() {
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
+      paddingTop: insets.top,
     },
     header: {
       flexDirection: "row",
@@ -118,6 +120,7 @@ export default function PremiumScreen() {
       paddingVertical: 16,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.border,
+      backgroundColor: theme.colors.background,
     },
     backButton: {
       marginRight: 16,
@@ -140,6 +143,7 @@ export default function PremiumScreen() {
       justifyContent: "center",
       alignItems: "center",
       marginBottom: 16,
+      borderRadius: 40,
     },
     heroTitle: {
       fontSize: 28,
@@ -172,6 +176,11 @@ export default function PremiumScreen() {
       marginBottom: 12,
       borderWidth: 2,
       borderColor: theme.colors.border,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
     },
     selectedPlan: {
       borderColor: theme.colors.primary,
@@ -230,6 +239,14 @@ export default function PremiumScreen() {
       flexDirection: "row",
       alignItems: "flex-start",
       marginBottom: 20,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 2,
     },
     featureIcon: {
       width: 40,
@@ -271,6 +288,11 @@ export default function PremiumScreen() {
       marginBottom: 12,
       borderWidth: 1,
       borderColor: theme.colors.border,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 2,
     },
     testimonialText: {
       fontSize: 14,
@@ -286,14 +308,21 @@ export default function PremiumScreen() {
     },
     footer: {
       padding: 20,
+      paddingBottom: Math.max(insets.bottom + 20, 40),
       borderTopWidth: 1,
       borderTopColor: theme.colors.border,
+      backgroundColor: theme.colors.background,
     },
     upgradeButton: {
       borderRadius: 12,
-      padding: 16,
+      padding: 18,
       alignItems: "center",
       marginBottom: 12,
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
     },
     upgradeButtonText: {
       fontSize: 18,
@@ -331,10 +360,16 @@ export default function PremiumScreen() {
       borderColor: theme.colors.border,
       borderRadius: 12,
       overflow: "hidden",
+      backgroundColor: theme.colors.surface,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
     },
     tableHeader: {
       flexDirection: "row",
-      backgroundColor: theme.colors.surface,
+      backgroundColor: theme.colors.primary + "10",
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.border,
     },
@@ -373,6 +408,8 @@ export default function PremiumScreen() {
       padding: 16,
       marginHorizontal: 20,
       marginBottom: 24,
+      borderWidth: 1,
+      borderColor: theme.colors.success + "30",
     },
     guaranteeIcon: {
       marginRight: 16,
@@ -382,11 +419,12 @@ export default function PremiumScreen() {
       fontSize: 14,
       color: theme.colors.success,
       lineHeight: 20,
+      fontWeight: "500",
     },
   });
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -617,6 +655,6 @@ export default function PremiumScreen() {
           your subscription in your account settings.
         </Text>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
