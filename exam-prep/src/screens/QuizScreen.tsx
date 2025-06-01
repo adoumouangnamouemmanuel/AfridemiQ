@@ -1,336 +1,645 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
-  Dimensions,
+  ScrollView,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useTheme } from "../utils/ThemeContext";
-import { useUser } from "../utils/UserContext";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
   withTiming,
-  interpolateColor,
-  runOnJS,
+  withSequence,
+  withDelay,
+  withRepeat,
+  withSpring,
+  interpolate,
 } from "react-native-reanimated";
-import QuestionCard from "../components/QuestionCard";
-import TimerBar from "../components/TimerBar";
 import questionsData from "../data/questions.json";
-
-const { width } = Dimensions.get("window");
+import QuizHeader from "../components/quiz/QuizHeader";
+import QuestionCard from "../components/quiz/QuestionCard";
+import HintModal from "../components/quiz/HintModal";
+import ExplanationModal from "../components/quiz/ExplanationModal";
 
 export default function QuizScreen() {
-  const { theme } = useTheme();
-  const { user, addXP, incrementStreak } = useUser();
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, mode } = useLocalSearchParams();
+  const isPracticeMode = mode === "practice";
+  const insets = useSafeAreaInsets();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
-  const [timeLeft, setTimeLeft] = useState(900); // 15 minutes
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [showResult, setShowResult] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [answers, setAnswers] = useState<(number | null)[]>([]);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [showHintModal, setShowHintModal] = useState(false);
+  const [hintStep, setHintStep] = useState(0);
+  const [hearts, setHearts] = useState(3);
+  const [streak, setStreak] = useState(0);
+  const [xpReductions, setXpReductions] = useState<number[]>([]);
+  const scrollViewRef = useRef<ScrollView>(null);
 
-  const questions = questionsData.slice(0, 10); // Get 10 questions for the quiz
+  const questions = questionsData.slice(0, 10);
   const currentQuestion = questions[currentQuestionIndex];
-  const progress = useSharedValue(0);
-  const questionScale = useSharedValue(1);
+
+  // Progressive hint steps
+  const getHintSteps = () => [
+    "💡 Think about what the question is really asking for.",
+    "🔍 Look at the key information provided in the question.",
+    "📝 Consider which formula or concept applies here.",
+    `⚡ The correct answer is option ${String.fromCharCode(
+      65 + currentQuestion.correctAnswer
+    )}: ${currentQuestion.options[currentQuestion.correctAnswer]}`,
+  ];
+
+  // Animations
+  const progressAnimation = useSharedValue(0);
+  const questionAnimation = useSharedValue(0);
+  const optionAnimations = [
+    useSharedValue(0),
+    useSharedValue(0),
+    useSharedValue(0),
+    useSharedValue(0),
+  ];
+  const feedbackAnimation = useSharedValue(0);
+  const heartAnimation = useSharedValue(1);
+  const streakAnimation = useSharedValue(1);
+  const helpButtonPulse = useSharedValue(1);
+
+  const optionAnimatedStyles = [
+    useAnimatedStyle(() => ({
+      opacity: optionAnimations[0].value,
+      transform: [
+        { translateY: interpolate(optionAnimations[0].value, [0, 1], [30, 0]) },
+        { scale: interpolate(optionAnimations[0].value, [0, 1], [0.95, 1]) },
+      ],
+    })),
+    useAnimatedStyle(() => ({
+      opacity: optionAnimations[1].value,
+      transform: [
+        { translateY: interpolate(optionAnimations[1].value, [0, 1], [30, 0]) },
+        { scale: interpolate(optionAnimations[1].value, [0, 1], [0.95, 1]) },
+      ],
+    })),
+    useAnimatedStyle(() => ({
+      opacity: optionAnimations[2].value,
+      transform: [
+        { translateY: interpolate(optionAnimations[2].value, [0, 1], [30, 0]) },
+        { scale: interpolate(optionAnimations[2].value, [0, 1], [0.95, 1]) },
+      ],
+    })),
+    useAnimatedStyle(() => ({
+      opacity: optionAnimations[3].value,
+      transform: [
+        { translateY: interpolate(optionAnimations[3].value, [0, 1], [30, 0]) },
+        { scale: interpolate(optionAnimations[3].value, [0, 1], [0.95, 1]) },
+      ],
+    })),
+  ];
 
   useEffect(() => {
-    progress.value = withTiming((currentQuestionIndex + 1) / questions.length);
+    setAnswers(Array(questions.length).fill(null));
+    setXpReductions(Array(questions.length).fill(0));
+  }, [questions.length]);
+
+  useEffect(() => {
+    setHintStep(0);
+    progressAnimation.value = withTiming(
+      (currentQuestionIndex + 1) / questions.length,
+      { duration: 800 }
+    );
+
+    questionAnimation.value = 0;
+    questionAnimation.value = withDelay(
+      200,
+      withSpring(1, { damping: 15, stiffness: 150 })
+    );
+
+    currentQuestion.options.forEach((_, index) => {
+      optionAnimations[index].value = 0;
+      optionAnimations[index].value = withDelay(
+        400 + index * 100,
+        withSpring(1, { damping: 15, stiffness: 150 })
+      );
+    });
+
+    helpButtonPulse.value = withRepeat(
+      withSequence(
+        withDelay(2000, withTiming(1.1, { duration: 600 })),
+        withTiming(1, { duration: 600 })
+      ),
+      3,
+      false
+    );
+  }, [currentQuestionIndex, currentQuestion]);
+
+  useEffect(() => {
+    setSelectedOption(null);
+    setShowFeedback(false);
+    feedbackAnimation.value = 0;
   }, [currentQuestionIndex]);
 
-  useEffect(() => {
-    if (timeLeft > 0 && !isSubmitted) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0) {
-      handleSubmitQuiz();
+  const handleOptionSelect = (optionIndex: number) => {
+    if (showFeedback) return;
+
+    setSelectedOption(optionIndex);
+
+    optionAnimations[optionIndex].value = withSequence(
+      withTiming(0.95, { duration: 100 }),
+      withTiming(1.05, { duration: 150 }),
+      withTiming(1, { duration: 100 })
+    );
+
+    setTimeout(() => {
+      const newAnswers = [...answers];
+      newAnswers[currentQuestionIndex] = optionIndex;
+      setAnswers(newAnswers);
+
+      setShowFeedback(true);
+      feedbackAnimation.value = withSpring(1, { damping: 15, stiffness: 150 });
+
+      const isCorrect = optionIndex === currentQuestion.correctAnswer;
+
+      if (isCorrect) {
+        setStreak(streak + 1);
+        streakAnimation.value = withSequence(
+          withTiming(1.3, { duration: 200 }),
+          withTiming(1, { duration: 200 })
+        );
+      } else {
+        setHearts(Math.max(0, hearts - 1));
+        heartAnimation.value = withSequence(
+          withTiming(1.5, { duration: 150 }),
+          withTiming(0.8, { duration: 150 }),
+          withTiming(1, { duration: 150 })
+        );
+      }
+    }, 300);
+  };
+
+  const handleHintPress = () => {
+    setShowHintModal(true);
+  };
+
+  const handleNextHint = () => {
+    const newHintStep = hintStep + 1;
+    setHintStep(newHintStep);
+
+    const newXpReductions = [...xpReductions];
+    const currentReduction = newXpReductions[currentQuestionIndex] || 0;
+
+    if (newHintStep === 1) {
+      newXpReductions[currentQuestionIndex] = currentReduction + 2;
+    } else if (newHintStep === 2) {
+      newXpReductions[currentQuestionIndex] = currentReduction + 2;
+    } else if (newHintStep === 3) {
+      newXpReductions[currentQuestionIndex] = currentReduction + 3;
+    } else if (newHintStep >= 4) {
+      // Final hint reveals answer - lose heart
+      setHearts(Math.max(0, hearts - 1));
+      newXpReductions[currentQuestionIndex] = 10; // Full penalty
+      heartAnimation.value = withSequence(
+        withTiming(1.5, { duration: 150 }),
+        withTiming(0.8, { duration: 150 }),
+        withTiming(1, { duration: 150 })
+      );
+      setShowHintModal(false);
     }
-  }, [timeLeft, isSubmitted]);
 
-  const animatedProgressStyle = useAnimatedStyle(() => ({
-    width: `${progress.value * 100}%`,
-    backgroundColor: interpolateColor(
-      progress.value,
-      [0, 0.5, 1],
-      [theme.colors.error, theme.colors.warning, theme.colors.success]
-    ),
-  }));
-
-  const animatedQuestionStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: questionScale.value }],
-  }));
-
-  const handleSelectAnswer = (answerIndex: number) => {
-    const newAnswers = [...selectedAnswers];
-    newAnswers[currentQuestionIndex] = answerIndex;
-    setSelectedAnswers(newAnswers);
+    setXpReductions(newXpReductions);
   };
 
   const handleNextQuestion = () => {
-    if (selectedAnswers[currentQuestionIndex] === undefined) {
-      Alert.alert(
-        "Please select an answer",
-        "You must select an answer before proceeding."
-      );
-      return;
-    }
-
-    questionScale.value = withSpring(0.8, {}, () => {
-      questionScale.value = withSpring(1);
-      if (currentQuestionIndex < questions.length - 1) {
-        runOnJS(setCurrentQuestionIndex)(currentQuestionIndex + 1);
-      } else {
-        runOnJS(handleSubmitQuiz)();
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({ y: 0, animated: false });
       }
-    });
-  };
-
-  const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      questionScale.value = withSpring(0.8, {}, () => {
-        questionScale.value = withSpring(1);
-        runOnJS(setCurrentQuestionIndex)(currentQuestionIndex - 1);
-      });
+    } else {
+      handleQuizComplete();
     }
   };
 
-  const handleSubmitQuiz = () => {
-    setIsSubmitted(true);
-    setShowResult(true);
-
-    // Calculate score
-    let correctAnswers = 0;
-    questions.forEach((question, index) => {
-      if (selectedAnswers[index] === question.correctAnswer) {
-        correctAnswers++;
-      }
-    });
+  const handleQuizComplete = () => {
+    const correctAnswers = answers.reduce((total, answer, index) => {
+      return total + (answer === questions[index].correctAnswer ? 1 : 0);
+    }, 0);
 
     const score = Math.round((correctAnswers / questions.length) * 100);
-    const xpEarned = correctAnswers * 10;
 
-    addXP(xpEarned);
-    if (score >= 70) {
-      incrementStreak();
-    }
+    let totalXP = 0;
+    answers.forEach((answer, index) => {
+      if (answer === questions[index].correctAnswer) {
+        const baseXP = 10;
+        const reduction = xpReductions[index] || 0;
+        totalXP += Math.max(0, baseXP - reduction);
+      }
+    });
 
-    // Navigate to results with quiz data
-    router.replace({
+    router.push({
       pathname: "/(routes)/results",
       params: {
         score: score.toString(),
         correctAnswers: correctAnswers.toString(),
         totalQuestions: questions.length.toString(),
-        xpEarned: xpEarned.toString(),
-        timeSpent: (900 - timeLeft).toString(),
+        xpEarned: totalXP.toString(),
+        timeSpent: "900",
+        streak: streak.toString(),
+        hearts: hearts.toString(),
       },
     });
   };
 
-  const handleQuitQuiz = () => {
-    Alert.alert(
-      "Quit Quiz",
-      "Are you sure you want to quit? Your progress will be lost.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Quit", style: "destructive", onPress: () => router.back() },
-      ]
-    );
+  const getOptionStyle = (index: number) => {
+    if (!showFeedback) {
+      return index === selectedOption ? styles.selectedOption : styles.option;
+    }
+
+    if (index === currentQuestion.correctAnswer) {
+      return styles.correctOption;
+    }
+
+    if (index === selectedOption && index !== currentQuestion.correctAnswer) {
+      return styles.incorrectOption;
+    }
+
+    return styles.option;
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.md,
-    },
-    headerTop: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: theme.spacing.md,
-    },
-    quitButton: {
-      padding: theme.spacing.sm,
-    },
-    questionCounter: {
-      fontSize: 18,
-      fontWeight: "600",
-      color: theme.colors.text,
-    },
-    progressContainer: {
-      height: 8,
-      backgroundColor: theme.colors.border,
-      borderRadius: 4,
-      overflow: "hidden",
-      marginBottom: theme.spacing.md,
-    },
-    progressBar: {
-      height: "100%",
-      borderRadius: 4,
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: theme.spacing.lg,
-    },
-    navigation: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.xl,
-    },
-    navButton: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: theme.borderRadius.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.md,
-      minWidth: 100,
-      alignItems: "center",
-    },
-    navButtonDisabled: {
-      backgroundColor: theme.colors.border,
-    },
-    navButtonText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "600",
-    },
-    navButtonTextDisabled: {
-      color: theme.colors.textSecondary,
-    },
-    submitButton: {
-      backgroundColor: theme.colors.success,
-      borderRadius: theme.borderRadius.md,
-      paddingHorizontal: theme.spacing.xl,
-      paddingVertical: theme.spacing.md,
-      alignItems: "center",
-    },
-    submitButtonText: {
-      color: "white",
-      fontSize: 18,
-      fontWeight: "600",
-    },
-    questionInfo: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.md,
-      marginBottom: theme.spacing.lg,
-    },
-    questionInfoText: {
-      fontSize: 14,
-      color: theme.colors.textSecondary,
-    },
-    pointsText: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: theme.colors.primary,
-    },
-  });
+  const hintSteps = getHintSteps();
+  const currentHint = hintSteps[hintStep] || hintSteps[0];
+  const isLastHint = hintStep >= hintSteps.length - 1;
+  const isCorrect = selectedOption === currentQuestion.correctAnswer;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <TouchableOpacity style={styles.quitButton} onPress={handleQuitQuiz}>
-            <Ionicons name="close" size={24} color={theme.colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.questionCounter}>
-            {currentQuestionIndex + 1} of {questions.length}
-          </Text>
-          <View style={{ width: 40 }} />
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <QuizHeader
+        currentQuestionIndex={currentQuestionIndex}
+        totalQuestions={questions.length}
+        hearts={hearts}
+        streak={streak}
+        progressAnimation={progressAnimation}
+        heartAnimation={heartAnimation}
+        streakAnimation={streakAnimation}
+      />
+
+      <ScrollView
+        style={styles.content}
+        ref={scrollViewRef}
+        showsVerticalScrollIndicator={false}
+      >
+        <QuestionCard
+          questionNumber={currentQuestionIndex + 1}
+          questionText={currentQuestion.question}
+          showFeedback={showFeedback}
+          onHintPress={handleHintPress}
+          questionAnimation={questionAnimation}
+          helpButtonAnimation={helpButtonPulse}
+        />
+
+        {/* Options */}
+        <View style={styles.optionsContainer}>
+          {currentQuestion.options.map((option, index) => (
+            <Animated.View key={index} style={optionAnimatedStyles[index]}>
+              <TouchableOpacity
+                style={getOptionStyle(index)}
+                onPress={() => handleOptionSelect(index)}
+                disabled={showFeedback}
+              >
+                <View
+                  style={[
+                    styles.optionIndicator,
+                    selectedOption === index && styles.selectedOptionIndicator,
+                    showFeedback &&
+                      index === currentQuestion.correctAnswer &&
+                      styles.correctOptionIndicator,
+                    showFeedback &&
+                      index === selectedOption &&
+                      index !== currentQuestion.correctAnswer &&
+                      styles.incorrectOptionIndicator,
+                  ]}
+                >
+                  <Text style={styles.optionIndicatorText}>
+                    {String.fromCharCode(65 + index)}
+                  </Text>
+                </View>
+                <Text
+                  style={[
+                    styles.optionText,
+                    selectedOption === index &&
+                      !showFeedback &&
+                      styles.selectedOptionText,
+                    showFeedback &&
+                      index === currentQuestion.correctAnswer &&
+                      styles.correctOptionText,
+                    showFeedback &&
+                      index === selectedOption &&
+                      index !== currentQuestion.correctAnswer &&
+                      styles.incorrectOptionText,
+                  ]}
+                >
+                  {option}
+                </Text>
+                {showFeedback && index === currentQuestion.correctAnswer && (
+                  <Ionicons name="checkmark-circle" size={32} color="#10B981" />
+                )}
+                {showFeedback &&
+                  index === selectedOption &&
+                  index !== currentQuestion.correctAnswer && (
+                    <Ionicons name="close-circle" size={32} color="#EF4444" />
+                  )}
+              </TouchableOpacity>
+            </Animated.View>
+          ))}
         </View>
 
-        <View style={styles.progressContainer}>
-          <Animated.View style={[styles.progressBar, animatedProgressStyle]} />
-        </View>
+        {/* Feedback */}
+        {showFeedback && (
+          <Animated.View style={{ opacity: feedbackAnimation }}>
+            <LinearGradient
+              colors={
+                isCorrect ? ["#ECFDF5", "#D1FAE5"] : ["#FEF2F2", "#FECACA"]
+              }
+              style={styles.feedbackCard}
+            >
+              <View style={styles.feedbackContent}>
+                <Ionicons
+                  name={isCorrect ? "checkmark-circle" : "close-circle"}
+                  size={40}
+                  color={isCorrect ? "#10B981" : "#EF4444"}
+                  style={styles.feedbackIcon}
+                />
+                <View style={styles.feedbackTextContainer}>
+                  <Text
+                    style={[
+                      styles.feedbackTitle,
+                      {
+                        color: isCorrect ? "#10B981" : "#EF4444",
+                      },
+                    ]}
+                  >
+                    {isCorrect ? "Excellent!" : "Not quite right"}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.feedbackSubtitle,
+                      {
+                        color: isCorrect ? "#10B981" : "#EF4444",
+                      },
+                    ]}
+                  >
+                    {isCorrect
+                      ? "You got it right! Well done."
+                      : `The correct answer is option ${String.fromCharCode(
+                          65 + currentQuestion.correctAnswer
+                        )}`}
+                  </Text>
+                </View>
+              </View>
 
-        <TimerBar duration={900} timeLeft={timeLeft} />
-      </View>
+              <TouchableOpacity
+                style={styles.solutionButton}
+                onPress={() => setShowExplanation(true)}
+              >
+                <LinearGradient
+                  colors={["#6366F1", "#8B5CF6"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={StyleSheet.absoluteFillObject}
+                />
+                <Ionicons name="bulb" size={20} color="white" />
+                <Text style={styles.solutionButtonText}>
+                  View Complete Solution
+                </Text>
+              </TouchableOpacity>
+            </LinearGradient>
+          </Animated.View>
+        )}
+      </ScrollView>
 
-      <View style={styles.content}>
-        <View style={styles.questionInfo}>
-          <Text style={styles.questionInfoText}>
-            Difficulty: {currentQuestion.difficulty}
-          </Text>
-          <Text style={styles.pointsText}>+{currentQuestion.points} XP</Text>
-        </View>
-
-        <Animated.View style={animatedQuestionStyle}>
-          <QuestionCard
-            question={currentQuestion.question}
-            options={currentQuestion.options}
-            selectedAnswer={selectedAnswers[currentQuestionIndex]}
-            onSelectAnswer={handleSelectAnswer}
-          />
-        </Animated.View>
-      </View>
-
-      <View style={styles.navigation}>
+      <View
+        style={[
+          styles.footer,
+          { paddingBottom: Math.max(insets.bottom + 20, 40) },
+        ]}
+      >
         <TouchableOpacity
           style={[
-            styles.navButton,
-            currentQuestionIndex === 0 && styles.navButtonDisabled,
+            styles.nextButton,
+            selectedOption === null && styles.disabledButton,
           ]}
-          onPress={handlePreviousQuestion}
-          disabled={currentQuestionIndex === 0}
+          onPress={handleNextQuestion}
+          disabled={selectedOption === null}
         >
-          <Text
-            style={[
-              styles.navButtonText,
-              currentQuestionIndex === 0 && styles.navButtonTextDisabled,
-            ]}
-          >
-            Previous
+          <LinearGradient
+            colors={
+              selectedOption !== null
+                ? ["#10B981", "#059669"]
+                : ["#E5E7EB", "#D1D5DB"]
+            }
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <Text style={styles.nextButtonText}>
+            {currentQuestionIndex === questions.length - 1
+              ? "Complete Quiz"
+              : "Continue"}
           </Text>
         </TouchableOpacity>
-
-        {currentQuestionIndex === questions.length - 1 ? (
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={handleSubmitQuiz}
-          >
-            <Text style={styles.submitButtonText}>Submit Quiz</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={[
-              styles.navButton,
-              selectedAnswers[currentQuestionIndex] === undefined &&
-                styles.navButtonDisabled,
-            ]}
-            onPress={handleNextQuestion}
-            disabled={selectedAnswers[currentQuestionIndex] === undefined}
-          >
-            <Text
-              style={[
-                styles.navButtonText,
-                selectedAnswers[currentQuestionIndex] === undefined &&
-                  styles.navButtonTextDisabled,
-              ]}
-            >
-              Next
-            </Text>
-          </TouchableOpacity>
-        )}
       </View>
-    </SafeAreaView>
+
+      <HintModal
+        visible={showHintModal}
+        currentHint={currentHint}
+        hintStep={hintStep}
+        totalHints={hintSteps.length}
+        onNextHint={handleNextHint}
+        onClose={() => setShowHintModal(false)}
+        isLastHint={isLastHint}
+      />
+
+      <ExplanationModal
+        visible={showExplanation}
+        question={currentQuestion}
+        onClose={() => setShowExplanation(false)}
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFF",
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  optionsContainer: {
+    marginBottom: 24,
+  },
+  option: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 3,
+    borderColor: "#E5E7EB",
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  selectedOption: {
+    borderColor: "#6366F1",
+    backgroundColor: "#EEF2FF",
+    shadowColor: "#6366F1",
+    shadowOpacity: 0.2,
+    transform: [{ scale: 1.02 }],
+  },
+  correctOption: {
+    borderColor: "#10B981",
+    backgroundColor: "#ECFDF5",
+    shadowColor: "#10B981",
+    shadowOpacity: 0.3,
+  },
+  incorrectOption: {
+    borderColor: "#EF4444",
+    backgroundColor: "#FEF2F2",
+    shadowColor: "#EF4444",
+    shadowOpacity: 0.3,
+  },
+  optionIndicator: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  selectedOptionIndicator: {
+    backgroundColor: "#6366F1",
+  },
+  correctOptionIndicator: {
+    backgroundColor: "#10B981",
+  },
+  incorrectOptionIndicator: {
+    backgroundColor: "#EF4444",
+  },
+  optionIndicatorText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "white",
+  },
+  optionText: {
+    fontSize: 18,
+    color: "#374151",
+    flex: 1,
+    lineHeight: 26,
+    fontWeight: "500",
+  },
+  selectedOptionText: {
+    fontSize: 18,
+    color: "#6366F1",
+    fontWeight: "600",
+    flex: 1,
+    lineHeight: 26,
+  },
+  correctOptionText: {
+    fontSize: 18,
+    color: "#10B981",
+    fontWeight: "600",
+    flex: 1,
+    lineHeight: 26,
+  },
+  incorrectOptionText: {
+    fontSize: 18,
+    color: "#EF4444",
+    fontWeight: "600",
+    flex: 1,
+    lineHeight: 26,
+  },
+  feedbackCard: {
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  feedbackContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  feedbackIcon: {
+    marginRight: 16,
+  },
+  feedbackTextContainer: {
+    flex: 1,
+  },
+  feedbackTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  feedbackSubtitle: {
+    fontSize: 16,
+    opacity: 0.8,
+  },
+  solutionButton: {
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  solutionButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "white",
+    marginLeft: 8,
+  },
+  footer: {
+    padding: 20,
+    backgroundColor: "#F8FAFF",
+  },
+  nextButton: {
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  nextButtonText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "white",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+});
