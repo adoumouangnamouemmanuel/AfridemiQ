@@ -1483,5 +1483,49 @@
     "country": "Zimbabwe",
     "levels": ["Secondary"],
     "subjects": ["math", "english", "shona", "physics"]
+  },
+  {
+    "id": "BAC",
+    "name": "Baccalauréat",
+    "description": "Examen national de fin d'études secondaires au Tchad",
+    "icon": "��",
+    "color": "#4A90E2",
+    "duration": "4 heures",
+    "country": "TD",
+    "levels": ["Terminale"],
+    "series": [
+      {
+        "id": "D",
+        "name": "Série D",
+        "description": "Mathématiques et Sciences de la Vie et de la Terre",
+        "subjects": [
+          {
+            "id": "MATH",
+            "name": "Mathématiques",
+            "coefficient": 4,
+            "duration": "4 heures"
+          },
+          {
+            "id": "SVT",
+            "name": "Sciences de la Vie et de la Terre",
+            "coefficient": 3,
+            "duration": "3 heures"
+          },
+          {
+            "id": "PHYS",
+            "name": "Physique-Chimie",
+            "coefficient": 3,
+            "duration": "3 heures"
+          }
+        ]
+      }
+    ],
+    "schedule": {
+      "2024": {
+        "startDate": "2024-06-15",
+        "endDate": "2024-06-30",
+        "registrationDeadline": "2024-04-30"
+      }
+    }
   }
 ]

@@ -1,28 +1,28 @@
 "use client";
 
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  StyleSheet,
+  Text,
   TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { useTheme } from "../utils/ThemeContext";
-import { useUser } from "../utils/UserContext";
-import { Ionicons } from "@expo/vector-icons";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
-  withSpring,
+  useSharedValue,
   withDelay,
+  withSpring,
 } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 import SubjectProgressCard from "../components/SubjectProgressCard";
 import subjectsData from "../data/subjects.json";
 import topicsData from "../data/topics.json";
+import { useTheme } from "../utils/ThemeContext";
+import { useUser } from "../utils/UserContext";
 
 export default function StudyScreen() {
   const { theme } = useTheme();
@@ -56,11 +56,6 @@ export default function StudyScreen() {
 
   const getFilteredSubjects = () => {
     let filtered = subjectsData.filter((subject) => {
-      // Filter by exam
-      if (user?.selectedExam && !subject.examIds.includes(user.selectedExam)) {
-        return false;
-      }
-
       // Filter by search query
       if (
         searchQuery &&
@@ -267,7 +262,7 @@ export default function StudyScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Study</Text>
         <Text style={styles.subtitle}>
-          Master your subjects with interactive lessons and quizzes
+          Master your subjects and prepare for success
         </Text>
 
         <View style={styles.searchContainer}>
@@ -285,12 +280,11 @@ export default function StudyScreen() {
             onChangeText={setSearchQuery}
           />
         </View>
-      </View>
 
-      <View style={styles.filtersContainer}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
+          style={styles.filtersContainer}
           contentContainerStyle={styles.filtersScroll}
         >
           {filters.map((filter) => (
@@ -306,7 +300,9 @@ export default function StudyScreen() {
                 name={filter.icon as any}
                 size={16}
                 color={
-                  selectedFilter === filter.id ? "white" : theme.colors.text
+                  selectedFilter === filter.id
+                    ? "white"
+                    : theme.colors.textSecondary
                 }
                 style={styles.filterIcon}
               />
@@ -348,28 +344,29 @@ export default function StudyScreen() {
             <View style={styles.emptyState}>
               <View style={styles.emptyStateIcon}>
                 <Ionicons
-                  name="book-outline"
-                  size={64}
+                  name="search-outline"
+                  size={48}
                   color={theme.colors.textSecondary}
                 />
               </View>
               <Text style={styles.emptyStateText}>No subjects found</Text>
               <Text style={styles.emptyStateSubtext}>
-                Try adjusting your search or filter criteria
+                Try adjusting your search or filters to find what you're looking for.
               </Text>
             </View>
           </AnimatedCard>
         ) : (
           filteredSubjects.map((subject, index) => {
-            const subjectStats = getSubjectProgress(subject.id);
+            const { progress, totalTopics, completedTopics } = getSubjectProgress(
+              subject.id
+            );
             return (
               <AnimatedCard key={subject.id} delay={200 + index * 100}>
                 <SubjectProgressCard
-                  subject={subject.name}
-                  icon={subject.icon}
-                  progress={subjectStats.progress}
-                  totalTopics={subjectStats.totalTopics}
-                  completedTopics={subjectStats.completedTopics}
+                  subject={subject}
+                  progress={progress}
+                  totalTopics={totalTopics}
+                  completedTopics={completedTopics}
                   onPress={() => handleSubjectPress(subject.id)}
                 />
               </AnimatedCard>

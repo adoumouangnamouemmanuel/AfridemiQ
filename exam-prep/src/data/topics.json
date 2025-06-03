@@ -98,5 +98,165 @@
     "estimatedTime": 30,
     "completed": true,
     "progress": 100
+  },
+  {
+    "id": "LIMITES",
+    "name": "Limites et Continuité",
+    "subjectId": "MATH",
+    "description": "Étude approfondie des limites de fonctions et de la continuité",
+    "difficulty": "Moyen",
+    "estimatedTime": 120,
+    "completed": false,
+    "progress": 0,
+    "sections": [
+      {
+        "id": "LIMITES_1",
+        "title": "Introduction aux Limites",
+        "content": {
+          "theory": [
+            {
+              "type": "text",
+              "content": "La notion de limite est fondamentale en analyse mathématique. Elle permet d'étudier le comportement d'une fonction lorsque sa variable se rapproche d'une valeur donnée."
+            },
+            {
+              "type": "formula",
+              "content": "lim(x→a) f(x) = L",
+              "explanation": "La limite de f(x) quand x tend vers a est égale à L"
+            }
+          ],
+          "examples": [
+            {
+              "type": "example",
+              "title": "Exemple 1: Limite Simple",
+              "content": "Calculer lim(x→2) (x² + 3x - 2)",
+              "solution": "En remplaçant x par 2, on obtient: 2² + 3(2) - 2 = 4 + 6 - 2 = 8"
+            }
+          ],
+          "videos": [
+            {
+              "id": "VIDEO_1",
+              "title": "Introduction aux Limites",
+              "url": "https://www.youtube.com/watch?v=example1",
+              "duration": "15:30",
+              "thumbnail": "/assets/thumbnails/limites_intro.jpg"
+            }
+          ]
+        }
+      },
+      {
+        "id": "LIMITES_2",
+        "title": "Limites à l'Infini",
+        "content": {
+          "theory": [
+            {
+              "type": "text",
+              "content": "L'étude des limites à l'infini permet de comprendre le comportement d'une fonction lorsque la variable tend vers l'infini."
+            },
+            {
+              "type": "formula",
+              "content": "lim(x→+∞) f(x) = L",
+              "explanation": "La limite de f(x) quand x tend vers plus l'infini est égale à L"
+            }
+          ],
+          "examples": [
+            {
+              "type": "example",
+              "title": "Exemple 2: Limite à l'Infini",
+              "content": "Calculer lim(x→+∞) (3x² + 2x - 1)/(x² + 1)",
+              "solution": "En factorisant par x², on obtient: lim(x→+∞) (3 + 2/x - 1/x²)/(1 + 1/x²) = 3"
+            }
+          ],
+          "videos": [
+            {
+              "id": "VIDEO_2",
+              "title": "Limites à l'Infini",
+              "url": "https://www.youtube.com/watch?v=example2",
+              "duration": "18:45",
+              "thumbnail": "/assets/thumbnails/limites_infini.jpg"
+            }
+          ]
+        }
+      },
+      {
+        "id": "CONTINUITE",
+        "title": "Continuité des Fonctions",
+        "content": {
+          "theory": [
+            {
+              "type": "text",
+              "content": "Une fonction est continue en un point si sa limite en ce point est égale à sa valeur en ce point."
+            },
+            {
+              "type": "formula",
+              "content": "f est continue en a si lim(x→a) f(x) = f(a)",
+              "explanation": "Condition de continuité en un point"
+            }
+          ],
+          "examples": [
+            {
+              "type": "example",
+              "title": "Exemple 3: Étude de la Continuité",
+              "content": "Étudier la continuité de f(x) = x² en x = 2",
+              "solution": "f(2) = 4 et lim(x→2) x² = 4, donc f est continue en x = 2"
+            }
+          ],
+          "videos": [
+            {
+              "id": "VIDEO_3",
+              "title": "Continuité des Fonctions",
+              "url": "https://www.youtube.com/watch?v=example3",
+              "duration": "20:15",
+              "thumbnail": "/assets/thumbnails/continuite.jpg"
+            }
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "exercises": [
+        {
+          "id": "EX_1",
+          "title": "Exercices sur les Limites",
+          "difficulty": "Facile",
+          "questions": [
+            {
+              "question": "Calculer lim(x→0) (sin x)/x",
+              "solution": "1",
+              "explanation": "C'est une limite fondamentale en trigonométrie"
+            },
+            {
+              "question": "Calculer lim(x→+∞) (2x + 1)/(x - 3)",
+              "solution": "2",
+              "explanation": "En factorisant par x au numérateur et au dénominateur"
+            }
+          ]
+        }
+      ],
+      "quizzes": [
+        {
+          "id": "QUIZ_1",
+          "title": "Quiz sur les Limites et la Continuité",
+          "description": "Testez vos connaissances sur les limites et la continuité"
+        }
+      ]
+    },
+    "resources": {
+      "documents": [
+        {
+          "id": "DOC_1",
+          "title": "Cours Complet sur les Limites",
+          "type": "pdf",
+          "url": "/assets/documents/limites_cours.pdf"
+        }
+      ],
+      "pastPapers": [
+        {
+          "id": "PAPER_1",
+          "title": "BAC 2023 - Mathématiques",
+          "type": "pdf",
+          "url": "/assets/papers/bac_2023_math.pdf"
+        }
+      ]
+    }
   }
 ]

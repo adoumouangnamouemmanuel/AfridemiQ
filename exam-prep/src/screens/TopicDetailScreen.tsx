@@ -1,29 +1,29 @@
 "use client";
 
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import questionsData from "../data/questions.json";
+import subjectsData from "../data/subjects.json";
+import topicsData from "../data/topics.json";
 import { useTheme } from "../utils/ThemeContext";
 import { useUser } from "../utils/UserContext";
-import { Ionicons } from "@expo/vector-icons";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-} from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
-import topicsData from "../data/topics.json";
-import subjectsData from "../data/subjects.json";
-import questionsData from "../data/questions.json";
 
 export default function TopicDetailScreen() {
   const { theme } = useTheme();
@@ -207,83 +207,141 @@ export default function TopicDetailScreen() {
 
   const renderStudy = () => (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <AnimatedCard delay={100}>
-        <View style={styles.studyCard}>
-          <Ionicons
-            name="book-outline"
-            size={48}
-            color={theme.colors.primary}
-          />
-          <Text style={styles.studyTitle}>Study Materials</Text>
-          <Text style={styles.studyDescription}>
-            Comprehensive study materials for {topic.name} are being prepared.
-          </Text>
-          <TouchableOpacity style={styles.comingSoonButton} disabled>
-            <Text style={styles.comingSoonText}>Coming Soon</Text>
-          </TouchableOpacity>
-        </View>
-      </AnimatedCard>
+      {topic.sections?.map((section, index) => (
+        <AnimatedCard key={section.id} delay={100 * (index + 1)}>
+          <View style={styles.studyCard}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            
+            {/* Theory Content */}
+            {section.content.theory.map((item, idx) => (
+              <View key={idx} style={styles.theoryItem}>
+                {item.type === "text" && (
+                  <Text style={styles.theoryText}>{item.content}</Text>
+                )}
+                {item.type === "formula" && (
+                  <View style={styles.formulaContainer}>
+                    <Text style={styles.formulaText}>{item.content}</Text>
+                    <Text style={styles.formulaExplanation}>{item.explanation}</Text>
+                  </View>
+                )}
+              </View>
+            ))}
 
-      <AnimatedCard delay={200}>
-        <View style={styles.studyCard}>
-          <Ionicons
-            name="play-circle-outline"
-            size={48}
-            color={theme.colors.secondary}
-          />
-          <Text style={styles.studyTitle}>Video Lessons</Text>
-          <Text style={styles.studyDescription}>
-            Interactive video lessons to help you master {topic.name}.
-          </Text>
-          <TouchableOpacity style={styles.comingSoonButton} disabled>
-            <Text style={styles.comingSoonText}>Coming Soon</Text>
-          </TouchableOpacity>
-        </View>
-      </AnimatedCard>
+            {/* Examples */}
+            {section.content.examples.map((example, idx) => (
+              <View key={idx} style={styles.exampleContainer}>
+                <Text style={styles.exampleTitle}>{example.title}</Text>
+                <Text style={styles.exampleContent}>{example.content}</Text>
+                <View style={styles.solutionContainer}>
+                  <Text style={styles.solutionLabel}>Solution:</Text>
+                  <Text style={styles.solutionText}>{example.solution}</Text>
+                </View>
+              </View>
+            ))}
+
+            {/* Videos */}
+            {section.content.videos.map((video, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.videoContainer}
+                onPress={() => {
+                  // Handle video playback
+                  Alert.alert("Video Player", "Video playback coming soon!");
+                }}
+              >
+                <View style={styles.videoThumbnail}>
+                  <Ionicons name="play-circle" size={48} color="white" />
+                </View>
+                <View style={styles.videoInfo}>
+                  <Text style={styles.videoTitle}>{video.title}</Text>
+                  <Text style={styles.videoDuration}>{video.duration}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </AnimatedCard>
+      ))}
+
+      {/* Resources */}
+      {topic.resources && (
+        <AnimatedCard delay={100 * (topic.sections?.length || 0) + 1}>
+          <View style={styles.resourcesCard}>
+            <Text style={styles.sectionTitle}>Resources</Text>
+            
+            {/* Documents */}
+            {topic.resources.documents.map((doc, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.resourceItem}
+                onPress={() => {
+                  // Handle document opening
+                  Alert.alert("Document Viewer", "Document viewer coming soon!");
+                }}
+              >
+                <Ionicons name="document-text" size={24} color={theme.colors.primary} />
+                <Text style={styles.resourceTitle}>{doc.title}</Text>
+              </TouchableOpacity>
+            ))}
+
+            {/* Past Papers */}
+            {topic.resources.pastPapers.map((paper, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.resourceItem}
+                onPress={() => {
+                  // Handle past paper opening
+                  Alert.alert("Past Paper Viewer", "Past paper viewer coming soon!");
+                }}
+              >
+                <Ionicons name="time" size={24} color={theme.colors.secondary} />
+                <Text style={styles.resourceTitle}>{paper.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </AnimatedCard>
+      )}
     </ScrollView>
   );
 
   const renderPractice = () => (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <AnimatedCard delay={100}>
-        <View style={styles.practiceCard}>
-          <LinearGradient
-            colors={[theme.colors.primary, theme.colors.secondary]}
-            style={styles.quizCard}
-          >
-            <Ionicons name="help-circle" size={48} color="white" />
-            <Text style={styles.quizTitle}>Topic Quiz</Text>
-            <Text style={styles.quizDescription}>
-              Test your knowledge with {topicQuestions.length} questions
+      {/* Exercises */}
+      {topic?.practice?.exercises.map((exercise, index) => (
+        <AnimatedCard key={exercise.id} delay={100 * (index + 1)}>
+          <View style={styles.practiceCard}>
+            <Text style={styles.exerciseTitle}>{exercise.title}</Text>
+            <Text style={styles.exerciseDifficulty}>
+              Difficulty: {exercise.difficulty}
             </Text>
+            
+            {exercise.questions.map((question, idx) => (
+              <View key={idx} style={styles.questionContainer}>
+                <Text style={styles.questionText}>{question.question}</Text>
+                <View style={styles.solutionContainer}>
+                  <Text style={styles.solutionLabel}>Solution:</Text>
+                  <Text style={styles.solutionText}>{question.solution}</Text>
+                  <Text style={styles.explanationText}>{question.explanation}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </AnimatedCard>
+      ))}
+
+      {/* Quizzes */}
+      {topic?.practice?.quizzes.map((quiz, index) => (
+        <AnimatedCard key={quiz.id} delay={100 * (topic.practice.exercises.length + index + 1)}>
+          <View style={styles.quizCard}>
+            <Text style={styles.quizTitle}>{quiz.title}</Text>
             <TouchableOpacity
               style={styles.startQuizButton}
               onPress={handleStartQuiz}
             >
-              <Text style={styles.startQuizText}>Start Quiz</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
-      </AnimatedCard>
-
-      <AnimatedCard delay={200}>
-        <View style={styles.practiceCard}>
-          <View style={styles.flashcardCard}>
-            <Ionicons
-              name="layers-outline"
-              size={48}
-              color={theme.colors.accent}
-            />
-            <Text style={styles.flashcardTitle}>Flashcards</Text>
-            <Text style={styles.flashcardDescription}>
-              Review key concepts with interactive flashcards
-            </Text>
-            <TouchableOpacity style={styles.comingSoonButton} disabled>
-              <Text style={styles.comingSoonText}>Coming Soon</Text>
+              <Text style={styles.startQuizButtonText}>Start Quiz</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </AnimatedCard>
+        </AnimatedCard>
+      ))}
     </ScrollView>
   );
 
@@ -489,84 +547,163 @@ export default function TopicDetailScreen() {
       borderWidth: 1,
       borderColor: theme.colors.border,
     },
-    studyTitle: {
+    theoryItem: {
+      marginBottom: theme.spacing.md,
+    },
+    theoryText: {
+      fontSize: 16,
+      color: theme.colors.text,
+      lineHeight: 24,
+    },
+    formulaContainer: {
+      backgroundColor: theme.colors.surface,
+      padding: theme.spacing.md,
+      borderRadius: theme.borderRadius.md,
+      marginVertical: theme.spacing.sm,
+    },
+    formulaText: {
+      fontSize: 18,
+      fontFamily: "monospace",
+      color: theme.colors.primary,
+      textAlign: "center",
+      marginBottom: theme.spacing.xs,
+    },
+    formulaExplanation: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      textAlign: "center",
+    },
+    exampleContainer: {
+      backgroundColor: theme.colors.surface,
+      padding: theme.spacing.md,
+      borderRadius: theme.borderRadius.md,
+      marginVertical: theme.spacing.sm,
+    },
+    exampleTitle: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: theme.colors.text,
+      marginBottom: theme.spacing.sm,
+    },
+    exampleContent: {
+      fontSize: 16,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.sm,
+    },
+    solutionContainer: {
+      backgroundColor: theme.colors.background,
+      padding: theme.spacing.md,
+      borderRadius: theme.borderRadius.md,
+    },
+    solutionLabel: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: theme.colors.primary,
+      marginBottom: theme.spacing.xs,
+    },
+    solutionText: {
+      fontSize: 16,
+      color: theme.colors.text,
+      marginBottom: theme.spacing.xs,
+    },
+    explanationText: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      fontStyle: "italic",
+    },
+    videoContainer: {
+      flexDirection: "row",
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.borderRadius.md,
+      marginVertical: theme.spacing.sm,
+      overflow: "hidden",
+    },
+    videoThumbnail: {
+      width: 120,
+      height: 80,
+      backgroundColor: theme.colors.primary,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    videoInfo: {
+      flex: 1,
+      padding: theme.spacing.md,
+    },
+    videoTitle: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: theme.colors.text,
+      marginBottom: theme.spacing.xs,
+    },
+    videoDuration: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+    },
+    resourcesCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.md,
+    },
+    resourceItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: theme.spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    resourceTitle: {
+      fontSize: 16,
+      color: theme.colors.text,
+      marginLeft: theme.spacing.md,
+    },
+    exerciseTitle: {
       fontSize: 18,
       fontWeight: "600",
       color: theme.colors.text,
-      marginTop: theme.spacing.md,
       marginBottom: theme.spacing.sm,
     },
-    studyDescription: {
+    exerciseDifficulty: {
       fontSize: 14,
       color: theme.colors.textSecondary,
-      textAlign: "center",
-      lineHeight: 20,
-      marginBottom: theme.spacing.lg,
+      marginBottom: theme.spacing.md,
     },
-    comingSoonButton: {
-      backgroundColor: theme.colors.border,
+    questionContainer: {
+      backgroundColor: theme.colors.surface,
+      padding: theme.spacing.md,
       borderRadius: theme.borderRadius.md,
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.sm,
+      marginBottom: theme.spacing.md,
     },
-    comingSoonText: {
-      color: theme.colors.textSecondary,
-      fontSize: 14,
-      fontWeight: "500",
-    },
-    practiceCard: {
+    questionText: {
+      fontSize: 16,
+      color: theme.colors.text,
       marginBottom: theme.spacing.md,
     },
     quizCard: {
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.xl,
-      alignItems: "center",
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.md,
     },
     quizTitle: {
-      fontSize: 20,
-      fontWeight: "bold",
-      color: "white",
-      marginTop: theme.spacing.md,
-      marginBottom: theme.spacing.sm,
-    },
-    quizDescription: {
-      fontSize: 14,
-      color: "rgba(255,255,255,0.8)",
-      textAlign: "center",
-      marginBottom: theme.spacing.lg,
+      fontSize: 18,
+      fontWeight: "600",
+      color: theme.colors.text,
+      marginBottom: theme.spacing.md,
     },
     startQuizButton: {
-      backgroundColor: "rgba(255,255,255,0.2)",
+      backgroundColor: theme.colors.primary,
+      padding: theme.spacing.md,
       borderRadius: theme.borderRadius.md,
-      paddingHorizontal: theme.spacing.xl,
-      paddingVertical: theme.spacing.md,
+      alignItems: "center",
     },
-    startQuizText: {
+    startQuizButtonText: {
       color: "white",
       fontSize: 16,
       fontWeight: "600",
     },
-    flashcardCard: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.xl,
-      alignItems: "center",
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    flashcardTitle: {
-      fontSize: 18,
-      fontWeight: "600",
-      color: theme.colors.text,
-      marginTop: theme.spacing.md,
-      marginBottom: theme.spacing.sm,
-    },
-    flashcardDescription: {
-      fontSize: 14,
-      color: theme.colors.textSecondary,
-      textAlign: "center",
-      lineHeight: 20,
-      marginBottom: theme.spacing.lg,
+    practiceCard: {
+      marginBottom: theme.spacing.md,
     },
   });
 

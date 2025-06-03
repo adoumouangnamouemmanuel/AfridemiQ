@@ -1,8 +1,8 @@
 "use client";
 
-import type React from "react";
-import { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface User {
   id: string;
@@ -87,21 +87,23 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           id: foundUser.id,
           name: foundUser.name,
           email: foundUser.email,
+          country: "TD", // Chad
+          exam: "BAC", // Baccalauréat
           xp: foundUser.xp || 0,
           streak: foundUser.streak || 0,
           level: foundUser.level || 1,
           isPremium: foundUser.isPremium || false,
           badges: [],
           completedTopics: [],
-          selectedExam: ""
+          selectedExam: "BAC" // Set default exam to BAC
         };
 
         // Load onboarding data if available
         const onboardingData = await AsyncStorage.getItem("onboardingData");
         if (onboardingData) {
           const parsed = JSON.parse(onboardingData);
-          userData.country = parsed.country;
-          userData.exam = parsed.exam;
+          userData.country = parsed.country || "TD";
+          userData.exam = parsed.exam || "BAC";
           userData.subjects = parsed.subjects;
           userData.learningStyle = parsed.learningStyle;
           userData.goalDate = new Date(parsed.goalDate);
@@ -156,13 +158,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
+        country: "TD", // Chad
+        exam: "BAC", // Baccalauréat
         xp: 0,
         streak: 0,
         level: 1,
         isPremium: false,
         badges: [],
         completedTopics: [],
-        selectedExam: ""
+        selectedExam: "BAC" // Set default exam to BAC
       };
 
       await saveUser(userData);

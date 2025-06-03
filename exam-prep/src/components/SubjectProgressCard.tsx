@@ -3,15 +3,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
 } from "react-native-reanimated";
 import { useTheme } from "../utils/ThemeContext";
 
 interface SubjectProgressCardProps {
-  subject: string;
-  icon: string;
+  subject: {
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+    description: string;
+    examIds: string[];
+  };
   progress: number;
   totalTopics: number;
   completedTopics: number;
@@ -20,7 +26,6 @@ interface SubjectProgressCardProps {
 
 export default function SubjectProgressCard({
   subject,
-  icon,
   progress,
   totalTopics,
   completedTopics,
@@ -42,14 +47,7 @@ export default function SubjectProgressCard({
   };
 
   const getSubjectColor = () => {
-    const colors = [
-      theme.colors.primary,
-      theme.colors.secondary,
-      theme.colors.accent,
-      theme.colors.info,
-      theme.colors.warning,
-    ];
-    return colors[subject.length % colors.length];
+    return subject.color || theme.colors.primary;
   };
 
   const styles = StyleSheet.create({
@@ -137,9 +135,9 @@ export default function SubjectProgressCard({
             colors={[getSubjectColor(), getSubjectColor() + "80"]}
             style={styles.iconContainer}
           >
-            <Ionicons name={icon as any} size={24} color="white" />
+            <Ionicons name={subject.icon as any} size={24} color="white" />
           </LinearGradient>
-          <Text style={styles.subjectName}>{subject}</Text>
+          <Text style={styles.subjectName}>{subject.name}</Text>
         </View>
 
         <View style={styles.progressContainer}>
