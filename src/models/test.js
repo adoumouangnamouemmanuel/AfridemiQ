@@ -218,19 +218,6 @@ const LeaderboardEntrySchema = new Schema({
   series: String,
 }, { timestamps: true });
 
-const MissionSchema = new Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  type: { type: String, enum: ['daily', 'weekly', 'custom'], required: true },
-  progress: { type: Number, default: 0 },
-  target: { type: Number, required: true },
-  reward: { type: String, required: true },
-  icon: { type: String, required: true },
-  completed: { type: Boolean, default: false },
-  expiresAt: { type: Date, required: true },
-  subjectId: { type: Schema.Types.ObjectId, ref: 'Subject' },
-  series: String,
-}, { timestamps: true });
 
 
 // Models
@@ -241,6 +228,5 @@ module.exports = {
   PeerTutorProfile: mongoose.model('PeerTutorProfile', PeerTutorProfileSchema),
   TutoringSession: mongoose.model('TutoringSession', TutoringSessionSchema),
   Challenge: mongoose.model('Challenge', ChallengeSchema),
-  LeaderboardEntry: mongoose.model('LeaderboardEntry', LeaderboardEntrySchema),
-  Mission: mongoose.model('Mission', MissionSchema),
+  LeaderboardEntry: mongoose.model('LeaderboardEntry', LeaderboardEntrySchema)
 };
