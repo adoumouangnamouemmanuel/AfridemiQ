@@ -13,27 +13,6 @@ const FeedbackSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const QuizResultSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  quizId: { type: Schema.Types.ObjectId, ref: 'Quiz', required: true },
-  questionIds: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
-  correctCount: { type: Number, required: true },
-  score: { type: Number, required: true },
-  timeTaken: { type: Number, required: true },
-  completedAt: { type: Date, default: Date.now },
-  hintUsages: [{ type: Schema.Types.ObjectId, ref: 'HintUsage' }],
-  questionFeedback: [FeedbackSchema],
-  feedback: {
-    title: String,
-    subtitle: String,
-    color: String,
-    emoji: String,
-    message: String,
-  },
-}, { timestamps: true });
-
-// Index for quiz result queries
-QuizResultSchema.index({ userId: 1, quizId: 1 });
 
 const HintUsageSchema = new Schema({
   questionId: { type: Schema.Types.ObjectId, ref: 'Question', required: true },
@@ -511,7 +490,6 @@ const LearningPathSchema = new Schema({
 
 // Models
 module.exports = {
-  QuizResult: mongoose.model('QuizResult', QuizResultSchema),
   Hint: mongoose.model('HintUsage', HintUsageSchema),
   Bookmark: mongoose.model('Bookmark', BookmarkSchema),
   Exercise: mongoose.model('Exercise', ExerciseSchema),
