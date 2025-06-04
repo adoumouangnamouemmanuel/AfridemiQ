@@ -6,7 +6,7 @@ const createUser = async (req, res) => {
     const user = new User({
       name: req.body.name,
       email: req.body.email,
-      country: 'Chad',
+      country: 'Tchad',
       isPremium: false,
       subscription: {
         type: 'free',

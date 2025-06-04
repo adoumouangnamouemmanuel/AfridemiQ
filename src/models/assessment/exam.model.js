@@ -5,10 +5,6 @@ const ExamSchema = new Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
-    translations: {
-      name: { fr: String, en: String },
-      description: { fr: String, en: String },
-    },
     icon: { type: String, required: true },
     color: { type: String, required: true },
     duration: { type: String, required: true },

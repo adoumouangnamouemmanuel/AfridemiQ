@@ -1,13 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const SubjectSchema = new Schema(
   {
     name: { type: String, required: true },
-    translations: {
-      name: { fr: String, en: String },
-      description: { fr: String, en: String },
-    },
     icon: { type: String, required: true },
     color: { type: String, required: true },
     description: { type: String, required: true },
@@ -18,5 +14,5 @@ const SubjectSchema = new Schema(
 );
 
 Module.exports = {
-    Subject: mongoose.model('Subject', SubjectSchema),
-}
+  Subject: mongoose.model("Subject", SubjectSchema),
+};
