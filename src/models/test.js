@@ -3,7 +3,6 @@ const { Schema } = mongoose;
 
 // Shared constants
 const DIFFICULTY_LEVELS = ['beginner', 'intermediate', 'advanced'];
-const QUESTION_TYPES = ['multiple_choice', 'short_answer', 'essay'];
 const RESOURCE_TYPES = ['document', 'video', 'audio', 'interactive', 'past_exam'];
 
 // Shared Feedback Subschema
@@ -13,25 +12,6 @@ const FeedbackSchema = new Schema({
   comments: String,
   createdAt: { type: Date, default: Date.now },
 });
-
-
-const QuizSessionSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  quizId: { type: Schema.Types.ObjectId, ref: 'Quiz', required: true },
-  startTime: { type: Date, default: Date.now },
-  lastActive: Date,
-  answers: [{
-    questionId: { type: Schema.Types.ObjectId, ref: 'Question' },
-    selectedAnswer: Schema.Types.Mixed,
-    timeSpent: Number,
-  }],
-  status: { type: String, enum: ['in_progress', 'completed', 'abandoned'], required: true },
-  deviceInfo: {
-    platform: String,
-    version: String,
-    lastSync: Date,
-  },
-}, { timestamps: true });
 
 const QuizResultSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -531,7 +511,6 @@ const LearningPathSchema = new Schema({
 
 // Models
 module.exports = {
-  QuizSession: mongoose.model('QuizSession', QuizSessionSchema),
   QuizResult: mongoose.model('QuizResult', QuizResultSchema),
   Hint: mongoose.model('HintUsage', HintUsageSchema),
   Bookmark: mongoose.model('Bookmark', BookmarkSchema),
