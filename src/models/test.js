@@ -372,46 +372,6 @@ const StudyPlanSchema = new Schema({
 // Index for study plan queries
 StudyPlanSchema.index({ userId: 1, 'dailyGoals.topics.topicId': 1 });
 
-const CurriculumSchema = new Schema({
-  country: { type: String, required: true },
-  educationLevel: { type: String, required: true },
-  examId: { type: Schema.Types.ObjectId, ref: 'Exam', required: true },
-  series: [String],
-  subjects: [{
-    subjectId: { type: Schema.Types.ObjectId, ref: 'Subject' },
-    name: String,
-    description: String,
-    topics: [{
-      topicId: { type: Schema.Types.ObjectId, ref: 'Topic' },
-      name: String,
-      description: String,
-      learningObjectives: [String],
-      assessmentCriteria: [String],
-      resourceIds: [{ type: Schema.Types.ObjectId, ref: 'Resource' }],
-    }],
-    assessments: [{
-      type: { type: String, enum: ['formative', 'summative'] },
-      weightage: Number,
-      criteria: [String],
-    }],
-  }],
-  academicYear: {
-    startDate: Date,
-    endDate: Date,
-    terms: [{
-      term: Number,
-      startDate: Date,
-      endDate: Date,
-      holidays: [{
-        name: String,
-        startDate: Date,
-        endDate: Date,
-      }],
-    }],
-  },
-}, { timestamps: true });
-
-
 
 
 // Models
@@ -433,5 +393,4 @@ module.exports = {
   ParentAccess: mongoose.model('ParentAccess', ParentAccessSchema),
   Notification: mongoose.model('Notification', NotificationSchema),
   StudyPlan: mongoose.model('StudyPlan', StudyPlanSchema),
-  Curriculum: mongoose.model('Curriculum', CurriculumSchema),
 };
