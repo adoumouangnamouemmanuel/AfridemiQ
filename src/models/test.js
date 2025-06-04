@@ -254,12 +254,6 @@ const ExamScheduleSchema = new Schema({
   notes: String,
 }, { timestamps: true });
 
-const CountrySchema = new Schema({
-  name: { type: String, required: true, unique: true },
-  flagUrl: { type: String, required: true },
-  supportedExams: [{ type: Schema.Types.ObjectId, ref: 'Exam' }],
-  languages: [String],
-}, { timestamps: true });
 
 // Models
 module.exports = {
@@ -273,5 +267,4 @@ module.exports = {
   Mission: mongoose.model('Mission', MissionSchema),
   Note: mongoose.model('Note', NoteSchema),
   ExamSchedule: mongoose.model('ExamSchedule', ExamScheduleSchema),
-  Country: mongoose.model('Country', CountrySchema),
 };
