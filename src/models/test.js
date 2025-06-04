@@ -284,26 +284,6 @@ const OnboardingStatusSchema = new Schema({
   lastUpdated: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-const DashboardSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  upcomingExams: [{
-    examId: { type: Schema.Types.ObjectId, ref: 'Exam' },
-    series: String,
-    date: Date,
-  }],
-  recentQuizzes: [{
-    quizId: { type: Schema.Types.ObjectId, ref: 'Quiz' },
-    score: Number,
-    completedAt: Date,
-  }],
-  recommendedTopics: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
-  streak: { type: Number, default: 0 },
-  notifications: [{ type: Schema.Types.ObjectId, ref: 'Notification' }],
-}, { timestamps: true });
-
-
-
-
 
 // Models
 module.exports = {
@@ -320,5 +300,4 @@ module.exports = {
   Country: mongoose.model('Country', CountrySchema),
   AdaptiveLearning: mongoose.model('AdaptiveLearning', AdaptiveLearningSchema),
   OnboardingStatus: mongoose.model('OnboardingStatus', OnboardingStatusSchema),
-  Dashboard: mongoose.model('Dashboard', DashboardSchema),
 };
