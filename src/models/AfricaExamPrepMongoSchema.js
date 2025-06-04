@@ -2083,6 +2083,226 @@ HistoryLessonSchema.virtual('completionStatus').get(function () {
   return 'not_started';
 });
 
+// Geography Lesson Schema (New)
+const GeographyLessonSchema = new Schema({
+  introduction: {
+    text: { type: String, required: true },
+    translations: {
+      text: { fr: String, en: String },
+    },
+    videoUrl: {
+      type: String,
+      match: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
+    },
+    transcript: String,
+    accessibility: {
+      hasSubtitles: Boolean,
+      hasAudioDescription: Boolean,
+    },
+  },
+  concepts: [{
+    name: { type: String, required: true },
+    topic: { type: String, enum: GEOGRAPHY_TOPICS, required: true },
+    translations: {
+      name: { fr: String, en: String },
+      description: { fr: String, en: String },
+    },
+    description: { type: String, required: true },
+    keyFeatures: [{
+      feature: String,
+      explanation: String,
+      translations: {
+        feature: { fr: String, en: String },
+        explanation: { fr: String, en: String },
+      },
+    }],
+    examples: [{
+      example: String,
+      explanation: String,
+      translations: {
+        example: { fr: String, en: String },
+        explanation: { fr: String, en: String },
+      },
+    }],
+    visualAid: {
+      mediaType: { type: String, enum: MEDIA_TYPES },
+      url: {
+        type: String,
+        match: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
+      },
+      altText: String,
+    },
+    difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
+    conceptQuizId: { type: Schema.Types.ObjectId, ref: 'Quiz' },
+  }],
+  mapAnalysis: [{
+    title: { type: String, required: true },
+    mapType: { type: String, enum: ['physical', 'political', 'thematic'], required: true },
+    mapUrl: {
+      type: String,
+      match: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
+    },
+    description: String,
+    questions: [{
+      question: String,
+      type: { type: String, enum: QUESTION_TYPES },
+      translations: {
+        question: { fr: String, en: String },
+      },
+    }],
+    difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
+    translations: {
+      title: { fr: String, en: String },
+      description: { fr: String, en: String },
+    },
+    mapQuizId: { type: Schema.Types.ObjectId, ref: 'Quiz' },
+  }],
+  caseStudies: [{
+    title: { type: String, required: true },
+    region: String,
+    context: String,
+    data: [{
+      variable: String,
+      value: String,
+      unit: String,
+      translations: {
+        variable: { fr: String, en: String },
+        value: { fr: String, en: String },
+      },
+    }],
+    questions: [{
+      question: String,
+      type: { type: String, enum: QUESTION_TYPES },
+      translations: {
+        question: { fr: String, en: String },
+      },
+    }],
+    difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
+    translations: {
+      title: { fr: String, en: String },
+      context: { fr: String, en: String },
+    },
+    caseStudyQuizId: { type: Schema.Types.ObjectId, ref: 'Quiz' },
+  }],
+  workedExamples: [{
+    problem: { type: String, required: true },
+    type: { type: String, enum: EXERCISE_TYPES, required: true },
+    solution: String,
+    annotations: [String],
+    difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
+    translations: {
+      problem: { fr: String, en: String },
+      solution: { fr: String, en: String },
+      annotations: [{ fr: String, en: String }],
+    },
+  }],
+  practiceExercises: [{
+    exerciseId: { type: Schema.Types.ObjectId, ref: 'Exercise', required: true },
+    type: { type: String, enum: EXERCISE_TYPES, required: true },
+    description: String,
+    difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
+    translations: {
+      description: { fr: String, en: String },
+    },
+  }],
+  interactiveElements: [{
+    elementType: { type: String, enum: INTERACTIVE_ELEMENT_TYPES, required: true },
+    url: {
+      type: String,
+      match: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
+      required: true,
+    },
+    instructions: String,
+    translations: {
+      instructions: { fr: String, en: String },
+    },
+    offlineAvailable: { type: Boolean, default: false },
+  }],
+  summary: {
+    keyTakeaways: [String],
+    translations: {
+      keyTakeaways: [{ fr: String, en: String }],
+    },
+    suggestedNextTopics: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
+  },
+  prerequisites: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
+  learningObjectives: [String],
+  translations: {
+    learningObjectives: [{ fr: String, en: String }],
+  },
+  gamification: {
+    badges: [String],
+    points: { type: Number, default: 0 },
+  },
+  progressTracking: {
+    completedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    completionRate: { type: Number, default: 0 },
+  },
+  accessibilityOptions: {
+    hasBraille: Boolean,
+    hasSignLanguage: Boolean,
+    languages: [String],
+  },
+  premiumOnly: { type: Boolean, default: false },
+}, { timestamps: true });
+
+// Indexes for performance
+GeographyLessonSchema.index({ 'concepts.conceptQuizId': 1 });
+GeographyLessonSchema.index({ 'mapAnalysis.mapQuizId': 1 });
+GeographyLessonSchema.index({ 'caseStudies.caseStudyQuizId': 1 });
+GeographyLessonSchema.index({ 'practiceExercises.exerciseId': 1 });
+
+// Pre-save hook for reference validation
+GeographyLessonSchema.pre('save', async function (next) {
+  const quizIds = [
+    ...this.concepts.filter(c => c.conceptQuizId).map(c => c.conceptQuizId),
+    ...this.mapAnalysis.filter(m => m.mapQuizId).map(m => m.mapQuizId),
+    ...this.caseStudies.filter(c => c.caseStudyQuizId).map(c => c.caseStudyQuizId),
+  ];
+  if (quizIds.length > 0) {
+    const validQuizzes = await mongoose.model('Quiz').countDocuments({ _id: { $in: quizIds } });
+    if (validQuizzes !== quizIds.length) {
+      return next(new Error('Invalid Quiz IDs in concepts, mapAnalysis, or caseStudies'));
+    }
+  }
+  const exerciseIds = this.practiceExercises.map(p => p.exerciseId);
+  if (exerciseIds.length > 0) {
+    const validExercises = await mongoose.model('Exercise').countDocuments({ _id: { $in: exerciseIds } });
+    if (validExercises !== exerciseIds.length) {
+      return next(new Error('Invalid Exercise IDs in practiceExercises'));
+    }
+  }
+  if (this.prerequisites.length > 0) {
+    const validTopics = await mongoose.model('Topic').countDocuments({ _id: { $in: this.prerequisites } });
+    if (validTopics !== this.prerequisites.length) {
+      return next(new Error('Invalid Topic IDs in prerequisites'));
+    }
+  }
+  if (this.summary.suggestedNextTopics.length > 0) {
+    const validTopics = await mongoose.model('Topic').countDocuments({ _id: { $in: this.summary.suggestedNextTopics } });
+    if (validTopics !== this.summary.suggestedNextTopics.length) {
+      return next(new Error('Invalid Topic IDs in suggestedNextTopics'));
+    }
+  }
+  next();
+});
+
+// Virtual for estimated time
+GeographyLessonSchema.virtual('estimatedTime').get(function () {
+  return this.duration || (
+    this.concepts.length * 15 +
+    this.mapAnalysis.length * 20 +
+    this.caseStudies.length * 20 +
+    this.practiceExercises.length * 15
+  ); // Example calculation in minutes
+});
+
+// Virtual for completion status
+GeographyLessonSchema.virtual('completionStatus').get(function () {
+  // Placeholder: Implement based on user progress
+  return 'not_started';
+});
+
 // Assessment Schema
 const AssessmentSchema = new Schema({
   type: { type: String, enum: ['quiz', 'exam', 'project'], required: true },
