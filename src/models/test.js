@@ -28,47 +28,7 @@ UserSchema.virtual('fullName').get(function () {
   return this.name;
 });
 
-// Other schemas remain largely unchanged but updated for consistency
-const UserAnalyticsSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  lastUpdated: { type: Date, default: Date.now },
-  dailyStats: [{
-    date: Date,
-    studyTime: Number,
-    questionsAnswered: Number,
-    correctAnswers: Number,
-    topicsCovered: [String],
-  }],
-  subjectStats: [{
-    subjectId: { type: Schema.Types.ObjectId, ref: 'Subject' },
-    series: String,
-    averageScore: Number,
-    timeSpent: Number,
-    lastStudied: Date,
-  }],
-  learningPatterns: {
-    preferredStudyTime: String,
-    mostProductiveDays: [String],
-    averageSessionLength: Number,
-  },
-  mastery: [{
-    subjectId: { type: Schema.Types.ObjectId, ref: 'Subject' },
-    series: String,
-    masteryLevel: Number,
-    lastAssessmentDate: Date,
-    improvementRate: Number,
-  }],
-  efficiency: {
-    averageResponseTime: Number,
-    accuracyRate: Number,
-    timeSpentPerTopic: Number,
-  },
-  personalizedRecommendations: {
-    weakTopics: [String],
-    suggestedStudyPath: [String],
-    nextMilestone: String,
-  },
-}, { timestamps: true });
+
 
 const AchievementSchema = new Schema({
   name: { type: String, required: true },
@@ -2793,7 +2753,7 @@ const LearningPathSchema = new Schema({
 
 // Models
 module.exports = {
-  UserAnalytics: mongoose.model('UserAnalytics', UserAnalyticsSchema),
+  
   Achievement: mongoose.model('Achievement', AchievementSchema),
   Exam: mongoose.model('Exam', ExamSchema),
   Subject: mongoose.model('Subject', SubjectSchema),
