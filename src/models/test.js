@@ -14,12 +14,7 @@ const FeedbackSchema = new Schema({
 });
 
 
-const HintUsageSchema = new Schema({
-  questionId: { type: Schema.Types.ObjectId, ref: 'Question', required: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  usedAt: { type: Date, default: Date.now },
-  stepsViewed: [Number],
-}, { timestamps: true });
+
 
 const BookmarkSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
@@ -490,7 +485,6 @@ const LearningPathSchema = new Schema({
 
 // Models
 module.exports = {
-  Hint: mongoose.model('HintUsage', HintUsageSchema),
   Bookmark: mongoose.model('Bookmark', BookmarkSchema),
   Exercise: mongoose.model('Exercise', ExerciseSchema),
   Resource: mongoose.model('Resource', ResourceSchema),
