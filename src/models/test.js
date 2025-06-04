@@ -153,28 +153,11 @@ const StudyGroupSchema = new Schema({
   },
 }, { timestamps: true });
 
-const PeerTutorProfileSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  subjects: [{ type: Schema.Types.ObjectId, ref: 'Subject' }],
-  series: [String],
-  topics: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
-  availability: [{
-    day: String,
-    startTime: String,
-    endTime: String,
-  }],
-  bio: { type: String, required: true },
-  rating: { type: Number, default: 0 },
-  reviews: [FeedbackSchema],
-  isAvailable: { type: Boolean, default: true },
-  premiumOnly: { type: Boolean, default: false },
-}, { timestamps: true });
 
 
 // Models
 module.exports = {
   Exercise: mongoose.model('Exercise', ExerciseSchema),
   Resource: mongoose.model('Resource', ResourceSchema),
-  StudyGroup: mongoose.model('StudyGroup', StudyGroupSchema),
-  PeerTutorProfile: mongoose.model('PeerTutorProfile', PeerTutorProfileSchema)
+  StudyGroup: mongoose.model('StudyGroup', StudyGroupSchema)
 };
