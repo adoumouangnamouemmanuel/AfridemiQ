@@ -16,11 +16,6 @@ const FeedbackSchema = new Schema({
 
 
 
-const BookmarkSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  questionId: { type: Schema.Types.ObjectId, ref: 'Question', required: true },
-  createdAt: { type: Date, default: Date.now },
-}, { timestamps: true });
 
 const ExerciseSchema = new Schema({
   type: { type: String, enum: ['practice', 'quiz', 'assignment', 'exam'], required: true },
@@ -485,7 +480,6 @@ const LearningPathSchema = new Schema({
 
 // Models
 module.exports = {
-  Bookmark: mongoose.model('Bookmark', BookmarkSchema),
   Exercise: mongoose.model('Exercise', ExerciseSchema),
   Resource: mongoose.model('Resource', ResourceSchema),
   StudyGroup: mongoose.model('StudyGroup', StudyGroupSchema),
