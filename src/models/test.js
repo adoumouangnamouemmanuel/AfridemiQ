@@ -301,15 +301,6 @@ const DashboardSchema = new Schema({
   notifications: [{ type: Schema.Types.ObjectId, ref: 'Notification' }],
 }, { timestamps: true });
 
-const ParentAccessSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  parentEmail: { type: String, required: true },
-  accessLevel: { type: String, enum: ['viewProgress', 'viewReports', 'fullAccess'], required: true },
-  notifications: [{
-    type: String,
-    frequency: String,
-  }],
-}, { timestamps: true });
 
 
 
@@ -330,5 +321,4 @@ module.exports = {
   AdaptiveLearning: mongoose.model('AdaptiveLearning', AdaptiveLearningSchema),
   OnboardingStatus: mongoose.model('OnboardingStatus', OnboardingStatusSchema),
   Dashboard: mongoose.model('Dashboard', DashboardSchema),
-  ParentAccess: mongoose.model('ParentAccess', ParentAccessSchema),
 };
