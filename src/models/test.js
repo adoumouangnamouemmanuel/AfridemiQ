@@ -232,14 +232,6 @@ const MissionSchema = new Schema({
   series: String,
 }, { timestamps: true });
 
-const NoteSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  topicId: { type: Schema.Types.ObjectId, ref: 'Topic', required: true },
-  series: String,
-  content: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: Date,
-}, { timestamps: true });
 
 // Models
 module.exports = {
@@ -251,5 +243,4 @@ module.exports = {
   Challenge: mongoose.model('Challenge', ChallengeSchema),
   LeaderboardEntry: mongoose.model('LeaderboardEntry', LeaderboardEntrySchema),
   Mission: mongoose.model('Mission', MissionSchema),
-  Note: mongoose.model('Note', NoteSchema),
 };
