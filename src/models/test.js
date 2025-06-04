@@ -277,13 +277,6 @@ const AdaptiveLearningSchema = new Schema({
   }],
 }, { timestamps: true });
 
-const OnboardingStatusSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  completedSteps: [String],
-  currentStep: { type: String, required: true },
-  lastUpdated: { type: Date, default: Date.now },
-}, { timestamps: true });
-
 
 // Models
 module.exports = {
@@ -299,5 +292,4 @@ module.exports = {
   ExamSchedule: mongoose.model('ExamSchedule', ExamScheduleSchema),
   Country: mongoose.model('Country', CountrySchema),
   AdaptiveLearning: mongoose.model('AdaptiveLearning', AdaptiveLearningSchema),
-  OnboardingStatus: mongoose.model('OnboardingStatus', OnboardingStatusSchema),
 };
