@@ -2,18 +2,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 // Shared constants
-const SUBJECT_TYPES = [
-  'french', 'english', 'math', 'physics', 'chemistry', 'biology',
-  'history', 'geography', 'philosophy'
-];
 const DIFFICULTY_LEVELS = ['beginner', 'intermediate', 'advanced'];
-const INTERACTIVITY_LEVELS = ['low', 'medium', 'high'];
 const QUESTION_TYPES = ['multiple_choice', 'short_answer', 'essay'];
 const RESOURCE_TYPES = ['document', 'video', 'audio', 'interactive', 'past_exam'];
 const MEDIA_TYPES = ['image', 'audio', 'video'];
-const WRITING_FORMATS = ['essay', 'letter', 'commentary', 'summary'];
-const INTERACTIVE_ELEMENT_TYPES = ['geogebra', 'desmos', 'video', 'quiz'];
-const USER_ROLES = ['student', 'teacher', 'admin'];
 
 // Shared Feedback Subschema
 const FeedbackSchema = new Schema({
@@ -23,22 +15,6 @@ const FeedbackSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Assessment Schema
-const AssessmentSchema = new Schema({
-  type: { type: String, enum: ['quiz', 'exam', 'project'], required: true },
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  questionIds: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
-  passingScore: { type: Number, required: true },
-  timeLimit: Number,
-  attempts: { type: Number, required: true },
-  feedback: {
-    immediate: Boolean,
-    detailed: Boolean,
-    solutions: Boolean,
-  },
-  premiumOnly: { type: Boolean, default: false },
-}, { timestamps: true });
 
 const QuestionSchema = new Schema({
   topicId: { type: Schema.Types.ObjectId, ref: 'Topic', required: true, index: true },
@@ -615,8 +591,6 @@ const LearningPathSchema = new Schema({
 
 // Models
 module.exports = {
-    
-  Assessment: mongoose.model('Assessment', AssessmentSchema),
   Question: mongoose.model('Question', QuestionSchema),
   Quiz: mongoose.model('Quiz', QuizSchema),
   QuizSession: mongoose.model('QuizSession', QuizSessionSchema),
