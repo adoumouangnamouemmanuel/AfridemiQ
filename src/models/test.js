@@ -261,23 +261,6 @@ const CountrySchema = new Schema({
   languages: [String],
 }, { timestamps: true });
 
-const AdaptiveLearningSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  currentLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-  series: String,
-  adjustmentRules: [{
-    metric: { type: String, enum: ['score', 'timeSpent', 'accuracy'] },
-    threshold: Number,
-    action: { type: String, enum: ['increaseDifficulty', 'decreaseDifficulty', 'suggestResource'] },
-    resourceId: { type: Schema.Types.ObjectId, ref: 'Resource' },
-  }],
-  recommendedContent: [{
-    contentType: { type: String, enum: ['topic', 'quiz', 'resource'] },
-    id: String,
-  }],
-}, { timestamps: true });
-
-
 // Models
 module.exports = {
   Exercise: mongoose.model('Exercise', ExerciseSchema),
@@ -291,5 +274,4 @@ module.exports = {
   Note: mongoose.model('Note', NoteSchema),
   ExamSchedule: mongoose.model('ExamSchedule', ExamScheduleSchema),
   Country: mongoose.model('Country', CountrySchema),
-  AdaptiveLearning: mongoose.model('AdaptiveLearning', AdaptiveLearningSchema),
 };
