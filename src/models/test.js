@@ -30,21 +30,7 @@ const FeedbackSchema = new Schema({
 
 
 
-const TopicProgressSchema = new Schema({
-  topicId: { type: Schema.Types.ObjectId, ref: 'Topic', required: true, index: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  series: String,
-  masteryLevel: { type: String, enum: ['beginner', 'intermediate', 'advanced', 'mastered'], required: true },
-  timeSpent: { type: Number, default: 0 },
-  lastStudied: Date,
-  practiceSessions: [{
-    date: Date,
-    score: Number,
-    timeSpent: Number,
-  }],
-  weakAreas: [String],
-  strongAreas: [String],
-}, { timestamps: true });
+
 
 const CourseContentSchema = new Schema({
   subjectId: { type: Schema.Types.ObjectId, ref: 'Subject', required: true },
@@ -2656,7 +2642,6 @@ const LearningPathSchema = new Schema({
 module.exports = {
   
 
-  TopicProgress: mongoose.model('TopicProgress', TopicProgressSchema),
   CourseContent: mongoose.model('CourseContent', CourseContentSchema),
   Lesson: mongoose.model('Lesson', LessonBaseSchema),
   FrenchLesson: mongoose.model('Lesson').discriminator('french', FrenchLessonSchema),
