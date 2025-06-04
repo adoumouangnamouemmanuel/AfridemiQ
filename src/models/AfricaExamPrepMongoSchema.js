@@ -3371,7 +3371,7 @@ const ExerciseBaseSchema = new Schema(
     },
     premiumOnly: { type: Boolean, default: false },
   },
-  { timestamps: true, discriminatorKey: "subjectType" }
+  { timestamps: true, discriminatorKey: "exerciseSubject" }
 );
 
 // Math Exercise Schema
@@ -4319,31 +4319,31 @@ module.exports = {
   Exercise: mongoose.model("Exercise", ExerciseBaseSchema),
   MathExercise: mongoose
     .model("Exercise")
-    .discriminator("math", MathExerciseSchema),
+    .discriminator("mathExercise", MathExerciseSchema),
   PhysicsExercise: mongoose
     .model("Exercise")
-    .discriminator("physics", PhysicsExerciseSchema),
+    .discriminator("physicsExercise", PhysicsExerciseSchema),
   ChemistryExercise: mongoose
     .model("Exercise")
-    .discriminator("chemistry", ChemistryExerciseSchema),
+    .discriminator("chemistryExercise", ChemistryExerciseSchema),
   BiologyExercise: mongoose
     .model("Exercise")
-    .discriminator("biology", BiologyExerciseSchema),
+    .discriminator("biologyExercise", BiologyExerciseSchema),
   FrenchExercise: mongoose
     .model("Exercise")
-    .discriminator("french", FrenchExerciseSchema),
+    .discriminator("frenchExercise", FrenchExerciseSchema),
   PhilosophyExercise: mongoose
     .model("Exercise")
-    .discriminator("philosophy", PhilosophyExerciseSchema),
+    .discriminator("philosophyExercise", PhilosophyExerciseSchema),
   EnglishExercise: mongoose
     .model("Exercise")
-    .discriminator("english", EnglishExerciseSchema),
+    .discriminator("englishExercise", EnglishExerciseSchema),
   HistoryExercise: mongoose
     .model("Exercise")
-    .discriminator("history", HistoryExerciseSchema),
+    .discriminator("historyExercise", HistoryExerciseSchema),
   GeographyExercise: mongoose
     .model("Exercise")
-    .discriminator("geography", GeographyExerciseSchema),
+    .discriminator("geographyExercise", GeographyExerciseSchema),
   Resource: mongoose.model("Resource", ResourceSchema),
   StudyGroup: mongoose.model("StudyGroup", StudyGroupSchema),
   PeerTutorProfile: mongoose.model("PeerTutorProfile", PeerTutorProfileSchema),
