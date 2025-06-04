@@ -411,20 +411,6 @@ const CurriculumSchema = new Schema({
   },
 }, { timestamps: true });
 
-const FeedbackLoopSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  type: { type: String, enum: ['question', 'exercise', 'lesson', 'platform'], required: true },
-  contentId: { type: Schema.Types.ObjectId, required: true },
-  feedback: [FeedbackSchema],
-  status: { type: String, enum: ['pending', 'reviewed', 'resolved'], required: true },
-  response: {
-    adminId: { type: Schema.Types.ObjectId, ref: 'User' },
-    message: String,
-    date: Date,
-  },
-  attachments: [String],
-}, { timestamps: true });
-
 
 
 
@@ -448,5 +434,4 @@ module.exports = {
   Notification: mongoose.model('Notification', NotificationSchema),
   StudyPlan: mongoose.model('StudyPlan', StudyPlanSchema),
   Curriculum: mongoose.model('Curriculum', CurriculumSchema),
-  FeedbackLoop: mongoose.model('FeedbackLoop', FeedbackLoopSchema),
 };
