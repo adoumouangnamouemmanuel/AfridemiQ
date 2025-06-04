@@ -311,24 +311,6 @@ const ParentAccessSchema = new Schema({
   }],
 }, { timestamps: true });
 
-const NotificationSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  type: { type: String, enum: ['reminder', 'achievement', 'study_group', 'system'], required: true },
-  title: { type: String, required: true },
-  message: { type: String, required: true },
-  priority: { type: String, enum: ['low', 'medium', 'high'], required: true },
-  read: { type: Boolean, default: false },
-  actionUrl: String,
-  expiresAt: Date,
-  metadata: {
-    relatedEntityId: String,
-    relatedEntityType: String,
-  },
-}, { timestamps: true });
-
-
-// Index for study plan queries
-StudyPlanSchema.index({ userId: 1, 'dailyGoals.topics.topicId': 1 });
 
 
 
@@ -349,5 +331,4 @@ module.exports = {
   OnboardingStatus: mongoose.model('OnboardingStatus', OnboardingStatusSchema),
   Dashboard: mongoose.model('Dashboard', DashboardSchema),
   ParentAccess: mongoose.model('ParentAccess', ParentAccessSchema),
-  Notification: mongoose.model('Notification', NotificationSchema),
 };

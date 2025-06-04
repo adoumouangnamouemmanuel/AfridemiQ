@@ -62,6 +62,9 @@ const StudyPlanSchema = new Schema(
   { timestamps: true }
 );
 
+// Index for study plan queries
+StudyPlanSchema.index({ userId: 1, "dailyGoals.topics.topicId": 1 });
+
 module.exports = {
   StudyPlan: mongoose.model("StudyPlan", StudyPlanSchema),
 };
