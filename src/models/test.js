@@ -187,21 +187,6 @@ const TutoringSessionSchema = new Schema({
   premiumOnly: { type: Boolean, default: false },
 }, { timestamps: true });
 
-const ChallengeSchema = new Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  creatorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  topicId: { type: Schema.Types.ObjectId, ref: 'Topic', required: true },
-  series: String,
-  questionIds: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
-  timeLimit: { type: Number, required: true },
-  participants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  createdAt: { type: Date, default: Date.now },
-  endsAt: Date,
-  premiumOnly: { type: Boolean, default: false },
-}, { timestamps: true });
-
-
 
 
 // Models
@@ -210,6 +195,5 @@ module.exports = {
   Resource: mongoose.model('Resource', ResourceSchema),
   StudyGroup: mongoose.model('StudyGroup', StudyGroupSchema),
   PeerTutorProfile: mongoose.model('PeerTutorProfile', PeerTutorProfileSchema),
-  TutoringSession: mongoose.model('TutoringSession', TutoringSessionSchema),
-  Challenge: mongoose.model('Challenge', ChallengeSchema),
+  TutoringSession: mongoose.model('TutoringSession', TutoringSessionSchema)
 };
