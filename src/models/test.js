@@ -23,24 +23,9 @@ const FeedbackSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Virtual for fullName
-UserSchema.virtual('fullName').get(function () {
-  return this.name;
-});
 
 
 
-const AchievementSchema = new Schema({
-  name: { type: String, required: true },
-  description: { type: String, required: true },
-  icon: { type: String, required: true },
-  color: { type: String, required: true },
-  earnedDate: Date,
-  progress: { type: Number, default: 0 },
-  target: { type: Number, required: true },
-  subjectId: { type: Schema.Types.ObjectId, ref: 'Subject' },
-  series: String,
-}, { timestamps: true });
 
 const ExamSchema = new Schema({
   name: { type: String, required: true },
@@ -2754,7 +2739,6 @@ const LearningPathSchema = new Schema({
 // Models
 module.exports = {
   
-  Achievement: mongoose.model('Achievement', AchievementSchema),
   Exam: mongoose.model('Exam', ExamSchema),
   Subject: mongoose.model('Subject', SubjectSchema),
   Topic: mongoose.model('Topic', TopicSchema),
