@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
+// Shared constants
+const DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
+
 const CourseContentSchema = new Schema(
   {
     examId: [{ type: Schema.Types.ObjectId, ref: "Exam", required: true }],
