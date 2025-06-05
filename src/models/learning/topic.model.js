@@ -12,7 +12,7 @@ const TopicSchema = new Schema(
       required: true,
       index: true,
     },
-    series: String,
+    series: [String],
     description: { type: String, required: true },
     difficulty: { type: String, enum: DIFFICULTY_LEVELS, required: true },
     estimatedTime: { type: Number, required: true },
@@ -24,7 +24,7 @@ const TopicSchema = new Schema(
     prerequisites: [String],
     learningObjectives: [String],
     estimatedTimeToMaster: { type: Number, required: true },
-    resourceIds: [{ type: Schema.Types.ObjectId, ref: "Resource" }],
+    resourceIds: [{ type: Schema.Types.ObjectId, ref: "Resource", default: [] }],
     assessmentCriteria: {
       minimumScore: Number,
       requiredPracticeQuestions: Number,
