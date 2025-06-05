@@ -130,10 +130,7 @@ const getUserById = async (req, res) => {
 
 // Log out user
 const logOut = async (req, res) => {
-  await userService.logOut(
-    req.user._id,
-    req.headers.authorization.split(" ")[1]
-  );
+  await userService.logOut(req.user._id);
   res.status(StatusCodes.OK).json({
     message: "Déconnexion réussie",
   });

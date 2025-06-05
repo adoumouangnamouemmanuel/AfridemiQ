@@ -5,13 +5,6 @@ const BadRequestError = require("../../errors/badRequestError");
 const NotFoundError = require("../../errors/notFoundError");
 const UnauthorizedError = require("../../errors/unauthorizedError");
 const ConflictError = require("../../errors/conflictError");
-const redis = require("redis");
-
-// Redis client for token blacklisting
-const redisClient = redis.createClient({ url: process.env.REDIS_URL });
-redisClient
-  .connect()
-  .catch((err) => console.error("Redis connection error:", err));
 
 // Register a new user
 const register = async (userData) => {
@@ -31,6 +24,10 @@ const login = async ({ email, password }) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new UnauthorizedError("Email ou mot de passe incorrect");
   user.lastLogin = new Date();
+  user.refreshToken = generateRefreshToken({
+    userId: user._id,
+    role: user.role,
+  });
   await user.save();
   const token = generateToken({ userId: user._id, role: user.role });
   return { user: user.toJSON(), token };
@@ -178,7 +175,7 @@ const updateSubscription = async (userId, subscriptionData) => {
 // Get user by ID
 const getUserById = async (userId, authUser) => {
   const user = await User.findById(userId).select(
-    "-password -phoneVerificationCode -phoneVerificationExpires"
+    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
   );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
   if (authUser.role !== "admin" && authUser._id !== userId) {
@@ -199,13 +196,12 @@ const getUserById = async (userId, authUser) => {
 };
 
 // Log out user
-const logOut = async (userId, token) => {
-  // Blacklist token in Redis with remaining TTL
-  const decoded = jwt.decode(token);
-  const expiresIn = decoded.exp - Math.floor(Date.now() / 1000);
-  if (expiresIn > 0) {
-    await redisClient.setEx(`blacklist:${token}`, expiresIn, "1");
-  }
+const logOut = async (userId) => {
+  const user = await User.findById(userId);
+  if (!user) throw new NotFoundError("Utilisateur non trouvé");
+  user.refreshToken = undefined; // Clear refresh token
+  await user.save();
+  // Client should remove JWT from storage
 };
 
 // Request password reset
@@ -220,7 +216,7 @@ const requestPasswordReset = async (email) => {
   user.resetPasswordToken = resetTokenHash;
   user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
   await user.save();
-  // TODO: Implement email service to send reset link
+  // TODO: Implement email service to send reset link with token
 };
 
 // Reset password
@@ -246,9 +242,9 @@ const refreshToken = async (refreshToken) => {
   try {
     const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const user = await User.findById(payload.userId);
-    if (!user) throw new UnauthorizedError("Utilisateur non trouvé");
-    const isBlacklisted = await redisClient.get(`blacklist:${refreshToken}`);
-    if (isBlacklisted) throw new UnauthorizedError("Token révoqué");
+    if (!user || user.refreshToken !== refreshToken) {
+      throw new UnauthorizedError("Token de rafraîchissement invalide");
+    }
     const newToken = generateToken({ userId: user._id, role: user.role });
     return { token: newToken };
   } catch (error) {
@@ -280,7 +276,9 @@ const updateSocialProfile = async (userId, socialProfile) => {
     userId,
     { socialProfile },
     { new: true, runValidators: true }
-  ).select("-password -phoneVerificationCode -phoneVerificationExpires");
+  ).select(
+    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
+  );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
   return user;
 };

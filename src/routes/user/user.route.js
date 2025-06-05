@@ -66,12 +66,12 @@ router.put(
   userController.updateProgress
 );
 router.post(
-  "/friends",
+  "/add-friend",
   validateMiddleware(addFriendSchema),
   userController.addFriend
 );
 router.delete(
-  "/friends",
+  "/friend",
   validateMiddleware(addFriendSchema),
   userController.removeFriend
 );
