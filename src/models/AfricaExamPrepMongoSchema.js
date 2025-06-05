@@ -3608,7 +3608,6 @@ const CurriculumSchema = new Schema(
   {
     country: { type: String, required: true },
     educationLevel: { type: String, required: true },
-    examId: { type: Schema.Types.ObjectId, ref: "Exam", required: true },
     series: [String],
     subjects: [
       {
