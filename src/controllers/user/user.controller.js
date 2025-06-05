@@ -119,6 +119,69 @@ const updateSubscription = async (req, res) => {
   });
 };
 
+// Get user by ID
+const getUserById = async (req, res) => {
+  const user = await userService.getUserById(req.params.id, req.user);
+  res.status(StatusCodes.OK).json({
+    message: "Utilisateur récupéré avec succès",
+    data: user,
+  });
+};
+
+// Log out user
+const logOut = async (req, res) => {
+  await userService.logOut(
+    req.user._id,
+    req.headers.authorization.split(" ")[1]
+  );
+  res.status(StatusCodes.OK).json({
+    message: "Déconnexion réussie",
+  });
+};
+
+// Request password reset
+const requestPasswordReset = async (req, res) => {
+  await userService.requestPasswordReset(req.body.email);
+  res.status(StatusCodes.OK).json({
+    message: "Lien de réinitialisation envoyé",
+  });
+};
+
+// Reset password
+const resetPassword = async (req, res) => {
+  await userService.resetPassword(req.body.token, req.body.password);
+  res.status(StatusCodes.OK).json({
+    message: "Mot de passe réinitialisé avec succès",
+  });
+};
+
+// Refresh token
+const refreshToken = async (req, res) => {
+  const { token } = await userService.refreshToken(req.body.refreshToken);
+  res.status(StatusCodes.OK).json({
+    message: "Token rafraîchi avec succès",
+    data: { token },
+  });
+};
+
+// Search users
+const searchUsers = async (req, res) => {
+  const { users, count } = await userService.searchUsers(req.query, req.user);
+  res.status(StatusCodes.OK).json({
+    message: "Utilisateurs trouvés",
+    data: { users, total: count },
+  });
+};
+
+// Update social profile
+const updateSocialProfile = async (req, res) => {
+  const user = await userService.updateSocialProfile(req.user._id, req.body);
+  res.status(StatusCodes.OK).json({
+    message: "Profil social mis à jour",
+    data: user,
+  });
+};
+
 module.exports = {
   register,
   login,
@@ -133,4 +196,11 @@ module.exports = {
   verifyPhone,
   requestPhoneVerification,
   updateSubscription,
+  getUserById,
+  logOut,
+  requestPasswordReset,
+  resetPassword,
+  refreshToken,
+  searchUsers,
+  updateSocialProfile,
 };
