@@ -19,7 +19,6 @@
     "http-status-codes": "^2.3.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.15.1",
-    "redis": "^5.5.5"
+    "mongoose": "^8.15.1"
   }
 }

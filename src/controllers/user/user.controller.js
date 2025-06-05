@@ -12,16 +12,16 @@ const register = async (req, res) => {
 
 // Login user
 const login = async (req, res) => {
-  const { user, token } = await userService.login(req.body);
+  const { user, token, refreshToken } = await userService.login(req.body);
   res.status(StatusCodes.OK).json({
     message: "Connexion réussie",
-    data: { user, token },
+    data: { user, token, refreshToken },
   });
 };
 
 // Get user profile
 const getProfile = async (req, res) => {
-  const user = await userService.getProfile(req.user._id);
+  const user = await userService.getProfile(req.user.userId); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Profil récupéré avec succès",
     data: user,
@@ -30,7 +30,7 @@ const getProfile = async (req, res) => {
 
 // Update user profile
 const updateProfile = async (req, res) => {
-  const user = await userService.updateProfile(req.user._id, req.body);
+  const user = await userService.updateProfile(req.user.userId, req.body); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Profil mis à jour avec succès",
     data: user,
@@ -39,7 +39,7 @@ const updateProfile = async (req, res) => {
 
 // Delete user
 const deleteUser = async (req, res) => {
-  await userService.deleteUser(req.user._id);
+  await userService.deleteUser(req.user.userId); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Utilisateur supprimé avec succès",
   });
@@ -56,7 +56,7 @@ const getAllUsers = async (req, res) => {
 
 // Update preferences
 const updatePreferences = async (req, res) => {
-  const user = await userService.updatePreferences(req.user._id, req.body);
+  const user = await userService.updatePreferences(req.user.userId, req.body); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Préférences mises à jour",
     data: user,
@@ -65,7 +65,7 @@ const updatePreferences = async (req, res) => {
 
 // Update progress
 const updateProgress = async (req, res) => {
-  const user = await userService.updateProgress(req.user._id, req.body);
+  const user = await userService.updateProgress(req.user.userId, req.body); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Progrès mis à jour",
     data: user,
@@ -74,7 +74,7 @@ const updateProgress = async (req, res) => {
 
 // Add friend
 const addFriend = async (req, res) => {
-  const user = await userService.addFriend(req.user._id, req.body.friendId);
+  const user = await userService.addFriend(req.user.userId, req.body.friendId); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Ami ajouté avec succès",
     data: user,
@@ -83,7 +83,10 @@ const addFriend = async (req, res) => {
 
 // Remove friend
 const removeFriend = async (req, res) => {
-  const user = await userService.removeFriend(req.user._id, req.body.friendId);
+  const user = await userService.removeFriend(
+    req.user.userId,
+    req.body.friendId
+  ); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Ami supprimé avec succès",
     data: user,
@@ -92,7 +95,7 @@ const removeFriend = async (req, res) => {
 
 // Verify phone
 const verifyPhone = async (req, res) => {
-  const user = await userService.verifyPhone(req.user._id, req.body.code);
+  const user = await userService.verifyPhone(req.user.userId, req.body.code); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Téléphone vérifié avec succès",
     data: user,
@@ -102,7 +105,7 @@ const verifyPhone = async (req, res) => {
 // Request phone verification code
 const requestPhoneVerification = async (req, res) => {
   await userService.requestPhoneVerification(
-    req.user._id,
+    req.user.userId, // Changed from _id to userId
     req.body.phoneNumber
   );
   res.status(StatusCodes.OK).json({
@@ -112,7 +115,7 @@ const requestPhoneVerification = async (req, res) => {
 
 // Update subscription
 const updateSubscription = async (req, res) => {
-  const user = await userService.updateSubscription(req.user._id, req.body);
+  const user = await userService.updateSubscription(req.user.userId, req.body); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Abonnement mis à jour",
     data: user,
@@ -130,7 +133,7 @@ const getUserById = async (req, res) => {
 
 // Log out user
 const logOut = async (req, res) => {
-  await userService.logOut(req.user._id);
+  await userService.logOut(req.user.userId); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Déconnexion réussie",
   });
@@ -172,7 +175,7 @@ const searchUsers = async (req, res) => {
 
 // Update social profile
 const updateSocialProfile = async (req, res) => {
-  const user = await userService.updateSocialProfile(req.user._id, req.body);
+  const user = await userService.updateSocialProfile(req.user.userId, req.body); // Changed from _id to userId
   res.status(StatusCodes.OK).json({
     message: "Profil social mis à jour",
     data: user,

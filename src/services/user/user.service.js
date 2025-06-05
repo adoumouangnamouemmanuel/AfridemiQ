@@ -1,42 +1,58 @@
-// This file defines the Mongoose schemas for various educational exercises
-const { User } = require("../../models/index");
-const { generateToken } = require("../../utils/jwt.utils");
+const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const { User } = require("../../models/user/user.model"); // Corrected path
+const {
+  generateToken,
+  generateRefreshToken,
+} = require("../../utils/jwt.utils");
 const BadRequestError = require("../../errors/badRequestError");
 const NotFoundError = require("../../errors/notFoundError");
 const UnauthorizedError = require("../../errors/unauthorizedError");
 const ConflictError = require("../../errors/conflictError");
 
 // Register a new user
-const register = async (userData) => {
-  const { email, password } = userData;
-  const existingUser = await User.findOne({ email });
+const register = async (data) => {
+  console.log("Register: Checking email:", data.email);
+  const existingUser = await User.findOne({ email: data.email });
   if (existingUser) throw new ConflictError("Email déjà utilisé");
-  userData.password = await bcrypt.hash(password, 10);
-  const user = await User.create(userData);
+  console.log("Register: Creating user");
+  const user = await User.create(data); // Rely on pre("save") for hashing
+  console.log("Register: User created:", user._id);
   const token = generateToken({ userId: user._id, role: user.role });
   return { user: user.toJSON(), token };
 };
 
 // Login user
 const login = async ({ email, password }) => {
+  console.log("Login: Searching for email:", email);
   const user = await User.findOne({ email });
-  if (!user) throw new UnauthorizedError("Email ou mot de passe incorrect");
+  if (!user) {
+    console.log("Login: User not found");
+    throw new UnauthorizedError("Email ou mot de passe incorrect");
+  }
+  console.log("Login: Comparing passwords");
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new UnauthorizedError("Email ou mot de passe incorrect");
+  if (!isMatch) {
+    console.log("Login: Password mismatch");
+    throw new UnauthorizedError("Email ou mot de passe incorrect");
+  }
+  console.log("Login: Updating user");
   user.lastLogin = new Date();
   user.refreshToken = generateRefreshToken({
     userId: user._id,
     role: user.role,
   });
   await user.save();
+  console.log("Login: Generating token");
   const token = generateToken({ userId: user._id, role: user.role });
-  return { user: user.toJSON(), token };
+  return { user: user.toJSON(), token, refreshToken: user.refreshToken };
 };
 
 // Get user profile
 const getProfile = async (userId) => {
   const user = await User.findById(userId).select(
-    "-password -phoneVerificationCode -phoneVerificationExpires"
+    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
   );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
   return user;
@@ -54,7 +70,9 @@ const updateProfile = async (userId, updateData) => {
   const user = await User.findByIdAndUpdate(userId, updateData, {
     new: true,
     runValidators: true,
-  }).select("-password -phoneVerificationCode -phoneVerificationExpires");
+  }).select(
+    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
+  );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
   return user;
 };
@@ -72,7 +90,9 @@ const getAllUsers = async (query) => {
   if (role) filter.role = role;
   if (country) filter.country = country;
   const users = await User.find(filter)
-    .select("-password -phoneVerificationCode -phoneVerificationExpires")
+    .select(
+      "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
+    )
     .skip((page - 1) * limit)
     .limit(Number(limit));
   const count = await User.countDocuments(filter);
@@ -84,8 +104,10 @@ const updatePreferences = async (userId, preferences) => {
   const user = await User.findByIdAndUpdate(
     userId,
     { preferences },
-    { new: true, runValidators: true }
-  ).select("-password -phoneVerificationCode -phoneVerificationExpires");
+    { new: true, runValidators: true } // Fixed userId to runValidators
+  ).select(
+    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
+  );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
   return user;
 };
@@ -96,13 +118,16 @@ const updateProgress = async (userId, progress) => {
     userId,
     { progress },
     { new: true, runValidators: true }
-  ).select("-password -phoneVerificationCode -phoneVerificationExpires");
+  ).select(
+    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
+  );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
   return user;
 };
 
 // Add friend
 const addFriend = async (userId, friendId) => {
+  // Removed duplicate friendId
   const user = await User.findById(userId);
   const friend = await User.findById(friendId);
   if (!user || !friend)
@@ -118,13 +143,16 @@ const addFriend = async (userId, friendId) => {
 
 // Remove friend
 const removeFriend = async (userId, friendId) => {
+  // Removed duplicate friendId
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
   if (!user.friends.includes(friendId))
     throw new NotFoundError("Cet utilisateur n’est pas un ami");
-  user.friends = user.friends.filter((f) => f.toString() !== friendId);
+  user.friends = user.friends.filter(
+    (f) => f.toString() !== friendId.toString()
+  );
   await user.save();
-  return user;
+  return user; // Return user instead of user.friends
 };
 
 // Verify phone
@@ -178,18 +206,18 @@ const getUserById = async (userId, authUser) => {
     "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
   );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
-  if (authUser.role !== "admin" && authUser._id !== userId) {
+  if (authUser.role !== "admin" && authUser._id.toString() !== userId) {
     if (
       user.socialProfile.visibility === "private" &&
       !user.friends.includes(authUser._id)
     ) {
-      throw new ForbiddenError("Accès au profil non autorisé");
+      throw new UnauthorizedError("Accès au profil non autorisé");
     }
     if (
       user.socialProfile.visibility === "friends" &&
       !user.friends.includes(authUser._id)
     ) {
-      throw new ForbiddenError("Accès au profil réservé aux amis");
+      throw new UnauthorizedError("Accès au profil réservé aux amis");
     }
   }
   return user;
@@ -201,7 +229,6 @@ const logOut = async (userId) => {
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
   user.refreshToken = undefined; // Clear refresh token
   await user.save();
-  // Client should remove JWT from storage
 };
 
 // Request password reset
@@ -217,6 +244,7 @@ const requestPasswordReset = async (email) => {
   user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
   await user.save();
   // TODO: Implement email service to send reset link with token
+  return resetToken; // Return for testing; remove in production
 };
 
 // Reset password
@@ -240,7 +268,7 @@ const resetPassword = async (token, password) => {
 // Refresh token
 const refreshToken = async (refreshToken) => {
   try {
-    const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const payload = jwt.verify(refreshToken, process.env.JWT_SECRET);
     const user = await User.findById(payload.userId);
     if (!user || user.refreshToken !== refreshToken) {
       throw new UnauthorizedError("Token de rafraîchissement invalide");
@@ -270,8 +298,16 @@ const searchUsers = async (query, authUser) => {
   return { users, count };
 };
 
-// Update social profile
-const updateSocialProfile = async (userId, socialProfile) => {
+const updateSocialProfile = async (
+  userId,
+  { bio, visibility, publicAchievements, socialLinks }
+) => {
+  const socialProfile = {
+    bio,
+    visibility,
+    publicAchievements: publicAchievements || [],
+    socialLinks: socialLinks || [],
+  };
   const user = await User.findByIdAndUpdate(
     userId,
     { socialProfile },
