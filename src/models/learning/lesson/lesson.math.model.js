@@ -4,6 +4,8 @@ const { Schema } = mongoose;
 const DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
 const MEDIA_TYPES = ["image", "audio", "video"];
 const INTERACTIVE_ELEMENT_TYPES = ["geogebra", "desmos", "video", "quiz"];
+const EXERCISE_TYPES = ["practice", "quiz", "assignment", "exam"];
+const MATH_TOPICS = ["algebra", "geometry", "calculus", "statistics"];
 
 // Math Lesson Schema (Enhanced)
 const MathLessonSchema = new Schema({

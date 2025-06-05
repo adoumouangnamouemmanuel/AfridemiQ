@@ -6,6 +6,13 @@ const DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
 const QUESTION_TYPES = ["multiple_choice", "short_answer", "essay"];
 const MEDIA_TYPES = ["image", "audio", "video"];
 const INTERACTIVE_ELEMENT_TYPES = ["geogebra", "desmos", "video", "quiz"];
+const EXERCISE_TYPES = ["practice", "quiz", "assignment", "exam"];
+const GEOGRAPHY_TOPICS = [
+  "physical_geography",
+  "human_geography",
+  "climate_and_environment",
+  "chadian_geography",
+];
 
 // Geography Lesson Schema (New)
 const GeographyLessonSchema = new Schema(

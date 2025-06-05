@@ -4,10 +4,16 @@ const { Schema } = mongoose;
 // Shared constants
 const DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
 const QUESTION_TYPES = ["multiple_choice", "short_answer", "essay"];
-const MEDIA_TYPES = ["image", "audio", "video"];
 const WRITING_FORMATS = ["essay", "letter", "commentary", "summary"];
 const INTERACTIVE_ELEMENT_TYPES = ["geogebra", "desmos", "video", "quiz"];
+const EXERCISE_TYPES = ["practice", "quiz", "assignment", "exam"];
 
+const ENGLISH_TOPICS = [
+  "grammar",
+  "reading_comprehension",
+  "writing_skills",
+  "speaking",
+];
 
 // English Lesson Schema (New)
 const EnglishLessonSchema = new Schema({
