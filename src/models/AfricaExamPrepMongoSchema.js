@@ -3663,7 +3663,6 @@ const FeedbackLoopSchema = new Schema(
       enum: ["question", "exercise", "lesson", "platform"],
       required: true,
     },
-    contentId: { type: Schema.Types.ObjectId, required: true },
     feedback: [FeedbackSchema],
     status: {
       type: String,
