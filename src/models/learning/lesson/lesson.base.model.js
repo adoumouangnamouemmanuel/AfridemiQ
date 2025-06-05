@@ -15,9 +15,9 @@ const FeedbackSchema = new Schema({
 // Lesson Base Schema
 const LessonBaseSchema = new Schema(
   {
-    subjectId: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
+    topicId: { type: Schema.Types.ObjectId, ref: "Topic", required: true },
     title: { type: String, required: true },
-    series: String,
+    series: [String],
     overview: String,
     objectives: [String],
     keyPoints: [String],
