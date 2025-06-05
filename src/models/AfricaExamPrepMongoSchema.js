@@ -407,6 +407,7 @@ const TopicProgressSchema = new Schema(
       type: String,
       enum: ["beginner", "intermediate", "advanced", "mastered"],
       required: true,
+      default: "beginner",
     },
     timeSpent: { type: Number, default: 0 },
     lastStudied: Date,
