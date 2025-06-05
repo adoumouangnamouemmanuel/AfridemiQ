@@ -296,7 +296,6 @@ const ExamSchema = new Schema(
     description: { type: String, required: true },
     icon: { type: String, required: true },
     color: { type: String, required: true },
-    duration: { type: String, required: true },
     country: { type: String, required: true },
     levels: [String],
     series: [
@@ -333,16 +332,9 @@ const ExamSchema = new Schema(
         capacity: Number,
       },
     ],
-    pastPapers: [
-      {
-        year: Number,
-        url: String,
-        solutions: String,
-        series: String,
-      },
-    ],
     statistics: [
       {
+        year: { type: Number, required: true },
         passRate: Number,
         averageScore: Number,
         totalCandidates: Number,
