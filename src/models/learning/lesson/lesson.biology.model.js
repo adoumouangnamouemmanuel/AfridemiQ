@@ -6,6 +6,7 @@ const DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
 const QUESTION_TYPES = ["multiple_choice", "short_answer", "essay"];
 const MEDIA_TYPES = ["image", "audio", "video"];
 const INTERACTIVE_ELEMENT_TYPES = ["geogebra", "desmos", "video", "quiz"];
+const EXERCISE_TYPES = ["practice", "quiz", "assignment", "exam"];
 
 // Biology Lesson Schema (New)
 const BiologyLessonSchema = new Schema(
