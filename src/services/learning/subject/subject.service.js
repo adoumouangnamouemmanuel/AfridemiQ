@@ -3,9 +3,9 @@ const NotFoundError = require("../../errors/notFoundError");
 const BadRequestError = require("../../errors/badRequestError");
 const ConflictError = require("../../errors/conflictError");
 const createLogger = require("../../services/logging.service");
-const searchService = require("./search.service");
-const analyticsService = require("./analytics.service");
-const bulkService = require("./bulk.service");
+const searchService = require("./subject/search.service");
+const analyticsService = require("./subject/analytics.service");
+const bulkService = require("./subject/bulk.service");
 
 const logger = createLogger("SubjectService");
 
