@@ -4,20 +4,14 @@ const registerSchema = Joi.object({
   name: Joi.string()
     .required()
     .messages({ "any.required": "Le nom est requis" }),
-  email: Joi.string()
-    .email()
-    .required()
-    .messages({
-      "string.email": "Email invalide",
-      "any.required": "Email requis",
-    }),
-  password: Joi.string()
-    .min(8)
-    .required()
-    .messages({
-      "string.min": "Mot de passe trop court",
-      "any.required": "Mot de passe requis",
-    }),
+  email: Joi.string().email().required().messages({
+    "string.email": "Email invalide",
+    "any.required": "Email requis",
+  }),
+  password: Joi.string().min(8).required().messages({
+    "string.min": "Mot de passe trop court",
+    "any.required": "Mot de passe requis",
+  }),
   phoneNumber: Joi.string()
     .pattern(/^\+?[1-9]\d{1,14}$/)
     .allow(null)
@@ -27,13 +21,10 @@ const registerSchema = Joi.object({
 });
 
 const loginSchema = Joi.object({
-  email: Joi.string()
-    .email()
-    .required()
-    .messages({
-      "string.email": "Email invalide",
-      "any.required": "Email requis",
-    }),
+  email: Joi.string().email().required().messages({
+    "string.email": "Email invalide",
+    "any.required": "Email requis",
+  }),
   password: Joi.string()
     .required()
     .messages({ "any.required": "Mot de passe requis" }),
@@ -111,13 +102,10 @@ const addFriendSchema = Joi.object({
 });
 
 const verifyPhoneSchema = Joi.object({
-  code: Joi.string()
-    .length(6)
-    .required()
-    .messages({
-      "any.required": "Code requis",
-      "string.length": "Code doit avoir 6 chiffres",
-    }),
+  code: Joi.string().length(6).required().messages({
+    "any.required": "Code requis",
+    "string.length": "Code doit avoir 6 chiffres",
+  }),
 });
 
 const phoneVerificationSchema = Joi.object({
@@ -143,6 +131,47 @@ const updateSubscriptionSchema = Joi.object({
   accessLevel: Joi.string().valid("basic", "premium"),
 });
 
+const passwordResetRequestSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Email invalide",
+    "any.required": "Email requis",
+  }),
+});
+
+const passwordResetSchema = Joi.object({
+  token: Joi.string().required().messages({ "any.required": "Token requis" }),
+  password: Joi.string().min(8).required().messages({
+    "string.min": "Mot de passe trop court",
+    "any.required": "Mot de passe requis",
+  }),
+});
+
+const refreshTokenSchema = Joi.object({
+  refreshToken: Joi.string()
+    .required()
+    .messages({ "any.required": "Token de rafraîchissement requis" }),
+});
+
+const searchUsersSchema = Joi.object({
+  search: Joi.string()
+    .optional()
+    .messages({ "string.base": "Recherche doit être une chaîne" }),
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(100).default(10),
+});
+
+const updateSocialProfileSchema = Joi.object({
+  bio: Joi.string().allow(""),
+  publicAchievements: Joi.array().items(Joi.string()),
+  visibility: Joi.string().valid("public", "friends", "private"),
+  socialLinks: Joi.array().items(
+    Joi.object({
+      platform: Joi.string(),
+      url: Joi.string().uri(),
+    })
+  ),
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -153,4 +182,9 @@ module.exports = {
   verifyPhoneSchema,
   phoneVerificationSchema,
   updateSubscriptionSchema,
+  passwordResetRequestSchema,
+  passwordResetSchema,
+  refreshTokenSchema,
+  searchUsersSchema,
+  updateSocialProfileSchema,
 };
