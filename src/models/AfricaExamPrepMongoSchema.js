@@ -3380,7 +3380,7 @@ const NoteSchema = new Schema(
       index: true,
     },
     topicId: { type: Schema.Types.ObjectId, ref: "Topic", required: true },
-    series: String,
+    series: [String],
     content: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: Date,
