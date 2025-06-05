@@ -2885,12 +2885,12 @@ const ExerciseBaseSchema = new Schema(
   {
     type: { type: String, enum: EXERCISE_TYPES, required: true },
     subjectId: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
-    series: { type: String, default: "D" },
+    series: [{ type: String, default: "D" }],
     topicId: { type: Schema.Types.ObjectId, ref: "Topic", required: true },
     title: { type: String, required: true },
     description: { type: String, required: true },
     difficulty: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    timeLimit: { type: Number, min: 0 }, // In minutes
+    timeLimit: { type: Number, min: 0, default: 15 }, // In minutes
     points: { type: Number, required: true, min: 0 },
     instructions: { type: String, required: true },
     attachments: [
