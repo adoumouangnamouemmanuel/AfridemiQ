@@ -1,6 +1,5 @@
-const { StatusCodes } = require("http-status-codes");
-const bcrypt = require("bcryptjs");
-const { User } = require("../models/user.model");
+// This file defines the Mongoose schemas for various educational exercises
+const { User } = require("../../modesls/index");
 const { generateToken } = require("../utils/jwt.utils");
 const BadRequestError = require("../errors/badRequestError");
 const NotFoundError = require("../errors/notFoundError");

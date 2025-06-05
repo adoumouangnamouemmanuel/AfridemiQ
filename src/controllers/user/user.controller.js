@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
-const userService = require("../services/user.service");
+const userService = require("../../services/user/user.service");
 
 // Register a new user
 const register = async (req, res) => {
