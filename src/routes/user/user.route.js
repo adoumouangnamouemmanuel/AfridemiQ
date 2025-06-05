@@ -14,6 +14,11 @@ const {
   verifyPhoneSchema,
   phoneVerificationSchema,
   updateSubscriptionSchema,
+  passwordResetRequestSchema,
+  passwordResetSchema,
+  refreshTokenSchema,
+  searchUsersSchema,
+  updateSocialProfileSchema,
 } = require("../../schemas/user/user.schema");
 
 // Public routes
@@ -23,6 +28,21 @@ router.post(
   userController.register
 );
 router.post("/login", validateMiddleware(loginSchema), userController.login);
+router.post(
+  "/request-password-reset",
+  validateMiddleware(passwordResetRequestSchema),
+  userController.requestPasswordReset
+);
+router.post(
+  "/reset-password",
+  validateMiddleware(passwordResetSchema),
+  userController.resetPassword
+);
+router.post(
+  "/refresh-token",
+  validateMiddleware(refreshTokenSchema),
+  userController.refreshToken
+);
 
 // Protected routes
 router.use(authMiddleware);
@@ -70,6 +90,18 @@ router.put(
   validateMiddleware(updateSubscriptionSchema),
   userController.updateSubscription
 );
+router.get(
+  "/search",
+  validateMiddleware(searchUsersSchema),
+  userController.searchUsers
+);
+router.put(
+  "/social-profile",
+  validateMiddleware(updateSocialProfileSchema),
+  userController.updateSocialProfile
+);
+router.get("/:id", userController.getUserById);
+router.post("/logout", userController.logOut);
 
 // Admin routes
 router.get("/", roleMiddleware(["admin"]), userController.getAllUsers);
