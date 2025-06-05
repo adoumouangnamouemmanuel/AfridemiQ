@@ -13,6 +13,6 @@ const SubjectSchema = new Schema(
   { timestamps: true, indexes: [{ key: { name: 1, series: 1 } }] }
 );
 
-Module.exports = {
+module.exports = {
   Subject: mongoose.model("Subject", SubjectSchema),
 };
