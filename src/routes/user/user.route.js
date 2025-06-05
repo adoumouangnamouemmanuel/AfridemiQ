@@ -14,7 +14,7 @@ const {
   verifyPhoneSchema,
   phoneVerificationSchema,
   updateSubscriptionSchema,
-} = require("../schemas/user.schema");
+} = require("../../schemas/user/user.schema");
 
 // Public routes
 router.post(
