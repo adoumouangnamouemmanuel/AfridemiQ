@@ -3167,15 +3167,15 @@ ExerciseBaseSchema.index({ "metadata.createdBy": 1 });
 
 const ResourceSchema = new Schema(
   {
-    type: { type: String, enum: RESOURCE_TYPES, required: true },
+    format: { type: String, enum: RESOURCE_TYPES, required: true },
     title: { type: String, required: true },
     subjectId: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
-    series: String,
-    topicId: { type: Schema.Types.ObjectId, ref: "Topic" },
+    series: [String],
+    topicIds: [{ type: Schema.Types.ObjectId, ref: "Topic" }],
     url: { type: String, required: true },
     description: { type: String, required: true },
     level: { type: String, required: true },
-    examId: { type: Schema.Types.ObjectId, ref: "Exam" },
+    examIds: [{ type: Schema.Types.ObjectId, ref: "Exam" }],
     thumbnail: String,
     offlineAvailable: { type: Boolean, default: false },
     premiumOnly: { type: Boolean, default: false },
