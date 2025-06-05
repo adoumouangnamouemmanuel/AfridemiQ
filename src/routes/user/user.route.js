@@ -5,6 +5,10 @@ const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
 const validateMiddleware = require("../../middlewares/validate.middleware");
 const {
+  authLimiter,
+  apiLimiter,
+} = require("../../middlewares/rate.limit.middleware");
+const {
   registerSchema,
   loginSchema,
   updateProfileSchema,
@@ -21,20 +25,33 @@ const {
   updateSocialProfileSchema,
 } = require("../../schemas/user/user.schema");
 
-// Public routes
+// Apply rate limiting to all routes
+router.use(apiLimiter);
+
+// Public routes with stricter rate limiting for auth endpoints
 router.post(
   "/register",
+  authLimiter,
   validateMiddleware(registerSchema),
   userController.register
 );
-router.post("/login", validateMiddleware(loginSchema), userController.login);
+
+router.post(
+  "/login",
+  authLimiter,
+  validateMiddleware(loginSchema),
+  userController.login
+);
+
 router.post(
   "/request-password-reset",
+  authLimiter,
   validateMiddleware(passwordResetRequestSchema),
   userController.requestPasswordReset
 );
 router.post(
   "/reset-password",
+  authLimiter,
   validateMiddleware(passwordResetSchema),
   userController.resetPassword
 );

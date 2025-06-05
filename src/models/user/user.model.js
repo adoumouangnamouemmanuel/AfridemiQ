@@ -8,32 +8,64 @@ const USER_ROLES = ["student", "teacher", "admin"];
 // User Schema
 const UserSchema = new Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true, index: true },
-    password: { type: String, required: true },
+    name: {
+      type: String,
+      required: [true, "Le nom est requis"],
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: [true, "L'email est requis"],
+      unique: true,
+      lowercase: true,
+      trim: true,
+      index: true,
+      match: [
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        "Veuillez fournir un email valide",
+      ],
+    },
+    password: {
+      type: String,
+      required: [true, "Le mot de passe est requis"],
+      minlength: [8, "Le mot de passe doit contenir au moins 8 caractères"],
+    },
     phoneNumber: {
       type: String,
       validate: {
-        validator: function (v) {
-          return v ? /^\+?[1-9]\d{1,14}$/.test(v) : true;
-        },
-        message: (props) => `${props.value} is not a valid phone number!`,
+        validator: (v) => (v ? /^\+?[1-9]\d{1,14}$/.test(v) : true),
+        message: (props) =>
+          `${props.value} n'est pas un numéro de téléphone valide!`,
       },
       unique: true,
       sparse: true,
+      index: true,
     },
     isPhoneVerified: { type: Boolean, default: false },
     phoneVerificationCode: String,
     phoneVerificationExpires: Date,
     avatar: String,
-    country: { type: String, required: true },
+    country: { type: String, required: [true, "Le pays est requis"] },
     timeZone: String,
     preferredLanguage: String,
     schoolName: String,
     gradeLevel: String,
-    parentEmail: String,
-    role: { type: String, enum: USER_ROLES, default: "student" },
-    createdAt: { type: Date, default: Date.now },
+    parentEmail: {
+      type: String,
+      validate: {
+        validator: (v) =>
+          !v || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v),
+        message: (props) => `${props.value} n'est pas un email valide!`,
+      },
+    },
+    role: {
+      type: String,
+      enum: {
+        values: USER_ROLES,
+        message: "{VALUE} n'est pas un rôle valide",
+      },
+      default: "student",
+    },
     lastLogin: Date,
     isPremium: { type: Boolean, default: false },
     subscription: {
@@ -142,34 +174,70 @@ const UserSchema = new Schema(
         enum: ["public", "friends", "private"],
         default: "public",
       },
-      socialLinks: [{ platform: String, url: String }],
+      socialLinks: [
+        {
+          platform: String,
+          url: {
+            type: String,
+            validate: {
+              validator: (v) =>
+                !v ||
+                /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(
+                  v
+                ),
+              message: (props) => `${props.value} n'est pas une URL valide!`,
+            },
+          },
+        },
+      ],
     },
     onboardingStatusId: {
       type: Schema.Types.ObjectId,
       ref: "OnboardingStatus",
     },
-    resetPasswordToken: String, // Added for password reset
-    resetPasswordExpires: Date, // Added for password reset
-    refreshToken: String, // Added for refresh token
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+    refreshToken: String,
+    tokenVersion: {
+      type: Number,
+      default: 0, // Increment this when user changes password or logs out
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
+
+// Add indexes for frequently queried fields
+UserSchema.index({ "progress.xp": -1 }); // For leaderboards
+UserSchema.index({ lastLogin: -1 }); // For active users
+UserSchema.index({ createdAt: -1 }); // For new users
 
 // Hash password before saving
 UserSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
-    console.log("Hashing password for user:", this.email);
-    this.password = await bcrypt.hash(this.password, 10);
+    try {
+      this.password = await bcrypt.hash(this.password, 10);
+    } catch (error) {
+      return next(error);
+    }
   }
   next();
 });
+
+// Compare password method
+UserSchema.methods.comparePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 // Virtual for fullName
 UserSchema.virtual("fullName").get(function () {
   return this.name;
 });
 
-// Exclude password from JSON output
+// Exclude sensitive fields from JSON output
 UserSchema.set("toJSON", {
   transform: (doc, ret) => {
     delete ret.password;
@@ -178,10 +246,12 @@ UserSchema.set("toJSON", {
     delete ret.resetPasswordToken;
     delete ret.resetPasswordExpires;
     delete ret.refreshToken;
+    delete ret.tokenVersion;
     return ret;
   },
 });
 
 module.exports = {
   User: mongoose.model("User", UserSchema),
+  USER_ROLES,
 };

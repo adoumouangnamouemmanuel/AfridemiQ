@@ -1,5 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const userService = require("../../services/user/user.service");
+const jwt = require("jsonwebtoken");
+const tokenBlacklist = require("../../services/token.blacklist.service");
 
 // Register a new user
 const register = async (req, res) => {
@@ -133,10 +135,33 @@ const getUserById = async (req, res) => {
 
 // Log out user
 const logOut = async (req, res) => {
-  await userService.logOut(req.user.userId); // Changed from _id to userId
-  res.status(StatusCodes.OK).json({
-    message: "Déconnexion réussie",
-  });
+  try {
+    // Get the token from the authorization header
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+
+      // Verify the token to get its expiry
+      const decoded = jwt.decode(token);
+      if (decoded && decoded.exp) {
+        // Add token to blacklist until it expires
+        const expiryMs = decoded.exp * 1000; // Convert to milliseconds
+        tokenBlacklist.addToBlacklist(token, expiryMs);
+      }
+    }
+
+    // Update user's tokenVersion to invalidate all existing tokens
+    await userService.logOut(req.user.userId);
+
+    logger.info(`User logged out: ${req.user.userId}`);
+
+    res.status(StatusCodes.OK).json({
+      message: "Déconnexion réussie",
+    });
+  } catch (error) {
+    logger.error("Logout error", error, { userId: req.user.userId });
+    throw error;
+  }
 };
 
 // Request password reset
