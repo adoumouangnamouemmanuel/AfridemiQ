@@ -1,6 +1,14 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
+// Shared Feedback Subschema
+const FeedbackSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  rating: { type: Number, min: 0, max: 10, required: true },
+  comments: String,
+  createdAt: { type: Date, default: Date.now },
+});
+
 const PeerTutorProfileSchema = new Schema(
   {
     userId: {
