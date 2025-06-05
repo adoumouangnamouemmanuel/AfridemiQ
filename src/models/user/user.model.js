@@ -10,7 +10,7 @@ const UserSchema = new Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, index: true },
-    password: { type: String, required: true }, // Added for authentication
+    password: { type: String, required: true },
     phoneNumber: {
       type: String,
       validate: {
@@ -148,6 +148,9 @@ const UserSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "OnboardingStatus",
     },
+    resetPasswordToken: String, // Added for password reset
+    resetPasswordExpires: Date, // Added for password reset
+    refreshToken: String, // Added for refresh token
   },
   { timestamps: true }
 );
@@ -171,6 +174,9 @@ UserSchema.set("toJSON", {
     delete ret.password;
     delete ret.phoneVerificationCode;
     delete ret.phoneVerificationExpires;
+    delete ret.resetPasswordToken;
+    delete ret.resetPasswordExpires;
+    delete ret.refreshToken;
     return ret;
   },
 });
