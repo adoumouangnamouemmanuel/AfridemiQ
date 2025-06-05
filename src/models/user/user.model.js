@@ -35,20 +35,31 @@ const UserSchema = new Schema(
     lastLogin: Date,
     isPremium: { type: Boolean, default: false },
     subscription: {
-      type: { type: String, enum: ["free", "premium"], required: true },
-      startDate: { type: Date, required: true },
+      type: {
+        type: String,
+        enum: ["free", "premium"],
+        required: true,
+        default: "free",
+      },
+      startDate: { type: Date, required: true, default: Date.now },
       expiresAt: Date,
       paymentStatus: {
         type: String,
         enum: ["active", "pending", "failed"],
         required: true,
+        default: "active",
       },
       trialPeriod: {
         startDate: Date,
         endDate: Date,
       },
       features: [String],
-      accessLevel: { type: String, enum: ["basic", "premium"], required: true },
+      accessLevel: {
+        type: String,
+        enum: ["basic", "premium"],
+        required: true,
+        default: "basic",
+      },
     },
     preferences: {
       notifications: {
@@ -79,6 +90,7 @@ const UserSchema = new Schema(
       learningStyle: {
         type: String,
         enum: ["visual", "auditory", "kinesthetic", "mixed"],
+        default: "mixed",
       },
       motivation: String,
       preferredStudySessionLength: Number,
@@ -106,14 +118,13 @@ const UserSchema = new Schema(
         remainingTopics: Number,
       },
     },
-    analyticsId: { type: Schema.Types.ObjectId, ref: "UserAnalytics" },
-    notes: [{ type: Schema.Types.ObjectId, ref: "Note" }],
-    hintsUsed: [{ type: Schema.Types.ObjectId, ref: "HintUsage" }],
-    bookmarks: [{ type: Schema.Types.ObjectId, ref: "Bookmark" }],
-    friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    tutorId: { type: Schema.Types.ObjectId, ref: "PeerTutorProfile" },
+    analyticsId: { type: Schema.Types.ObjectId, ref: "UserAnalytics", default: null },
+    notes: [{ type: Schema.Types.ObjectId, ref: "Note", default: [] }],
+    hintsUsed: [{ type: Schema.Types.ObjectId, ref: "HintUsage", default: [] }],
+    bookmarks: [{ type: Schema.Types.ObjectId, ref: "Bookmark", default: [] }],
+    friends: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+    tutorId: { type: Schema.Types.ObjectId, ref: "PeerTutorProfile", default: null },
     socialProfile: {
-      userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
       bio: String,
       publicAchievements: [String],
       visibility: {
