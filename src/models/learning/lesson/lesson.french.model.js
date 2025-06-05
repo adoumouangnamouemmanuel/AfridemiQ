@@ -11,9 +11,6 @@ const INTERACTIVE_ELEMENT_TYPES = ["geogebra", "desmos", "video", "quiz"];
 const FrenchLessonSchema = new Schema({
   introduction: {
     text: { type: String, required: true },
-    translations: {
-      text: { fr: String, en: String },
-    },
     videoUrl: {
       type: String,
       match: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
@@ -32,16 +29,8 @@ const FrenchLessonSchema = new Schema({
     questions: [{
       question: String,
       type: { type: String, enum: QUESTION_TYPES },
-      translations: {
-        question: { fr: String, en: String },
-      },
     }],
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      text: { fr: String, en: String },
-      title: { fr: String, en: String },
-      themes: [{ fr: String, en: String }],
-    },
     context: String, // Historical/literary context
     analysisQuizId: { type: Schema.Types.ObjectId, ref: 'Quiz' },
   }],
@@ -50,11 +39,6 @@ const FrenchLessonSchema = new Schema({
     explanation: String,
     examples: [String],
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      rule: { fr: String, en: String },
-      explanation: { fr: String, en: String },
-      examples: [{ fr: String, en: String }],
-    },
     grammarExerciseId: { type: Schema.Types.ObjectId, ref: 'Exercise' },
   }],
   vocabulary: [{
@@ -64,12 +48,6 @@ const FrenchLessonSchema = new Schema({
     examples: [String],
     pronunciation: String,
     synonyms: [String],
-    translations: {
-      word: { fr: String, en: String },
-      definition: { fr: String, en: String },
-      examples: [{ fr: String, en: String }],
-      synonyms: [{ fr: String, en: String }],
-    },
     vocabularyQuizId: { type: Schema.Types.ObjectId, ref: 'Quiz' },
   }],
   writingSkills: [{
@@ -78,17 +56,9 @@ const FrenchLessonSchema = new Schema({
     prompts: [{
       prompt: String,
       instructions: String,
-      translations: {
-        prompt: { fr: String, en: String },
-        instructions: { fr: String, en: String },
-      },
     }],
     modelAnswer: String,
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      guidelines: [{ fr: String, en: String }],
-      modelAnswer: { fr: String, en: String },
-    },
     writingExerciseId: { type: Schema.Types.ObjectId, ref: 'Exercise' },
   }],
   oralSkills: [{
@@ -97,12 +67,6 @@ const FrenchLessonSchema = new Schema({
     sampleDialogue: String,
     pronunciationGuide: String,
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      topic: { fr: String, en: String },
-      instructions: { fr: String, en: String },
-      sampleDialogue: { fr: String, en: String },
-      pronunciationGuide: { fr: String, en: String },
-    },
     oralExerciseId: { type: Schema.Types.ObjectId, ref: 'Exercise' },
   }],
   workedExamples: [{
@@ -111,20 +75,12 @@ const FrenchLessonSchema = new Schema({
     solution: String,
     annotations: [String],
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      problem: { fr: String, en: String },
-      solution: { fr: String, en: String },
-      annotations: [{ fr: String, en: String }],
-    },
   }],
   practiceExercises: [{
     exerciseId: { type: Schema.Types.ObjectId, ref: 'Exercise', required: true },
     type: { type: String, enum: EXERCISE_TYPES, required: true },
     description: String,
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      description: { fr: String, en: String },
-    },
   }],
   interactiveElements: [{
     elementType: { type: String, enum: INTERACTIVE_ELEMENT_TYPES, required: true },
@@ -134,23 +90,14 @@ const FrenchLessonSchema = new Schema({
       required: true,
     },
     instructions: String,
-    translations: {
-      instructions: { fr: String, en: String },
-    },
     offlineAvailable: { type: Boolean, default: false },
   }],
   summary: {
     keyTakeaways: [String],
-    translations: {
-      keyTakeaways: [{ fr: String, en: String }],
-    },
     suggestedNextTopics: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
   },
   prerequisites: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
   learningObjectives: [String],
-  translations: {
-    learningObjectives: [{ fr: String, en: String }],
-  },
   gamification: {
     badges: [String],
     points: { type: Number, default: 0 },

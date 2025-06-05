@@ -12,9 +12,6 @@ const GeographyLessonSchema = new Schema(
   {
     introduction: {
       text: { type: String, required: true },
-      translations: {
-        text: { fr: String, en: String },
-      },
       videoUrl: {
         type: String,
         match:
@@ -30,29 +27,17 @@ const GeographyLessonSchema = new Schema(
       {
         name: { type: String, required: true },
         topic: { type: String, enum: GEOGRAPHY_TOPICS, required: true },
-        translations: {
-          name: { fr: String, en: String },
-          description: { fr: String, en: String },
-        },
         description: { type: String, required: true },
         keyFeatures: [
           {
             feature: String,
             explanation: String,
-            translations: {
-              feature: { fr: String, en: String },
-              explanation: { fr: String, en: String },
-            },
           },
         ],
         examples: [
           {
             example: String,
             explanation: String,
-            translations: {
-              example: { fr: String, en: String },
-              explanation: { fr: String, en: String },
-            },
           },
         ],
         visualAid: {
@@ -90,19 +75,12 @@ const GeographyLessonSchema = new Schema(
           {
             question: String,
             type: { type: String, enum: QUESTION_TYPES },
-            translations: {
-              question: { fr: String, en: String },
-            },
           },
         ],
         difficultyLevel: {
           type: String,
           enum: DIFFICULTY_LEVELS,
           required: true,
-        },
-        translations: {
-          title: { fr: String, en: String },
-          description: { fr: String, en: String },
         },
         mapQuizId: { type: Schema.Types.ObjectId, ref: "Quiz" },
       },
@@ -117,29 +95,18 @@ const GeographyLessonSchema = new Schema(
             variable: String,
             value: String,
             unit: String,
-            translations: {
-              variable: { fr: String, en: String },
-              value: { fr: String, en: String },
-            },
           },
         ],
         questions: [
           {
             question: String,
             type: { type: String, enum: QUESTION_TYPES },
-            translations: {
-              question: { fr: String, en: String },
-            },
           },
         ],
         difficultyLevel: {
           type: String,
           enum: DIFFICULTY_LEVELS,
           required: true,
-        },
-        translations: {
-          title: { fr: String, en: String },
-          context: { fr: String, en: String },
         },
         caseStudyQuizId: { type: Schema.Types.ObjectId, ref: "Quiz" },
       },
@@ -154,11 +121,6 @@ const GeographyLessonSchema = new Schema(
           type: String,
           enum: DIFFICULTY_LEVELS,
           required: true,
-        },
-        translations: {
-          problem: { fr: String, en: String },
-          solution: { fr: String, en: String },
-          annotations: [{ fr: String, en: String }],
         },
       },
     ],
@@ -176,9 +138,6 @@ const GeographyLessonSchema = new Schema(
           enum: DIFFICULTY_LEVELS,
           required: true,
         },
-        translations: {
-          description: { fr: String, en: String },
-        },
       },
     ],
     interactiveElements: [
@@ -195,24 +154,15 @@ const GeographyLessonSchema = new Schema(
           required: true,
         },
         instructions: String,
-        translations: {
-          instructions: { fr: String, en: String },
-        },
         offlineAvailable: { type: Boolean, default: false },
       },
     ],
     summary: {
       keyTakeaways: [String],
-      translations: {
-        keyTakeaways: [{ fr: String, en: String }],
-      },
       suggestedNextTopics: [{ type: Schema.Types.ObjectId, ref: "Topic" }],
     },
     prerequisites: [{ type: Schema.Types.ObjectId, ref: "Topic" }],
     learningObjectives: [String],
-    translations: {
-      learningObjectives: [{ fr: String, en: String }],
-    },
     gamification: {
       badges: [String],
       points: { type: Number, default: 0 },

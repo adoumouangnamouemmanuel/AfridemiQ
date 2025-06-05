@@ -11,9 +11,6 @@ const INTERACTIVE_ELEMENT_TYPES = ["geogebra", "desmos", "video", "quiz"];
 const HistoryLessonSchema = new Schema({
   introduction: {
     text: { type: String, required: true },
-    translations: {
-      text: { fr: String, en: String },
-    },
     videoUrl: {
       type: String,
       match: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
@@ -27,27 +24,15 @@ const HistoryLessonSchema = new Schema({
   concepts: [{
     name: { type: String, required: true },
     topic: { type: String, enum: HISTORY_TOPICS, required: true },
-    translations: {
-      name: { fr: String, en: String },
-      description: { fr: String, en: String },
-    },
     description: { type: String, required: true },
     keyEvents: [{
       event: String,
       date: String,
       significance: String,
-      translations: {
-        event: { fr: String, en: String },
-        significance: { fr: String, en: String },
-      },
     }],
     keyFigures: [{
       name: String,
       role: String,
-      translations: {
-        name: { fr: String, en: String },
-        role: { fr: String, en: String },
-      },
     }],
     visualAid: {
       mediaType: { type: String, enum: MEDIA_TYPES },
@@ -70,16 +55,8 @@ const HistoryLessonSchema = new Schema({
     questions: [{
       question: String,
       type: { type: String, enum: QUESTION_TYPES },
-      translations: {
-        question: { fr: String, en: String },
-      },
     }],
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      title: { fr: String, en: String },
-      excerpt: { fr: String, en: String },
-      context: { fr: String, en: String },
-    },
     sourceQuizId: { type: Schema.Types.ObjectId, ref: 'Quiz' },
   }],
   timeline: [{
@@ -90,15 +67,8 @@ const HistoryLessonSchema = new Schema({
       event: String,
       date: String,
       description: String,
-      translations: {
-        event: { fr: String, en: String },
-        description: { fr: String, en: String },
-      },
     }],
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      period: { fr: String, en: String },
-    },
     timelineExerciseId: { type: Schema.Types.ObjectId, ref: 'Exercise' },
   }],
   workedExamples: [{
@@ -107,20 +77,12 @@ const HistoryLessonSchema = new Schema({
     solution: String,
     annotations: [String],
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      problem: { fr: String, en: String },
-      solution: { fr: String, en: String },
-      annotations: [{ fr: String, en: String }],
-    },
   }],
   practiceExercises: [{
     exerciseId: { type: Schema.Types.ObjectId, ref: 'Exercise', required: true },
     type: { type: String, enum: EXERCISE_TYPES, required: true },
     description: String,
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      description: { fr: String, en: String },
-    },
   }],
   interactiveElements: [{
     elementType: { type: String, enum: INTERACTIVE_ELEMENT_TYPES, required: true },
@@ -130,23 +92,14 @@ const HistoryLessonSchema = new Schema({
       required: true,
     },
     instructions: String,
-    translations: {
-      instructions: [{ fr: String, en: String }],
-    },
     offlineAvailable: { type: Boolean, default: false },
   }],
   summary: {
     keyTakeaways: [String],
-    translations: {
-      keyTakeaways: [{ fr: String, en: String }],
-    },
     suggestedNextTopics: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
   },
   prerequisites: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
   learningObjectives: [String],
-  translations: {
-    learningObjectives: [{ fr: String, en: String }],
-  },
   gamification: {
     badges: [String],
     points: { type: Number, default: 0 },

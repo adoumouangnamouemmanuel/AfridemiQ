@@ -12,9 +12,6 @@ const PhilosophyLessonSchema = new Schema(
   {
     introduction: {
       text: { type: String, required: true },
-      translations: {
-        text: { fr: String, en: String },
-      },
       videoUrl: {
         type: String,
         match:
@@ -30,19 +27,11 @@ const PhilosophyLessonSchema = new Schema(
       {
         name: { type: String, required: true },
         topic: { type: String, enum: PHILOSOPHY_TOPICS, required: true },
-        translations: {
-          name: { fr: String, en: String },
-          description: { fr: String, en: String },
-        },
         description: { type: String, required: true },
         keyThinkers: [
           {
             name: String,
             contribution: String,
-            translations: {
-              name: { fr: String, en: String },
-              contribution: { fr: String, en: String },
-            },
           },
         ],
         arguments: [
@@ -50,11 +39,6 @@ const PhilosophyLessonSchema = new Schema(
             premise: String,
             conclusion: String,
             critique: String,
-            translations: {
-              premise: { fr: String, en: String },
-              conclusion: { fr: String, en: String },
-              critique: { fr: String, en: String },
-            },
           },
         ],
         visualAid: {
@@ -84,20 +68,12 @@ const PhilosophyLessonSchema = new Schema(
           {
             question: String,
             type: { type: String, enum: QUESTION_TYPES },
-            translations: {
-              question: { fr: String, en: String },
-            },
           },
         ],
         difficultyLevel: {
           type: String,
           enum: DIFFICULTY_LEVELS,
           required: true,
-        },
-        translations: {
-          title: { fr: String, en: String },
-          excerpt: { fr: String, en: String },
-          context: { fr: String, en: String },
         },
         textQuizId: { type: Schema.Types.ObjectId, ref: "Quiz" },
       },
@@ -112,11 +88,6 @@ const PhilosophyLessonSchema = new Schema(
           type: String,
           enum: DIFFICULTY_LEVELS,
           required: true,
-        },
-        translations: {
-          problem: { fr: String, en: String },
-          solution: { fr: String, en: String },
-          annotations: [{ fr: String, en: String }],
         },
       },
     ],
@@ -134,9 +105,6 @@ const PhilosophyLessonSchema = new Schema(
           enum: DIFFICULTY_LEVELS,
           required: true,
         },
-        translations: {
-          description: { fr: String, en: String },
-        },
       },
     ],
     interactiveElements: [
@@ -153,24 +121,15 @@ const PhilosophyLessonSchema = new Schema(
           required: true,
         },
         instructions: String,
-        translations: {
-          instructions: { fr: String, en: String },
-        },
         offlineAvailable: { type: Boolean, default: false },
       },
     ],
     summary: {
       keyTakeaways: [String],
-      translations: {
-        keyTakeaways: [{ fr: String, en: String }],
-      },
       suggestedNextTopics: [{ type: Schema.Types.ObjectId, ref: "Topic" }],
     },
     prerequisites: [{ type: Schema.Types.ObjectId, ref: "Topic" }],
     learningObjectives: [String],
-    translations: {
-      learningObjectives: [{ fr: String, en: String }],
-    },
     gamification: {
       badges: [String],
       points: { type: Number, default: 0 },

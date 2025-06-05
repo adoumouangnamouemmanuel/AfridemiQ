@@ -6,10 +6,6 @@ const DIFFICULTY_LEVELS = ['beginner', 'intermediate', 'advanced'];
 const TopicSchema = new Schema(
   {
     name: { type: String, required: true },
-    translations: {
-      name: { fr: String, en: String },
-      description: { fr: String, en: String },
-    },
     subjectId: {
       type: Schema.Types.ObjectId,
       ref: "Subject",

@@ -9,9 +9,6 @@ const INTERACTIVE_ELEMENT_TYPES = ["geogebra", "desmos", "video", "quiz"];
 const MathLessonSchema = new Schema({
   introduction: {
     text: { type: String, required: true },
-    translations: {
-      text: { fr: String, en: String },
-    },
     videoUrl: {
       type: String,
       match: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
@@ -24,11 +21,6 @@ const MathLessonSchema = new Schema({
   },
   concepts: [{
     name: { type: String, required: true },
-    translations: {
-      name: { fr: String, en: String },
-      definition: { fr: String, en: String },
-      explanation: { fr: String, en: String },
-    },
     definition: { type: String, required: true },
     explanation: String,
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
@@ -36,19 +28,11 @@ const MathLessonSchema = new Schema({
       expression: { type: String, required: true },
       explanation: String,
       steps: [String],
-      translations: {
-        explanation: { fr: String, en: String },
-        steps: [{ fr: String, en: String }],
-      },
     }],
     formulas: [{
       formula: { type: String, required: true },
       useCase: String,
       derivationSteps: [String],
-      translations: {
-        useCase: { fr: String, en: String },
-        derivationSteps: [{ fr: String, en: String }],
-      },
     }],
     visualAid: {
       mediaType: { type: String, enum: MEDIA_TYPES },
@@ -62,10 +46,6 @@ const MathLessonSchema = new Schema({
   }],
   theorems: [{
     title: { type: String, required: true },
-    translations: {
-      title: { fr: String, en: String },
-      statement: { fr: String, en: String },
-    },
     statement: { type: String, required: true },
     proof: [String],
     diagram: {
@@ -77,29 +57,18 @@ const MathLessonSchema = new Schema({
       altText: String,
     },
     applications: [String],
-    translations: {
-      applications: [{ fr: String, en: String }],
-    },
   }],
   workedExamples: [{
     problem: { type: String, required: true },
     solutionSteps: [String],
     answer: String,
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      problem: { fr: String, en: String },
-      solutionSteps: [{ fr: String, en: String }],
-      answer: { fr: String, en: String },
-    },
   }],
   practiceExercises: [{
     exerciseId: { type: Schema.Types.ObjectId, ref: 'Exercise', required: true },
     type: { type: String, enum: EXERCISE_TYPES, required: true },
     description: String,
     difficultyLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    translations: {
-      description: { fr: String, en: String },
-    },
   }],
   interactiveElements: [{
     elementType: { type: String, enum: INTERACTIVE_ELEMENT_TYPES, required: true },
@@ -109,23 +78,14 @@ const MathLessonSchema = new Schema({
       required: true,
     },
     instructions: String,
-    translations: {
-      instructions: { fr: String, en: String },
-    },
     offlineAvailable: { type: Boolean, default: false },
   }],
   summary: {
     keyTakeaways: [String],
-    translations: {
-      keyTakeaways: [{ fr: String, en: String }],
-    },
     suggestedNextTopics: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
   },
   prerequisites: [{ type: Schema.Types.ObjectId, ref: 'Topic' }],
   learningObjectives: [String],
-  translations: {
-    learningObjectives: [{ fr: String, en: String }],
-  },
   gamification: {
     badges: [String],
     points: { type: Number, default: 0 },

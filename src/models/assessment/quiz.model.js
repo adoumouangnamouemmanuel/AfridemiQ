@@ -4,10 +4,6 @@ const { Schema } = mongoose;
 const QuizSchema = new Schema(
   {
     title: { type: String, required: true },
-    translations: {
-      title: { fr: String, en: String },
-      description: { fr: String, en: String },
-    },
     subjectId: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
     series: String,
     topicIds: [{ type: Schema.Types.ObjectId, ref: "Topic" }],

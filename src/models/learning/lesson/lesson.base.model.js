@@ -19,11 +19,6 @@ const LessonBaseSchema = new Schema(
     title: { type: String, required: true },
     series: String,
     overview: String,
-    translations: {
-      title: { fr: String, en: String },
-      overview: { fr: String, en: String },
-      objectives: [{ fr: String, en: String }],
-    },
     objectives: [String],
     keyPoints: [String],
     duration: { type: Number, required: true },

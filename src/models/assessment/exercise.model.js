@@ -70,11 +70,6 @@ const ExerciseBaseSchema = new Schema(
     series: { type: String, default: "D" },
     topicId: { type: Schema.Types.ObjectId, ref: "Topic", required: true },
     title: { type: String, required: true },
-    translations: {
-      title: { fr: String, en: String },
-      description: { fr: String, en: String },
-      instructions: { fr: String, en: String },
-    },
     description: { type: String, required: true },
     difficulty: { type: String, enum: DIFFICULTY_LEVELS, required: true },
     timeLimit: { type: Number, min: 0 }, // In minutes
@@ -123,9 +118,6 @@ const MathExerciseSchema = new Schema({
         questionType: { type: String, enum: QUESTION_TYPES, required: true },
         variables: [String],
         constraints: [String],
-        translations: {
-          statement: { fr: String, en: String },
-        },
       },
     ],
     formulas: [String],
@@ -136,10 +128,6 @@ const MathExerciseSchema = new Schema({
     explanation: String,
     workingSteps: [String],
     formulasUsed: [String],
-    translations: {
-      explanation: { fr: String, en: String },
-      workingSteps: [{ fr: String, en: String }],
-    },
   },
 });
 
@@ -152,9 +140,6 @@ const PhysicsExerciseSchema = new Schema({
         statement: { type: String, required: true },
         questionType: { type: String, enum: QUESTION_TYPES, required: true },
         variables: [{ name: String, value: String, unit: String }],
-        translations: {
-          statement: { fr: String, en: String },
-        },
       },
     ],
     diagrams: [
@@ -169,10 +154,6 @@ const PhysicsExerciseSchema = new Schema({
     answers: [{ answer: Schema.Types.Mixed, problemIndex: Number }],
     explanation: String,
     calculations: [String],
-    translations: {
-      explanation: { fr: String, en: String },
-      calculations: [{ fr: String, en: String }],
-    },
   },
 });
 
@@ -185,10 +166,6 @@ const ChemistryExerciseSchema = new Schema({
         statement: { type: String, required: true },
         questionType: { type: String, enum: QUESTION_TYPES, required: true },
         reaction: String,
-        translations: {
-          statement: { fr: String, en: String },
-          reaction: { fr: String, en: String },
-        },
       },
     ],
     labSetup: {
@@ -200,10 +177,6 @@ const ChemistryExerciseSchema = new Schema({
     answers: [{ answer: Schema.Types.Mixed, problemIndex: Number }],
     explanation: String,
     balancedEquation: String,
-    translations: {
-      explanation: { fr: String, en: String },
-      balancedEquation: { fr: String, en: String },
-    },
   },
 });
 
@@ -216,9 +189,6 @@ const BiologyExerciseSchema = new Schema({
         statement: { type: String, required: true },
         questionType: { type: String, enum: QUESTION_TYPES, required: true },
         diagram: { url: String, altText: String },
-        translations: {
-          statement: { fr: String, en: String },
-        },
       },
     ],
     caseStudy: {
@@ -230,10 +200,6 @@ const BiologyExerciseSchema = new Schema({
     answers: [{ answer: Schema.Types.Mixed, problemIndex: Number }],
     explanation: String,
     annotations: [String],
-    translations: {
-      explanation: { fr: String, en: String },
-      annotations: [{ fr: String, en: String }],
-    },
   },
 });
 
@@ -247,9 +213,6 @@ const FrenchExerciseSchema = new Schema({
         {
           question: String,
           questionType: { type: String, enum: QUESTION_TYPES },
-          translations: {
-            question: { fr: String, en: String },
-          },
         },
       ],
     },
@@ -257,9 +220,6 @@ const FrenchExerciseSchema = new Schema({
       {
         statement: String,
         questionType: { type: String, enum: QUESTION_TYPES },
-        translations: {
-          statement: { fr: String, en: String },
-        },
       },
     ],
   },
@@ -267,10 +227,6 @@ const FrenchExerciseSchema = new Schema({
     answers: [{ answer: Schema.Types.Mixed, problemIndex: Number }],
     modelAnswer: String,
     guidelines: [String],
-    translations: {
-      modelAnswer: { fr: String, en: String },
-      guidelines: [{ fr: String, en: String }],
-    },
   },
 });
 
@@ -283,10 +239,6 @@ const PhilosophyExerciseSchema = new Schema({
         question: String,
         questionType: { type: String, enum: QUESTION_TYPES },
         textExcerpt: String,
-        translations: {
-          question: { fr: String, en: String },
-          textExcerpt: { fr: String, en: String },
-        },
       },
     ],
     argumentAnalysis: {
@@ -298,10 +250,6 @@ const PhilosophyExerciseSchema = new Schema({
     answers: [{ answer: Schema.Types.Mixed, problemIndex: Number }],
     explanation: String,
     critique: String,
-    translations: {
-      explanation: { fr: String, en: String },
-      critique: { fr: String, en: String },
-    },
   },
 });
 
@@ -315,9 +263,6 @@ const EnglishExerciseSchema = new Schema({
         {
           question: String,
           questionType: { type: String, enum: QUESTION_TYPES },
-          translations: {
-            question: { fr: String, en: String },
-          },
         },
       ],
     },
@@ -325,9 +270,6 @@ const EnglishExerciseSchema = new Schema({
       {
         statement: String,
         questionType: { type: String, enum: QUESTION_TYPES },
-        translations: {
-          statement: { fr: String, en: String },
-        },
       },
     ],
     writingPrompt: {
@@ -339,10 +281,6 @@ const EnglishExerciseSchema = new Schema({
     answers: [{ answer: Schema.Types.Mixed, problemIndex: Number }],
     modelAnswer: String,
     guidelines: [String],
-    translations: {
-      modelAnswer: { fr: String, en: String },
-      guidelines: [{ fr: String, en: String }],
-    },
   },
 });
 
@@ -357,9 +295,6 @@ const HistoryExerciseSchema = new Schema({
         {
           question: String,
           questionType: { type: String, enum: QUESTION_TYPES },
-          translations: {
-            question: { fr: String, en: String },
-          },
         },
       ],
     },
@@ -367,9 +302,6 @@ const HistoryExerciseSchema = new Schema({
       {
         question: String,
         questionType: { type: String, enum: QUESTION_TYPES },
-        translations: {
-          question: { fr: String, en: String },
-        },
       },
     ],
   },
@@ -377,10 +309,6 @@ const HistoryExerciseSchema = new Schema({
     answers: [{ answer: Schema.Types.Mixed, problemIndex: Number }],
     explanation: String,
     annotations: [String],
-    translations: {
-      explanation: { fr: String, en: String },
-      annotations: [{ fr: String, en: String }],
-    },
   },
 });
 
@@ -394,9 +322,6 @@ const GeographyExerciseSchema = new Schema({
         {
           question: String,
           questionType: { type: String, enum: QUESTION_TYPES },
-          translations: {
-            question: { fr: String, en: String },
-          },
         },
       ],
     },
@@ -406,9 +331,6 @@ const GeographyExerciseSchema = new Schema({
         {
           question: String,
           questionType: { type: String, enum: QUESTION_TYPES },
-          translations: {
-            question: { fr: String, en: String },
-          },
         },
       ],
     },
@@ -417,10 +339,6 @@ const GeographyExerciseSchema = new Schema({
     answers: [{ answer: Schema.Types.Mixed, problemIndex: Number }],
     explanation: String,
     annotations: [String],
-    translations: {
-      explanation: { fr: String, en: String },
-      annotations: [{ fr: String, en: String }],
-    },
   },
 });
 
