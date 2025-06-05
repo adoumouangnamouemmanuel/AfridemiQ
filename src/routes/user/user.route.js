@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../../controllers/user/user.controller");
 const authMiddleware = require("../../middlewares/auth.middleware");
-const roleMiddleware = require("../middlewares/role.middleware");
+const roleMiddleware = require("../../middlewares/role.middleware");
 const validateMiddleware = require("../middlewares/validate.middleware");
 const {
   registerSchema,
