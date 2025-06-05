@@ -1,5 +1,5 @@
 // This file defines the Mongoose schemas for various educational exercises
-const { User } = require("../../modesls/index");
+const { User } = require("../../models/index");
 const { generateToken } = require("../../utils/jwt.utils");
 const BadRequestError = require("../../errors/badRequestError");
 const NotFoundError = require("../../errors/notFoundError");
