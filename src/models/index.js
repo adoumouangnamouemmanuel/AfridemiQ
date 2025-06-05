@@ -1,27 +1,26 @@
 // Load and export all models
 
 // User models
-const User = require('./user/user.model');
-const Achievement = require('./user/achievement.model');
-const Dashboard = require('./user/dashboard.model');
-const FeedbackLoop = require('./user/feedback.loop.model');
-const Notification = require('./user/notification.model');
-const Onboarding = require('./user/onboarding.model');
+const User = require("./user/user.model");
+const Achievement = require("./user/achievement.model");
+const Dashboard = require("./user/dashboard.model");
+const FeedbackLoop = require("./user/feedback.loop.model");
+const Notification = require("./user/notification.model");
+const Onboarding = require("./user/onboarding.model");
 const ParentAccess = require("./user/parent.access.model");
 const PeerTutorProfile = require("./user/peer.tutor.profile.model");
-const TutoringSession = require('./user/tutoring.session.model');
+const TutoringSession = require("./user/tutoring.session.model");
 const UserAnalytics = require("./user/user.analytics.model");
 
 // Assessment models
-const Assessment = require('./assessment/assessment.model');
-const Challenge = require('./assessment/challenge.model');
-const Exam = require('./assessment/exam.model');
+const Assessment = require("./assessment/assessment.model");
+const Challenge = require("./assessment/challenge.model");
+const Exam = require("./assessment/exam.model");
 const ExamSchedule = require("./assessment/exam.schedule.model");
 // need to add Exercise model
-const Question = require('./assessment/question.model');
-const Quiz = require('./assessment/quiz.model');
+const Question = require("./assessment/question.model");
+const Quiz = require("./assessment/quiz.model");
 const QuizSession = require("./assessment/quiz.session.model");
-
 
 // results models
 const QuizResult = require("./results/quiz.result.model");
@@ -60,48 +59,48 @@ const PhysicsLesson = require("./learning/lesson/lesson.physics.model");
 
 // Export all models
 module.exports = {
-    User,
-    Achievement,
-    Dashboard,
-    FeedbackLoop,
-    Notification,
-    Onboarding,
-    ParentAccess,
-    PeerTutorProfile,
-    TutoringSession,
-    UserAnalytics,
-    Assessment,
-    Challenge,
-    Exam,
-    ExamSchedule,
-    Question,
-    Quiz,
-    QuizSession,
-    QuizResult,
-    Hint,
-    GamifiedProgress,
-    LeaderboardEntry,
-    Misson,
-    TopicProgress,
-    AdaptiveLearning,
-    Bookmark,
-    CourseContent,
-    Curriculum,
-    LearningPath,
-    Note,
-    Resource,
-    StudyGroup,
-    StudyPlan,
-    Subject,
-    Topic,
-    Lesson,
-    BiologyLesson,
-    ChemistryLesson,
-    EnglishLesson,
-    FrenchLesson,
-    GeographyLesson,
-    HistoryLesson,
-    MathLesson,
-    PhilosophyLesson,
-    PhysicsLesson
+  User,
+  Achievement,
+  Dashboard,
+  FeedbackLoop,
+  Notification,
+  Onboarding,
+  ParentAccess,
+  PeerTutorProfile,
+  TutoringSession,
+  UserAnalytics,
+  Assessment,
+  Challenge,
+  Exam,
+  ExamSchedule,
+  Question,
+  Quiz,
+  QuizSession,
+  QuizResult,
+  Hint,
+  GamifiedProgress,
+  LeaderboardEntry,
+  Misson,
+  TopicProgress,
+  AdaptiveLearning,
+  Bookmark,
+  CourseContent,
+  Curriculum,
+  LearningPath,
+  Note,
+  Resource,
+  StudyGroup,
+  StudyPlan,
+  Subject,
+  Topic,
+  Lesson,
+  BiologyLesson,
+  ChemistryLesson,
+  EnglishLesson,
+  FrenchLesson,
+  GeographyLesson,
+  HistoryLesson,
+  MathLesson,
+  PhilosophyLesson,
+  PhysicsLesson,
 };
