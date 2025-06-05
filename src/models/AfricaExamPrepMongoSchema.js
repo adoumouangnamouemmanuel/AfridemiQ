@@ -3423,7 +3423,7 @@ const AdaptiveLearningSchema = new Schema(
       unique: true,
     },
     currentLevel: { type: String, enum: DIFFICULTY_LEVELS, required: true },
-    series: String,
+    series: [String],
     adjustmentRules: [
       {
         metric: { type: String, enum: ["score", "timeSpent", "accuracy"] },
