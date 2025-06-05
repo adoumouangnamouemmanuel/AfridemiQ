@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
+// Shared constants
+const DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
+
 const RESOURCE_TYPES = [
   "document",
   "video",
