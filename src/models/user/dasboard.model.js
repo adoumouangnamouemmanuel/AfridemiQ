@@ -12,7 +12,7 @@ const DashboardSchema = new Schema(
     upcomingExams: [
       {
         examId: { type: Schema.Types.ObjectId, ref: "Exam" },
-        series: String,
+        series: [String],
         date: Date,
       },
     ],
