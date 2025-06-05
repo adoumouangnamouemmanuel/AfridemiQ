@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 const { Schema } = mongoose;
 
 // Shared constants
@@ -9,6 +10,7 @@ const UserSchema = new Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, index: true },
+    password: { type: String, required: true }, // Added for authentication
     phoneNumber: {
       type: String,
       validate: {
@@ -24,7 +26,7 @@ const UserSchema = new Schema(
     phoneVerificationCode: String,
     phoneVerificationExpires: Date,
     avatar: String,
-    country: { type: String, required: true }, // Required for consistency with Country model
+    country: { type: String, required: true },
     timeZone: String,
     preferredLanguage: String,
     schoolName: String,
@@ -118,12 +120,20 @@ const UserSchema = new Schema(
         remainingTopics: Number,
       },
     },
-    analyticsId: { type: Schema.Types.ObjectId, ref: "UserAnalytics", default: null },
+    analyticsId: {
+      type: Schema.Types.ObjectId,
+      ref: "UserAnalytics",
+      default: null,
+    },
     notes: [{ type: Schema.Types.ObjectId, ref: "Note", default: [] }],
     hintsUsed: [{ type: Schema.Types.ObjectId, ref: "HintUsage", default: [] }],
     bookmarks: [{ type: Schema.Types.ObjectId, ref: "Bookmark", default: [] }],
     friends: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
-    tutorId: { type: Schema.Types.ObjectId, ref: "PeerTutorProfile", default: null },
+    tutorId: {
+      type: Schema.Types.ObjectId,
+      ref: "PeerTutorProfile",
+      default: null,
+    },
     socialProfile: {
       bio: String,
       publicAchievements: [String],
@@ -142,12 +152,29 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
+// Hash password before saving
+UserSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
+
 // Virtual for fullName
 UserSchema.virtual("fullName").get(function () {
   return this.name;
 });
 
-// Model
+// Exclude password from JSON output
+UserSchema.set("toJSON", {
+  transform: (doc, ret) => {
+    delete ret.password;
+    delete ret.phoneVerificationCode;
+    delete ret.phoneVerificationExpires;
+    return ret;
+  },
+});
+
 module.exports = {
   User: mongoose.model("User", UserSchema),
 };
