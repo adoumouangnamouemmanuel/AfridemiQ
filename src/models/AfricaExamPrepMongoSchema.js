@@ -2692,7 +2692,7 @@ GeographyLessonSchema.virtual("completionStatus").get(function () {
 // Assessment Schema
 const AssessmentSchema = new Schema(
   {
-    type: { type: String, enum: ["quiz", "exam", "project"], required: true },
+    format: { type: String, enum: ["quiz", "exam", "project"], required: true },
     title: { type: String, required: true },
     description: { type: String, required: true },
     questionIds: [{ type: Schema.Types.ObjectId, ref: "Question" }],
