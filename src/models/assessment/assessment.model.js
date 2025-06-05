@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 // Assessment Schema
 const AssessmentSchema = new Schema(
   {
-    type: { type: String, enum: ["quiz", "exam", "project"], required: true },
+    type: { type: String, enum: ["quiz", "exam", "project"], required: true, default: "quiz" },
     title: { type: String, required: true },
     description: { type: String, required: true },
     questionIds: [{ type: Schema.Types.ObjectId, ref: "Question" }],

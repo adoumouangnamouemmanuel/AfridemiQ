@@ -426,7 +426,9 @@ const TopicProgressSchema = new Schema(
 
 const CourseContentSchema = new Schema(
   {
+    examId: [{ type: Schema.Types.ObjectId, ref: "Exam", required: true }],
     subjectId: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
+    topicId: [{ type: Schema.Types.ObjectId, ref: "Topic", required: true }],
     series: String,
     title: { type: String, required: true },
     description: { type: String, required: true },
@@ -440,22 +442,7 @@ const CourseContentSchema = new Schema(
         series: String,
         lessons: [{ type: Schema.Types.ObjectId, ref: "Lesson" }],
         exerciseIds: [{ type: Schema.Types.ObjectId, ref: "Exercise" }],
-        assessment: {
-          id: String,
-          type: { type: String, enum: ["quiz", "exam", "project"] },
-          title: String,
-          description: String,
-          questionIds: [{ type: Schema.Types.ObjectId, ref: "Question" }],
-          passingScore: Number,
-          timeLimit: Number,
-          attempts: Number,
-          feedback: {
-            immediate: Boolean,
-            detailed: Boolean,
-            solutions: Boolean,
-          },
-          premiumOnly: Boolean,
-        },
+        assessment: { type: Schema.Types.ObjectId, ref: "Assessment", default: null },
         progressTracking: {
           completedLessons: Number,
           totalLessons: Number,
