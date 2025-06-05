@@ -7,7 +7,7 @@ const SubjectSchema = new Schema(
     icon: { type: String, required: true },
     color: { type: String, required: true },
     description: { type: String, required: true },
-    examIds: [{ type: Schema.Types.ObjectId, ref: "Exam" }],
+    examIds: [{ type: Schema.Types.ObjectId, ref: "Exam", default: [] }],
     series: [String],
   },
   { timestamps: true, indexes: [{ key: { name: 1, series: 1 } }] }
