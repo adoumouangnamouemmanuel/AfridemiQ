@@ -284,7 +284,7 @@ const AchievementSchema = new Schema(
     earnedDate: Date,
     progress: { type: Number, default: 0 },
     target: { type: Number, required: true },
-    subjectId: { type: Schema.Types.ObjectId, ref: "Subject" },
+    subjectId: { type: Schema.Types.ObjectId, ref: "Subject", default: null },
     series: String,
   },
   { timestamps: true }
