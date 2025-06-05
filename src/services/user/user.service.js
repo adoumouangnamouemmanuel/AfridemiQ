@@ -3,7 +3,7 @@ const { User } = require("../../modesls/index");
 const { generateToken } = require("../utils/jwt.utils");
 const BadRequestError = require("../../errors/badRequestError");
 const NotFoundError = require("../errors/notFoundError");
-const UnauthorizedError = require("../errors/unauthorizedError");
+const UnauthorizedError = require("../../errors/unauthorizedError")
 const ConflictError = require("../errors/conflictError");
 
 // Register a new user
