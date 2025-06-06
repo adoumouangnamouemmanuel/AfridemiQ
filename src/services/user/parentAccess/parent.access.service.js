@@ -1,5 +1,5 @@
 const { ParentAccess } = require("../../../models/user/parent.access.model");
-const { User } = require("../../../models/user.model");
+const { User } = require("../../../models/user/user.model");
 const createLogger = require("../../logging.service");
 const crypto = require("crypto");
 
