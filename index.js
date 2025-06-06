@@ -3,18 +3,29 @@ const mongoose = require("mongoose");
 const helmet = require("helmet");
 const cors = require("cors");
 const compression = require("compression");
+
+// user routes
 const userRoutes = require("./src/routes/user/user.route");
 const countryRoutes = require("./src/routes/user/country.route");
-const subjectRoutes = require("./src/routes/learning/subject.route");
-const curriculumRoutes = require("./src/routes/learning/curriculum.route");
-const examRoutes = require("./src/routes/assessment/exam.route");
-const topicRoutes = require("./src/routes/learning/topic.route");
-const courseContentRoutes = require("./src/routes/learning/course.content.route");
-const resourceRoutes = require("./src/routes/learning/resource.route");
 const userAnalyticsRoutes = require("./src/routes/user/user.analytics.route");
 const achievementRoutes = require("./src/routes/user/achievement.route");
 const dashboardRoutes = require("./src/routes/user/dashboard.route");
 const onboardingStatusRoutes = require("./src/routes/user/onboarding.status.route");
+
+// Learning routes
+const subjectRoutes = require("./src/routes/learning/subject.route");
+const curriculumRoutes = require("./src/routes/learning/curriculum.route");
+const topicRoutes = require("./src/routes/learning/topic.route");
+const courseContentRoutes = require("./src/routes/learning/course.content.route");
+const resourceRoutes = require("./src/routes/learning/resource.route");
+
+
+// assessment routes
+const examRoutes = require("./src/routes/assessment/exam.route");
+
+// Progress routes
+const gamifiedProgressRoutes = require("./src/routes/progress/gamified.progress.route");
+
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const dotenv = require("dotenv");
 
@@ -98,6 +109,7 @@ app.use("/api/resources", resourceRoutes);
 app.use("/api/achievements", achievementRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/onboarding-status", onboardingStatusRoutes);
+app.use("/api/progress/gamified", gamifiedProgressRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
