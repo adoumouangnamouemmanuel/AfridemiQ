@@ -1,5 +1,5 @@
-const mongoose = require("mongoose")
-const { Schema } = mongoose
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
 // Subject Schema with enhanced features
 const SubjectSchema = new Schema(
@@ -26,7 +26,8 @@ const SubjectSchema = new Schema(
       required: [true, "La couleur est requise"],
       validate: {
         validator: (v) => /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(v),
-        message: (props) => `${props.value} n'est pas un code couleur hexadécimal valide!`,
+        message: (props) =>
+          `${props.value} n'est pas un code couleur hexadécimal valide!`,
       },
     },
     description: {
@@ -37,7 +38,10 @@ const SubjectSchema = new Schema(
     },
     longDescription: {
       type: String,
-      maxlength: [2000, "La description longue ne peut pas dépasser 2000 caractères"],
+      maxlength: [
+        2000,
+        "La description longue ne peut pas dépasser 2000 caractères",
+      ],
     },
     examIds: [
       {
@@ -57,7 +61,15 @@ const SubjectSchema = new Schema(
     },
     category: {
       type: String,
-      enum: ["sciences", "litterature", "langues", "mathematiques", "sciences-sociales", "arts", "technologie"],
+      enum: [
+        "sciences",
+        "litterature",
+        "langues",
+        "mathematiques",
+        "sciences-sociales",
+        "arts",
+        "technologie",
+      ],
       required: true,
       index: true,
     },
@@ -126,13 +138,17 @@ const SubjectSchema = new Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
-)
+  }
+);
 
 // Compound indexes for performance
-SubjectSchema.index({ name: 1, series: 1 }, { unique: true })
-SubjectSchema.index({ category: 1, difficulty: 1 })
-SubjectSchema.index({ createdAt: -1 })
+SubjectSchema.index({ name: 1, series: 1 }, { unique: true });
+SubjectSchema.index({ category: 1, difficulty: 1 });
+SubjectSchema.index({ popularity: -1 });
+SubjectSchema.index({ "rating.average": -1 });
+SubjectSchema.index({ series: 1, category: 1 });
+SubjectSchema.index({ tags: 1 });
+SubjectSchema.index({ keywords: 1 });
 
 // Text index for search
 SubjectSchema.index({
@@ -141,29 +157,29 @@ SubjectSchema.index({
   longDescription: "text",
   tags: "text",
   keywords: "text",
-})
+});
 
 // Virtual fields
 SubjectSchema.virtual("examCount").get(function () {
-  return this.examIds ? this.examIds.length : 0
-})
+  return this.examIds ? this.examIds.length : 0;
+});
 
 SubjectSchema.virtual("formattedSeries").get(function () {
-  return this.series ? this.series.join(", ") : ""
-})
+  return this.series ? this.series.join(", ") : "";
+});
 
 SubjectSchema.virtual("isPopular").get(function () {
-  return this.popularity > 100
-})
+  return this.popularity > 100;
+});
 
 SubjectSchema.virtual("difficultyLevel").get(function () {
-  const levels = { facile: 1, moyen: 2, difficile: 3 }
-  return levels[this.difficulty] || 2
-})
+  const levels = { facile: 1, moyen: 2, difficile: 3 };
+  return levels[this.difficulty] || 2;
+});
 
 SubjectSchema.virtual("completionPercentage").get(function () {
-  return Math.round(this.statistics.completionRate * 100)
-})
+  return Math.round(this.statistics.completionRate * 100);
+});
 
 // Pre-save middleware
 SubjectSchema.pre("save", function (next) {
@@ -172,40 +188,40 @@ SubjectSchema.pre("save", function (next) {
     this.slug = this.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
+      .replace(/(^-|-$)/g, "");
   }
 
   // Ensure series array has unique values
   if (this.series) {
-    this.series = [...new Set(this.series)]
+    this.series = [...new Set(this.series)];
   }
 
   // Ensure tags array has unique values
   if (this.tags) {
-    this.tags = [...new Set(this.tags.map((tag) => tag.toLowerCase()))]
+    this.tags = [...new Set(this.tags.map((tag) => tag.toLowerCase()))];
   }
 
   // Update statistics
   if (this.examIds) {
-    this.statistics.totalExams = this.examIds.length
+    this.statistics.totalExams = this.examIds.length;
   }
 
-  next()
-})
+  next();
+});
 
 // Instance methods
 SubjectSchema.methods.incrementPopularity = function (amount = 1) {
-  this.popularity += amount
-  return this.save()
-}
+  this.popularity += amount;
+  return this.save();
+};
 
 SubjectSchema.methods.updateRating = function (newRating) {
-  const currentTotal = this.rating.average * this.rating.count
-  this.rating.count += 1
-  this.rating.average = (currentTotal + newRating) / this.rating.count
-  return this.save()
-}
+  const currentTotal = this.rating.average * this.rating.count;
+  this.rating.count += 1;
+  this.rating.average = (currentTotal + newRating) / this.rating.count;
+  return this.save();
+};
 
-const Subject = mongoose.model("Subject", SubjectSchema)
+const Subject = mongoose.model("Subject", SubjectSchema);
 
-module.exports = { Subject }
+module.exports = { Subject };
