@@ -1,7 +1,7 @@
-const { Topic } = require("../../models/learning/topic.model");
-const { Subject } = require("../../models/learning/subject.model");
-const NotFoundError = require("../../errors/notFoundError");
-const BadRequestError = require("../../errors/badRequestError");
+const { Topic } = require("../../../models/learning/topic.model");
+const { Subject } = require("../../../models/learning/subject.model");
+const NotFoundError = require("../../../errors/notFoundError");
+const BadRequestError = require("../../../errors/badRequestError");
 
 class TopicService {
   // Create a new topic
