@@ -1,6 +1,5 @@
 const { Subject } = require("../../../models/index");
 const createLogger = require("../../logging.service");
-b;
 
 const logger = createLogger("SearchService");
 

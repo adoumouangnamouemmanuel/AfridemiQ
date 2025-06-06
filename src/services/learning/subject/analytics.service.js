@@ -1,4 +1,4 @@
-const { Subject } = require("../../models/subject.model");
+const { Subject } = require("../../../models/index");
 const createLogger = require("../../logging.service");
 
 const logger = createLogger("AnalyticsService");

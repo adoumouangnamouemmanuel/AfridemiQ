@@ -144,12 +144,12 @@ const SubjectSchema = new Schema(
 // Compound indexes for performance
 SubjectSchema.index({ name: 1, series: 1 }, { unique: true });
 SubjectSchema.index({ category: 1, difficulty: 1 });
-SubjectSchema.index({ isActive: 1 });
+// SubjectSchema.index({ isActive: 1 });
 SubjectSchema.index({ popularity: -1 });
 SubjectSchema.index({ "rating.average": -1 });
 SubjectSchema.index({ createdAt: -1 });
 SubjectSchema.index({ series: 1, category: 1 });
-SubjectSchema.index({ tags: 1 });
+// SubjectSchema.index({ tags: 1 });
 SubjectSchema.index({ keywords: 1 });
 
 // Text index for search
