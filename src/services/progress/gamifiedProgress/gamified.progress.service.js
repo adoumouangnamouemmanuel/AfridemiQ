@@ -1,7 +1,7 @@
 const {
   GamifiedProgress,
 } = require("../../../models/progress/gamified.progress.model");
-const createLogger = require("../../services/logging.service");
+const createLogger = require("../../logging.service");
 
 const logger = createLogger("GamifiedProgressService");
 
