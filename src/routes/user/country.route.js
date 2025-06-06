@@ -4,7 +4,7 @@ const countryController = require("../../controllers/user/country.controller");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
 const validateMiddleware = require("../../middlewares/validate.middleware");
-const { apiLimiter } = require("../../middlewares/rate-limit.middleware");
+const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
 const {
   createCountrySchema,
   updateCountrySchema,
