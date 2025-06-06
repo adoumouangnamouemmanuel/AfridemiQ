@@ -53,14 +53,40 @@ const ResourceSchema = new Schema(
       hasAudioDescription: Boolean,
     },
     analytics: {
-      views: Number,
-      downloads: Number,
-      averageRating: Number,
+      views: { type: Number, default: 0 },
+      downloads: { type: Number, default: 0 },
+      averageRating: { type: Number, default: 0 },
       userFeedback: [FeedbackSchema],
     },
   },
   { timestamps: true }
 );
+
+// Indexes for better performance
+ResourceSchema.index({ subjectId: 1, series: 1 });
+ResourceSchema.index({ topicIds: 1 });
+ResourceSchema.index({ examIds: 1 });
+ResourceSchema.index({ format: 1, level: 1 });
+ResourceSchema.index({ "metadata.tags": 1 });
+ResourceSchema.index({ "analytics.averageRating": -1 });
+ResourceSchema.index({ "analytics.views": -1 });
+
+// Virtual fields
+ResourceSchema.virtual("popularity").get(function () {
+  return this.analytics.views + this.analytics.downloads * 2;
+});
+
+ResourceSchema.virtual("ratingCount").get(function () {
+  return this.analytics.userFeedback.length;
+});
+
+ResourceSchema.virtual("isPopular").get(function () {
+  return this.analytics.views > 100 || this.analytics.averageRating > 7;
+});
+
+// Ensure virtual fields are serialized
+ResourceSchema.set("toJSON", { virtuals: true });
+ResourceSchema.set("toObject", { virtuals: true });
 
 module.exports = {
   Resource: mongoose.model("Resource", ResourceSchema),
