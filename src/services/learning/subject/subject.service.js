@@ -1,11 +1,8 @@
-const { Subject } = require("../../../models/index");
+const { Subject } = require("../../../models/learning/subject.model");
 const NotFoundError = require("../../../errors/notFoundError");
 const BadRequestError = require("../../../errors/badRequestError");
 const ConflictError = require("../../../errors/conflictError");
-const createLogger = require("../../logging.service");
-const searchService = require("./search.service");
-const analyticsService = require("./analytics.service");
-const bulkService = require("./bulk.service");
+const createLogger = require("../../../services/logging.service");
 
 const logger = createLogger("SubjectService");
 
@@ -44,11 +41,6 @@ const createSubject = async (subjectData) => {
  */
 const getSubjects = async (query) => {
   try {
-    // Use advanced search service for complex queries
-    if (query.query || query.tags || query.minRating || query.hasExams) {
-      return await searchService.advancedSearch(query);
-    }
-
     // Simple filtering for basic queries
     const {
       page = 1,
@@ -120,13 +112,6 @@ const getSubjectById = async (subjectId, includeRelated = false) => {
     await subject.save();
 
     const result = { subject };
-
-    if (includeRelated) {
-      result.related = await searchService.getRelatedSubjects(subjectId);
-      result.performance = await analyticsService.getSubjectPerformance(
-        subjectId
-      );
-    }
 
     return result;
   } catch (error) {
@@ -320,7 +305,6 @@ const rateSubject = async (subjectId, rating) => {
   }
 };
 
-// Export all services including search, analytics, and bulk operations
 module.exports = {
   createSubject,
   getSubjects,
@@ -330,23 +314,4 @@ module.exports = {
   addExamToSubject,
   removeExamFromSubject,
   rateSubject,
-
-  // Search services
-  advancedSearch: searchService.advancedSearch,
-  getSearchSuggestions: searchService.getSearchSuggestions,
-  getTrendingSearches: searchService.getTrendingSearches,
-  getRelatedSubjects: searchService.getRelatedSubjects,
-
-  // Analytics services
-  getSubjectAnalytics: analyticsService.getSubjectAnalytics,
-  getSubjectPerformance: analyticsService.getSubjectPerformance,
-  getTrendingSubjects: analyticsService.getTrendingSubjects,
-  compareSubjects: analyticsService.compareSubjects,
-
-  // Bulk operations
-  bulkCreateSubjects: bulkService.bulkCreateSubjects,
-  bulkUpdateSubjects: bulkService.bulkUpdateSubjects,
-  bulkDeleteSubjects: bulkService.bulkDeleteSubjects,
-  bulkExportSubjects: bulkService.bulkExportSubjects,
-  bulkImportSubjects: bulkService.bulkImportSubjects,
 };
