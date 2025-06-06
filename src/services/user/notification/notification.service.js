@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const { Notification } = require("../../models/user/notification.model");
-const { createLogger } = require("../../services/logging.service");
+const { Notification } = require("../../../models/user/notification.model");
+const createLogger = require("../../logging.service");
 
 const logger = createLogger("NotificationService");
 
