@@ -16,6 +16,7 @@ const subjects = [
   // === LANGUES ===
   {
     name: "Français",
+    slug: "francais",
     icon: "📘",
     color: "#0000FF",
     description:
@@ -55,6 +56,7 @@ const subjects = [
   },
   {
     name: "Anglais",
+    slug: "anglais",
     icon: "🇬🇧",
     color: "#FF1744",
     description:
@@ -108,6 +110,7 @@ const subjects = [
   },
   {
     name: "Arabe",
+    slug: "arabe",
     icon: "📜",
     color: "#8B008B",
     description:
@@ -148,6 +151,7 @@ const subjects = [
   },
   {
     name: "Portugais",
+    slug: "portugais",
     icon: "🇵🇹",
     color: "#228B22",
     description: "Langue portugaise pour les pays lusophones d'Afrique.",
@@ -180,6 +184,7 @@ const subjects = [
   },
   {
     name: "Kiswahili",
+    slug: "kiswahili",
     icon: "🌍",
     color: "#FF9800",
     description: "Langue swahilie, importante en Afrique de l'Est.",
@@ -212,6 +217,7 @@ const subjects = [
   },
   {
     name: "Afrikaans",
+    slug: "afrikaans",
     icon: "🇿🇦",
     color: "#4CAF50",
     description: "Langue afrikaans, principalement en Afrique du Sud.",
@@ -243,6 +249,7 @@ const subjects = [
   },
   {
     name: "Langues Nationales",
+    slug: "langues-nationales",
     icon: "🗣️",
     color: "#795548",
     description:
@@ -285,6 +292,7 @@ const subjects = [
   // === MATHÉMATIQUES ===
   {
     name: "Mathématiques",
+    slug: "mathematiques",
     icon: "➗",
     color: "#FF0000",
     description: "Algèbre, géométrie, analyse, probabilités et statistiques.",
@@ -324,6 +332,7 @@ const subjects = [
   },
   {
     name: "Mathématiques Appliquées",
+    slug: "mathematiques-appliquees",
     icon: "📊",
     color: "#E91E63",
     description:
@@ -364,6 +373,7 @@ const subjects = [
   // === SCIENCES ===
   {
     name: "Physique-Chimie",
+    slug: "physique-chimie",
     icon: "⚗️",
     color: "#008000",
     description:
@@ -404,6 +414,7 @@ const subjects = [
   },
   {
     name: "Sciences de la Vie et de la Terre",
+    slug: "sciences-de-la-vie-et-de-la-terre",
     icon: "🌱",
     color: "#00FF00",
     description:
@@ -444,6 +455,7 @@ const subjects = [
   },
   {
     name: "Biologie",
+    slug: "biologie",
     icon: "🧬",
     color: "#4CAF50",
     description:
@@ -484,6 +496,7 @@ const subjects = [
   },
   {
     name: "Chimie",
+    slug: "chimie",
     icon: "🧪",
     color: "#FF5722",
     description: "Chimie générale, organique, inorganique et analytique.",
@@ -523,6 +536,7 @@ const subjects = [
   },
   {
     name: "Physique",
+    slug: "physique",
     icon: "⚛️",
     color: "#2196F3",
     description:
@@ -563,6 +577,7 @@ const subjects = [
   },
   {
     name: "Sciences Générales",
+    slug: "sciences-generales",
     icon: "🔬",
     color: "#20B2AA",
     description: "Cours intégré de sciences pour les examens généraux.",
@@ -597,6 +612,7 @@ const subjects = [
   // === SCIENCES SOCIALES ===
   {
     name: "Histoire-Géographie",
+    slug: "histoire-geographie",
     icon: "🌍",
     color: "#FFA500",
     description:
@@ -637,6 +653,7 @@ const subjects = [
   },
   {
     name: "Histoire",
+    slug: "histoire",
     icon: "📚",
     color: "#8D6E63",
     description:
@@ -677,6 +694,7 @@ const subjects = [
   },
   {
     name: "Géographie",
+    slug: "geographie",
     icon: "🗺️",
     color: "#4CAF50",
     description: "Géographie physique, humaine, économique et régionale.",
@@ -716,6 +734,7 @@ const subjects = [
   },
   {
     name: "Éducation Civique et Morale",
+    slug: "education-civique-et-morale",
     icon: "⚖️",
     color: "#A52A2A",
     description: "Citoyenneté, institutions, droits et devoirs, éthique.",
@@ -766,6 +785,7 @@ const subjects = [
   },
   {
     name: "Sociologie",
+    slug: "sociologie",
     icon: "👥",
     color: "#9C27B0",
     description: "Étude des sociétés, groupes sociaux et phénomènes sociaux.",
@@ -806,6 +826,7 @@ const subjects = [
   // === ÉCONOMIE ===
   {
     name: "Économie",
+    slug: "economie",
     icon: "💰",
     color: "#FFD700",
     description:
@@ -846,6 +867,7 @@ const subjects = [
   },
   {
     name: "Sciences Économiques et Sociales",
+    slug: "sciences-economiques-et-sociales",
     icon: "📊",
     color: "#4682B4",
     description: "Économie, sociologie, science politique intégrées.",
@@ -885,6 +907,7 @@ const subjects = [
   },
   {
     name: "Comptabilité",
+    slug: "comptabilite",
     icon: "📋",
     color: "#607D8B",
     description:
@@ -925,6 +948,7 @@ const subjects = [
   },
   {
     name: "Commerce",
+    slug: "commerce",
     icon: "🛒",
     color: "#228B22",
     description: "Techniques commerciales, marketing, gestion d'entreprise.",
@@ -966,6 +990,7 @@ const subjects = [
   // === LITTÉRATURE ET PHILOSOPHIE ===
   {
     name: "Philosophie",
+    slug: "philosophie",
     icon: "🤔",
     color: "#800080",
     description:
@@ -1006,6 +1031,7 @@ const subjects = [
   },
   {
     name: "Littérature",
+    slug: "litterature",
     icon: "📖",
     color: "#9C27B0",
     description:
@@ -1048,6 +1074,7 @@ const subjects = [
   // === ARTS ===
   {
     name: "Arts Plastiques",
+    slug: "arts-plastiques",
     icon: "🎨",
     color: "#E91E63",
     description:
@@ -1088,6 +1115,7 @@ const subjects = [
   },
   {
     name: "Musique",
+    slug: "musique",
     icon: "🎵",
     color: "#FF9800",
     description:
@@ -1121,6 +1149,7 @@ const subjects = [
   },
   {
     name: "Éducation Physique et Sportive",
+    slug: "education-physique-et-sportive",
     icon: "🏃",
     color: "#FF4500",
     description: "Activités physiques, sports, santé, développement corporel.",
@@ -1166,6 +1195,7 @@ const subjects = [
   // === TECHNOLOGIE ===
   {
     name: "Technologie",
+    slug: "technologie",
     icon: "🔧",
     color: "#808080",
     description:
@@ -1206,6 +1236,7 @@ const subjects = [
   },
   {
     name: "Informatique",
+    slug: "informatique",
     icon: "💻",
     color: "#00CED1",
     description:
@@ -1246,6 +1277,7 @@ const subjects = [
   },
   {
     name: "Électronique",
+    slug: "electronique",
     icon: "🔌",
     color: "#FF5722",
     description: "Circuits électroniques, composants, systèmes électroniques.",
@@ -1287,6 +1319,7 @@ const subjects = [
   // === MATIÈRES SPÉCIALISÉES ===
   {
     name: "Agriculture",
+    slug: "agriculture",
     icon: "🌾",
     color: "#8BC34A",
     description: "Sciences agricoles, agronomie, élevage, développement rural.",
@@ -1326,6 +1359,7 @@ const subjects = [
   },
   {
     name: "Sciences Islamiques",
+    slug: "sciences-islamiques",
     icon: "☪️",
     color: "#4CAF50",
     description: "Études islamiques, Coran, Hadith, jurisprudence islamique.",
@@ -1365,6 +1399,7 @@ const subjects = [
   },
   {
     name: "Études Religieuses",
+    slug: "etudes-religieuses",
     icon: "✝️",
     color: "#9C27B0",
     description:
@@ -1405,6 +1440,7 @@ const subjects = [
   },
   {
     name: "Santé et Nutrition",
+    slug: "sante-et-nutrition",
     icon: "🏥",
     color: "#F44336",
     description:
@@ -1445,6 +1481,7 @@ const subjects = [
   },
   {
     name: "Environnement et Développement Durable",
+    slug: "environnement-et-developpement-durable",
     icon: "🌿",
     color: "#4CAF50",
     description:
@@ -1485,6 +1522,7 @@ const subjects = [
   },
   {
     name: "Entrepreneuriat",
+    slug: "entrepreneuriat",
     icon: "💼",
     color: "#FF9800",
     description:
