@@ -31,7 +31,7 @@ const DashboardSchema = new Schema(
 );
 
 // Indexes for better performance
-DashboardSchema.index({ userId: 1 });
+// DashboardSchema.index({ userId: 1 });
 DashboardSchema.index({ "upcomingExams.date": 1 });
 DashboardSchema.index({ "recentQuizzes.completedAt": -1 });
 DashboardSchema.index({ streak: -1 });

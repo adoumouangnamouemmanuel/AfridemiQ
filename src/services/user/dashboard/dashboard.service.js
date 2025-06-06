@@ -1,5 +1,5 @@
 const { Dashboard } = require("../../../models/user/dashboard.model");
-const createLogger = require("../../services/logging.service");
+const createLogger  = require("../../logging.service");
 
 const logger = createLogger("DashboardService");
 
