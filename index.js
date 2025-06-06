@@ -13,6 +13,7 @@ const dashboardRoutes = require("./src/routes/user/dashboard.route");
 const onboardingStatusRoutes = require("./src/routes/user/onboarding.status.route");
 const feedbackLoopRoutes = require("./src/routes/user/feedback.loop.route");
 const notificationRoutes = require("./src/routes/user/notification.route");
+const parentAccessRoutes = require("./src/routes/user/parent.access.route");
 
 // Learning routes
 const subjectRoutes = require("./src/routes/learning/subject.route");
@@ -120,6 +121,7 @@ app.use("/api/progress/gamified", gamifiedProgressRoutes);
 app.use("/api/progress/leaderboard", leaderboardEntryRoutes);
 app.use("/api/progress/missions", missionRoutes);
 app.use("/api/progress/topic", topicProgressRoutes);
+app.use("/api/parent-access", parentAccessRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
