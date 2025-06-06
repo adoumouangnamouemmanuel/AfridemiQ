@@ -1,5 +1,5 @@
 const { TopicProgress } = require("../../models/progress/topic.progress.model");
-const createLogger = require("../../logging.service");
+const createLogger = require("../../services/logging.service");
 
 const logger = createLogger("TopicProgressService");
 
