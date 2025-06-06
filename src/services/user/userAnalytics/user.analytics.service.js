@@ -1,447 +1,543 @@
 const { UserAnalytics } = require("../../../models/user/user.analytics.model");
-const { Subject } = require("../../../models/learning/subject.model");
-const NotFoundError = require("../../../errors/notFoundError");
+const createLogger  = require("../../logging.service");
 
-class UserAnalyticsService {
-  // Get or create user analytics
-  async getOrCreateUserAnalytics(userId) {
-    try {
-      let analytics = await UserAnalytics.findOne({ userId })
-        .populate("subjectStats.subjectId", "name code")
-        .populate("mastery.subjectId", "name code");
+const logger = createLogger("UserAnalyticsService");
 
-      if (!analytics) {
-        analytics = new UserAnalytics({
-          userId,
-          dailyStats: [],
-          subjectStats: [],
-          learningPatterns: {
-            preferredStudyTime: "",
-            mostProductiveDays: [],
-            averageSessionLength: 0,
-          },
-          mastery: [],
-          efficiency: {
-            averageResponseTime: 0,
-            accuracyRate: 0,
-            timeSpentPerTopic: 0,
-          },
-          personalizedRecommendations: {
-            weakTopics: [],
-            suggestedStudyPath: [],
-            nextMilestone: "",
-          },
-        });
-        await analytics.save();
-      }
+const getOrCreateUserAnalytics = async (userId) => {
+  try {
+    let analytics = await UserAnalytics.findOne({ userId }).populate(
+      "subjectStats.subjectId mastery.subjectId"
+    );
 
-      return analytics;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Add daily stats
-  async addDailyStats(userId, statsData) {
-    try {
-      const analytics = await this.getOrCreateUserAnalytics(userId);
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      // Check if stats for today already exist
-      const existingStatsIndex = analytics.dailyStats.findIndex(
-        (stat) => stat.date && stat.date.toDateString() === today.toDateString()
-      );
-
-      const newStats = {
-        date: today,
-        studyTime: statsData.studyTime || 0,
-        questionsAnswered: statsData.questionsAnswered || 0,
-        correctAnswers: statsData.correctAnswers || 0,
-        topicsCovered: statsData.topicsCovered || [],
-      };
-
-      if (existingStatsIndex >= 0) {
-        // Update existing stats
-        analytics.dailyStats[existingStatsIndex] = {
-          ...analytics.dailyStats[existingStatsIndex],
-          studyTime:
-            (analytics.dailyStats[existingStatsIndex].studyTime || 0) +
-            newStats.studyTime,
-          questionsAnswered:
-            (analytics.dailyStats[existingStatsIndex].questionsAnswered || 0) +
-            newStats.questionsAnswered,
-          correctAnswers:
-            (analytics.dailyStats[existingStatsIndex].correctAnswers || 0) +
-            newStats.correctAnswers,
-          topicsCovered: [
-            ...new Set([
-              ...analytics.dailyStats[existingStatsIndex].topicsCovered,
-              ...newStats.topicsCovered,
-            ]),
-          ],
-        };
-      } else {
-        analytics.dailyStats.push(newStats);
-      }
-
-      analytics.lastUpdated = new Date();
+    if (!analytics) {
+      analytics = new UserAnalytics({
+        userId,
+        dailyStats: [],
+        subjectStats: [],
+        learningPatterns: {
+          preferredStudyTime: "",
+          mostProductiveDays: [],
+          averageSessionLength: 0,
+        },
+        mastery: [],
+        efficiency: {
+          averageResponseTime: 0,
+          accuracyRate: 0,
+          timeSpentPerTopic: 0,
+        },
+        personalizedRecommendations: {
+          weakTopics: [],
+          suggestedStudyPath: [],
+          nextMilestone: "",
+        },
+      });
       await analytics.save();
-
-      return analytics;
-    } catch (error) {
-      throw error;
+      logger.info(`Created new analytics for user: ${userId}`);
     }
+
+    return analytics;
+  } catch (error) {
+    logger.error("Error getting or creating user analytics:", error);
+    throw error;
   }
+};
 
-  // Update subject stats
-  async updateSubjectStats(userId, subjectId, statsData) {
-    try {
-      // Verify subject exists
-      const subject = await Subject.findById(subjectId);
-      if (!subject) {
-        throw new NotFoundError("Matière non trouvée");
-      }
+const addDailyStats = async (userId, dailyStatsData) => {
+  try {
+    const analytics = await getOrCreateUserAnalytics(userId);
 
-      const analytics = await this.getOrCreateUserAnalytics(userId);
+    // Check if stats for today already exist
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-      const existingStatsIndex = analytics.subjectStats.findIndex(
-        (stat) =>
-          stat.subjectId.toString() === subjectId &&
-          stat.series === statsData.series
-      );
+    const existingStatsIndex = analytics.dailyStats.findIndex((stat) => {
+      const statDate = new Date(stat.date);
+      statDate.setHours(0, 0, 0, 0);
+      return statDate.getTime() === today.getTime();
+    });
 
-      const newStats = {
-        subjectId,
-        series: statsData.series,
-        averageScore: statsData.averageScore,
-        timeSpent: statsData.timeSpent || 0,
+    if (existingStatsIndex !== -1) {
+      // Update existing stats
+      analytics.dailyStats[existingStatsIndex] = {
+        ...analytics.dailyStats[existingStatsIndex],
+        ...dailyStatsData,
+        date: today,
+      };
+    } else {
+      // Add new stats
+      analytics.dailyStats.push({
+        ...dailyStatsData,
+        date: today,
+      });
+    }
+
+    analytics.lastUpdated = new Date();
+    await analytics.save();
+
+    logger.info(`Daily stats added for user: ${userId}`);
+    return analytics;
+  } catch (error) {
+    logger.error("Error adding daily stats:", error);
+    throw error;
+  }
+};
+
+const updateSubjectStats = async (userId, subjectId, subjectStatsData) => {
+  try {
+    const analytics = await getOrCreateUserAnalytics(userId);
+
+    const existingStatsIndex = analytics.subjectStats.findIndex(
+      (stat) => stat.subjectId.toString() === subjectId
+    );
+
+    if (existingStatsIndex !== -1) {
+      // Update existing subject stats
+      analytics.subjectStats[existingStatsIndex] = {
+        ...analytics.subjectStats[existingStatsIndex],
+        ...subjectStatsData,
         lastStudied: new Date(),
       };
-
-      if (existingStatsIndex >= 0) {
-        // Update existing stats
-        analytics.subjectStats[existingStatsIndex] = {
-          ...analytics.subjectStats[existingStatsIndex],
-          ...newStats,
-          timeSpent:
-            (analytics.subjectStats[existingStatsIndex].timeSpent || 0) +
-            newStats.timeSpent,
-        };
-      } else {
-        analytics.subjectStats.push(newStats);
-      }
-
-      analytics.lastUpdated = new Date();
-      await analytics.save();
-
-      return analytics;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Update learning patterns
-  async updateLearningPatterns(userId, patternsData) {
-    try {
-      const analytics = await this.getOrCreateUserAnalytics(userId);
-
-      analytics.learningPatterns = {
-        ...analytics.learningPatterns,
-        ...patternsData,
-      };
-
-      analytics.lastUpdated = new Date();
-      await analytics.save();
-
-      return analytics;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Update mastery levels
-  async updateMastery(userId, subjectId, masteryData) {
-    try {
-      // Verify subject exists
-      const subject = await Subject.findById(subjectId);
-      if (!subject) {
-        throw new NotFoundError("Matière non trouvée");
-      }
-
-      const analytics = await this.getOrCreateUserAnalytics(userId);
-
-      const existingMasteryIndex = analytics.mastery.findIndex(
-        (mastery) =>
-          mastery.subjectId.toString() === subjectId &&
-          mastery.series === masteryData.series
-      );
-
-      const newMastery = {
+    } else {
+      // Add new subject stats
+      analytics.subjectStats.push({
         subjectId,
-        series: masteryData.series,
-        masteryLevel: masteryData.masteryLevel,
+        ...subjectStatsData,
+        lastStudied: new Date(),
+      });
+    }
+
+    analytics.lastUpdated = new Date();
+    await analytics.save();
+
+    logger.info(
+      `Subject stats updated for user: ${userId}, subject: ${subjectId}`
+    );
+    return analytics;
+  } catch (error) {
+    logger.error("Error updating subject stats:", error);
+    throw error;
+  }
+};
+
+const updateLearningPatterns = async (userId, learningPatternsData) => {
+  try {
+    const analytics = await getOrCreateUserAnalytics(userId);
+
+    analytics.learningPatterns = {
+      ...analytics.learningPatterns,
+      ...learningPatternsData,
+    };
+
+    analytics.lastUpdated = new Date();
+    await analytics.save();
+
+    logger.info(`Learning patterns updated for user: ${userId}`);
+    return analytics;
+  } catch (error) {
+    logger.error("Error updating learning patterns:", error);
+    throw error;
+  }
+};
+
+const updateMastery = async (userId, subjectId, masteryData) => {
+  try {
+    const analytics = await getOrCreateUserAnalytics(userId);
+
+    const existingMasteryIndex = analytics.mastery.findIndex(
+      (mastery) => mastery.subjectId.toString() === subjectId
+    );
+
+    if (existingMasteryIndex !== -1) {
+      // Update existing mastery
+      analytics.mastery[existingMasteryIndex] = {
+        ...analytics.mastery[existingMasteryIndex],
+        ...masteryData,
         lastAssessmentDate: new Date(),
-        improvementRate: masteryData.improvementRate || 0,
       };
-
-      if (existingMasteryIndex >= 0) {
-        analytics.mastery[existingMasteryIndex] = newMastery;
-      } else {
-        analytics.mastery.push(newMastery);
-      }
-
-      analytics.lastUpdated = new Date();
-      await analytics.save();
-
-      return analytics;
-    } catch (error) {
-      throw error;
+    } else {
+      // Add new mastery
+      analytics.mastery.push({
+        subjectId,
+        ...masteryData,
+        lastAssessmentDate: new Date(),
+      });
     }
+
+    analytics.lastUpdated = new Date();
+    await analytics.save();
+
+    logger.info(`Mastery updated for user: ${userId}, subject: ${subjectId}`);
+    return analytics;
+  } catch (error) {
+    logger.error("Error updating mastery:", error);
+    throw error;
   }
+};
 
-  // Update efficiency metrics
-  async updateEfficiency(userId, efficiencyData) {
-    try {
-      const analytics = await this.getOrCreateUserAnalytics(userId);
+const updateEfficiency = async (userId, efficiencyData) => {
+  try {
+    const analytics = await getOrCreateUserAnalytics(userId);
 
-      analytics.efficiency = {
-        ...analytics.efficiency,
-        ...efficiencyData,
-      };
+    analytics.efficiency = {
+      ...analytics.efficiency,
+      ...efficiencyData,
+    };
 
-      analytics.lastUpdated = new Date();
-      await analytics.save();
+    analytics.lastUpdated = new Date();
+    await analytics.save();
 
-      return analytics;
-    } catch (error) {
-      throw error;
+    logger.info(`Efficiency updated for user: ${userId}`);
+    return analytics;
+  } catch (error) {
+    logger.error("Error updating efficiency:", error);
+    throw error;
+  }
+};
+
+const generateDashboardData = async (userId) => {
+  try {
+    const analytics = await getOrCreateUserAnalytics(userId);
+
+    // Calculate summary statistics
+    const totalStudyTime = analytics.dailyStats.reduce(
+      (total, stat) => total + (stat.studyTime || 0),
+      0
+    );
+    const totalQuestionsAnswered = analytics.dailyStats.reduce(
+      (total, stat) => total + (stat.questionsAnswered || 0),
+      0
+    );
+    const totalCorrectAnswers = analytics.dailyStats.reduce(
+      (total, stat) => total + (stat.correctAnswers || 0),
+      0
+    );
+
+    const overallAccuracy =
+      totalQuestionsAnswered > 0
+        ? (totalCorrectAnswers / totalQuestionsAnswered) * 100
+        : 0;
+
+    // Get recent activity (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const recentActivity = analytics.dailyStats.filter(
+      (stat) => new Date(stat.date) >= sevenDaysAgo
+    );
+
+    // Get subject performance
+    const subjectPerformance = analytics.subjectStats.map((stat) => ({
+      subjectId: stat.subjectId,
+      series: stat.series,
+      averageScore: stat.averageScore,
+      timeSpent: stat.timeSpent,
+      lastStudied: stat.lastStudied,
+    }));
+
+    // Get mastery levels
+    const masteryLevels = analytics.mastery.map((mastery) => ({
+      subjectId: mastery.subjectId,
+      series: mastery.series,
+      masteryLevel: mastery.masteryLevel,
+      improvementRate: mastery.improvementRate,
+    }));
+
+    const dashboardData = {
+      summary: {
+        totalStudyTime,
+        totalQuestionsAnswered,
+        overallAccuracy: Math.round(overallAccuracy * 100) / 100,
+        averageSessionLength: analytics.learningPatterns.averageSessionLength,
+      },
+      recentActivity,
+      subjectPerformance,
+      masteryLevels,
+      efficiency: analytics.efficiency,
+      recommendations: analytics.personalizedRecommendations,
+    };
+
+    logger.info(`Dashboard data generated for user: ${userId}`);
+    return dashboardData;
+  } catch (error) {
+    logger.error("Error generating dashboard data:", error);
+    throw error;
+  }
+};
+
+const generateDetailedReport = async (userId, options = {}) => {
+  try {
+    const { startDate, endDate } = options;
+    const analytics = await getOrCreateUserAnalytics(userId);
+
+    let filteredDailyStats = analytics.dailyStats;
+
+    // Apply date filters if provided
+    if (startDate || endDate) {
+      filteredDailyStats = analytics.dailyStats.filter((stat) => {
+        const statDate = new Date(stat.date);
+        if (startDate && statDate < new Date(startDate)) return false;
+        if (endDate && statDate > new Date(endDate)) return false;
+        return true;
+      });
     }
+
+    // Calculate detailed statistics
+    const totalStudyTime = filteredDailyStats.reduce(
+      (total, stat) => total + (stat.studyTime || 0),
+      0
+    );
+    const totalQuestionsAnswered = filteredDailyStats.reduce(
+      (total, stat) => total + (stat.questionsAnswered || 0),
+      0
+    );
+    const totalCorrectAnswers = filteredDailyStats.reduce(
+      (total, stat) => total + (stat.correctAnswers || 0),
+      0
+    );
+
+    const averageStudyTime =
+      filteredDailyStats.length > 0
+        ? totalStudyTime / filteredDailyStats.length
+        : 0;
+    const overallAccuracy =
+      totalQuestionsAnswered > 0
+        ? (totalCorrectAnswers / totalQuestionsAnswered) * 100
+        : 0;
+
+    // Calculate trends
+    const studyTimeTrend = calculateTrend(
+      filteredDailyStats.map((stat) => stat.studyTime || 0)
+    );
+    const accuracyTrend = calculateTrend(
+      filteredDailyStats.map((stat) =>
+        stat.questionsAnswered > 0
+          ? (stat.correctAnswers / stat.questionsAnswered) * 100
+          : 0
+      )
+    );
+
+    const report = {
+      period: {
+        startDate:
+          startDate ||
+          (filteredDailyStats.length > 0 ? filteredDailyStats[0].date : null),
+        endDate:
+          endDate ||
+          (filteredDailyStats.length > 0
+            ? filteredDailyStats[filteredDailyStats.length - 1].date
+            : null),
+        totalDays: filteredDailyStats.length,
+      },
+      summary: {
+        totalStudyTime,
+        averageStudyTime: Math.round(averageStudyTime * 100) / 100,
+        totalQuestionsAnswered,
+        totalCorrectAnswers,
+        overallAccuracy: Math.round(overallAccuracy * 100) / 100,
+      },
+      trends: {
+        studyTime: studyTimeTrend,
+        accuracy: accuracyTrend,
+      },
+      dailyBreakdown: filteredDailyStats,
+      subjectPerformance: analytics.subjectStats,
+      masteryProgress: analytics.mastery,
+      learningPatterns: analytics.learningPatterns,
+      efficiency: analytics.efficiency,
+    };
+
+    logger.info(`Detailed report generated for user: ${userId}`);
+    return report;
+  } catch (error) {
+    logger.error("Error generating detailed report:", error);
+    throw error;
   }
+};
 
-  // Generate personalized recommendations
-  async generateRecommendations(userId) {
-    try {
-      const analytics = await this.getOrCreateUserAnalytics(userId);
+const generateRecommendations = async (userId) => {
+  try {
+    const analytics = await getOrCreateUserAnalytics(userId);
 
-      // Analyze weak subjects based on mastery levels
-      const weakSubjects = analytics.mastery
-        .filter((mastery) => mastery.masteryLevel < 60)
-        .map((mastery) => mastery.subjectId.toString());
+    // Analyze weak areas
+    const weakSubjects = analytics.subjectStats
+      .filter((stat) => stat.averageScore < 60)
+      .map((stat) => stat.subjectId);
 
-      // Analyze subjects with low accuracy
-      const lowAccuracySubjects = analytics.subjectStats
-        .filter((stat) => stat.averageScore < 50)
-        .map((stat) => stat.subjectId.toString());
+    // Analyze mastery levels
+    const lowMasterySubjects = analytics.mastery
+      .filter((mastery) => mastery.masteryLevel < 50)
+      .map((mastery) => mastery.subjectId);
 
-      const weakTopics = [
-        ...new Set([...weakSubjects, ...lowAccuracySubjects]),
-      ];
+    // Combine weak areas
+    const allWeakAreas = [...new Set([...weakSubjects, ...lowMasterySubjects])];
 
-      // Generate study path based on mastery levels
-      const suggestedStudyPath = analytics.mastery
-        .sort((a, b) => a.masteryLevel - b.masteryLevel)
-        .slice(0, 5)
-        .map((mastery) => mastery.subjectId.toString());
-
-      // Determine next milestone
-      const averageMastery = analytics.averageMasteryLevel;
-      let nextMilestone = "";
-      if (averageMastery < 25) {
-        nextMilestone = "Atteindre 25% de maîtrise moyenne";
-      } else if (averageMastery < 50) {
-        nextMilestone = "Atteindre 50% de maîtrise moyenne";
-      } else if (averageMastery < 75) {
-        nextMilestone = "Atteindre 75% de maîtrise moyenne";
-      } else {
-        nextMilestone = "Maintenir l'excellence";
-      }
-
-      analytics.personalizedRecommendations = {
-        weakTopics,
-        suggestedStudyPath,
-        nextMilestone,
-      };
-
-      analytics.lastUpdated = new Date();
-      await analytics.save();
-
-      return analytics.personalizedRecommendations;
-    } catch (error) {
-      throw error;
+    // Generate study path recommendations
+    const suggestedStudyPath = [];
+    if (allWeakAreas.length > 0) {
+      suggestedStudyPath.push("Concentrez-vous sur les matières faibles");
+      suggestedStudyPath.push("Augmentez le temps d'étude quotidien");
+      suggestedStudyPath.push("Pratiquez plus d'exercices");
     }
-  }
 
-  // Get dashboard data
-  async getDashboardData(userId) {
-    try {
-      const analytics = await this.getOrCreateUserAnalytics(userId);
-
-      // Calculate recent performance (last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      const recentStats = analytics.dailyStats.filter(
-        (stat) => stat.date >= sevenDaysAgo
-      );
-
-      const recentStudyTime = recentStats.reduce(
-        (total, stat) => total + (stat.studyTime || 0),
-        0
-      );
-      const recentQuestions = recentStats.reduce(
-        (total, stat) => total + (stat.questionsAnswered || 0),
-        0
-      );
-      const recentCorrect = recentStats.reduce(
-        (total, stat) => total + (stat.correctAnswers || 0),
-        0
-      );
-
-      return {
-        totalStudyTime: analytics.totalStudyTime,
-        overallAccuracy: analytics.overallAccuracy,
-        averageMasteryLevel: analytics.averageMasteryLevel,
-        recentPerformance: {
-          studyTime: recentStudyTime,
-          questionsAnswered: recentQuestions,
-          accuracy:
-            recentQuestions > 0 ? (recentCorrect / recentQuestions) * 100 : 0,
-        },
-        subjectStats: analytics.subjectStats,
-        learningPatterns: analytics.learningPatterns,
-        recommendations: analytics.personalizedRecommendations,
-      };
-    } catch (error) {
-      throw error;
+    // Determine next milestone
+    let nextMilestone = "Continuez vos efforts d'apprentissage";
+    if (analytics.efficiency.accuracyRate < 70) {
+      nextMilestone = "Améliorer la précision à 70%";
+    } else if (analytics.efficiency.accuracyRate < 85) {
+      nextMilestone = "Atteindre 85% de précision";
     }
+
+    const recommendations = {
+      weakTopics: allWeakAreas,
+      suggestedStudyPath,
+      nextMilestone,
+      studyTimeRecommendation:
+        analytics.learningPatterns.averageSessionLength < 30
+          ? "Augmentez vos sessions d'étude à au moins 30 minutes"
+          : "Maintenez votre rythme d'étude actuel",
+      focusAreas:
+        allWeakAreas.length > 0
+          ? "Concentrez-vous sur les matières identifiées comme faibles"
+          : "Continuez à maintenir vos performances actuelles",
+    };
+
+    // Update recommendations in analytics
+    analytics.personalizedRecommendations = {
+      weakTopics: allWeakAreas.map((id) => id.toString()),
+      suggestedStudyPath,
+      nextMilestone,
+    };
+
+    analytics.lastUpdated = new Date();
+    await analytics.save();
+
+    logger.info(`Recommendations generated for user: ${userId}`);
+    return recommendations;
+  } catch (error) {
+    logger.error("Error generating recommendations:", error);
+    throw error;
   }
+};
 
-  // Get detailed report
-  async getDetailedReport(userId, startDate, endDate) {
-    try {
-      const analytics = await this.getOrCreateUserAnalytics(userId);
+const getAllUsersAnalytics = async (options = {}) => {
+  try {
+    const { page = 1, limit = 10 } = options;
+    const skip = (page - 1) * limit;
 
-      let filteredStats = analytics.dailyStats;
+    const analytics = await UserAnalytics.find()
+      .populate("userId", "name email")
+      .populate("subjectStats.subjectId", "name")
+      .populate("mastery.subjectId", "name")
+      .skip(skip)
+      .limit(limit)
+      .sort({ lastUpdated: -1 });
 
-      if (startDate || endDate) {
-        filteredStats = analytics.dailyStats.filter((stat) => {
-          const statDate = new Date(stat.date);
-          if (startDate && statDate < new Date(startDate)) return false;
-          if (endDate && statDate > new Date(endDate)) return false;
-          return true;
-        });
-      }
+    const total = await UserAnalytics.countDocuments();
 
-      const totalStudyTime = filteredStats.reduce(
-        (total, stat) => total + (stat.studyTime || 0),
-        0
+    logger.info(`Retrieved ${analytics.length} user analytics records`);
+    return {
+      analytics,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalRecords: total,
+        hasNext: page < Math.ceil(total / limit),
+        hasPrev: page > 1,
+      },
+    };
+  } catch (error) {
+    logger.error("Error getting all users analytics:", error);
+    throw error;
+  }
+};
+
+const getSystemStatistics = async () => {
+  try {
+    const totalUsers = await UserAnalytics.countDocuments();
+
+    // Calculate system-wide statistics
+    const allAnalytics = await UserAnalytics.find();
+
+    let totalStudyTime = 0;
+    let totalQuestionsAnswered = 0;
+    let totalCorrectAnswers = 0;
+    let activeUsers = 0;
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    allAnalytics.forEach((analytics) => {
+      // Check if user was active in last 30 days
+      const recentActivity = analytics.dailyStats.some(
+        (stat) => new Date(stat.date) >= thirtyDaysAgo
       );
-      const totalQuestions = filteredStats.reduce(
-        (total, stat) => total + (stat.questionsAnswered || 0),
-        0
-      );
-      const totalCorrect = filteredStats.reduce(
-        (total, stat) => total + (stat.correctAnswers || 0),
-        0
-      );
+      if (recentActivity) activeUsers++;
 
-      return {
-        period: {
-          startDate: startDate || "Début",
-          endDate: endDate || "Aujourd'hui",
-          totalDays: filteredStats.length,
-        },
-        summary: {
-          totalStudyTime,
-          totalQuestions,
-          totalCorrect,
-          accuracy:
-            totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0,
-        },
-        dailyBreakdown: filteredStats,
-        subjectPerformance: analytics.subjectStats,
-        masteryProgress: analytics.mastery,
-        efficiency: analytics.efficiency,
-        recommendations: analytics.personalizedRecommendations,
-      };
-    } catch (error) {
-      throw error;
-    }
+      // Sum up all statistics
+      analytics.dailyStats.forEach((stat) => {
+        totalStudyTime += stat.studyTime || 0;
+        totalQuestionsAnswered += stat.questionsAnswered || 0;
+        totalCorrectAnswers += stat.correctAnswers || 0;
+      });
+    });
+
+    const averageAccuracy =
+      totalQuestionsAnswered > 0
+        ? (totalCorrectAnswers / totalQuestionsAnswered) * 100
+        : 0;
+    const averageStudyTimePerUser =
+      totalUsers > 0 ? totalStudyTime / totalUsers : 0;
+
+    const statistics = {
+      totalUsers,
+      activeUsers,
+      userEngagement: {
+        activeUserRate: totalUsers > 0 ? (activeUsers / totalUsers) * 100 : 0,
+      },
+      studyMetrics: {
+        totalStudyTime,
+        averageStudyTimePerUser:
+          Math.round(averageStudyTimePerUser * 100) / 100,
+        totalQuestionsAnswered,
+        totalCorrectAnswers,
+        systemWideAccuracy: Math.round(averageAccuracy * 100) / 100,
+      },
+      generatedAt: new Date(),
+    };
+
+    logger.info("System statistics generated");
+    return statistics;
+  } catch (error) {
+    logger.error("Error getting system statistics:", error);
+    throw error;
   }
+};
 
-  // Admin: Get all users analytics
-  async getAllUsersAnalytics(page = 1, limit = 10) {
-    try {
-      const skip = (page - 1) * limit;
+// Helper function to calculate trend
+const calculateTrend = (values) => {
+  if (values.length < 2) return 0;
 
-      const analytics = await UserAnalytics.find()
-        .populate("userId", "name email")
-        .populate("subjectStats.subjectId", "name code")
-        .sort({ lastUpdated: -1 })
-        .skip(skip)
-        .limit(limit);
+  const firstHalf = values.slice(0, Math.floor(values.length / 2));
+  const secondHalf = values.slice(Math.floor(values.length / 2));
 
-      const total = await UserAnalytics.countDocuments();
+  const firstAvg =
+    firstHalf.reduce((sum, val) => sum + val, 0) / firstHalf.length;
+  const secondAvg =
+    secondHalf.reduce((sum, val) => sum + val, 0) / secondHalf.length;
 
-      return {
-        analytics,
-        pagination: {
-          currentPage: page,
-          totalPages: Math.ceil(total / limit),
-          totalItems: total,
-          itemsPerPage: limit,
-        },
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
+  return secondAvg - firstAvg;
+};
 
-  // Admin: Get system statistics
-  async getSystemStatistics() {
-    try {
-      const totalUsers = await UserAnalytics.countDocuments();
-
-      const aggregation = await UserAnalytics.aggregate([
-        {
-          $group: {
-            _id: null,
-            totalStudyTime: { $sum: { $sum: "$dailyStats.studyTime" } },
-            totalQuestions: { $sum: { $sum: "$dailyStats.questionsAnswered" } },
-            totalCorrectAnswers: {
-              $sum: { $sum: "$dailyStats.correctAnswers" },
-            },
-            averageMasteryLevel: { $avg: { $avg: "$mastery.masteryLevel" } },
-          },
-        },
-      ]);
-
-      const stats = aggregation[0] || {
-        totalStudyTime: 0,
-        totalQuestions: 0,
-        totalCorrectAnswers: 0,
-        averageMasteryLevel: 0,
-      };
-
-      return {
-        totalUsers,
-        systemWideStats: {
-          totalStudyTime: stats.totalStudyTime,
-          totalQuestions: stats.totalQuestions,
-          totalCorrectAnswers: stats.totalCorrectAnswers,
-          overallAccuracy:
-            stats.totalQuestions > 0
-              ? (stats.totalCorrectAnswers / stats.totalQuestions) * 100
-              : 0,
-          averageMasteryLevel: stats.averageMasteryLevel || 0,
-        },
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-}
-
-module.exports = new UserAnalyticsService();
+module.exports = {
+  getOrCreateUserAnalytics,
+  addDailyStats,
+  updateSubjectStats,
+  updateLearningPatterns,
+  updateMastery,
+  updateEfficiency,
+  generateDashboardData,
+  generateDetailedReport,
+  generateRecommendations,
+  getAllUsersAnalytics,
+  getSystemStatistics,
+};
