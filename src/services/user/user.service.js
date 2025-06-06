@@ -143,8 +143,11 @@ const addFriend = async (userId, friendId) => {
       throw new BadRequestError("Vous ne pouvez pas vous ajouter vous-même comme ami");
     }
 
-    const user = await User.findById(userId);
-    const friend = await User.findById(friendId);
+    // Check if users exist
+    const [user, friend] = await Promise.all([
+      User.findById(userId),
+      User.findById(friendId)
+    ]);
 
     if (!user || !friend) {
       throw new NotFoundError("Utilisateur ou ami non trouvé");
@@ -163,12 +166,19 @@ const addFriend = async (userId, friendId) => {
       throw new BadRequestError("Impossible d'ajouter cet utilisateur comme ami");
     }
 
-    // Add friend to both users' friend lists
-    user.friends.push(friendId);
-    friend.friends.push(userId);
-    
-    // Save both users
-    await Promise.all([user.save(), friend.save()]);
+    // Update both users' friend lists using atomic operations
+    await Promise.all([
+      User.findByIdAndUpdate(
+        userId,
+        { $addToSet: { friends: friendId } },
+        { new: true }
+      ),
+      User.findByIdAndUpdate(
+        friendId,
+        { $addToSet: { friends: userId } },
+        { new: true }
+      )
+    ]);
 
     // Create notification for the friend
     await notificationService.createNotification({
@@ -185,7 +195,9 @@ const addFriend = async (userId, friendId) => {
     });
 
     logger.info(`L'utilisateur ${userId} a ajouté ${friendId} comme ami`);
-    return user;
+    
+    // Return the updated user
+    return await User.findById(userId);
   } catch (error) {
     logger.error(`Erreur lors de l'ajout d'un ami: ${error.message}`);
     throw error;
@@ -205,8 +217,11 @@ const removeFriend = async (userId, friendId) => {
       throw new BadRequestError("Vous ne pouvez pas vous retirer vous-même comme ami");
     }
 
-    const user = await User.findById(userId);
-    const friend = await User.findById(friendId);
+    // Check if users exist
+    const [user, friend] = await Promise.all([
+      User.findById(userId),
+      User.findById(friendId)
+    ]);
 
     if (!user) {
       throw new NotFoundError("Utilisateur non trouvé");
@@ -216,10 +231,19 @@ const removeFriend = async (userId, friendId) => {
       throw new NotFoundError("Cet utilisateur n'est pas un ami");
     }
 
-    user.friends = user.friends.filter(
-      (f) => f.toString() !== friendId.toString()
-    );
-    await user.save();
+    // Remove from both users' friend lists using atomic operations
+    await Promise.all([
+      User.findByIdAndUpdate(
+        userId,
+        { $pull: { friends: friendId } },
+        { new: true }
+      ),
+      User.findByIdAndUpdate(
+        friendId,
+        { $pull: { friends: userId } },
+        { new: true }
+      )
+    ]);
 
     // Create notification for the removed friend
     if (friend) {
@@ -238,7 +262,7 @@ const removeFriend = async (userId, friendId) => {
     }
 
     logger.info(`L'utilisateur ${userId} a retiré ${friendId} de ses amis`);
-    return user;
+    return await User.findById(userId);
   } catch (error) {
     logger.error(`Erreur lors du retrait d'un ami: ${error.message}`);
     throw error;
@@ -493,9 +517,13 @@ const unblockFriend = async (userId, friendId) => {
       (f) => f.toString() !== friendId.toString()
     );
 
-    // Add back to friends list if they were friends before
+    // Add back to friends list if they were friends before and not already in the list
     if (!user.friends.includes(friendId)) {
       user.friends.push(friendId);
+    }
+    
+    // Only add to friend's list if not already there
+    if (!friend.friends.includes(userId)) {
       friend.friends.push(userId);
     }
 

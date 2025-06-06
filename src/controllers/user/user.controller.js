@@ -211,16 +211,19 @@ const updateSocialProfile = async (req, res) => {
 const blockFriend = async (req, res) => {
   try {
     const { friendId } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.userId;
 
     const user = await userService.blockFriend(userId, friendId);
-    res.json({
-      success: true,
+    res.status(StatusCodes.OK).json({
       message: "Utilisateur bloqué avec succès",
       data: user
     });
   } catch (error) {
-    handleError(res, error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message,
+      status: "error",
+      code: error.name
+    });
   }
 };
 
@@ -228,16 +231,19 @@ const blockFriend = async (req, res) => {
 const unblockFriend = async (req, res) => {
   try {
     const { friendId } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.userId;
 
     const user = await userService.unblockFriend(userId, friendId);
-    res.json({
-      success: true,
+    res.status(StatusCodes.OK).json({
       message: "Utilisateur débloqué avec succès",
       data: user
     });
   } catch (error) {
-    handleError(res, error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message,
+      status: "error",
+      code: error.name
+    });
   }
 };
 
