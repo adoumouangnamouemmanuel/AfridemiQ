@@ -41,9 +41,6 @@ const createSubject = async (subjectData) => {
  */
 const getSubjects = async (query) => {
   try {
-    // Debug: Log the incoming query
-    logger.info("Getting subjects with query:", query);
-
     const {
       page = 1,
       limit = 10,
@@ -55,10 +52,8 @@ const getSubjects = async (query) => {
       sortOrder = "asc",
     } = query;
 
-    // Build filter - only add isActive filter if explicitly provided
     const filter = {};
 
-    // Only filter by isActive if it's explicitly set in the query
     if (isActive !== undefined) {
       filter.isActive = isActive === "true" || isActive === true;
     }
@@ -75,17 +70,6 @@ const getSubjects = async (query) => {
       filter.difficulty = difficulty;
     }
 
-    // Debug: Log the filter being applied
-    logger.info("Filter being applied:", filter);
-
-    // First, let's check total count without any filters
-    const totalInDB = await Subject.countDocuments({});
-    logger.info(`Total subjects in database: ${totalInDB}`);
-
-    // Count with current filter
-    const filteredCount = await Subject.countDocuments(filter);
-    logger.info(`Subjects matching filter: ${filteredCount}`);
-
     const sort = {};
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
@@ -94,8 +78,6 @@ const getSubjects = async (query) => {
       .sort(sort)
       .skip(skip)
       .limit(Number.parseInt(limit));
-
-    logger.info(`Found ${subjects.length} subjects`);
 
     const total = await Subject.countDocuments(filter);
 
@@ -106,12 +88,6 @@ const getSubjects = async (query) => {
         pages: Math.ceil(total / limit),
         total,
         limit: Number.parseInt(limit),
-      },
-      debug: {
-        totalInDB,
-        filteredCount,
-        filter,
-        query,
       },
     };
   } catch (error) {
@@ -361,7 +337,6 @@ const rateSubject = async (subjectId, rating) => {
 module.exports = {
   createSubject,
   getSubjects,
-  getAllSubjectsRaw,
   getSubjectById,
   updateSubject,
   deleteSubject,

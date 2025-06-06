@@ -16,17 +16,19 @@ const {
 // Apply rate limiting to all routes
 router.use(apiLimiter);
 
-// Debug route - get all subjects without any filters
-router.get("/debug/all", subjectController.getAllSubjectsRaw);
+// Public routes - ORDER MATTERS! More specific routes must come before generic ones
+// Series route must come before /:id to avoid being caught as an ID
+router.get("/series/:series", subjectController.getSubjectsBySeries);
 
-// Public routes
+// Main listing route
 router.get(
   "/",
   validateMiddleware(getSubjectsSchema),
   subjectController.getSubjects
 );
+
+// ID route should come last as it's the most generic pattern
 router.get("/:id", subjectController.getSubjectById);
-router.get("/series/:series", subjectController.getSubjectsBySeries);
 
 // Protected routes (require authentication)
 router.use(authMiddleware);

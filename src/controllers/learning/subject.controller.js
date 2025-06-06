@@ -26,27 +26,11 @@ const getSubjects = async (req, res) => {
       message: "Matières récupérées avec succès",
       data: result.subjects,
       pagination: result.pagination,
-      debug: result.debug, // Include debug info temporarily
     });
   } catch (error) {
     logger.error("Error in getSubjects controller", error, {
       query: req.query,
     });
-    throw error;
-  }
-};
-
-// Debug endpoint to get all subjects without filters
-const getAllSubjectsRaw = async (req, res) => {
-  try {
-    const subjects = await subjectService.getAllSubjectsRaw();
-    res.status(StatusCodes.OK).json({
-      message: "Raw subjects retrieved",
-      data: subjects,
-      count: subjects.length,
-    });
-  } catch (error) {
-    logger.error("Error in getAllSubjectsRaw controller", error);
     throw error;
   }
 };
@@ -177,7 +161,6 @@ const getSubjectsBySeries = async (req, res) => {
 module.exports = {
   createSubject,
   getSubjects,
-  getAllSubjectsRaw,
   getSubjectById,
   updateSubject,
   deleteSubject,
