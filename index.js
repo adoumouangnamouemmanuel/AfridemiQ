@@ -7,6 +7,7 @@ const userRoutes = require("./src/routes/user/user.route");
 const countryRoutes = require("./src/routes/user/country.route");
 const subjectRoutes = require("./src/routes/learning/subject.route");
 const curriculumRoutes = require("./src/routes/learning/curriculum.route");
+const examRoutes = require("./src/routes/assessment/exam.route");
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const dotenv = require("dotenv");
 
@@ -40,7 +41,7 @@ if (process.env.NODE_ENV !== "test") {
 
   if (missingEnvVars.length > 0) {
     console.error(
-      `Missing required environment variables: ${missingEnvVars.join(", ")}`
+      `Variables d'environnement manquantes: ${missingEnvVars.join(", ")}`
     );
     process.exit(1);
   }
@@ -55,13 +56,13 @@ if (process.env.NODE_ENV !== "test") {
   mongoose
     .connect(process.env.MONGO_URI, mongoOptions)
     .then(() => {
-      console.info("Connected to MongoDB");
+      console.info("Connecté à MongoDB");
       // Log registered models
       const modelNames = mongoose.modelNames();
-      console.info(`Registered models: ${modelNames.join(", ")}`);
+      console.info(`Modèles enregistrés: ${modelNames.join(", ")}`);
     })
     .catch((err) => {
-      console.error("MongoDB connection error:", err);
+      console.error("Erreur de connexion MongoDB:", err);
       process.exit(1);
     });
 }
@@ -82,10 +83,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/countries", countryRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/curricula", curriculumRoutes);
+app.use("/api/exams", examRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
-  console.warn(`404 - Route not found: ${req.method} ${req.url}`, {
+  console.warn(`404 - Route non trouvée: ${req.method} ${req.url}`, {
     method: req.method,
     url: req.url,
     ip: req.ip,
@@ -109,15 +111,15 @@ if (process.env.NODE_ENV !== "test") {
   process.on("SIGINT", gracefulShutdown);
 
   function gracefulShutdown() {
-    console.info("Shutting down gracefully...");
+    console.info("Arrêt en cours...");
     mongoose.connection
       .close(false)
       .then(() => {
-        console.info("MongoDB connection closed");
+        console.info("Connexion MongoDB fermée");
         process.exit(0);
       })
       .catch((err) => {
-        console.error("Error during shutdown:", err);
+        console.error("Erreur lors de l'arrêt:", err);
         process.exit(1);
       });
   }
@@ -125,7 +127,7 @@ if (process.env.NODE_ENV !== "test") {
   // Start server
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
-    console.info(`Server running on port ${PORT}`, {
+    console.info(`Serveur en cours d'exécution sur le port ${PORT}`, {
       port: PORT,
       environment: process.env.NODE_ENV || "development",
       logLevel: process.env.LOG_LEVEL || "info",

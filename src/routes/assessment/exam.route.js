@@ -1,6 +1,6 @@
 const express = require("express");
 const examController = require("../../controllers/assessment/exam.controller");
-const { validateRequest } = require("../../middlewares/validation.middleware");
+const validateMiddleware = require("../../middlewares/validate.middleware");
 const {
   authenticateToken,
   requireAdmin,
@@ -8,7 +8,6 @@ const {
 const {
   createExamSchema,
   updateExamSchema,
-  getExamsSchema,
   addSeriesToExamSchema,
   addCenterToExamSchema,
   addStatisticsToExamSchema,
@@ -18,11 +17,7 @@ const {
 const router = express.Router();
 
 // Routes publiques
-router.get(
-  "/",
-  validateRequest(getExamsSchema, "query"),
-  examController.getExams
-);
+router.get("/", examController.getExams);
 router.get("/search", examController.searchExams);
 router.get("/stats", examController.getExamStats);
 router.get("/upcoming", examController.getUpcomingExams);
@@ -34,7 +29,7 @@ router.get("/:id", examController.getExamById);
 router.post(
   "/:id/rate",
   authenticateToken,
-  validateRequest(rateExamSchema),
+  validateMiddleware(rateExamSchema),
   examController.rateExam
 );
 router.post(
@@ -48,14 +43,14 @@ router.post(
   "/",
   authenticateToken,
   requireAdmin,
-  validateRequest(createExamSchema),
+  validateMiddleware(createExamSchema),
   examController.createExam
 );
 router.put(
   "/:id",
   authenticateToken,
   requireAdmin,
-  validateRequest(updateExamSchema),
+  validateMiddleware(updateExamSchema),
   examController.updateExam
 );
 router.delete(
@@ -70,7 +65,7 @@ router.post(
   "/:id/series",
   authenticateToken,
   requireAdmin,
-  validateRequest(addSeriesToExamSchema),
+  validateMiddleware(addSeriesToExamSchema),
   examController.addSeriesToExam
 );
 router.delete(
@@ -85,7 +80,7 @@ router.post(
   "/:id/centers",
   authenticateToken,
   requireAdmin,
-  validateRequest(addCenterToExamSchema),
+  validateMiddleware(addCenterToExamSchema),
   examController.addCenterToExam
 );
 
@@ -94,7 +89,7 @@ router.post(
   "/:id/statistics",
   authenticateToken,
   requireAdmin,
-  validateRequest(addStatisticsToExamSchema),
+  validateMiddleware(addStatisticsToExamSchema),
   examController.addStatisticsToExam
 );
 
