@@ -8,7 +8,7 @@ const {
   updateHintUsageSchema,
   getHintUsageSchema,
   bulkDeleteSchema,
-} = require("../../schemas/results/hint.usage.schema");
+} = require("../../schemas/results/hint.schema");
 
 const router = express.Router();
 
