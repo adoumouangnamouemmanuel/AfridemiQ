@@ -26,6 +26,7 @@ const resourceRoutes = require("./src/routes/learning/resource.route");
 // assessment routes
 const examRoutes = require("./src/routes/assessment/exam.route");
 const assessmentRoutes = require("./src/routes/assessment/assessment.route");
+const quizRoutes = require("./src/routes/assessment/quiz.route");
 
 // Progress routes
 const gamifiedProgressRoutes = require("./src/routes/progress/gamified.progress.route");
@@ -124,6 +125,7 @@ app.use("/api/progress/leaderboard", leaderboardEntryRoutes);
 app.use("/api/progress/missions", missionRoutes);
 app.use("/api/progress/topic", topicProgressRoutes);
 app.use("/api/parent-access", parentAccessRoutes);
+app.use("/api/quizzes", quizRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
