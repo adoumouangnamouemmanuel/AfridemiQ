@@ -1,6 +1,6 @@
 const { Assessment } = require("../../../models/assessment/assessment.model");
 const { Question } = require("../../../models/assessment/question.model");
-const { ApiError } = require("../../utils/ApiError"); // to be asked about this import
+const { ApiError } = require("../../../utils/ApiError"); 
 
 class AssessmentService {
   // Create assessment
