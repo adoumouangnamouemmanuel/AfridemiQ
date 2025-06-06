@@ -1,7 +1,9 @@
 const express = require("express");
 const quizController = require("../../controllers/assessment/quiz.controller");
-const { authenticate } = require("../../middlewares/auth.middleware");
-const { validateRequest } = require("../../middlewares/validation.middleware");
+const authMiddleware = require("../../middlewares/auth.middleware");
+// const roleMiddleware = require("../../middlewares/role.middleware");
+const validateMiddleware = require("../../middlewares/validate.middleware");
+// const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
 const {
   createQuizSchema,
   updateQuizSchema,
@@ -15,13 +17,13 @@ const router = express.Router();
 router.get("/popular", quizController.getPopularQuizzes);
 
 // Protected routes
-router.use(authenticate);
+router.use(authMiddleware);
 
 // Quiz CRUD operations
-router.post("/", validateRequest(createQuizSchema), quizController.createQuiz);
+router.post("/", validateMiddleware(createQuizSchema), quizController.createQuiz);
 router.get(
   "/",
-  validateRequest(getQuizzesSchema, "query"),
+  validateMiddleware(getQuizzesSchema, "query"),
   quizController.getAllQuizzes
 );
 router.get("/my-quizzes", quizController.getMyQuizzes);
@@ -29,7 +31,7 @@ router.get("/subject/:subjectId", quizController.getQuizzesBySubject);
 router.get("/:id", quizController.getQuizById);
 router.put(
   "/:id",
-  validateRequest(updateQuizSchema),
+  validateMiddleware(updateQuizSchema),
   quizController.updateQuiz
 );
 router.delete("/:id", quizController.deleteQuiz);
@@ -42,7 +44,7 @@ router.post("/:id/update-analytics", quizController.updateQuizAnalytics);
 // Bulk operations
 router.post(
   "/bulk/update",
-  validateRequest(bulkUpdateQuizzesSchema),
+  validateMiddleware(bulkUpdateQuizzesSchema),
   quizController.bulkUpdateQuizzes
 );
 
