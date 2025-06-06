@@ -207,6 +207,40 @@ const updateSocialProfile = async (req, res) => {
   });
 };
 
+// Block friend
+const blockFriend = async (req, res) => {
+  try {
+    const { friendId } = req.params;
+    const userId = req.user._id;
+
+    const user = await userService.blockFriend(userId, friendId);
+    res.json({
+      success: true,
+      message: "Utilisateur bloqué avec succès",
+      data: user
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// Unblock friend
+const unblockFriend = async (req, res) => {
+  try {
+    const { friendId } = req.params;
+    const userId = req.user._id;
+
+    const user = await userService.unblockFriend(userId, friendId);
+    res.json({
+      success: true,
+      message: "Utilisateur débloqué avec succès",
+      data: user
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -228,4 +262,6 @@ module.exports = {
   refreshToken,
   searchUsers,
   updateSocialProfile,
+  blockFriend,
+  unblockFriend,
 };

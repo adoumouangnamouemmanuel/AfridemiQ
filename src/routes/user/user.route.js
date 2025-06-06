@@ -120,6 +120,12 @@ router.put(
 router.get("/:id", userController.getUserById);
 router.post("/logout", userController.logOut);
 
+// Friend management routes
+router.post("/friends/:friendId", authMiddleware, userController.addFriend);
+router.delete("/friends/:friendId", authMiddleware, userController.removeFriend);
+router.post("/block/:friendId", authMiddleware, userController.blockFriend);
+router.delete("/block/:friendId", authMiddleware, userController.unblockFriend);
+
 // Admin routes
 router.get("/", roleMiddleware(["admin"]), userController.getAllUsers);
 

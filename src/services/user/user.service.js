@@ -405,6 +405,98 @@ const updateSocialProfile = async (
   return user;
 };
 
+// Block friend
+const blockFriend = async (userId, friendId) => {
+  try {
+    // Validate IDs
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(friendId)) {
+      throw new BadRequestError("Format d'ID utilisateur invalide");
+    }
+
+    // Prevent self-blocking
+    if (userId === friendId) {
+      throw new BadRequestError("Vous ne pouvez pas vous bloquer vous-même");
+    }
+
+    const user = await User.findById(userId);
+    const friend = await User.findById(friendId);
+
+    if (!user || !friend) {
+      throw new NotFoundError("Utilisateur non trouvé");
+    }
+
+    // Check if already blocked
+    if (user.blockedUsers.includes(friendId)) {
+      throw new ConflictError("Cet utilisateur est déjà bloqué");
+    }
+
+    // Add to blocked users
+    user.blockedUsers.push(friendId);
+
+    // Remove from friends if they were friends
+    if (user.friends.includes(friendId)) {
+      user.friends = user.friends.filter(
+        (f) => f.toString() !== friendId.toString()
+      );
+    }
+
+    await user.save();
+
+    // Create notification for the blocked user
+    await notificationService.createNotification({
+      userId: friendId,
+      type: "user_blocked",
+      title: "Utilisateur bloqué",
+      message: `${user.name} vous a bloqué`,
+      priority: "high",
+      actionUrl: `/profile/${userId}`,
+      metadata: {
+        blockedById: userId,
+        blockedByName: user.name
+      }
+    });
+
+    logger.info(`L'utilisateur ${userId} a bloqué ${friendId}`);
+    return user;
+  } catch (error) {
+    logger.error(`Erreur lors du blocage d'un utilisateur: ${error.message}`);
+    throw error;
+  }
+};
+
+// Unblock friend
+const unblockFriend = async (userId, friendId) => {
+  try {
+    // Validate IDs
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(friendId)) {
+      throw new BadRequestError("Format d'ID utilisateur invalide");
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new NotFoundError("Utilisateur non trouvé");
+    }
+
+    // Check if user is blocked
+    if (!user.blockedUsers.includes(friendId)) {
+      throw new NotFoundError("Cet utilisateur n'est pas bloqué");
+    }
+
+    // Remove from blocked users
+    user.blockedUsers = user.blockedUsers.filter(
+      (f) => f.toString() !== friendId.toString()
+    );
+
+    await user.save();
+
+    logger.info(`L'utilisateur ${userId} a débloqué ${friendId}`);
+    return user;
+  } catch (error) {
+    logger.error(`Erreur lors du déblocage d'un utilisateur: ${error.message}`);
+    throw error;
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -416,6 +508,8 @@ module.exports = {
   updateProgress,
   addFriend,
   removeFriend,
+  blockFriend,
+  unblockFriend,
   verifyPhone,
   requestPhoneVerification,
   updateSubscription,
