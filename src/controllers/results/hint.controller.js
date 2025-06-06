@@ -1,4 +1,4 @@
-const hintUsageService = require("../../services/results/hint/hint.service");
+const hintUsageService = require("../../services/results/hint.service");
 const { asyncHandler } = require("../../utils/asyncHandler");
 const { ApiError } = require("../../utils/ApiError");
 

@@ -1,7 +1,10 @@
-const { HintUsage } = require("../../../models/results/hint.model");
-const { Question } = require("../../../models/assessment/question.model");
-const { ApiError } = require("../../../utils/ApiError");
-const { ApiResponse } = require("../../../utils/ApiResponse");
+const { HintUsage } = require("../../models/results/hint.model");
+const { Question } = require("../../models/assessment/question.model");
+const { ApiError } = require("../../utils/ApiError");
+const { ApiResponse } = require("../../utils/ApiResponse");
+const createLogger = require("../logging.service");
+
+const logger = createLogger("HintUsageService");
 
 class HintUsageService {
   // Record hint usage
@@ -10,6 +13,7 @@ class HintUsageService {
       // Validate question exists
       const question = await Question.findById(hintData.questionId);
       if (!question) {
+        logger.warn(`Question not found for hint usage: ${hintData.questionId}`);
         throw new ApiError(404, "Question not found");
       }
 
@@ -31,6 +35,7 @@ class HintUsageService {
         if (hintData.pointsDeducted) {
           hintUsage.pointsDeducted += hintData.pointsDeducted;
         }
+        logger.info(`Updated existing hint usage for user ${hintData.userId} and question ${hintData.questionId}`);
       } else {
         // Create new hint usage record
         hintUsage = new HintUsage({
@@ -43,6 +48,7 @@ class HintUsageService {
             difficulty: question.difficulty,
           },
         });
+        logger.info(`Created new hint usage for user ${hintData.userId} and question ${hintData.questionId}`);
       }
 
       await hintUsage.save();
@@ -59,6 +65,7 @@ class HintUsageService {
         "Hint usage recorded successfully"
       );
     } catch (error) {
+      logger.error(`Error recording hint usage for user ${hintData.userId} and question ${hintData.questionId}:`, error);
       if (error instanceof ApiError) throw error;
       if (error.name === "ValidationError") {
         throw new ApiError(
@@ -81,15 +88,18 @@ class HintUsageService {
       ]);
 
       if (!hintUsage) {
+        logger.warn(`Hint usage not found: ${hintUsageId}`);
         throw new ApiError(404, "Hint usage record not found");
       }
 
+      logger.info(`Retrieved hint usage: ${hintUsageId}`);
       return new ApiResponse(
         200,
         hintUsage,
         "Hint usage retrieved successfully"
       );
     } catch (error) {
+      logger.error(`Error retrieving hint usage ${hintUsageId}:`, error);
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, "Failed to retrieve hint usage", error.message);
     }
@@ -141,12 +151,14 @@ class HintUsageService {
         itemsPerPage: Number.parseInt(limit),
       };
 
+      logger.info(`Retrieved ${hintUsages.length} hint usages for user ${userId}`);
       return new ApiResponse(
         200,
         { hintUsages, pagination },
         "Hint usage history retrieved successfully"
       );
     } catch (error) {
+      logger.error(`Error retrieving hint usage history for user ${userId}:`, error);
       throw new ApiError(
         500,
         "Failed to retrieve hint usage history",
@@ -160,6 +172,7 @@ class HintUsageService {
     try {
       const question = await Question.findById(questionId);
       if (!question) {
+        logger.warn(`Question not found for hint stats: ${questionId}`);
         throw new ApiError(404, "Question not found");
       }
 
@@ -191,6 +204,7 @@ class HintUsageService {
         });
       });
 
+      logger.info(`Retrieved hint statistics for question ${questionId}`);
       return new ApiResponse(
         200,
         {
@@ -207,6 +221,7 @@ class HintUsageService {
         "Question hint statistics retrieved successfully"
       );
     } catch (error) {
+      logger.error(`Error retrieving hint statistics for question ${questionId}:`, error);
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         500,
@@ -225,6 +240,7 @@ class HintUsageService {
       );
 
       if (hintUsages.length === 0) {
+        logger.info(`No hint usage found for user ${userId}`);
         return new ApiResponse(
           200,
           {
@@ -275,12 +291,14 @@ class HintUsageService {
         hintTrends: this.calculateHintTrends(hintUsages, 6),
       };
 
+      logger.info(`Retrieved hint analytics for user ${userId}`);
       return new ApiResponse(
         200,
         analytics,
         "User hint analytics retrieved successfully"
       );
     } catch (error) {
+      logger.error(`Error retrieving hint analytics for user ${userId}:`, error);
       throw new ApiError(
         500,
         "Failed to retrieve user hint analytics",
@@ -300,12 +318,14 @@ class HintUsageService {
         select: "question difficulty points steps",
       });
 
+      logger.info(`Found ${populatedQuestions.length} questions needing better hints`);
       return new ApiResponse(
         200,
         populatedQuestions,
         "Questions needing better hints retrieved successfully"
       );
     } catch (error) {
+      logger.error("Error retrieving questions needing better hints:", error);
       throw new ApiError(
         500,
         "Failed to retrieve questions needing better hints",
@@ -331,11 +351,14 @@ class HintUsageService {
       ]);
 
       if (!hintUsage) {
+        logger.warn(`Hint usage not found for update: ${hintUsageId}`);
         throw new ApiError(404, "Hint usage record not found");
       }
 
+      logger.info(`Updated hint usage: ${hintUsageId}`);
       return new ApiResponse(200, hintUsage, "Hint usage updated successfully");
     } catch (error) {
+      logger.error(`Error updating hint usage ${hintUsageId}:`, error);
       if (error instanceof ApiError) throw error;
       if (error.name === "ValidationError") {
         throw new ApiError(
@@ -354,15 +377,18 @@ class HintUsageService {
       const hintUsage = await HintUsage.findByIdAndDelete(hintUsageId);
 
       if (!hintUsage) {
+        logger.warn(`Hint usage not found for deletion: ${hintUsageId}`);
         throw new ApiError(404, "Hint usage record not found");
       }
 
+      logger.info(`Deleted hint usage: ${hintUsageId}`);
       return new ApiResponse(
         200,
         null,
         "Hint usage record deleted successfully"
       );
     } catch (error) {
+      logger.error(`Error deleting hint usage ${hintUsageId}:`, error);
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         500,
@@ -421,12 +447,14 @@ class HintUsageService {
         { $sort: { _id: 1 } },
       ]);
 
+      logger.info(`Retrieved hint usage summary with ${summary.length} records`);
       return new ApiResponse(
         200,
         summary,
         "Hint usage summary retrieved successfully"
       );
     } catch (error) {
+      logger.error("Error retrieving hint usage summary:", error);
       throw new ApiError(
         500,
         "Failed to retrieve hint usage summary",
@@ -479,6 +507,7 @@ class HintUsageService {
         _id: { $in: hintUsageIds },
       });
 
+      logger.info(`Bulk deleted ${result.deletedCount} hint usages`);
       return new ApiResponse(
         200,
         {
@@ -487,6 +516,7 @@ class HintUsageService {
         "Bulk delete completed successfully"
       );
     } catch (error) {
+      logger.error("Error bulk deleting hint usages:", error);
       throw new ApiError(
         500,
         "Failed to bulk delete hint usages",
