@@ -1,7 +1,6 @@
-const { UserAnalytics } = require("../../models/user/userAnalytics.model");
-const { Subject } = require("../../models/learning/subject.model");
+const { UserAnalytics } = require("../../../models/user/user.analytics.model");
+const { Subject } = require("../../../models/learning/subject.model");
 const NotFoundError = require("../../../errors/notFoundError");
-const BadRequestError = require("../../../errors/badRequestError");
 
 class UserAnalyticsService {
   // Get or create user analytics

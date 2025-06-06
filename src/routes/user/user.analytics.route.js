@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const userAnalyticsController = require("../controllers/user/userAnalytics.controller");
+const userAnalyticsController = require("../../controllers/user/user.analytics.controller");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
 const validateMiddleware = require("../../middlewares/validate.middleware");
@@ -11,7 +11,7 @@ const {
   updateLearningPatternsSchema,
   updateMasterySchema,
   updateEfficiencySchema,
-} = require("../schemas/user/userAnalytics.schema");
+} = require("../../schemas/user/user.analytics.schema");
 
 // Apply rate limiting to all routes
 router.use(apiLimiter);

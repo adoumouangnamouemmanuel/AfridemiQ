@@ -9,6 +9,7 @@ const subjectRoutes = require("./src/routes/learning/subject.route");
 const curriculumRoutes = require("./src/routes/learning/curriculum.route");
 const examRoutes = require("./src/routes/assessment/exam.route");
 const topicRoutes = require("./src/routes/learning/topic.route");
+const userAnalyticsRoutes = require("./src/routes/user/user.analytics.route");
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const dotenv = require("dotenv");
 
@@ -86,6 +87,7 @@ app.use("/api/subjects", subjectRoutes);
 app.use("/api/curricula", curriculumRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/topics", topicRoutes);
+app.use("/api/user-analytics", userAnalyticsRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
