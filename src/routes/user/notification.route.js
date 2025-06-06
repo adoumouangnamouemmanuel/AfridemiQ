@@ -16,14 +16,14 @@ router.use(apiLimiter);
 // All routes require authentication
 router.use(authMiddleware);
 
-// User routes
-router.get("/", notificationController.getUserNotifications);
+// User routes - specific routes first
 router.get("/statistics", notificationController.getUserNotificationStats);
-router.get("/:notificationId", notificationController.getNotificationById);
-
-router.put("/:notificationId/read", notificationController.markAsRead);
 router.put("/read-all", notificationController.markAllAsRead);
 
+// User routes - parameterized routes
+router.get("/", notificationController.getUserNotifications);
+router.get("/:notificationId", notificationController.getNotificationById);
+router.put("/:notificationId/read", notificationController.markAsRead);
 router.delete("/:notificationId", notificationController.deleteNotification);
 
 // Admin routes

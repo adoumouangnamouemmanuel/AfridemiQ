@@ -75,6 +75,11 @@ class NotificationService {
   // Get notification by ID
   async getNotificationById(notificationId) {
     try {
+      // Handle special routes
+      if (notificationId === 'read-all') {
+        throw new Error("Invalid notification ID");
+      }
+
       const notification = await Notification.findById(notificationId).populate(
         "userId",
         "name email"
@@ -169,7 +174,7 @@ class NotificationService {
   async getUserNotificationStats(userId) {
     try {
       const stats = await Notification.aggregate([
-        { $match: { userId: mongoose.Types.ObjectId(userId) } },
+        { $match: { userId: new mongoose.Types.ObjectId(userId) } },
         {
           $group: {
             _id: null,
@@ -182,13 +187,9 @@ class NotificationService {
                 priority: "$priority",
               },
             },
-            byPriority: {
-              high: { $sum: { $cond: [{ $eq: ["$priority", "high"] }, 1, 0] } },
-              medium: {
-                $sum: { $cond: [{ $eq: ["$priority", "medium"] }, 1, 0] },
-              },
-              low: { $sum: { $cond: [{ $eq: ["$priority", "low"] }, 1, 0] } },
-            },
+            highPriority: { $sum: { $cond: [{ $eq: ["$priority", "high"] }, 1, 0] } },
+            mediumPriority: { $sum: { $cond: [{ $eq: ["$priority", "medium"] }, 1, 0] } },
+            lowPriority: { $sum: { $cond: [{ $eq: ["$priority", "low"] }, 1, 0] } },
           },
         },
       ]);
@@ -197,7 +198,9 @@ class NotificationService {
         total: 0,
         unread: 0,
         byType: [],
-        byPriority: { high: 0, medium: 0, low: 0 },
+        highPriority: 0,
+        mediumPriority: 0,
+        lowPriority: 0,
       };
 
       // Process type statistics
@@ -210,8 +213,19 @@ class NotificationService {
         if (!item.read) typeStats[item.type].unread++;
       });
 
+      // Format the result
       result.typeStats = typeStats;
+      result.byPriority = {
+        high: result.highPriority,
+        medium: result.mediumPriority,
+        low: result.lowPriority,
+      };
+      
+      // Clean up temporary fields
       delete result.byType;
+      delete result.highPriority;
+      delete result.mediumPriority;
+      delete result.lowPriority;
 
       return result;
     } catch (error) {

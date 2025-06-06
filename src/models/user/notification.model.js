@@ -39,7 +39,7 @@ const NotificationSchema = new Schema(
 NotificationSchema.index({ userId: 1, read: 1 });
 NotificationSchema.index({ userId: 1, type: 1 });
 NotificationSchema.index({ userId: 1, priority: 1 });
-NotificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// NotificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // Virtual fields
 NotificationSchema.virtual("isExpired").get(function () {

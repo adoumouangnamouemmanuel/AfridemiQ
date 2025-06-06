@@ -48,6 +48,13 @@ class NotificationController {
       const { notificationId } = req.params;
       const userId = req.user.userId;
 
+      // Handle special routes
+      if (notificationId === 'read-all') {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          message: "Invalid notification ID",
+        });
+      }
+
       const notification = await notificationService.getNotificationById(
         notificationId
       );

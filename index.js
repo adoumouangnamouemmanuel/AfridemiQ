@@ -12,6 +12,7 @@ const achievementRoutes = require("./src/routes/user/achievement.route");
 const dashboardRoutes = require("./src/routes/user/dashboard.route");
 const onboardingStatusRoutes = require("./src/routes/user/onboarding.status.route");
 const feedbackLoopRoutes = require("./src/routes/user/feedback.loop.route");
+const notificationRoutes = require("./src/routes/user/notification.route");
 
 // Learning routes
 const subjectRoutes = require("./src/routes/learning/subject.route");
@@ -114,6 +115,7 @@ app.use("/api/achievements", achievementRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/onboarding-status", onboardingStatusRoutes);
 app.use("/api/feedback-loop", feedbackLoopRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/progress/gamified", gamifiedProgressRoutes);
 app.use("/api/progress/leaderboard", leaderboardEntryRoutes);
 app.use("/api/progress/missions", missionRoutes);
