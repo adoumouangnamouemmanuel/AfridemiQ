@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
-const resourceService = require("../services/learning/resource/resource.service");
-const createLogger = require("../services/logging.service");
+const resourceService = require("../../services/learning/resource/resource.service");
+const createLogger = require("../../services/logging.service");
 
 const logger = createLogger("ResourceController");
 
