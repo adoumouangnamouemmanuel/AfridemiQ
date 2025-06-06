@@ -1,8 +1,7 @@
 const {
   OnboardingStatus,
 } = require("../../../models/user/onboarding.status.model");
-const createLogger = require("../../services/logging.service");
-
+const createLogger = require("../../logging.service")
 const logger = createLogger("OnboardingStatusService");
 
 // Define the onboarding steps

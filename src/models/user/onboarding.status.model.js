@@ -17,7 +17,7 @@ const OnboardingStatusSchema = new Schema(
 );
 
 // Indexes for better performance
-OnboardingStatusSchema.index({ userId: 1 });
+// OnboardingStatusSchema.index({ userId: 1 });
 OnboardingStatusSchema.index({ currentStep: 1 });
 OnboardingStatusSchema.index({ lastUpdated: -1 });
 
