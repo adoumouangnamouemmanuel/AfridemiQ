@@ -14,6 +14,7 @@ const resourceRoutes = require("./src/routes/learning/resource.route");
 const userAnalyticsRoutes = require("./src/routes/user/user.analytics.route");
 const achievementRoutes = require("./src/routes/user/achievement.route");
 const dashboardRoutes = require("./src/routes/user/dashboard.route");
+const onboardingStatusRoutes = require("./src/routes/user/onboarding.status.route");
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const dotenv = require("dotenv");
 
@@ -96,6 +97,7 @@ app.use("/api/course-contents", courseContentRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/achievements", achievementRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/onboarding-status", onboardingStatusRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
