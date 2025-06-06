@@ -372,12 +372,12 @@ const ExamSchema = new Schema(
 
 // Indexes
 ExamSchema.index({ country: 1, levels: 1 });
-ExamSchema.index({ examFormat: 1 });
-ExamSchema.index({ curriculumId: 1 });
+// ExamSchema.index({ examFormat: 1 });
+// ExamSchema.index({ curriculumId: 1 });
 ExamSchema.index({ primaryLanguage: 1 });
 ExamSchema.index({ "statistics.year": -1 });
-ExamSchema.index({ difficulty: 1 });
-ExamSchema.index({ examType: 1 });
+// ExamSchema.index({ difficulty: 1 });
+// ExamSchema.index({ examType: 1 });
 
 // Text index for search
 ExamSchema.index({

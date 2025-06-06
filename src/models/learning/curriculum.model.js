@@ -145,9 +145,9 @@ const CurriculumSchema = new Schema(
 
 // Indexes
 CurriculumSchema.index({ country: 1, educationLevel: 1 })
-CurriculumSchema.index({ series: 1 })
-CurriculumSchema.index({ isActive: 1 })
-CurriculumSchema.index({ createdBy: 1 })
+// CurriculumSchema.index({ series: 1 })
+// CurriculumSchema.index({ isActive: 1 })
+// CurriculumSchema.index({ createdBy: 1 })
 CurriculumSchema.index({ "academicYear.startDate": 1 })
 
 // Virtual fields
