@@ -58,7 +58,7 @@ const UserAnalyticsSchema = new Schema(
 );
 
 // Add indexes for better performance
-UserAnalyticsSchema.index({ userId: 1 });
+// UserAnalyticsSchema.index({ userId: 1 });
 UserAnalyticsSchema.index({ "dailyStats.date": 1 });
 UserAnalyticsSchema.index({ "subjectStats.subjectId": 1 });
 UserAnalyticsSchema.index({ lastUpdated: -1 });

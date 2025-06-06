@@ -2,221 +2,294 @@ const { StatusCodes } = require("http-status-codes");
 const userAnalyticsService = require("../../services/user/userAnalytics/user.analytics.service");
 const createLogger = require("../../services/logging.service");
 
+
 const logger = createLogger("UserAnalyticsController");
 
-// Get or create user analytics
 const getUserAnalytics = async (req, res) => {
   try {
+    const userId = req.user.userId;
     const analytics = await userAnalyticsService.getOrCreateUserAnalytics(
-      req.user.userId
+      userId
     );
+
+    logger.info(`User analytics retrieved for user: ${userId}`);
     res.status(StatusCodes.OK).json({
-      message: "Analyses utilisateur récupérées avec succès",
+      message: "Analytiques utilisateur récupérées avec succès",
       data: analytics,
     });
   } catch (error) {
-    logger.error("Erreur dans getUserAnalytics", error);
-    throw error;
-  }
-};
-
-// Add daily stats
-const addDailyStats = async (req, res) => {
-  try {
-    const analytics = await userAnalyticsService.addDailyStats(
-      req.user.userId,
-      req.body
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Statistiques quotidiennes ajoutées avec succès",
-      data: analytics,
+    logger.error("Error getting user analytics:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de la récupération des analytiques",
+      error: error.message,
     });
-  } catch (error) {
-    logger.error("Erreur dans addDailyStats", error);
-    throw error;
   }
 };
 
-// Update subject stats
-const updateSubjectStats = async (req, res) => {
-  try {
-    const analytics = await userAnalyticsService.updateSubjectStats(
-      req.user.userId,
-      req.params.subjectId,
-      req.body
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Statistiques de matière mises à jour avec succès",
-      data: analytics,
-    });
-  } catch (error) {
-    logger.error("Erreur dans updateSubjectStats", error);
-    throw error;
-  }
-};
-
-// Update learning patterns
-const updateLearningPatterns = async (req, res) => {
-  try {
-    const analytics = await userAnalyticsService.updateLearningPatterns(
-      req.user.userId,
-      req.body
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Modèles d'apprentissage mis à jour avec succès",
-      data: analytics,
-    });
-  } catch (error) {
-    logger.error("Erreur dans updateLearningPatterns", error);
-    throw error;
-  }
-};
-
-// Update mastery levels
-const updateMastery = async (req, res) => {
-  try {
-    const analytics = await userAnalyticsService.updateMastery(
-      req.user.userId,
-      req.params.subjectId,
-      req.body
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Niveaux de maîtrise mis à jour avec succès",
-      data: analytics,
-    });
-  } catch (error) {
-    logger.error("Erreur dans updateMastery", error);
-    throw error;
-  }
-};
-
-// Update efficiency metrics
-const updateEfficiency = async (req, res) => {
-  try {
-    const analytics = await userAnalyticsService.updateEfficiency(
-      req.user.userId,
-      req.body
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Métriques d'efficacité mises à jour avec succès",
-      data: analytics,
-    });
-  } catch (error) {
-    logger.error("Erreur dans updateEfficiency", error);
-    throw error;
-  }
-};
-
-// Get dashboard data
 const getDashboardData = async (req, res) => {
   try {
-    const dashboardData = await userAnalyticsService.getDashboardData(
-      req.user.userId
+    const userId = req.user.userId;
+    const dashboardData = await userAnalyticsService.generateDashboardData(
+      userId
     );
+
+    logger.info(`Dashboard data generated for user: ${userId}`);
     res.status(StatusCodes.OK).json({
       message: "Données du tableau de bord récupérées avec succès",
       data: dashboardData,
     });
   } catch (error) {
-    logger.error("Erreur dans getDashboardData", error);
-    throw error;
-  }
-};
-
-// Get recommendations
-const getRecommendations = async (req, res) => {
-  try {
-    const recommendations = await userAnalyticsService.generateRecommendations(
-      req.user.userId
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Recommandations générées avec succès",
-      data: recommendations,
+    logger.error("Error getting dashboard data:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de la récupération des données du tableau de bord",
+      error: error.message,
     });
-  } catch (error) {
-    logger.error("Erreur dans getRecommendations", error);
-    throw error;
   }
 };
 
-// Get detailed report
 const getDetailedReport = async (req, res) => {
   try {
+    const userId = req.user.userId;
     const { startDate, endDate } = req.query;
-    const report = await userAnalyticsService.getDetailedReport(
-      req.user.userId,
+
+    const report = await userAnalyticsService.generateDetailedReport(userId, {
       startDate,
-      endDate
-    );
+      endDate,
+    });
+
+    logger.info(`Detailed report generated for user: ${userId}`);
     res.status(StatusCodes.OK).json({
       message: "Rapport détaillé généré avec succès",
       data: report,
     });
   } catch (error) {
-    logger.error("Erreur dans getDetailedReport", error);
-    throw error;
+    logger.error("Error generating detailed report:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de la génération du rapport détaillé",
+      error: error.message,
+    });
   }
 };
 
-// Admin: Get all users analytics
+const generateRecommendations = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const recommendations = await userAnalyticsService.generateRecommendations(
+      userId
+    );
+
+    logger.info(`Recommendations generated for user: ${userId}`);
+    res.status(StatusCodes.OK).json({
+      message: "Recommandations générées avec succès",
+      data: recommendations,
+    });
+  } catch (error) {
+    logger.error("Error generating recommendations:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de la génération des recommandations",
+      error: error.message,
+    });
+  }
+};
+
+const addDailyStats = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const dailyStatsData = req.body;
+
+    const updatedAnalytics = await userAnalyticsService.addDailyStats(
+      userId,
+      dailyStatsData
+    );
+
+    logger.info(`Daily stats added for user: ${userId}`);
+    res.status(StatusCodes.OK).json({
+      message: "Statistiques quotidiennes ajoutées avec succès",
+      data: updatedAnalytics,
+    });
+  } catch (error) {
+    logger.error("Error adding daily stats:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de l'ajout des statistiques quotidiennes",
+      error: error.message,
+    });
+  }
+};
+
+const updateSubjectStats = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { subjectId } = req.params;
+    const subjectStatsData = req.body;
+
+    const updatedAnalytics = await userAnalyticsService.updateSubjectStats(
+      userId,
+      subjectId,
+      subjectStatsData
+    );
+
+    logger.info(
+      `Subject stats updated for user: ${userId}, subject: ${subjectId}`
+    );
+    res.status(StatusCodes.OK).json({
+      message: "Statistiques de matière mises à jour avec succès",
+      data: updatedAnalytics,
+    });
+  } catch (error) {
+    logger.error("Error updating subject stats:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de la mise à jour des statistiques de matière",
+      error: error.message,
+    });
+  }
+};
+
+const updateLearningPatterns = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const learningPatternsData = req.body;
+
+    const updatedAnalytics = await userAnalyticsService.updateLearningPatterns(
+      userId,
+      learningPatternsData
+    );
+
+    logger.info(`Learning patterns updated for user: ${userId}`);
+    res.status(StatusCodes.OK).json({
+      message: "Modèles d'apprentissage mis à jour avec succès",
+      data: updatedAnalytics,
+    });
+  } catch (error) {
+    logger.error("Error updating learning patterns:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de la mise à jour des modèles d'apprentissage",
+      error: error.message,
+    });
+  }
+};
+
+const updateMastery = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { subjectId } = req.params;
+    const masteryData = req.body;
+
+    const updatedAnalytics = await userAnalyticsService.updateMastery(
+      userId,
+      subjectId,
+      masteryData
+    );
+
+    logger.info(`Mastery updated for user: ${userId}, subject: ${subjectId}`);
+    res.status(StatusCodes.OK).json({
+      message: "Niveau de maîtrise mis à jour avec succès",
+      data: updatedAnalytics,
+    });
+  } catch (error) {
+    logger.error("Error updating mastery:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de la mise à jour du niveau de maîtrise",
+      error: error.message,
+    });
+  }
+};
+
+const updateEfficiency = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const efficiencyData = req.body;
+
+    const updatedAnalytics = await userAnalyticsService.updateEfficiency(
+      userId,
+      efficiencyData
+    );
+
+    logger.info(`Efficiency updated for user: ${userId}`);
+    res.status(StatusCodes.OK).json({
+      message: "Efficacité mise à jour avec succès",
+      data: updatedAnalytics,
+    });
+  } catch (error) {
+    logger.error("Error updating efficiency:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de la mise à jour de l'efficacité",
+      error: error.message,
+    });
+  }
+};
+
 const getAllUsersAnalytics = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    const result = await userAnalyticsService.getAllUsersAnalytics(
-      Number.parseInt(page),
-      Number.parseInt(limit)
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Analyses de tous les utilisateurs récupérées avec succès",
-      data: result.analytics,
-      pagination: result.pagination,
+    const analytics = await userAnalyticsService.getAllUsersAnalytics({
+      page: Number.parseInt(page),
+      limit: Number.parseInt(limit),
     });
-  } catch (error) {
-    logger.error("Erreur dans getAllUsersAnalytics", error);
-    throw error;
-  }
-};
 
-// Admin: Get system statistics
-const getSystemStatistics = async (req, res) => {
-  try {
-    const stats = await userAnalyticsService.getSystemStatistics();
+    logger.info("All users analytics retrieved by admin");
     res.status(StatusCodes.OK).json({
-      message: "Statistiques système récupérées avec succès",
-      data: stats,
-    });
-  } catch (error) {
-    logger.error("Erreur dans getSystemStatistics", error);
-    throw error;
-  }
-};
-
-// Admin: Get user analytics by ID
-const getUserAnalyticsById = async (req, res) => {
-  try {
-    const analytics = await userAnalyticsService.getOrCreateUserAnalytics(
-      req.params.userId
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Analyses utilisateur récupérées avec succès",
+      message: "Analytiques de tous les utilisateurs récupérées avec succès",
       data: analytics,
     });
   } catch (error) {
-    logger.error("Erreur dans getUserAnalyticsById", error);
-    throw error;
+    logger.error("Error getting all users analytics:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message:
+        "Erreur lors de la récupération des analytiques de tous les utilisateurs",
+      error: error.message,
+    });
+  }
+};
+
+const getSystemStatistics = async (req, res) => {
+  try {
+    const statistics = await userAnalyticsService.getSystemStatistics();
+
+    logger.info("System statistics retrieved by admin");
+    res.status(StatusCodes.OK).json({
+      message: "Statistiques système récupérées avec succès",
+      data: statistics,
+    });
+  } catch (error) {
+    logger.error("Error getting system statistics:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de la récupération des statistiques système",
+      error: error.message,
+    });
+  }
+};
+
+const getUserAnalyticsById = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const analytics = await userAnalyticsService.getOrCreateUserAnalytics(
+      userId
+    );
+
+    logger.info(`User analytics retrieved by admin for user: ${userId}`);
+    res.status(StatusCodes.OK).json({
+      message: "Analytiques utilisateur récupérées avec succès",
+      data: analytics,
+    });
+  } catch (error) {
+    logger.error("Error getting user analytics by ID:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Erreur lors de la récupération des analytiques utilisateur",
+      error: error.message,
+    });
   }
 };
 
 module.exports = {
   getUserAnalytics,
+  getDashboardData,
+  getDetailedReport,
+  generateRecommendations,
   addDailyStats,
   updateSubjectStats,
   updateLearningPatterns,
   updateMastery,
   updateEfficiency,
-  getDashboardData,
-  getRecommendations,
-  getDetailedReport,
   getAllUsersAnalytics,
   getSystemStatistics,
   getUserAnalyticsById,
