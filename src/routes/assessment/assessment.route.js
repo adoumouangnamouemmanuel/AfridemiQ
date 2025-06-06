@@ -12,8 +12,8 @@ const {
   bulkUpdateAssessments,
   bulkDeleteAssessments,
 } = require("../../controllers/assessment/assessment.controller");
-const { authenticate } = require("../../middlewares/auth.middleware");
-const { validateRequest } = require("../../middlewares/validation.middleware");
+const authMiddleware = require("../../middlewares/auth.middleware");
+const validateMiddleware = require("../../middlewares/validate.middleware");
 const {
   createAssessmentSchema,
   updateAssessmentSchema,
@@ -27,25 +27,25 @@ const router = express.Router();
 // Public routes
 router.get(
   "/published",
-  validateRequest(getAssessmentsSchema, "query"),
+  validateMiddleware(getAssessmentsSchema, "query"),
   getPublishedAssessments
 );
 router.get(
   "/subject/:subjectId",
-  validateRequest(getAssessmentsSchema, "query"),
+  validateMiddleware(getAssessmentsSchema, "query"),
   getAssessmentsBySubject
 );
 
 // Protected routes
-router.use(authenticate);
+router.use(authMiddleware);
 
 // CRUD operations
-router.post("/", validateRequest(createAssessmentSchema), createAssessment);
-router.get("/", validateRequest(getAssessmentsSchema, "query"), getAssessments);
+router.post("/", validateMiddleware(createAssessmentSchema), createAssessment);
+router.get("/", validateMiddleware(getAssessmentsSchema, "query"), getAssessments);
 router.get("/:assessmentId", getAssessmentById);
 router.put(
   "/:assessmentId",
-  validateRequest(updateAssessmentSchema),
+  validateMiddleware(updateAssessmentSchema),
   updateAssessment
 );
 router.delete("/:assessmentId", deleteAssessment);
@@ -57,12 +57,12 @@ router.get("/:assessmentId/analytics", getAssessmentAnalytics);
 // Bulk operations
 router.patch(
   "/bulk/update",
-  validateRequest(bulkUpdateAssessmentsSchema),
+  validateMiddleware(bulkUpdateAssessmentsSchema),
   bulkUpdateAssessments
 );
 router.delete(
   "/bulk/delete",
-  validateRequest(bulkDeleteAssessmentsSchema),
+  validateMiddleware(bulkDeleteAssessmentsSchema),
   bulkDeleteAssessments
 );
 

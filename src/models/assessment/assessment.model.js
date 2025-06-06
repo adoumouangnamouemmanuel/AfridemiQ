@@ -148,7 +148,7 @@ AssessmentSchema.virtual("isScheduled").get(function () {
   );
 });
 
-AssessmentSchema.virtual("isActive").get(function () {
+AssessmentSchema.virtual("isCurrentlyActive").get(function () {
   if (!this.isScheduled) return this.status === "published";
   const now = new Date();
   return (
