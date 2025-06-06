@@ -1,10 +1,7 @@
-const { Curriculum } = require("../../models/index")
+const { Curriculum } = require("../../models/learning/curriculum.model")
 const NotFoundError = require("../../errors/notFoundError")
 const BadRequestError = require("../../errors/badRequestError")
 const ConflictError = require("../../errors/conflictError")
-const createLogger = require("../../services/logging.service")
-
-const logger = createLogger("CurriculumService")
 
 /**
  * Create a new curriculum
@@ -26,13 +23,13 @@ const createCurriculum = async (curriculumData) => {
     const curriculum = new Curriculum(curriculumData)
     await curriculum.save()
 
-    logger.info(`Curriculum created for ${curriculum.country} - ${curriculum.educationLevel}`, {
+    console.log(`Curriculum created for ${curriculum.country} - ${curriculum.educationLevel}`, {
       curriculumId: curriculum._id,
     })
 
     return curriculum
   } catch (error) {
-    logger.error("Error creating curriculum", error, { curriculumData })
+    console.error("Error creating curriculum", error, { curriculumData })
     throw error
   }
 }
@@ -94,7 +91,7 @@ const getCurricula = async (query) => {
       },
     }
   } catch (error) {
-    logger.error("Error getting curricula", error, { query })
+    console.error("Error getting curricula", error, { query })
     throw error
   }
 }
@@ -117,7 +114,7 @@ const getCurriculumById = async (curriculumId) => {
     if (error.name === "CastError") {
       throw new BadRequestError("ID de curriculum invalide")
     }
-    logger.error("Error getting curriculum by ID", error, { curriculumId })
+    console.error("Error getting curriculum by ID", error, { curriculumId })
     throw error
   }
 }
@@ -161,7 +158,7 @@ const updateCurriculum = async (curriculumId, updateData) => {
 
     await curriculum.save()
 
-    logger.info(`Curriculum updated: ${curriculum.country} - ${curriculum.educationLevel}`, {
+    console.log(`Curriculum updated: ${curriculum.country} - ${curriculum.educationLevel}`, {
       curriculumId,
     })
 
@@ -170,7 +167,7 @@ const updateCurriculum = async (curriculumId, updateData) => {
     if (error.name === "CastError") {
       throw new BadRequestError("ID de curriculum invalide")
     }
-    logger.error("Error updating curriculum", error, { curriculumId, updateData })
+    console.error("Error updating curriculum", error, { curriculumId, updateData })
     throw error
   }
 }
@@ -189,7 +186,7 @@ const deleteCurriculum = async (curriculumId) => {
     curriculum.isActive = false
     await curriculum.save()
 
-    logger.info(`Curriculum deleted: ${curriculum.country} - ${curriculum.educationLevel}`, {
+    console.log(`Curriculum deleted: ${curriculum.country} - ${curriculum.educationLevel}`, {
       curriculumId,
     })
 
@@ -198,7 +195,7 @@ const deleteCurriculum = async (curriculumId) => {
     if (error.name === "CastError") {
       throw new BadRequestError("ID de curriculum invalide")
     }
-    logger.error("Error deleting curriculum", error, { curriculumId })
+    console.error("Error deleting curriculum", error, { curriculumId })
     throw error
   }
 }
@@ -226,7 +223,7 @@ const addSubjectToCurriculum = async (curriculumId, subjectData) => {
     curriculum.subjects.push(subjectData)
     await curriculum.save()
 
-    logger.info(`Subject added to curriculum: ${curriculum.country} - ${curriculum.educationLevel}`, {
+    console.log(`Subject added to curriculum: ${curriculum.country} - ${curriculum.educationLevel}`, {
       curriculumId,
       subjectId: subjectData.subjectId,
     })
@@ -236,7 +233,7 @@ const addSubjectToCurriculum = async (curriculumId, subjectData) => {
     if (error.name === "CastError") {
       throw new BadRequestError("ID invalide")
     }
-    logger.error("Error adding subject to curriculum", error, { curriculumId, subjectData })
+    console.error("Error adding subject to curriculum", error, { curriculumId, subjectData })
     throw error
   }
 }
@@ -261,7 +258,7 @@ const removeSubjectFromCurriculum = async (curriculumId, subjectId) => {
     curriculum.subjects.splice(subjectIndex, 1)
     await curriculum.save()
 
-    logger.info(`Subject removed from curriculum: ${curriculum.country} - ${curriculum.educationLevel}`, {
+    console.log(`Subject removed from curriculum: ${curriculum.country} - ${curriculum.educationLevel}`, {
       curriculumId,
       subjectId,
     })
@@ -271,7 +268,7 @@ const removeSubjectFromCurriculum = async (curriculumId, subjectId) => {
     if (error.name === "CastError") {
       throw new BadRequestError("ID invalide")
     }
-    logger.error("Error removing subject from curriculum", error, { curriculumId, subjectId })
+    console.error("Error removing subject from curriculum", error, { curriculumId, subjectId })
     throw error
   }
 }
@@ -290,7 +287,7 @@ const getCurriculaByCountry = async (country) => {
 
     return curricula
   } catch (error) {
-    logger.error("Error getting curricula by country", error, { country })
+    console.error("Error getting curricula by country", error, { country })
     throw error
   }
 }
@@ -326,7 +323,7 @@ const getCurriculumStats = async () => {
 
     return stats[0] || {}
   } catch (error) {
-    logger.error("Error getting curriculum statistics", error)
+    console.error("Error getting curriculum statistics", error)
     throw error
   }
 }
