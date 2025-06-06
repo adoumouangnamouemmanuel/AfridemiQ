@@ -11,14 +11,13 @@ const {
   getSubjectsSchema,
   addExamToSubjectSchema,
   rateSubjectSchema,
-  bulkCreateSchema,
-  bulkUpdateSchema,
-  bulkDeleteSchema,
-  compareSubjectsSchema,
 } = require("../../schemas/learning/subject.schema");
 
 // Apply rate limiting to all routes
 router.use(apiLimiter);
+
+// Debug route - get all subjects without any filters
+router.get("/debug/all", subjectController.getAllSubjectsRaw);
 
 // Public routes
 router.get(
@@ -26,14 +25,8 @@ router.get(
   validateMiddleware(getSubjectsSchema),
   subjectController.getSubjects
 );
-router.get("/search", subjectController.advancedSearch);
-router.get("/search/suggestions", subjectController.getSearchSuggestions);
-router.get("/search/trending", subjectController.getTrendingSearches);
-router.get("/analytics", subjectController.getSubjectAnalytics);
-router.get("/trending", subjectController.getTrendingSubjects);
-router.get("/series/:series", subjectController.getSubjectsBySeries);
-router.get("/export", subjectController.exportSubjects);
 router.get("/:id", subjectController.getSubjectById);
+router.get("/series/:series", subjectController.getSubjectsBySeries);
 
 // Protected routes (require authentication)
 router.use(authMiddleware);
@@ -43,11 +36,6 @@ router.post(
   "/:id/rate",
   validateMiddleware(rateSubjectSchema),
   subjectController.rateSubject
-);
-router.post(
-  "/compare",
-  validateMiddleware(compareSubjectsSchema),
-  subjectController.compareSubjects
 );
 
 // Teacher and Admin routes
@@ -82,34 +70,6 @@ router.delete(
   "/:id/exams/:examId",
   roleMiddleware(["teacher", "admin"]),
   subjectController.removeExamFromSubject
-);
-
-// Bulk operations (teacher and admin)
-router.post(
-  "/bulk/create",
-  roleMiddleware(["teacher", "admin"]),
-  validateMiddleware(bulkCreateSchema),
-  subjectController.bulkCreateSubjects
-);
-
-router.put(
-  "/bulk/update",
-  roleMiddleware(["teacher", "admin"]),
-  validateMiddleware(bulkUpdateSchema),
-  subjectController.bulkUpdateSubjects
-);
-
-router.delete(
-  "/bulk/delete",
-  roleMiddleware(["teacher", "admin"]),
-  validateMiddleware(bulkDeleteSchema),
-  subjectController.bulkDeleteSubjects
-);
-
-router.post(
-  "/bulk/import",
-  roleMiddleware(["teacher", "admin"]),
-  subjectController.importSubjects
 );
 
 module.exports = router;

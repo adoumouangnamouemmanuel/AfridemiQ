@@ -41,19 +41,27 @@ const createSubject = async (subjectData) => {
  */
 const getSubjects = async (query) => {
   try {
-    // Simple filtering for basic queries
+    // Debug: Log the incoming query
+    logger.info("Getting subjects with query:", query);
+
     const {
       page = 1,
       limit = 10,
       series,
       category,
       difficulty,
-      isActive = true,
+      isActive,
       sortBy = "name",
       sortOrder = "asc",
     } = query;
 
-    const filter = { isActive };
+    // Build filter - only add isActive filter if explicitly provided
+    const filter = {};
+
+    // Only filter by isActive if it's explicitly set in the query
+    if (isActive !== undefined) {
+      filter.isActive = isActive === "true" || isActive === true;
+    }
 
     if (series) {
       filter.series = { $in: Array.isArray(series) ? series : [series] };
@@ -67,6 +75,17 @@ const getSubjects = async (query) => {
       filter.difficulty = difficulty;
     }
 
+    // Debug: Log the filter being applied
+    logger.info("Filter being applied:", filter);
+
+    // First, let's check total count without any filters
+    const totalInDB = await Subject.countDocuments({});
+    logger.info(`Total subjects in database: ${totalInDB}`);
+
+    // Count with current filter
+    const filteredCount = await Subject.countDocuments(filter);
+    logger.info(`Subjects matching filter: ${filteredCount}`);
+
     const sort = {};
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
@@ -75,6 +94,8 @@ const getSubjects = async (query) => {
       .sort(sort)
       .skip(skip)
       .limit(Number.parseInt(limit));
+
+    logger.info(`Found ${subjects.length} subjects`);
 
     const total = await Subject.countDocuments(filter);
 
@@ -86,9 +107,41 @@ const getSubjects = async (query) => {
         total,
         limit: Number.parseInt(limit),
       },
+      debug: {
+        totalInDB,
+        filteredCount,
+        filter,
+        query,
+      },
     };
   } catch (error) {
     logger.error("Error getting subjects", error, { query });
+    throw error;
+  }
+};
+
+/**
+ * Get all subjects without any filters (for debugging)
+ */
+const getAllSubjectsRaw = async () => {
+  try {
+    const subjects = await Subject.find({});
+    logger.info(`Raw query found ${subjects.length} subjects`);
+
+    // Log first subject structure if any exist
+    if (subjects.length > 0) {
+      logger.info("Sample subject structure:", {
+        id: subjects[0]._id,
+        name: subjects[0].name,
+        isActive: subjects[0].isActive,
+        series: subjects[0].series,
+        category: subjects[0].category,
+      });
+    }
+
+    return subjects;
+  } catch (error) {
+    logger.error("Error getting raw subjects", error);
     throw error;
   }
 };
@@ -308,6 +361,7 @@ const rateSubject = async (subjectId, rating) => {
 module.exports = {
   createSubject,
   getSubjects,
+  getAllSubjectsRaw,
   getSubjectById,
   updateSubject,
   deleteSubject,
