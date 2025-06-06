@@ -34,6 +34,10 @@ const leaderboardEntryRoutes = require("./src/routes/progress/leaderboard.entry.
 const missionRoutes = require("./src/routes/progress/mission.route");
 const topicProgressRoutes = require("./src/routes/progress/topic.progress.route");
 
+
+// Results routes
+const userHintRoutes = require("./src/routes/results/hint.route");
+
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const dotenv = require("dotenv");
 
@@ -126,6 +130,7 @@ app.use("/api/progress/missions", missionRoutes);
 app.use("/api/progress/topic", topicProgressRoutes);
 app.use("/api/parent-access", parentAccessRoutes);
 app.use("/api/quizzes", quizRoutes);
+app.use("/api/hints", userHintRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
