@@ -8,6 +8,8 @@ const subjectRoutes = require("./src/routes/learning/subject.route")
 const errorMiddleware = require("./src/middlewares/error.middleware")
 const dotenv = require("dotenv")
 
+require("./src/models")
+
 // Load environment variables
 if (process.env.NODE_ENV === "test") {
   dotenv.config({ path: "__tests__/.env.test" })
