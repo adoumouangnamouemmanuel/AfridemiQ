@@ -11,7 +11,7 @@ const NotificationSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ["reminder", "achievement", "study_group", "system"],
+      enum: ["reminder", "achievement", "study_group", "system", "friend_request", "friend_removed", "user_blocked"],
       required: true,
       index: true,
     },

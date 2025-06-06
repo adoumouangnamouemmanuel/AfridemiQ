@@ -163,8 +163,12 @@ const addFriend = async (userId, friendId) => {
       throw new BadRequestError("Impossible d'ajouter cet utilisateur comme ami");
     }
 
+    // Add friend to both users' friend lists
     user.friends.push(friendId);
-    await user.save();
+    friend.friends.push(userId);
+    
+    // Save both users
+    await Promise.all([user.save(), friend.save()]);
 
     // Create notification for the friend
     await notificationService.createNotification({
@@ -473,7 +477,9 @@ const unblockFriend = async (userId, friendId) => {
     }
 
     const user = await User.findById(userId);
-    if (!user) {
+    const friend = await User.findById(friendId);
+
+    if (!user || !friend) {
       throw new NotFoundError("Utilisateur non trouvé");
     }
 
@@ -487,7 +493,28 @@ const unblockFriend = async (userId, friendId) => {
       (f) => f.toString() !== friendId.toString()
     );
 
-    await user.save();
+    // Add back to friends list if they were friends before
+    if (!user.friends.includes(friendId)) {
+      user.friends.push(friendId);
+      friend.friends.push(userId);
+    }
+
+    // Save both users
+    await Promise.all([user.save(), friend.save()]);
+
+    // Create notification for the unblocked user
+    await notificationService.createNotification({
+      userId: friendId,
+      type: "friend_request",
+      title: "Ami débloqué",
+      message: `${user.name} vous a débloqué et ajouté comme ami`,
+      priority: "medium",
+      actionUrl: `/profile/${userId}`,
+      metadata: {
+        unblockedById: userId,
+        unblockedByName: user.name
+      }
+    });
 
     logger.info(`L'utilisateur ${userId} a débloqué ${friendId}`);
     return user;

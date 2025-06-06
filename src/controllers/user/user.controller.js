@@ -76,7 +76,7 @@ const updateProgress = async (req, res) => {
 
 // Add friend
 const addFriend = async (req, res) => {
-  const user = await userService.addFriend(req.user.userId, req.body.friendId); // Changed from _id to userId
+  const user = await userService.addFriend(req.user.userId, req.params.friendId);
   res.status(StatusCodes.OK).json({
     message: "Ami ajouté avec succès",
     data: user,
@@ -87,8 +87,8 @@ const addFriend = async (req, res) => {
 const removeFriend = async (req, res) => {
   const user = await userService.removeFriend(
     req.user.userId,
-    req.body.friendId
-  ); // Changed from _id to userId
+    req.params.friendId
+  );
   res.status(StatusCodes.OK).json({
     message: "Ami supprimé avec succès",
     data: user,
