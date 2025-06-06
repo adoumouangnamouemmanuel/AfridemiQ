@@ -10,13 +10,18 @@ const BadRequestError = require("../../errors/badRequestError");
 const NotFoundError = require("../../errors/notFoundError");
 const UnauthorizedError = require("../../errors/unauthorizedError");
 const ConflictError = require("../../errors/conflictError");
+const mongoose = require("mongoose");
+const notificationService = require("./notification/notification.service");
+const createLogger = require("../logging.service");
+
+const logger = createLogger("UserService");
 
 // Register a new user
 const register = async (data) => {
-  console.log("Register: Checking email:", data.email);
+  // console.log("Register: Checking email:", data.email);
   const existingUser = await User.findOne({ email: data.email });
   if (existingUser) throw new ConflictError("Email déjà utilisé");
-  console.log("Register: Creating user");
+  // console.log("Register: Creating user");
   const user = await User.create(data); // Rely on pre("save") for hashing
   console.log("Register: User created:", user._id);
   const token = generateToken({ userId: user._id, role: user.role });
@@ -25,26 +30,26 @@ const register = async (data) => {
 
 // Login user
 const login = async ({ email, password }) => {
-  console.log("Login: Searching for email:", email);
+  // console.log("Login: Searching for email:", email);
   const user = await User.findOne({ email });
   if (!user) {
-    console.log("Login: User not found");
+    // console.log("Login: User not found");
     throw new UnauthorizedError("Email ou mot de passe incorrect");
   }
-  console.log("Login: Comparing passwords");
+  // console.log("Login: Comparing passwords");
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    console.log("Login: Password mismatch");
+    // console.log("Login: Password mismatch");
     throw new UnauthorizedError("Email ou mot de passe incorrect");
   }
-  console.log("Login: Updating user");
+  // console.log("Login: Updating user");
   user.lastLogin = new Date();
   user.refreshToken = generateRefreshToken({
     userId: user._id,
     role: user.role,
   });
   await user.save();
-  console.log("Login: Generating token");
+  // console.log("Login: Generating token");
   const token = generateToken({ userId: user._id, role: user.role });
   return { user: user.toJSON(), token, refreshToken: user.refreshToken };
 };
@@ -127,32 +132,113 @@ const updateProgress = async (userId, progress) => {
 
 // Add friend
 const addFriend = async (userId, friendId) => {
-  // Removed duplicate friendId
-  const user = await User.findById(userId);
-  const friend = await User.findById(friendId);
-  if (!user || !friend)
-    throw new NotFoundError("Utilisateur ou ami non trouvé");
-  if (user.friends.includes(friendId))
-    throw new ConflictError("Cet utilisateur est déjà un ami");
-  if (!friend.preferences.allowFriendRequests)
-    throw new BadRequestError("Les demandes d’amis sont désactivées");
-  user.friends.push(friendId);
-  await user.save();
-  return user;
+  try {
+    // Validate IDs
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(friendId)) {
+      throw new BadRequestError("Format d'ID utilisateur invalide");
+    }
+
+    // Prevent self-friending
+    if (userId === friendId) {
+      throw new BadRequestError("Vous ne pouvez pas vous ajouter vous-même comme ami");
+    }
+
+    const user = await User.findById(userId);
+    const friend = await User.findById(friendId);
+
+    if (!user || !friend) {
+      throw new NotFoundError("Utilisateur ou ami non trouvé");
+    }
+
+    if (user.friends.includes(friendId)) {
+      throw new ConflictError("Cet utilisateur est déjà un ami");
+    }
+
+    if (!friend.preferences.allowFriendRequests) {
+      throw new BadRequestError("Les demandes d'amis sont désactivées");
+    }
+
+    // Check if either user has blocked the other
+    if (user.blockedUsers.includes(friendId) || friend.blockedUsers.includes(userId)) {
+      throw new BadRequestError("Impossible d'ajouter cet utilisateur comme ami");
+    }
+
+    user.friends.push(friendId);
+    await user.save();
+
+    // Create notification for the friend
+    await notificationService.createNotification({
+      userId: friendId,
+      type: "friend_request",
+      title: "Nouvelle demande d'ami",
+      message: `${user.name} vous a ajouté comme ami`,
+      priority: "medium",
+      actionUrl: `/profile/${userId}`,
+      metadata: {
+        requesterId: userId,
+        requesterName: user.name
+      }
+    });
+
+    logger.info(`L'utilisateur ${userId} a ajouté ${friendId} comme ami`);
+    return user;
+  } catch (error) {
+    logger.error(`Erreur lors de l'ajout d'un ami: ${error.message}`);
+    throw error;
+  }
 };
 
 // Remove friend
 const removeFriend = async (userId, friendId) => {
-  // Removed duplicate friendId
-  const user = await User.findById(userId);
-  if (!user) throw new NotFoundError("Utilisateur non trouvé");
-  if (!user.friends.includes(friendId))
-    throw new NotFoundError("Cet utilisateur n’est pas un ami");
-  user.friends = user.friends.filter(
-    (f) => f.toString() !== friendId.toString()
-  );
-  await user.save();
-  return user; // Return user instead of user.friends
+  try {
+    // Validate IDs
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(friendId)) {
+      throw new BadRequestError("Format d'ID utilisateur invalide");
+    }
+
+    // Prevent self-friending
+    if (userId === friendId) {
+      throw new BadRequestError("Vous ne pouvez pas vous retirer vous-même comme ami");
+    }
+
+    const user = await User.findById(userId);
+    const friend = await User.findById(friendId);
+
+    if (!user) {
+      throw new NotFoundError("Utilisateur non trouvé");
+    }
+
+    if (!user.friends.includes(friendId)) {
+      throw new NotFoundError("Cet utilisateur n'est pas un ami");
+    }
+
+    user.friends = user.friends.filter(
+      (f) => f.toString() !== friendId.toString()
+    );
+    await user.save();
+
+    // Create notification for the removed friend
+    if (friend) {
+      await notificationService.createNotification({
+        userId: friendId,
+        type: "friend_removed",
+        title: "Ami retiré",
+        message: `${user.name} vous a retiré de sa liste d'amis`,
+        priority: "low",
+        actionUrl: `/profile/${userId}`,
+        metadata: {
+          removedById: userId,
+          removedByName: user.name
+        }
+      });
+    }
+
+    logger.info(`L'utilisateur ${userId} a retiré ${friendId} de ses amis`);
+    return user;
+  } catch (error) {
+    logger.error(`Erreur lors du retrait d'un ami: ${error.message}`);
+    throw error;
+  }
 };
 
 // Verify phone

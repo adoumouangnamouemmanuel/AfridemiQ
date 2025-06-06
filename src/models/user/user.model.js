@@ -161,6 +161,7 @@ const UserSchema = new Schema(
     hintsUsed: [{ type: Schema.Types.ObjectId, ref: "HintUsage", default: [] }],
     bookmarks: [{ type: Schema.Types.ObjectId, ref: "Bookmark", default: [] }],
     friends: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+    blockedUsers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     tutorId: {
       type: Schema.Types.ObjectId,
       ref: "PeerTutorProfile",
