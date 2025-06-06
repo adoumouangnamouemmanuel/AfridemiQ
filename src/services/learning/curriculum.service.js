@@ -1,8 +1,8 @@
-const { Curriculum } = require("../../../models/learning/curriculum.model")
-const NotFoundError = require("../../../errors/notFoundError")
-const BadRequestError = require("../../../errors/badRequestError")
-const ConflictError = require("../../../errors/conflictError")
-const createLogger = require("../../../services/logging.service")
+const { Curriculum } = require("../../models/index")
+const NotFoundError = require("../../errors/notFoundError")
+const BadRequestError = require("../../errors/badRequestError")
+const ConflictError = require("../../errors/conflictError")
+const createLogger = require("../../services/logging.service")
 
 const logger = createLogger("CurriculumService")
 

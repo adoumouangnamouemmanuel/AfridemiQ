@@ -1,7 +1,7 @@
 const request = require("supertest");
 const app = require("../index");
 
-describe("User API", () => {
+describe("User", () => {
   describe("POST /api/users/register", () => {
     it("should register a new user successfully", async () => {
       const userData = {

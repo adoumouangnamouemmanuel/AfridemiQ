@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes")
-const curriculumService = require("../../services/learning/learning/curriculum.service")
+const curriculumService = require("../../services/learning/curriculum.service")
 const createLogger = require("../../services/logging.service")
 
 const logger = createLogger("CurriculumController")
