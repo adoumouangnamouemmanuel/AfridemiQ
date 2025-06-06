@@ -123,10 +123,14 @@ const CountrySchema = new Schema(
 );
 
 // Indexes
-CountrySchema.index({ name: 1 });
-CountrySchema.index({ code: 1 });
+// Remove these duplicate index lines:
+// CountrySchema.index({ name: 1 })
+// CountrySchema.index({ code: 1 })
+// CountrySchema.index({ region: 1, educationSystem: 1 })
+// CountrySchema.index({ isActive: 1 })
+
+// Keep only the compound and text indexes that are not duplicated:
 CountrySchema.index({ region: 1, educationSystem: 1 });
-CountrySchema.index({ isActive: 1 });
 
 // Text index for search
 CountrySchema.index({
