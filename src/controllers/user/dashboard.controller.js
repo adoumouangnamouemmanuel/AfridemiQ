@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
-const dashboardService = require("../services/user/dashboard/dashboard.service");
-const { createLogger } = require("../services/logging.service");
+const dashboardService = require("../../services/user/dashboard/dashboard.service");
+const { createLogger } = require("../../services/logging.service");
 
 const logger = createLogger("DashboardController");
 
