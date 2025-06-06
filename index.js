@@ -25,6 +25,7 @@ const resourceRoutes = require("./src/routes/learning/resource.route");
 
 // assessment routes
 const examRoutes = require("./src/routes/assessment/exam.route");
+const assessmentRoutes = require("./src/routes/assessment/assessment.route");
 
 // Progress routes
 const gamifiedProgressRoutes = require("./src/routes/progress/gamified.progress.route");
@@ -108,6 +109,7 @@ app.use("/api/countries", countryRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/curricula", curriculumRoutes);
 app.use("/api/exams", examRoutes);
+app.use("/api/assessments", assessmentRoutes);
 app.use("/api/topics", topicRoutes);
 app.use("/api/user-analytics", userAnalyticsRoutes);
 app.use("/api/course-contents", courseContentRoutes);
