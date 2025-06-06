@@ -27,6 +27,7 @@ const examRoutes = require("./src/routes/assessment/exam.route");
 const gamifiedProgressRoutes = require("./src/routes/progress/gamified.progress.route");
 const leaderboardEntryRoutes = require("./src/routes/progress/leaderboard.entry.route");
 const missionRoutes = require("./src/routes/progress/mission.route");
+const topicProgressRoutes = require("./src/routes/progress/topic.progress.route");
 
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const dotenv = require("dotenv");
@@ -114,6 +115,7 @@ app.use("/api/onboarding-status", onboardingStatusRoutes);
 app.use("/api/progress/gamified", gamifiedProgressRoutes);
 app.use("/api/progress/leaderboard", leaderboardEntryRoutes);
 app.use("/api/progress/missions", missionRoutes);
+app.use("/api/progress/topic", topicProgressRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
