@@ -1,5 +1,5 @@
 const express = require("express");
-const hintUsageController = require("../../controllers/results/hint.usage.controller");
+const hintUsageController = require("../../controllers/results/hint.controller");
 const authMiddleware = require("../../middlewares/auth.middleware");
 // const roleMiddleware = require("../../middlewares/role.middleware");
 const validateMiddleware = require("../../middlewares/validate.middleware");
