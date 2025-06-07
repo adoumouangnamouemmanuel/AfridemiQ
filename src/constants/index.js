@@ -1,5 +1,5 @@
 /**
- * Constants for onboarding steps and notifications.
+ * Constants for onboarding steps, notifications, and countries.
  * @module constants
  */
 const TOTAL_STEPS = [
@@ -23,4 +23,27 @@ const NOTIFICATION_TYPES = [
 
 const NOTIFICATION_PRIORITIES = ["low", "medium", "high"];
 
-module.exports = { TOTAL_STEPS, NOTIFICATION_TYPES, NOTIFICATION_PRIORITIES };
+const COUNTRY_REGIONS = [
+  "North Africa",
+  "West Africa",
+  "East Africa",
+  "Central Africa",
+  "Southern Africa",
+];
+
+const EDUCATION_SYSTEMS = [
+  "French",
+  "British",
+  "American",
+  "Portuguese",
+  "Arabic",
+  "Mixed",
+];
+
+module.exports = {
+  TOTAL_STEPS,
+  NOTIFICATION_TYPES,
+  NOTIFICATION_PRIORITIES,
+  COUNTRY_REGIONS,
+  EDUCATION_SYSTEMS,
+};
