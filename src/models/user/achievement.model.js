@@ -1,41 +1,92 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, model, Types } = require("mongoose");
 
-// Achievement Schema
+/**
+ * Mongoose schema for user achievements, tracking progress and completion status.
+ * @module AchievementSchema
+ */
 const AchievementSchema = new Schema(
   {
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    icon: { type: String, required: true },
-    color: { type: String, required: true },
-    earnedDate: Date,
-    progress: { type: Number, default: 0 },
-    target: { type: Number, required: true },
-    subjectId: { type: Schema.Types.ObjectId, ref: "Subject", default: null },
-    series: String,
+    // Achievement name
+    name: {
+      type: String,
+      required: [true, "Le nom de la réalisation est requis"],
+    },
+    // Achievement description
+    description: {
+      type: String,
+      required: [true, "La description de la réalisation est requise"],
+    },
+    // Achievement icon
+    icon: {
+      type: String,
+      required: [true, "L'icône de la réalisation est requise"],
+    },
+    // Achievement color
+    color: {
+      type: String,
+      required: [true, "La couleur de la réalisation est requise"],
+    },
+    // Date achievement was earned
+    earnedDate: {
+      type: Date,
+    },
+    // Current progress toward achievement
+    progress: {
+      type: Number,
+      default: 0,
+      min: [0, "Le progrès ne peut pas être négatif"],
+      required: [true, "Le progrès est requis"],
+    },
+    // Target progress to complete achievement
+    target: {
+      type: Number,
+      required: [true, "La cible de la réalisation est requise"],
+      min: [1, "La cible doit être supérieure à zéro"],
+    },
+    // Associated subject reference
+    subjectId: {
+      type: Types.ObjectId,
+      ref: "Subject",
+      default: null,
+    },
+    // Achievement series identifier
+    series: {
+      type: String,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
-// Indexes for better performance
-AchievementSchema.index({ subjectId: 1, series: 1 });
-AchievementSchema.index({ earnedDate: 1 });
+// =============== INDEXES =================
+AchievementSchema.index({ subjectId: 1, series: 1 }, { sparse: true });
+AchievementSchema.index({ earnedDate: 1 }, { sparse: true });
 AchievementSchema.index({ progress: 1, target: 1 });
 
-// Virtual for completion percentage
+// =============== VIRTUALS =============
+/**
+ * Virtual field for achievement completion percentage.
+ * @returns {number} Rounded percentage of progress toward target, or 0 if target is invalid.
+ */
 AchievementSchema.virtual("completionPercentage").get(function () {
   return this.target > 0 ? Math.round((this.progress / this.target) * 100) : 0;
 });
 
-// Virtual for completion status
+/**
+ * Virtual field for achievement completion status.
+ * @returns {boolean} True if progress meets or exceeds target, false otherwise.
+ */
 AchievementSchema.virtual("isCompleted").get(function () {
   return this.progress >= this.target;
 });
 
-// Ensure virtual fields are serialized
-AchievementSchema.set("toJSON", { virtuals: true });
-AchievementSchema.set("toObject", { virtuals: true });
-
+/**
+ * Achievement model for interacting with the Achievement collection.
+ * @type {mongoose.Model}
+ */
 module.exports = {
-  Achievement: mongoose.model("Achievement", AchievementSchema),
+  Achievement: model("Achievement", AchievementSchema),
 };
