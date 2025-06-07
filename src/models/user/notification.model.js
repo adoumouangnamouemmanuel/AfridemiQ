@@ -1,4 +1,14 @@
 const { Schema, model, Types } = require("mongoose");
+const {
+  NOTIFICATION_TYPES,
+  NOTIFICATION_PRIORITIES,
+} = require("../../constants");
+
+// =============== CONSTANTS =============
+/**
+ * Imported constants for notification types and priorities.
+ * @see module:constants
+ */
 
 // ==================== SCHEMA ==================
 /**
@@ -15,15 +25,7 @@ const NotificationSchema = new Schema(
     },
     type: {
       type: String,
-      enum: [
-        "reminder",
-        "achievement",
-        "study_group",
-        "system",
-        "friend_request",
-        "friend_removed",
-        "user_blocked",
-      ],
+      enum: NOTIFICATION_TYPES,
       required: [true, "Le type de notification est requis"],
     },
     title: {
@@ -36,9 +38,9 @@ const NotificationSchema = new Schema(
     },
     priority: {
       type: String,
-      enum: ["low", "medium", "high"],
+      enum: NOTIFICATION_PRIORITIES,
       required: [true, "La priorité est requise"],
-      default: "medium",
+      default: NOTIFICATION_PRIORITIES[1], // medium
     },
     // Notification status
     read: {
@@ -97,7 +99,7 @@ NotificationSchema.virtual("timeUntilExpiry").get(function () {
  * @returns {boolean} True if priority is high and unread, false otherwise.
  */
 NotificationSchema.virtual("isUrgent").get(function () {
-  return this.priority === "high" && !this.read;
+  return this.priority === NOTIFICATION_PRIORITIES[2] && !this.read; // high
 });
 
 /**
