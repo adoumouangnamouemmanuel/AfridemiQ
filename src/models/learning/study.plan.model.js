@@ -1,8 +1,5 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const {
-  DIFFICULTY_LEVELS,
-} = require("../../models/learning/adaptive.learning.model");
 
 const StudyPlanSchema = new Schema(
   {
@@ -16,21 +13,13 @@ const StudyPlanSchema = new Schema(
     targetSeries: [{ type: String, trim: true, minlength: 1 }],
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
+    adaptiveLearningId: {
+      type: Schema.Types.ObjectId,
+      ref: "AdaptiveLearning",
+    },
     dailyGoals: [
       {
-        dayOfWeek: {
-          type: String,
-          enum: [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
-          ],
-          required: true,
-        },
+        date: { type: Date, required: true },
         topics: [
           {
             topicId: {
@@ -39,11 +28,6 @@ const StudyPlanSchema = new Schema(
               required: true,
             },
             duration: { type: Number, min: 1, required: true }, // in minutes
-            difficulty: {
-              type: String,
-              enum: DIFFICULTY_LEVELS,
-              required: true,
-            },
             priority: {
               type: String,
               enum: ["high", "medium", "low"],
@@ -61,7 +45,7 @@ const StudyPlanSchema = new Schema(
             count: { type: Number, min: 1, required: true },
             type: {
               type: String,
-              enum: ["multiple_choice", "short_answer", "essay"],
+              enum: ["practice", "assessment"],
               required: true,
             },
           },
@@ -73,13 +57,18 @@ const StudyPlanSchema = new Schema(
               match: /^([01]\d|2[0-3]):[0-5]\d$/,
               required: true,
             }, // HH:mm
+            endTime: {
+              type: String,
+              match: /^([01]\d|2[0-3]):[0-5]\d$/,
+              required: true,
+            }, // HH:mm
             duration: { type: Number, min: 1, required: true }, // in minutes
           },
         ],
       },
     ],
     weeklyReview: {
-      dayOfWeek: {
+      day: {
         type: String,
         enum: [
           "Monday",
@@ -95,7 +84,7 @@ const StudyPlanSchema = new Schema(
       topics: [{ type: Schema.Types.ObjectId, ref: "Topic" }],
       assessmentType: {
         type: String,
-        enum: ["quiz", "mock_exam", "self_review"],
+        enum: ["quiz", "mock_exam", "review"],
         required: true,
       },
     },
@@ -103,8 +92,8 @@ const StudyPlanSchema = new Schema(
       completedTopics: [{ type: Schema.Types.ObjectId, ref: "Topic" }],
       weakAreas: [{ type: Schema.Types.ObjectId, ref: "Topic" }],
       strongAreas: [{ type: Schema.Types.ObjectId, ref: "Topic" }],
-      completionRate: { type: Number, min: 0, max: 100, default: 0 },
       adjustmentNeeded: { type: Boolean, default: false },
+      lastAdjusted: { type: Date },
     },
     reminders: [
       {
@@ -136,20 +125,14 @@ const StudyPlanSchema = new Schema(
 );
 
 // Indexes for performance
-StudyPlanSchema.index({ userId: 1 });
+StudyPlanSchema.index({ userId: 1, "dailyGoals.topics.topicId": 1 });
 StudyPlanSchema.index({ targetExam: 1 });
-StudyPlanSchema.index({ "dailyGoals.topics.topicId": 1 });
-StudyPlanSchema.index({ "dailyGoals.exercises.exerciseId": 1 });
+StudyPlanSchema.index({ "dailyGoals.date": 1 });
 
-// Pre-save middleware to validate references and dates
+// Pre-save middleware for validation
 StudyPlanSchema.pre("save", async function (next) {
   try {
-    // Validate dates
-    if (this.startDate >= this.endDate) {
-      return next(new Error("startDate must be before endDate"));
-    }
-
-    // Validate references
+    // Validate userId and targetExam
     const [user, exam] = await Promise.all([
       mongoose.model("User").findById(this.userId),
       mongoose.model("Exam").findById(this.targetExam),
@@ -157,8 +140,26 @@ StudyPlanSchema.pre("save", async function (next) {
     if (!user) return next(new Error("Invalid user ID"));
     if (!exam) return next(new Error("Invalid exam ID"));
 
-    // Validate dailyGoals.topics and exercises
+    // Validate adaptiveLearningId
+    if (this.adaptiveLearningId) {
+      const adaptive = await mongoose
+        .model("AdaptiveLearning")
+        .findById(this.adaptiveLearningId);
+      if (!adaptive) return next(new Error("Invalid adaptive learning ID"));
+    }
+
+    // Validate startDate < endDate
+    if (this.startDate >= this.endDate) {
+      return next(new Error("startDate must be before endDate"));
+    }
+
+    // Validate dailyGoals
     for (const goal of this.dailyGoals) {
+      if (goal.date < this.startDate || goal.date > this.endDate) {
+        return next(
+          new Error("dailyGoals.date must be within startDate and endDate")
+        );
+      }
       if (goal.topics.length > 0) {
         const topics = await mongoose.model("Topic").find({
           _id: { $in: goal.topics.map((t) => t.topicId) },
@@ -173,7 +174,7 @@ StudyPlanSchema.pre("save", async function (next) {
         });
         if (questions.length !== goal.exercises.length) {
           return next(
-            new Error("One or more invalid question IDs in dailyGoals")
+            new Error("One or more invalid exercise IDs in dailyGoals")
           );
         }
       }
