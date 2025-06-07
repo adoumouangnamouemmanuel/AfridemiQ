@@ -107,9 +107,6 @@ if (process.env.NODE_ENV !== "test") {
     .connect(process.env.MONGO_URI, mongoOptions)
     .then(() => {
       console.info("Connecté à MongoDB");
-      // Log registered models
-      const modelNames = mongoose.modelNames();
-      console.info(`Modèles enregistrés: ${modelNames.join(", ")}`);
     })
     .catch((err) => {
       console.error("Erreur de connexion MongoDB:", err);
