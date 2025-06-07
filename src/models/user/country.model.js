@@ -1,8 +1,12 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, model, Types } = require("mongoose");
 
+/**
+ * Mongoose schema for countries, storing details like name, code, and education system.
+ * @module CountrySchema
+ */
 const CountrySchema = new Schema(
   {
+    // Country details
     name: {
       type: String,
       required: [true, "Le nom du pays est requis"],
@@ -26,13 +30,15 @@ const CountrySchema = new Schema(
       required: [true, "Le drapeau est requis"],
       trim: true,
     },
+    // Supported exams
     supportedExams: [
       {
-        type: Schema.Types.ObjectId,
+        type: Types.ObjectId,
         ref: "Exam",
-        default: [],
+        required: [true, "L'ID de l'examen est requis"],
       },
     ],
+    // Language details
     languages: {
       type: [String],
       required: [true, "Au moins une langue doit être spécifiée"],
@@ -51,6 +57,7 @@ const CountrySchema = new Schema(
       trim: true,
       maxlength: [50, "Le fuseau horaire ne peut pas dépasser 50 caractères"],
     },
+    // Regional and educational details
     region: {
       type: String,
       enum: [
@@ -78,11 +85,12 @@ const CountrySchema = new Schema(
       required: [true, "Le système éducatif est requis"],
       index: true,
     },
+    // Exam board details
     examBoards: [
       {
         name: {
           type: String,
-          required: true,
+          required: [true, "Le nom du conseil d'examen est requis"],
           trim: true,
         },
         description: {
@@ -95,6 +103,7 @@ const CountrySchema = new Schema(
         },
       },
     ],
+    // Status and statistics
     isActive: {
       type: Boolean,
       default: true,
@@ -104,14 +113,17 @@ const CountrySchema = new Schema(
       totalUsers: {
         type: Number,
         default: 0,
+        min: [0, "Le nombre total d'utilisateurs ne peut pas être négatif"],
       },
       totalExams: {
         type: Number,
         default: 0,
+        min: [0, "Le nombre total d'examens ne peut pas être négatif"],
       },
       totalSubjects: {
         type: Number,
         default: 0,
+        min: [0, "Le nombre total de sujets ne peut pas être négatif"],
       },
     },
   },
@@ -122,41 +134,53 @@ const CountrySchema = new Schema(
   }
 );
 
-// Indexes
-// Remove these duplicate index lines:
-// CountrySchema.index({ name: 1 })
-// CountrySchema.index({ code: 1 })
-// CountrySchema.index({ region: 1, educationSystem: 1 })
-// CountrySchema.index({ isActive: 1 })
-
-// Keep only the compound and text indexes that are not duplicated:
+// =============== INDEXES =================
 CountrySchema.index({ region: 1, educationSystem: 1 });
-
-// Text index for search
+CountrySchema.index({ supportedExams: 1 }, { sparse: true });
 CountrySchema.index({
   name: "text",
   capital: "text",
   languages: "text",
 });
 
-// Virtual fields
+// =============== VIRTUALS =============
+/**
+ * Virtual field for the number of supported exams.
+ * @returns {number} Length of supportedExams array.
+ */
 CountrySchema.virtual("examCount").get(function () {
-  return this.supportedExams ? this.supportedExams.length : 0;
+  return this.supportedExams?.length ?? 0;
 });
 
+/**
+ * Virtual field for the number of languages.
+ * @returns {number} Length of languages array.
+ */
 CountrySchema.virtual("languageCount").get(function () {
-  return this.languages ? this.languages.length : 0;
+  return this.languages?.length ?? 0;
 });
 
+/**
+ * Virtual field for a comma-separated list of languages.
+ * @returns {string} Joined languages string or empty string.
+ */
 CountrySchema.virtual("formattedLanguages").get(function () {
-  return this.languages ? this.languages.join(", ") : "";
+  return this.languages?.join(", ") ?? "";
 });
 
+/**
+ * Virtual field for the number of exam boards.
+ * @returns {number} Length of examBoards array.
+ */
 CountrySchema.virtual("examBoardCount").get(function () {
-  return this.examBoards ? this.examBoards.length : 0;
+  return this.examBoards?.length ?? 0;
 });
 
-// Pre-save middleware
+// =============== MIDDLEWARE =============
+/**
+ * Pre-save middleware to ensure unique languages and update statistics.
+ * @param {Function} next - Callback to proceed with save.
+ */
 CountrySchema.pre("save", function (next) {
   // Ensure languages array has unique values
   if (this.languages) {
@@ -171,19 +195,38 @@ CountrySchema.pre("save", function (next) {
   next();
 });
 
-// Static methods
+// =============== STATIC METHODS =============
+/**
+ * Find active countries by region.
+ * @param {string} region - The region to filter by.
+ * @returns {Promise} Query for matching countries.
+ */
 CountrySchema.statics.findByRegion = function (region) {
   return this.find({ region, isActive: true });
 };
 
+/**
+ * Find active countries by education system.
+ * @param {string} educationSystem - The education system to filter by.
+ * @returns {Promise} Query for matching countries.
+ */
 CountrySchema.statics.findByEducationSystem = function (educationSystem) {
   return this.find({ educationSystem, isActive: true });
 };
 
+/**
+ * Find active countries by language.
+ * @param {string} language - The language to filter by.
+ * @returns {Promise} Query for matching countries.
+ */
 CountrySchema.statics.findByLanguage = function (language) {
   return this.find({ languages: { $in: [language] }, isActive: true });
 };
 
+/**
+ * Aggregate statistics by region for active countries.
+ * @returns {Promise} Aggregation result with region stats.
+ */
 CountrySchema.statics.getRegionStats = function () {
   return this.aggregate([
     { $match: { isActive: true } },
@@ -200,6 +243,10 @@ CountrySchema.statics.getRegionStats = function () {
   ]);
 };
 
+/**
+ * Aggregate statistics by education system for active countries.
+ * @returns {Promise} Aggregation result with education system stats.
+ */
 CountrySchema.statics.getEducationSystemStats = function () {
   return this.aggregate([
     { $match: { isActive: true } },
@@ -215,7 +262,12 @@ CountrySchema.statics.getEducationSystemStats = function () {
   ]);
 };
 
-// Instance methods
+// =============== INSTANCE METHODS =============
+/**
+ * Add an exam to the country's supported exams.
+ * @param {Types.ObjectId} examId - The ID of the exam to add.
+ * @returns {Promise} Updated country document.
+ */
 CountrySchema.methods.addExam = function (examId) {
   if (!this.supportedExams.includes(examId)) {
     this.supportedExams.push(examId);
@@ -224,6 +276,11 @@ CountrySchema.methods.addExam = function (examId) {
   return this.save();
 };
 
+/**
+ * Remove an exam from the country's supported exams.
+ * @param {Types.ObjectId} examId - The ID of the exam to remove.
+ * @returns {Promise} Updated country document.
+ */
 CountrySchema.methods.removeExam = function (examId) {
   this.supportedExams = this.supportedExams.filter(
     (id) => id.toString() !== examId.toString()
@@ -232,17 +289,28 @@ CountrySchema.methods.removeExam = function (examId) {
   return this.save();
 };
 
+/**
+ * Update country statistics.
+ * @param {number} [userCount] - New user count.
+ * @param {number} [examCount] - New exam count.
+ * @param {number} [subjectCount] - New subject count.
+ * @returns {Promise} Updated country document.
+ */
 CountrySchema.methods.updateStatistics = function (
   userCount,
   examCount,
   subjectCount
 ) {
-  this.statistics.totalUsers = userCount || this.statistics.totalUsers;
-  this.statistics.totalExams = examCount || this.statistics.totalExams;
-  this.statistics.totalSubjects = subjectCount || this.statistics.totalSubjects;
+  this.statistics.totalUsers = userCount ?? this.statistics.totalUsers;
+  this.statistics.totalExams = examCount ?? this.statistics.totalExams;
+  this.statistics.totalSubjects = subjectCount ?? this.statistics.totalSubjects;
   return this.save();
 };
 
-const Country = mongoose.model("Country", CountrySchema);
-
-module.exports = { Country };
+/**
+ * Country model for interacting with the Country collection.
+ * @type {mongoose.Model}
+ */
+module.exports = {
+  Country: model("Country", CountrySchema),
+};
