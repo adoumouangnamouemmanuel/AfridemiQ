@@ -346,118 +346,109 @@ class ExerciseController {
   // Get subject-specific exercises
   async getMathExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de mathématiques reçue`);
-    const filters = { ...req.query, subjectType: "math" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
       populate: ["subjectId", "topicId"],
     };
 
-    const result = await exerciseService.getAllExercises(filters, options);
+    const result = await exerciseService.getAllExercises({ subjectType: "math_exercise" }, options);
     res.status(result.statusCode).json(result);
   }
 
   async getPhysicsExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de physique reçue`);
-    const filters = { ...req.query, subjectType: "physics" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
       populate: ["subjectId", "topicId"],
     };
 
-    const result = await exerciseService.getAllExercises(filters, options);
+    const result = await exerciseService.getAllExercises({ subjectType: "physics_exercise" }, options);
     res.status(result.statusCode).json(result);
   }
 
   async getChemistryExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de chimie reçue`);
-    const filters = { ...req.query, subjectType: "chemistry" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
       populate: ["subjectId", "topicId"],
     };
 
-    const result = await exerciseService.getAllExercises(filters, options);
+    const result = await exerciseService.getAllExercises({ subjectType: "chemistry_exercise" }, options);
     res.status(result.statusCode).json(result);
   }
 
   async getBiologyExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de biologie reçue`);
-    const filters = { ...req.query, subjectType: "biology" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
       populate: ["subjectId", "topicId"],
     };
 
-    const result = await exerciseService.getAllExercises(filters, options);
+    const result = await exerciseService.getAllExercises({ subjectType: "biology_exercise" }, options);
     res.status(result.statusCode).json(result);
   }
 
   async getFrenchExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de français reçue`);
-    const filters = { ...req.query, subjectType: "french" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
       populate: ["subjectId", "topicId"],
     };
 
-    const result = await exerciseService.getAllExercises(filters, options);
+    const result = await exerciseService.getAllExercises({ subjectType: "french_exercise" }, options);
     res.status(result.statusCode).json(result);
   }
 
   async getPhilosophyExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de philosophie reçue`);
-    const filters = { ...req.query, subjectType: "philosophy" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
       populate: ["subjectId", "topicId"],
     };
 
-    const result = await exerciseService.getAllExercises(filters, options);
+    const result = await exerciseService.getAllExercises({ subjectType: "philosophy_exercise" }, options);
     res.status(result.statusCode).json(result);
   }
 
   async getEnglishExercises(req, res) {
     logger.info(`Requête de récupération d'exercices d'anglais reçue`);
-    const filters = { ...req.query, subjectType: "english" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
       populate: ["subjectId", "topicId"],
     };
 
-    const result = await exerciseService.getAllExercises(filters, options);
+    const result = await exerciseService.getAllExercises({ subjectType: "english_exercise" }, options);
     res.status(result.statusCode).json(result);
   }
 
   async getHistoryExercises(req, res) {
     logger.info(`Requête de récupération d'exercices d'histoire reçue`);
-    const filters = { ...req.query, subjectType: "history" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
       populate: ["subjectId", "topicId"],
     };
 
-    const result = await exerciseService.getAllExercises(filters, options);
+    const result = await exerciseService.getAllExercises({ subjectType: "history_exercise" }, options);
     res.status(result.statusCode).json(result);
   }
 
   async getGeographyExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de géographie reçue`);
-    const filters = { ...req.query, subjectType: "geography" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
       populate: ["subjectId", "topicId"],
     };
 
-    const result = await exerciseService.getAllExercises(filters, options);
+    const result = await exerciseService.getAllExercises({ subjectType: "geography_exercise" }, options);
     res.status(result.statusCode).json(result);
   }
 }
