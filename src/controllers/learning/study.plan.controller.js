@@ -7,6 +7,7 @@ const logger = createLogger("StudyPlanController");
 const createStudyPlan = async (req, res) => {
   try {
     const studyPlan = await studyPlanService.createStudyPlan(req.body);
+    logger.info(`Study plan created successfully for user: ${req.body.userId}`);
     res.status(StatusCodes.CREATED).json({
       message: "Plan d'étude créé avec succès",
       data: studyPlan,
@@ -20,6 +21,7 @@ const createStudyPlan = async (req, res) => {
 const getStudyPlanById = async (req, res) => {
   try {
     const studyPlan = await studyPlanService.getStudyPlanById(req.params.id);
+    logger.info(`Study plan retrieved successfully: ${req.params.id}`);
     res.status(StatusCodes.OK).json({
       message: "Plan d'étude récupéré avec succès",
       data: studyPlan,
@@ -60,6 +62,7 @@ const getStudyPlanByUserId = async (req, res) => {
 const getStudyPlans = async (req, res) => {
   try {
     const result = await studyPlanService.getStudyPlans(req.query, req.query);
+    logger.info(`Retrieved ${result.studyPlans.length} study plans`);
     res.status(StatusCodes.OK).json({
       message: "Plans d'étude récupérés avec succès",
       data: result.studyPlans,
@@ -77,6 +80,7 @@ const updateStudyPlan = async (req, res) => {
       req.params.id,
       req.body
     );
+    logger.info(`Study plan updated successfully: ${req.params.id}`);
     res.status(StatusCodes.OK).json({
       message: "Plan d'étude mis à jour avec succès",
       data: studyPlan,
@@ -90,6 +94,7 @@ const updateStudyPlan = async (req, res) => {
 const deleteStudyPlan = async (req, res) => {
   try {
     const result = await studyPlanService.deleteStudyPlan(req.params.id);
+    logger.info(`Study plan deleted successfully: ${req.params.id}`);
     res.status(StatusCodes.OK).json(result);
   } catch (error) {
     logger.error("Error deleting study plan:", error);
