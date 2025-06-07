@@ -326,10 +326,24 @@ const getCountriesByEducationSystem = async (educationSystem) => {
  */
 const getCountriesByLanguage = async (language) => {
   try {
-    const countries = await Country.findByLanguage(language).populate(
-      "supportedExams",
-      "title examType"
-    );
+    if (!language) {
+      throw new BadRequestError("La langue est requise");
+    }
+
+    // Convert language to lowercase for case-insensitive search
+    const searchLanguage = language.toLowerCase();
+
+    // Search for countries with the language in their languages array
+    const countries = await Country.find({
+      isActive: true,
+      languages: { 
+        $regex: new RegExp(`^${searchLanguage}$`, 'i') 
+      }
+    }).populate("supportedExams", "title examType");
+
+    if (!countries || countries.length === 0) {
+      throw new NotFoundError(`Aucun pays trouvé avec la langue: ${language}`);
+    }
 
     return countries;
   } catch (error) {

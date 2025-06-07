@@ -11,6 +11,7 @@ const {
   getCountriesSchema,
   addExamToCountrySchema,
 } = require("../../schemas/user/country.schema");
+const Joi = require("joi");
 
 // Apply rate limiting to all routes
 router.use(apiLimiter);
@@ -23,7 +24,13 @@ router.get(
   "/education-system/:educationSystem",
   countryController.getCountriesByEducationSystem
 );
-router.get("/language/:language", countryController.getCountriesByLanguage);
+router.get(
+  "/language/:language",
+  validateMiddleware(Joi.object({
+    language: Joi.string().required().trim().min(2).max(50)
+  })),
+  countryController.getCountriesByLanguage
+);
 router.get("/code/:code", countryController.getCountryByCode);
 router.get(
   "/",
