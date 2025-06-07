@@ -10,27 +10,41 @@ const DashboardSchema = new Schema(
     userId: {
       type: Types.ObjectId,
       ref: "User",
-      required: [true, "User ID is required"],
+      required: [true, "L'ID utilisateur est requis"],
       unique: true,
     },
     // Upcoming exams array
     upcomingExams: [
       {
-        examId: { type: Types.ObjectId, ref: "Exam", required: true },
+        examId: {
+          type: Types.ObjectId,
+          ref: "Exam",
+          required: [true, "L'ID de l'examen est requis"],
+        },
         series: [{ type: String }],
-        date: { type: Date, required: true },
+        date: {
+          type: Date,
+          required: [true, "La date de l'examen est requise"],
+        },
       },
     ],
     // Recent quizzes array
     recentQuizzes: [
       {
-        quizId: { type: Types.ObjectId, ref: "Quiz", required: true },
+        quizId: {
+          type: Types.ObjectId,
+          ref: "Quiz",
+          required: [true, "L'ID du quiz est requis"],
+        },
         score: {
           type: Number,
-          required: true,
-          min: [0, "Score cannot be negative"],
+          required: [true, "Le score est requis"],
+          min: [0, "Le score ne peut pas être négatif"],
         },
-        completedAt: { type: Date, required: true },
+        completedAt: {
+          type: Date,
+          required: [true, "La date de complétion est requise"],
+        },
       },
     ],
     // Recommended topics array
@@ -38,21 +52,21 @@ const DashboardSchema = new Schema(
       {
         type: Types.ObjectId,
         ref: "Topic",
-        required: true,
+        required: [true, "L'ID du sujet recommandé est requis"],
       },
     ],
     // User streak counter
     streak: {
       type: Number,
       default: 0,
-      min: [0, "Streak cannot be negative"],
+      min: [0, "La série ne peut pas être négative"],
     },
     // Notifications array
     notifications: [
       {
         type: Types.ObjectId,
         ref: "Notification",
-        required: true,
+        required: [true, "L'ID de la notification est requis"],
       },
     ],
   },
