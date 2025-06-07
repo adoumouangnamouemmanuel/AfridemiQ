@@ -20,7 +20,7 @@ const createQuizSchema = Joi.object({
       "any.required": "Subject ID is required",
     }),
 
-  series: Joi.array().trim().optional(),
+  series: Joi.array().optional(),
 
   topicIds: Joi.array()
     .items(Joi.string().pattern(/^[0-9a-fA-F]{24}$/))
