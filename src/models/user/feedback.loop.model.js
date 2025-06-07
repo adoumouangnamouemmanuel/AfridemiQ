@@ -1,74 +1,130 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, model, Types } = require("mongoose");
 
-// Shared Feedback Subschema
+// =============== SUBSCHEMAS =============
+/**
+ * Subschema for individual feedback entries.
+ * @module FeedbackSubSchema
+ */
 const FeedbackSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  rating: { type: Number, min: 0, max: 10, required: true },
-  comments: String,
-  createdAt: { type: Date, default: Date.now },
+  // User reference
+  userId: {
+    type: Types.ObjectId,
+    ref: "User",
+    required: [true, "L'ID utilisateur est requis"],
+  },
+  // Rating value
+  rating: {
+    type: Number,
+    min: [0, "La note ne peut pas être négative"],
+    max: [10, "La note ne peut pas dépasser 10"],
+    required: [true, "La note est requise"],
+  },
+  // Optional comments
+  comments: {
+    type: String,
+  },
+  // Creation timestamp
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
+// ==================== SCHEMA ==================
+/**
+ * Mongoose schema for feedback loops, managing user feedback and responses.
+ * @module FeedbackLoopSchema
+ */
 const FeedbackLoopSchema = new Schema(
   {
+    // Feedback loop details
     userId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "User",
-      required: true,
-      index: true,
+      required: [true, "L'ID utilisateur est requis"],
     },
     type: {
       type: String,
       enum: ["question", "exercise", "lesson", "platform"],
-      required: true,
-      index: true,
+      required: [true, "Le type de feedback est requis"],
     },
+    // Feedback entries
     feedback: [FeedbackSchema],
+    // Feedback status
     status: {
       type: String,
       enum: ["pending", "reviewed", "resolved"],
-      required: true,
+      required: [true, "Le statut est requis"],
       default: "pending",
-      index: true,
     },
+    // Admin response
     response: {
-      adminId: { type: Schema.Types.ObjectId, ref: "User" },
-      message: String,
-      date: Date,
+      adminId: { type: Types.ObjectId, ref: "User" },
+      message: { type: String },
+      date: { type: Date },
     },
-    attachments: [String],
+    // File attachments
+    attachments: [{ type: String }],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
-// Indexes for better performance
+// =============== INDEXES =================
 FeedbackLoopSchema.index({ userId: 1, type: 1 });
 FeedbackLoopSchema.index({ status: 1, createdAt: -1 });
-FeedbackLoopSchema.index({ "response.adminId": 1 });
+FeedbackLoopSchema.index({ "response.adminId": 1 }, { sparse: true });
 
-// Virtual fields
+// =============== VIRTUALS =============
+/**
+ * Virtual field for the average rating of feedback entries.
+ * @returns {number} Rounded average rating to one decimal place, or 0 if no feedback.
+ */
 FeedbackLoopSchema.virtual("averageRating").get(function () {
-  if (this.feedback.length === 0) return 0;
-  const total = this.feedback.reduce((sum, fb) => sum + fb.rating, 0);
-  return Math.round((total / this.feedback.length) * 10) / 10;
+  return this.feedback?.length
+    ? Math.round(
+        (this.feedback.reduce((sum, fb) => sum + (fb.rating ?? 0), 0) /
+          this.feedback.length) *
+          10
+      ) / 10
+    : 0;
 });
 
+/**
+ * Virtual field for the number of feedback entries.
+ * @returns {number} Length of feedback array.
+ */
 FeedbackLoopSchema.virtual("feedbackCount").get(function () {
-  return this.feedback.length;
+  return this.feedback?.length ?? 0;
 });
 
+/**
+ * Virtual field to check if an admin response exists.
+ * @returns {boolean} True if response message exists, false otherwise.
+ */
 FeedbackLoopSchema.virtual("hasResponse").get(function () {
-  return !!(this.response && this.response.message);
+  return !!this.response?.message;
 });
 
+/**
+ * Virtual field to check if feedback is overdue (unresolved after 7 days).
+ * @returns {boolean} True if pending/reviewed and older than 7 days, false otherwise.
+ */
 FeedbackLoopSchema.virtual("isOverdue").get(function () {
   if (this.status === "resolved") return false;
   const daysSinceCreated = Math.floor(
     (new Date() - this.createdAt) / (1000 * 60 * 60 * 24)
   );
-  return daysSinceCreated > 7; // Consider overdue after 7 days
+  return daysSinceCreated > 7;
 });
 
+/**
+ * FeedbackLoop model for interacting with the FeedbackLoop collection.
+ * @type {mongoose.Model}
+ */
 module.exports = {
-  FeedbackLoop: mongoose.model("FeedbackLoop", FeedbackLoopSchema),
+  FeedbackLoop: model("FeedbackLoop", FeedbackLoopSchema),
 };
