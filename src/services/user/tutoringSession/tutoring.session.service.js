@@ -4,7 +4,7 @@ const {
 } = require("../../../models/user/peer.tutor.profile.model");
 const { ApiError } = require("../../../utils/ApiError");
 const { ApiResponse } = require("../../../utils/ApiResponse");
-const createLogger = require("../../services/logging.service");
+const createLogger = require("../../logging.service");
 
 const logger = createLogger("TutoringSessionService");
 
