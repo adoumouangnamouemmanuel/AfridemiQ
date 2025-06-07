@@ -6,67 +6,167 @@ const INTERACTIVITY_LEVELS = ["low", "medium", "high"];
 
 // Shared Feedback Subschema
 const FeedbackSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  rating: { type: Number, min: 0, max: 10, required: true },
-  comments: String,
-  createdAt: { type: Date, default: Date.now },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: [true, "Identifiant d'utilisateur requis"],
+  },
+  rating: {
+    type: Number,
+    min: [0, "La note doit être au moins 0"],
+    max: [10, "La note ne peut dépasser 10"],
+    required: [true, "Note requise"],
+  },
+  comments: {
+    type: String,
+    trim: true,
+    maxlength: [500, "Commentaires trop longs (max 500 caractères)"],
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 // Lesson Base Schema
 const LessonBaseSchema = new Schema(
   {
-    topicId: { type: Schema.Types.ObjectId, ref: "Topic", required: true },
-    title: { type: String, required: true },
-    series: [String],
-    overview: String,
-    objectives: [String],
-    keyPoints: [String],
-    duration: { type: Number, required: true },
+    topicId: {
+      type: Schema.Types.ObjectId,
+      ref: "Topic",
+      required: [true, "Identifiant du sujet requis"],
+    },
+    title: {
+      type: String,
+      trim: true,
+      required: [true, "Titre requis"],
+      minlength: [3, "Titre trop court (min 3 caractères)"],
+      maxlength: [100, "Titre trop long (max 100 caractères)"],
+    },
+    series: {
+      type: [{ type: String, trim: true }],
+      validate: {
+        validator: (v) => v.every((s) => s.length >= 1),
+        message: "Les séries ne peuvent pas être vides",
+      },
+    },
+    overview: {
+      type: String,
+      trim: true,
+      maxlength: [1000, "Résumé trop long (max 1000 caractères)"],
+    },
+    objectives: {
+      type: [{ type: String, trim: true }],
+      validate: {
+        validator: (v) => v.every((o) => o.length >= 1),
+        message: "Les objectifs ne peuvent pas être vides",
+      },
+    },
+    keyPoints: {
+      type: [{ type: String, trim: true }],
+      validate: {
+        validator: (v) => v.every((k) => k.length >= 1),
+        message: "Les points clés ne peuvent pas être vides",
+      },
+    },
+    duration: {
+      type: Number,
+      required: [true, "Durée requise"],
+      min: [5, "La durée doit être d'au moins 5 minutes"],
+    },
     resourceIds: [{ type: Schema.Types.ObjectId, ref: "Resource" }],
     exerciseIds: [{ type: Schema.Types.ObjectId, ref: "Exercise" }],
     interactivityLevel: {
       type: String,
-      enum: INTERACTIVITY_LEVELS,
-      required: true,
+      enum: {
+        values: INTERACTIVITY_LEVELS,
+        message: "Niveau d'interactivité invalide",
+      },
+      required: [true, "Niveau d'interactivité requis"],
     },
-    offlineAvailable: { type: Boolean, default: false },
-    premiumOnly: { type: Boolean, default: false },
+    offlineAvailable: {
+      type: Boolean,
+      default: false,
+    },
+    premiumOnly: {
+      type: Boolean,
+      default: false,
+    },
     feedback: [FeedbackSchema],
     metadata: {
-      createdBy: { type: Schema.Types.ObjectId, ref: "User" },
-      updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: [true, "Créateur requis"],
+      },
+      updatedBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
     },
   },
   {
     timestamps: true,
     discriminatorKey: "subjectType",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
-// Pre-save hook for resource and exercise validation
+// Indexes for performance
+LessonBaseSchema.index({ topicId: 1 });
+LessonBaseSchema.index({ resourceIds: 1 });
+LessonBaseSchema.index({ exerciseIds: 1 });
+
+// Pre-save hook for validation
 LessonBaseSchema.pre("save", async function (next) {
-  if (this.resourceIds.length > 0) {
-    const validResources = await mongoose
-      .model("Resource")
-      .countDocuments({ _id: { $in: this.resourceIds } });
-    if (validResources !== this.resourceIds.length) {
-      return next(new Error("Invalid Resource IDs"));
+  try {
+    // Validate topic
+    const topic = await mongoose.model("Topic").findById(this.topicId);
+    if (!topic) return next(new Error("Identifiant du sujet invalide"));
+
+    // Validate resources
+    if (this.resourceIds.length > 0) {
+      const validResources = await mongoose
+        .model("Resource")
+        .countDocuments({ _id: { $in: this.resourceIds } });
+      if (validResources !== this.resourceIds.length)
+        return next(new Error("Identifiants de ressources invalides"));
     }
-  }
-  if (this.exerciseIds.length > 0) {
-    const validExercises = await mongoose
-      .model("Exercise")
-      .countDocuments({ _id: { $in: this.exerciseIds } });
-    if (validExercises !== this.exerciseIds.length) {
-      return next(new Error("Invalid Exercise IDs"));
+
+    // Validate exercises
+    if (this.exerciseIds.length > 0) {
+      const validExercises = await mongoose
+        .model("Exercise")
+        .countDocuments({ _id: { $in: this.exerciseIds } });
+      if (validExercises !== this.exerciseIds.length)
+        return next(new Error("Identifiants d'exercices invalides"));
     }
+
+    // Validate users
+    const user = await mongoose.model("User").findById(this.metadata.createdBy);
+    if (!user) return next(new Error("Identifiant du créateur invalide"));
+    if (this.metadata.updatedBy) {
+      const updatedUser = await mongoose
+        .model("User")
+        .findById(this.metadata.updatedBy);
+      if (!updatedUser)
+        return next(new Error("Identifiant du modificateur invalide"));
+    }
+
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
 });
 
 // Virtual for completion status
 LessonBaseSchema.virtual("completionStatus").get(function () {
-  // Placeholder: Implement based on user progress
+  // Example logic based on progress tracking
+  if (!this.progressTracking) return "not_started";
+  const completion = this.progressTracking.completionRate;
+  if (completion >= 100) return "completed";
+  if (completion > 0) return "in_progress";
   return "not_started";
 });
 
