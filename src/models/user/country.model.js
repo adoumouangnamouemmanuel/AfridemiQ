@@ -1,5 +1,13 @@
 const { Schema, model, Types } = require("mongoose");
+const { COUNTRY_REGIONS, EDUCATION_SYSTEMS } = require("../../constants");
 
+// =============== CONSTANTS =============
+/**
+ * Imported constants for country regions and education systems.
+ * @see module:constants
+ */
+
+// ==================== SCHEMA ==================
 /**
  * Mongoose schema for countries, storing details like name, code, and education system.
  * @module CountrySchema
@@ -60,13 +68,7 @@ const CountrySchema = new Schema(
     // Regional and educational details
     region: {
       type: String,
-      enum: [
-        "North Africa",
-        "West Africa",
-        "East Africa",
-        "Central Africa",
-        "Southern Africa",
-      ],
+      enum: COUNTRY_REGIONS,
       required: [true, "La région est requise"],
       index: true,
     },
@@ -81,7 +83,7 @@ const CountrySchema = new Schema(
     },
     educationSystem: {
       type: String,
-      enum: ["French", "British", "American", "Portuguese", "Arabic", "Mixed"],
+      enum: EDUCATION_SYSTEMS,
       required: [true, "Le système éducatif est requis"],
       index: true,
     },
