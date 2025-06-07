@@ -1,5 +1,5 @@
 /**
- * Constants for onboarding steps.
+ * Constants for onboarding steps and notifications.
  * @module constants
  */
 const TOTAL_STEPS = [
@@ -11,4 +11,16 @@ const TOTAL_STEPS = [
   "tutorial_completion",
 ];
 
-module.exports = { TOTAL_STEPS };
+const NOTIFICATION_TYPES = [
+  "reminder",
+  "achievement",
+  "study_group",
+  "system",
+  "friend_request",
+  "friend_removed",
+  "user_blocked",
+];
+
+const NOTIFICATION_PRIORITIES = ["low", "medium", "high"];
+
+module.exports = { TOTAL_STEPS, NOTIFICATION_TYPES, NOTIFICATION_PRIORITIES };
