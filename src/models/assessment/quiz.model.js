@@ -20,11 +20,7 @@ const QuizSchema = new Schema(
       required: true,
       index: true,
     },
-    series: {
-      type: String,
-      trim: true,
-      index: true,
-    },
+    series: [String],
     topicIds: [
       {
         type: Schema.Types.ObjectId,

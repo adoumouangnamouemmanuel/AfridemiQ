@@ -8,7 +8,7 @@ const CourseContentSchema = new Schema(
   {
     examId: [{ type: Schema.Types.ObjectId, ref: "Exam", required: true }],
     subjectId: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
-    topicIds: [{ type: Schema.Types.ObjectId, ref: "Topic", required: true }],
+    topicId: [{ type: Schema.Types.ObjectId, ref: "Topic", required: true }],
     series: [String],
     title: { type: String, required: true },
     description: { type: String, required: true },

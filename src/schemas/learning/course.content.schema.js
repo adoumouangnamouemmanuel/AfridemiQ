@@ -115,7 +115,7 @@ const createCourseContentSchema = Joi.object({
     "string.pattern.base": "ID de matière invalide",
     "any.required": "La matière est requise",
   }),
-  topicId: Joi.array()
+  topicIds: Joi.array()
     .items(
       Joi.string().pattern(objectIdPattern).required().messages({
         "string.pattern.base": "ID de sujet invalide",
