@@ -34,6 +34,7 @@ const studyGroupRoutes = require("./src/routes/learning/study.group.route");
 const lessonRoutes = require("./src/routes/learning/lesson/lesson.route");
 const biologyLessonRoutes = require("./src/routes/learning/lesson/biology.lesson.route");
 const mathLessonRoutes = require("./src/routes/learning/lesson/math.lesson.route");
+const englishLessonRoutes = require("./src/routes/learning/lesson/english.lesson.route");
 
 
 // assessment routes
@@ -165,6 +166,7 @@ app.use("/api/questions", questionRoutes);
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/biology-lessons", biologyLessonRoutes);
 app.use("/api/math-lessons", mathLessonRoutes);
+app.use("/api/english-lessons", englishLessonRoutes);
 
 
 
