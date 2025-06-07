@@ -1,5 +1,5 @@
-const mongoose = require("mongoose")
-const { Schema } = mongoose
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
 const CurriculumSchema = new Schema(
   {
@@ -22,60 +22,9 @@ const CurriculumSchema = new Schema(
     },
     subjects: [
       {
-        subjectId: {
-          type: Schema.Types.ObjectId,
-          ref: "Subject",
-          required: true,
-        },
-        name: {
-          type: String,
-          required: true,
-          trim: true,
-        },
-        description: {
-          type: String,
-          trim: true,
-        },
-        topics: [
-          {
-            topicId: {
-              type: Schema.Types.ObjectId,
-              ref: "Topic",
-            },
-            name: {
-              type: String,
-              required: true,
-              trim: true,
-            },
-            description: {
-              type: String,
-              trim: true,
-            },
-            learningObjectives: [String],
-            assessmentCriteria: [String],
-            resourceIds: [
-              {
-                type: Schema.Types.ObjectId,
-                ref: "Resource",
-              },
-            ],
-          },
-        ],
-        assessments: [
-          {
-            type: {
-              type: String,
-              enum: ["formative", "summative"],
-              required: true,
-            },
-            weightage: {
-              type: Number,
-              min: 0,
-              max: 100,
-            },
-            criteria: [String],
-          },
-        ],
+        type: Schema.Types.ObjectId,
+        ref: "Subject",
+        required: true,
       },
     ],
     academicYear: {
@@ -133,61 +82,81 @@ const CurriculumSchema = new Schema(
       ref: "User",
       required: [true, "Le créateur est requis"],
       index: true,
-      default: "6842e98f15589cf49ccdf916",
     },
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
-)
+  }
+);
 
 // Indexes
-CurriculumSchema.index({ country: 1, educationLevel: 1 })
-// CurriculumSchema.index({ series: 1 })
-// CurriculumSchema.index({ isActive: 1 })
-// CurriculumSchema.index({ createdBy: 1 })
-CurriculumSchema.index({ "academicYear.startDate": 1 })
+CurriculumSchema.index({
+  country: 1,
+  educationLevel: 1,
+  "academicYear.startDate": 1,
+});
 
 // Virtual fields
 CurriculumSchema.virtual("subjectsCount").get(function () {
-  return this.subjects ? this.subjects.length : 0
-})
-
-CurriculumSchema.virtual("totalTopics").get(function () {
-  if (!this.subjects) return 0
-  return this.subjects.reduce((total, subject) => total + (subject.topics ? subject.topics.length : 0), 0)
-})
+  return this.subjects ? this.subjects.length : 0;
+});
 
 CurriculumSchema.virtual("academicYearDuration").get(function () {
-  if (!this.academicYear.startDate || !this.academicYear.endDate) return 0
-  const diffTime = Math.abs(this.academicYear.endDate - this.academicYear.startDate)
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) // days
-})
+  if (!this.academicYear.startDate || !this.academicYear.endDate) return 0;
+  const diffTime = Math.abs(
+    this.academicYear.endDate - this.academicYear.startDate
+  );
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // days
+});
 
 // Pre-save middleware
-CurriculumSchema.pre("save", function (next) {
+CurriculumSchema.pre("save", async function (next) {
   // Validate academic year dates
   if (this.academicYear.startDate >= this.academicYear.endDate) {
-    return next(new Error("La date de début doit être antérieure à la date de fin"))
+    return next(
+      new Error("La date de début doit être antérieure à la date de fin")
+    );
   }
 
   // Validate term dates
   if (this.academicYear.terms) {
     for (const term of this.academicYear.terms) {
       if (term.startDate >= term.endDate) {
-        return next(new Error(`Les dates du trimestre ${term.term} sont invalides`))
+        return next(
+          new Error(`Les dates du trimestre ${term.term} sont invalides`)
+        );
       }
-      if (term.startDate < this.academicYear.startDate || term.endDate > this.academicYear.endDate) {
-        return next(new Error(`Le trimestre ${term.term} dépasse les limites de l'année académique`))
+      if (
+        term.startDate < this.academicYear.startDate ||
+        term.endDate > this.academicYear.endDate
+      ) {
+        return next(
+          new Error(
+            `Le trimestre ${term.term} dépasse les limites de l'année académique`
+          )
+        );
       }
     }
   }
 
-  next()
-})
+  // Validate subjects
+  if (this.subjects && this.subjects.length > 0) {
+    const validSubjects = await mongoose.model("Subject").find({
+      _id: { $in: this.subjects },
+      isActive: true,
+    });
+    if (validSubjects.length !== this.subjects.length) {
+      return next(
+        new Error("Certains subjectIds ne sont pas valides ou inactifs")
+      );
+    }
+  }
 
-const Curriculum = mongoose.model("Curriculum", CurriculumSchema)
+  next();
+});
 
-module.exports = { Curriculum }
+const Curriculum = mongoose.model("Curriculum", CurriculumSchema);
+
+module.exports = { Curriculum };
