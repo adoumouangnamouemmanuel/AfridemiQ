@@ -84,6 +84,44 @@ ResourceSchema.virtual("isPopular").get(function () {
   return this.analytics.views > 100 || this.analytics.averageRating > 7;
 });
 
+// Pre-save middleware to validate references
+ResourceSchema.pre("save", async function (next) {
+  try {
+    // Validate subjectId
+    if (this.subjectId) {
+      const subject = await mongoose.model("Subject").findById(this.subjectId);
+      if (!subject) {
+        return next(new Error("Invalid subject ID"));
+      }
+    }
+
+    // Validate topicIds
+    if (this.topicIds && this.topicIds.length > 0) {
+      const topics = await mongoose.model("Topic").find({
+        _id: { $in: this.topicIds },
+      });
+      if (topics.length !== this.topicIds.length) {
+        return next(new Error("One or more invalid topic IDs"));
+      }
+    }
+
+    // Validate examIds
+    if (this.examIds && this.examIds.length > 0) {
+      const exams = await mongoose.model("Exam").find({
+        _id: { $in: this.examIds },
+      });
+      if (exams.length !== this.examIds.length) {
+        return next(new Error("One or more invalid exam IDs"));
+      }
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+
 // Ensure virtual fields are serialized
 ResourceSchema.set("toJSON", { virtuals: true });
 ResourceSchema.set("toObject", { virtuals: true });

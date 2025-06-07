@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 // Shared constants
-const DIFFICULTY_LEVELS = ["Beginner", "Intermediate", "Advanced"];
+const DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
 
 const CourseContentSchema = new Schema(
   {
