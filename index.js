@@ -35,6 +35,7 @@ const assessmentRoutes = require("./src/routes/assessment/assessment.route");
 const quizRoutes = require("./src/routes/assessment/quiz.route");
 const challengeRoutes = require("./src/routes/assessment/challenge.route");
 const examScheduleRoutes = require("./src/routes/assessment/exam.schedule.route");
+const questionRoutes = require("./src/routes/assessment/question.route");
 
 // Progress routes
 const gamifiedProgressRoutes = require("./src/routes/progress/gamified.progress.route");
@@ -147,6 +148,9 @@ app.use("/api/quizzes", quizRoutes);
 app.use("/api/hints", userHintRoutes);
 app.use("/api/challenges", challengeRoutes);
 app.use("/api/exam-schedules", examScheduleRoutes);
+app.use("/api/questions", questionRoutes);
+
+
 // 404 handler
 app.use((req, res, next) => {
   console.warn(`404 - Route non trouvée: ${req.method} ${req.url}`, {
