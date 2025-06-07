@@ -21,6 +21,7 @@ const curriculumRoutes = require("./src/routes/learning/curriculum.route");
 const topicRoutes = require("./src/routes/learning/topic.route");
 const courseContentRoutes = require("./src/routes/learning/course.content.route");
 const resourceRoutes = require("./src/routes/learning/resource.route");
+const adaptiveLearningRoutes = require("./src/routes/learning/adaptive.learning.route");
 
 
 // assessment routes
@@ -119,6 +120,7 @@ app.use("/api/topics", topicRoutes);
 app.use("/api/user-analytics", userAnalyticsRoutes);
 app.use("/api/course-contents", courseContentRoutes);
 app.use("/api/resources", resourceRoutes);
+app.use("/api/adaptive-learning", adaptiveLearningRoutes);
 app.use("/api/achievements", achievementRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/onboarding-status", onboardingStatusRoutes);
