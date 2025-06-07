@@ -56,13 +56,56 @@ const getAllUsers = async (req, res) => {
   });
 };
 
-// Update preferences
-const updatePreferences = async (req, res) => {
-  const user = await userService.updatePreferences(req.user.userId, req.body); // Changed from _id to userId
-  res.status(StatusCodes.OK).json({
-    message: "Préférences mises à jour",
-    data: user,
-  });
+// Update all preferences
+const updateAllPreferences = async (req, res) => {
+  try {
+    const user = await userService.updateAllPreferences(req.user.userId, req.body);
+    res.status(StatusCodes.OK).json({
+      message: "Préférences mises à jour avec succès",
+      data: user
+    });
+  } catch (error) {
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message,
+      status: "error",
+      code: error.name
+    });
+  }
+};
+
+// Update specific preference type
+const updatePreferenceType = async (req, res) => {
+  try {
+    const { type } = req.params;
+    const user = await userService.updatePreferenceType(req.user.userId, type, req.body);
+    res.status(StatusCodes.OK).json({
+      message: "Préférences mises à jour avec succès",
+      data: user
+    });
+  } catch (error) {
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message,
+      status: "error",
+      code: error.name
+    });
+  }
+};
+
+// Update multiple preference types
+const updateMultiplePreferences = async (req, res) => {
+  try {
+    const user = await userService.updateMultiplePreferences(req.user.userId, req.body);
+    res.status(StatusCodes.OK).json({
+      message: "Préférences mises à jour avec succès",
+      data: user
+    });
+  } catch (error) {
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: error.message,
+      status: "error",
+      code: error.name
+    });
+  }
 };
 
 // Update progress
@@ -254,7 +297,9 @@ module.exports = {
   updateProfile,
   deleteUser,
   getAllUsers,
-  updatePreferences,
+  updateAllPreferences,
+  updatePreferenceType,
+  updateMultiplePreferences,
   updateProgress,
   addFriend,
   removeFriend,

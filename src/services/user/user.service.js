@@ -104,17 +104,89 @@ const getAllUsers = async (query) => {
   return { users, count };
 };
 
-// Update preferences
-const updatePreferences = async (userId, preferences) => {
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { preferences },
-    { new: true, runValidators: true } // Fixed userId to runValidators
-  ).select(
-    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
-  );
+// Update all preferences
+const updateAllPreferences = async (userId, { preferences }) => {
+  const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
-  return user;
+
+  // Update preferences
+  user.preferences = {
+    ...user.preferences,
+    ...preferences
+  };
+
+  // Save the user document
+  await user.save();
+
+  // Return user without sensitive fields
+  const userResponse = user.toObject();
+  delete userResponse.password;
+  delete userResponse.phoneVerificationCode;
+  delete userResponse.phoneVerificationExpires;
+  delete userResponse.resetPasswordToken;
+  delete userResponse.resetPasswordExpires;
+  delete userResponse.refreshToken;
+  return userResponse;
+};
+
+// Update specific preference type
+const updatePreferenceType = async (userId, type, { value }) => {
+  const user = await User.findById(userId);
+  if (!user) throw new NotFoundError("Utilisateur non trouvé");
+
+  // Handle nested preferences (like notifications)
+  if (type === 'notifications') {
+    user.preferences.notifications = {
+      ...user.preferences.notifications,
+      ...value
+    };
+  } else {
+    user.preferences[type] = value;
+  }
+
+  // Save the user document
+  await user.save();
+
+  // Return user without sensitive fields
+  const userResponse = user.toObject();
+  delete userResponse.password;
+  delete userResponse.phoneVerificationCode;
+  delete userResponse.phoneVerificationExpires;
+  delete userResponse.resetPasswordToken;
+  delete userResponse.resetPasswordExpires;
+  delete userResponse.refreshToken;
+  return userResponse;
+};
+
+// Update multiple preference types
+const updateMultiplePreferences = async (userId, { preferences }) => {
+  const user = await User.findById(userId);
+  if (!user) throw new NotFoundError("Utilisateur non trouvé");
+
+  // Update each specified preference type
+  Object.entries(preferences).forEach(([type, value]) => {
+    if (type === 'notifications') {
+      user.preferences.notifications = {
+        ...user.preferences.notifications,
+        ...value
+      };
+    } else {
+      user.preferences[type] = value;
+    }
+  });
+
+  // Save the user document
+  await user.save();
+
+  // Return user without sensitive fields
+  const userResponse = user.toObject();
+  delete userResponse.password;
+  delete userResponse.phoneVerificationCode;
+  delete userResponse.phoneVerificationExpires;
+  delete userResponse.resetPasswordToken;
+  delete userResponse.resetPasswordExpires;
+  delete userResponse.refreshToken;
+  return userResponse;
 };
 
 // Update progress
@@ -559,7 +631,9 @@ module.exports = {
   updateProfile,
   deleteUser,
   getAllUsers,
-  updatePreferences,
+  updateAllPreferences,
+  updatePreferenceType,
+  updateMultiplePreferences,
   updateProgress,
   addFriend,
   removeFriend,

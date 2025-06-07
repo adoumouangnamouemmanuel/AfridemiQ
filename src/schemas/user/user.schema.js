@@ -98,7 +98,7 @@ const updateProgressSchema = Joi.object({
 const addFriendSchema = Joi.object({
   friendId: Joi.string()
     .required()
-    .messages({ "any.required": "ID de l’ami requis" }),
+    .messages({ "any.required": "ID de l'ami requis" }),
 });
 
 const verifyPhoneSchema = Joi.object({
@@ -172,6 +172,60 @@ const updateSocialProfileSchema = Joi.object({
   ),
 });
 
+const updateAllPreferencesSchema = Joi.object({
+  preferences: Joi.object({
+    notifications: Joi.object({
+      general: Joi.boolean(),
+      dailyReminderTime: Joi.string(),
+      challengeNotifications: Joi.boolean(),
+      progressUpdates: Joi.boolean()
+    }),
+    darkMode: Joi.boolean(),
+    fontSize: Joi.string().valid('small', 'medium', 'large'),
+    preferredContentFormat: Joi.string().valid('video', 'text', 'audio', 'mixed'),
+    enableHints: Joi.boolean(),
+    autoPlayAudio: Joi.boolean(),
+    showStepSolutions: Joi.boolean(),
+    leaderboardVisibility: Joi.boolean(),
+    allowFriendRequests: Joi.boolean(),
+    multilingualSupport: Joi.array().items(Joi.string())
+  }).required()
+});
+
+const updatePreferenceTypeSchema = Joi.object({
+  value: Joi.alternatives().try(
+    Joi.boolean(),
+    Joi.string(),
+    Joi.array().items(Joi.string()),
+    Joi.object({
+      general: Joi.boolean(),
+      dailyReminderTime: Joi.string(),
+      challengeNotifications: Joi.boolean(),
+      progressUpdates: Joi.boolean()
+    })
+  ).required()
+});
+
+const updateMultiplePreferencesSchema = Joi.object({
+  preferences: Joi.object({
+    notifications: Joi.object({
+      general: Joi.boolean(),
+      dailyReminderTime: Joi.string(),
+      challengeNotifications: Joi.boolean(),
+      progressUpdates: Joi.boolean()
+    }),
+    darkMode: Joi.boolean(),
+    fontSize: Joi.string().valid('small', 'medium', 'large'),
+    preferredContentFormat: Joi.string().valid('video', 'text', 'audio', 'mixed'),
+    enableHints: Joi.boolean(),
+    autoPlayAudio: Joi.boolean(),
+    showStepSolutions: Joi.boolean(),
+    leaderboardVisibility: Joi.boolean(),
+    allowFriendRequests: Joi.boolean(),
+    multilingualSupport: Joi.array().items(Joi.string())
+  }).min(1).required()
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -187,4 +241,7 @@ module.exports = {
   refreshTokenSchema,
   searchUsersSchema,
   updateSocialProfileSchema,
+  updateAllPreferencesSchema,
+  updatePreferenceTypeSchema,
+  updateMultiplePreferencesSchema
 };
