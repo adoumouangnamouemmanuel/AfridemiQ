@@ -393,22 +393,10 @@ const frenchLessonSchema = baseLessonSchema.append({
   premiumOnly: Joi.boolean().default(false),
 });
 
-const updateFrenchLessonSchema = frenchLessonSchema
-  .fork([
-    "topicId",
-    "title",
-    "subjectType",
-    "interactivityLevel",
-    "metadata.createdBy",
-    "introduction.text",
-    "literaryAnalysis",
-    "grammar",
-    "vocabulary",
-    "writingSkills",
-    "practiceExercises",
-  ])
-  .optional()
-  .min(1)
+const updateFrenchLessonSchema = frenchLessonSchema.fork(
+  ["topicId", "title", "subjectType", "interactivityLevel", "metadata.createdBy", "introduction.text", "literaryAnalysis", "grammar", "vocabulary", "writingSkills", "practiceExercises"],
+  (schema) => schema.optional()
+).min(1)
   .messages({
     "object.min": "Au moins un champ doit être fourni pour la mise à jour",
   });
