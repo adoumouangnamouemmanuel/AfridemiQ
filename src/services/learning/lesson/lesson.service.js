@@ -241,4 +241,4 @@ class LessonService {
   }
 }
 
-module.exports = new LessonService();
+module.exports = LessonService;

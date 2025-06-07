@@ -308,4 +308,5 @@ class BiologyLessonService extends LessonService {
   }
 }
 
+// Create and export an instance
 module.exports = new BiologyLessonService();
