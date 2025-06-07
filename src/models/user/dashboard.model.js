@@ -78,7 +78,6 @@ const DashboardSchema = new Schema(
 );
 
 // Indexes for query performance
-DashboardSchema.index({ userId: 1 }, { unique: true });
 DashboardSchema.index({ "upcomingExams.date": 1 });
 DashboardSchema.index({ "recentQuizzes.completedAt": -1 });
 DashboardSchema.index({ streak: -1 });
