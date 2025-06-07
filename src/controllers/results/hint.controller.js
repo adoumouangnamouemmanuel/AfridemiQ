@@ -1,9 +1,13 @@
-const hintUsageService = require("../../services/results/hint.service");
+const { StatusCodes } = require("http-status-codes");
+const hintService = require("../../services/results/hint.service");
 const { asyncHandler } = require("../../utils/asyncHandler");
 const { ApiError } = require("../../utils/ApiError");
+const createLogger = require("../../services/logging.service");
+const { HintUsage } = require("../../models/results/hint.model");
 
-class HintUsageController {
-  // Record hint usage
+const logger = createLogger("HintController");
+
+class HintController {
   recordHintUsage = asyncHandler(async (req, res) => {
     const hintData = {
       ...req.body,
@@ -14,27 +18,24 @@ class HintUsageController {
         screenSize: req.body.screenSize,
       },
     };
-
-    const result = await hintUsageService.recordHintUsage(hintData);
+    const result = await hintService.recordHintUsage(hintData);
     res.status(result.statusCode).json(result);
   });
 
-  // Get hint usage by ID
   getHintUsageById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const result = await hintUsageService.getHintUsageById(id);
+    const result = await hintService.getHintUsageById(id);
     res.status(result.statusCode).json(result);
   });
 
-  // Get user's hint usage history
   getUserHintUsage = asyncHandler(async (req, res) => {
     const userId = req.params.userId || req.user.id;
-
-    // Users can only access their own data unless they're admin
     if (userId !== req.user.id && req.user.role !== "admin") {
-      throw new ApiError(403, "Access denied");
+      logger.warn(
+        `Accès refusé pour l'utilisateur ${req.user.id} tentant d'accéder aux données de ${userId}`
+      );
+      throw new ApiError(403, "Accès refusé");
     }
-
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 20,
@@ -44,12 +45,10 @@ class HintUsageController {
       endDate: req.query.endDate,
       hintType: req.query.hintType,
     };
-
-    const result = await hintUsageService.getUserHintUsage(userId, options);
+    const result = await hintService.getUserHintUsage(userId, options);
     res.status(result.statusCode).json(result);
   });
 
-  // Get current user's hint usage
   getMyHintUsage = asyncHandler(async (req, res) => {
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -60,124 +59,129 @@ class HintUsageController {
       endDate: req.query.endDate,
       hintType: req.query.hintType,
     };
-
-    const result = await hintUsageService.getUserHintUsage(
-      req.user.id,
-      options
-    );
+    const result = await hintService.getUserHintUsage(req.user.id, options);
     res.status(result.statusCode).json(result);
   });
 
-  // Get question hint statistics
   getQuestionHintStats = asyncHandler(async (req, res) => {
     const { questionId } = req.params;
-    const result = await hintUsageService.getQuestionHintStats(questionId);
+    const result = await hintService.getQuestionHintStats(questionId);
     res.status(result.statusCode).json(result);
   });
 
-  // Get user hint analytics
   getUserHintAnalytics = asyncHandler(async (req, res) => {
     const userId = req.params.userId || req.user.id;
-
-    // Users can only access their own analytics unless they're admin
     if (userId !== req.user.id && req.user.role !== "admin") {
-      throw new ApiError(403, "Access denied");
+      logger.warn(
+        `Accès refusé pour l'utilisateur ${req.user.id} tentant d'accéder aux analyses de ${userId}`
+      );
+      throw new ApiError(403, "Accès refusé");
     }
-
-    const result = await hintUsageService.getUserHintAnalytics(userId);
+    const result = await hintService.getUserHintAnalytics(userId);
     res.status(result.statusCode).json(result);
   });
 
-  // Get my hint analytics
   getMyHintAnalytics = asyncHandler(async (req, res) => {
-    const result = await hintUsageService.getUserHintAnalytics(req.user.id);
+    const result = await hintService.getUserHintAnalytics(req.user.id);
     res.status(result.statusCode).json(result);
   });
 
-  // Get questions needing better hints (admin only)
   getQuestionsNeedingBetterHints = asyncHandler(async (req, res) => {
-    if (req.user.role !== "admin") {
-      throw new ApiError(403, "Only administrators can access this endpoint");
-    }
-
-    const result = await hintUsageService.getQuestionsNeedingBetterHints();
+    const result = await hintService.getQuestionsNeedingBetterHints();
     res.status(result.statusCode).json(result);
   });
 
-  // Update hint usage
   updateHintUsage = asyncHandler(async (req, res) => {
     const { id } = req.params;
-
-    // Check if user owns the hint usage record or is admin
-    const hintUsage = await hintUsageService.getHintUsageById(id);
+    const hintUsage = await HintUsage.findById(id).select("userId");
+    if (!hintUsage) {
+      logger.warn(
+        `Utilisation d'indice introuvable pour la mise à jour: ${id}`
+      );
+      throw new ApiError(404, "Enregistrement d'indice introuvable");
+    }
     if (
-      hintUsage.data.userId._id.toString() !== req.user.id &&
+      hintUsage.userId.toString() !== req.user.id &&
       req.user.role !== "admin"
     ) {
+      logger.warn(
+        `Utilisateur non autorisé ${req.user.id} pour la mise à jour de l'indice ${id}`
+      );
       throw new ApiError(
         403,
-        "Not authorized to update this hint usage record"
+        "Non autorisé à mettre à jour cet enregistrement d'indice"
       );
     }
-
-    const result = await hintUsageService.updateHintUsage(id, req.body);
+    const result = await hintService.updateHintUsage(id, req.body);
     res.status(result.statusCode).json(result);
   });
 
-  // Delete hint usage record
   deleteHintUsage = asyncHandler(async (req, res) => {
     const { id } = req.params;
-
-    // Check if user owns the hint usage record or is admin
-    const hintUsage = await hintUsageService.getHintUsageById(id);
+    const hintUsage = await HintUsage.findById(id).select("userId");
+    if (!hintUsage) {
+      logger.warn(
+        `Utilisation d'indice introuvable pour la suppression: ${id}`
+      );
+      throw new ApiError(404, "Enregistrement d'indice introuvable");
+    }
     if (
-      hintUsage.data.userId._id.toString() !== req.user.id &&
+      hintUsage.userId.toString() !== req.user.id &&
       req.user.role !== "admin"
     ) {
+      logger.warn(
+        `Utilisateur non autorisé ${req.user.id} pour la suppression de l'indice ${id}`
+      );
       throw new ApiError(
         403,
-        "Not authorized to delete this hint usage record"
+        "Non autorisé à supprimer cet enregistrement d'indice"
       );
     }
-
-    const result = await hintUsageService.deleteHintUsage(id);
+    const result = await hintService.deleteHintUsage(id);
     res.status(result.statusCode).json(result);
   });
 
-  // Get hint usage summary (admin only)
-  getHintUsageSummary = asyncHandler(async (req, res) => {
-    if (req.user.role !== "admin") {
-      throw new ApiError(403, "Only administrators can access this endpoint");
+  addViewedStep = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { stepNumber } = req.body;
+    const hintUsage = await HintUsage.findById(id).select("userId");
+    if (!hintUsage) {
+      logger.warn(
+        `Utilisation d'indice introuvable pour l'ajout d'étape: ${id}`
+      );
+      throw new ApiError(404, "Enregistrement d'indice introuvable");
     }
+    if (
+      hintUsage.userId.toString() !== req.user.id &&
+      req.user.role !== "admin"
+    ) {
+      logger.warn(
+        `Utilisateur non autorisé ${req.user.id} pour l'ajout d'étape à l'indice ${id}`
+      );
+      throw new ApiError(
+        403,
+        "Non autorisé à ajouter une étape à cet enregistrement d'indice"
+      );
+    }
+    const result = await hintService.addViewedStep(id, stepNumber);
+    res.status(result.statusCode).json(result);
+  });
 
+  getHintUsageSummary = asyncHandler(async (req, res) => {
     const options = {
       startDate: req.query.startDate,
       endDate: req.query.endDate,
       groupBy: req.query.groupBy || "day",
     };
-
-    const result = await hintUsageService.getHintUsageSummary(options);
+    const result = await hintService.getHintUsageSummary(options);
     res.status(result.statusCode).json(result);
   });
 
-  // Bulk delete hint usages (admin only)
   bulkDeleteHintUsages = asyncHandler(async (req, res) => {
-    if (req.user.role !== "admin") {
-      throw new ApiError(
-        403,
-        "Only administrators can perform bulk operations"
-      );
-    }
-
     const { hintUsageIds } = req.body;
-
-    if (!Array.isArray(hintUsageIds) || hintUsageIds.length === 0) {
-      throw new ApiError(400, "Hint usage IDs array is required");
-    }
-
-    const result = await hintUsageService.bulkDeleteHintUsages(hintUsageIds);
+    const result = await hintService.bulkDeleteHintUsages(hintUsageIds);
     res.status(result.statusCode).json(result);
   });
 }
 
-module.exports = new HintUsageController();
+module.exports = new HintController();
