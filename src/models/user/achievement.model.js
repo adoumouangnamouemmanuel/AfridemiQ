@@ -1,5 +1,6 @@
 const { Schema, model, Types } = require("mongoose");
 
+// ==================== SCHEMA ==================
 /**
  * Mongoose schema for user achievements, tracking progress and completion status.
  * @module AchievementSchema
