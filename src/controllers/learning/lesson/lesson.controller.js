@@ -3,7 +3,7 @@ const lessonService = require("../../../services/learning/lesson/lesson.service"
 const { asyncHandler } = require("../../../utils/asyncHandler");
 const { ApiError } = require("../../../utils/ApiError");
 const createLogger = require("../../../services/logging.service");
-const { Lesson } = require("../../../models/learning/lesson/lesson.model");
+const { Lesson } = require("../../../models/learning/lesson/lesson.base.model");
 
 const logger = createLogger("LessonController");
 

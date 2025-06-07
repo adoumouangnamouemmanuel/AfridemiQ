@@ -31,7 +31,7 @@ const studyPlanRoutes = require("./src/routes/learning/study.plan.route");
 const studyGroupRoutes = require("./src/routes/learning/study.group.route");
 
 // learning/lesson routes
-const lessonRoutes = require("./src/routes/learning/lesson.route");
+const lessonRoutes = require("./src/routes/learning/lesson/lesson.route");
 
 
 // assessment routes
