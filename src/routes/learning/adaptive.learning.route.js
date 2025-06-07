@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const Joi = require("joi");
 const adaptiveLearningController = require("../../controllers/learning/adaptive.learning.controller");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
@@ -40,15 +41,18 @@ router.put(
   adaptiveLearningController.updateAdaptiveLearning
 );
 
+// Adjust difficulty validation schema
+const adjustDifficultySchema = Joi.object({
+  score: Joi.number().min(0).max(100).optional(),
+  timeSpent: Joi.number().min(0).optional(),
+  accuracy: Joi.number().min(0).max(100).optional(),
+  completionRate: Joi.number().min(0).max(100).optional(),
+});
+
 // Adjust difficulty (user)
 router.post(
   "/user/:userId/adjust",
-  validateMiddleware({
-    score: Joi.number().min(0).max(100).optional(),
-    timeSpent: Joi.number().min(0).optional(),
-    accuracy: Joi.number().min(0).max(100).optional(),
-    completionRate: Joi.number().min(0).max(100).optional(),
-  }),
+  validateMiddleware(adjustDifficultySchema),
   adaptiveLearningController.adjustDifficulty
 );
 
