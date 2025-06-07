@@ -22,7 +22,7 @@ const {
   updateChallengeSchema,
   getChallengesSchema,
   submitChallengeResultSchema,
-} = require("../schemas/assessment/challenge.schema");
+} = require("../../schemas/assessment/challenge.schema");
 
 const router = express.Router();
 

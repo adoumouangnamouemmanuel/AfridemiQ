@@ -144,7 +144,7 @@ ChallengeSchema.virtual("isRegistrationOpen").get(function () {
   return this.status === "open" && now < deadline;
 });
 
-ChallengeSchema.virtual("isActive").get(function () {
+ChallengeSchema.virtual("isCurrentlyActive").get(function () {
   const now = new Date();
   return (
     this.status === "active" &&
