@@ -1,16 +1,25 @@
 const exerciseService = require("../../services/assessment/exercise/exercise.service");
 const { asyncHandler } = require("../../utils/asyncHandler");
 const { ApiError } = require("../../utils/ApiError");
+const createLogger = require("../../services/logging.service");
+
+const logger = createLogger("ExerciseController");
 
 class ExerciseController {
   // Create exercise
   createExercise = asyncHandler(async (req, res) => {
+    logger.info(`Requête de création d'exercice reçue de l'utilisateur ${req.user.id}`);
     const result = await exerciseService.createExercise(req.body, req.user.id);
     res.status(result.statusCode).json(result);
   });
 
   // Get all exercises
   getAllExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices reçue avec filtres:`, {
+      filters: req.query,
+      userId: req.user?.id
+    });
+
     const filters = {
       subjectId: req.query.subjectId,
       topicId: req.query.topicId,
@@ -39,6 +48,7 @@ class ExerciseController {
 
   // Get exercise by ID
   getExerciseById = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercice reçue pour l'ID: ${req.params.id}`);
     const populate = req.query.populate
       ? req.query.populate.split(",")
       : ["subjectId", "topicId", "metadata.createdBy"];
@@ -51,6 +61,7 @@ class ExerciseController {
 
   // Update exercise
   updateExercise = asyncHandler(async (req, res) => {
+    logger.info(`Requête de mise à jour d'exercice reçue pour l'ID: ${req.params.id} de l'utilisateur ${req.user.id}`);
     const result = await exerciseService.updateExercise(
       req.params.id,
       req.body,
@@ -61,6 +72,7 @@ class ExerciseController {
 
   // Delete exercise
   deleteExercise = asyncHandler(async (req, res) => {
+    logger.info(`Requête de suppression d'exercice reçue pour l'ID: ${req.params.id} de l'utilisateur ${req.user.id}`);
     const result = await exerciseService.deleteExercise(
       req.params.id,
       req.user.id
@@ -70,6 +82,7 @@ class ExerciseController {
 
   // Get exercises by subject
   getExercisesBySubject = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices par matière reçue pour l'ID: ${req.params.subjectId}`);
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
@@ -89,6 +102,7 @@ class ExerciseController {
 
   // Get exercises by topic
   getExercisesByTopic = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices par sujet reçue pour l'ID: ${req.params.topicId}`);
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
@@ -108,6 +122,7 @@ class ExerciseController {
 
   // Get exercises by difficulty
   getExercisesByDifficulty = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices par difficulté reçue: ${req.params.difficulty}`);
     const options = {
       page: Number.parseInt(req.query.page) || 1,
       limit: Number.parseInt(req.query.limit) || 10,
@@ -127,10 +142,12 @@ class ExerciseController {
 
   // Add feedback
   addFeedback = asyncHandler(async (req, res) => {
+    logger.info(`Requête d'ajout de commentaire reçue pour l'exercice ${req.params.id} de l'utilisateur ${req.user.id}`);
     const { rating, comments } = req.body;
 
     if (!rating || rating < 0 || rating > 5) {
-      throw new ApiError(400, "Rating must be between 0 and 5");
+      logger.warn(`Note invalide: ${rating} de l'utilisateur ${req.user.id}`);
+      throw new ApiError(400, "La note doit être comprise entre 0 et 5");
     }
 
     const result = await exerciseService.addFeedback(
@@ -144,10 +161,12 @@ class ExerciseController {
 
   // Update analytics
   updateAnalytics = asyncHandler(async (req, res) => {
+    logger.info(`Requête de mise à jour des statistiques reçue pour l'exercice ${req.params.id}`);
     const { score, timeSpent } = req.body;
 
     if (score === undefined || timeSpent === undefined) {
-      throw new ApiError(400, "Score and timeSpent are required");
+      logger.warn(`Données statistiques manquantes pour l'exercice ${req.params.id}`);
+      throw new ApiError(400, "Le score et le temps passé sont requis");
     }
 
     const result = await exerciseService.updateAnalytics(
@@ -160,12 +179,14 @@ class ExerciseController {
 
   // Get exercise analytics
   getExerciseAnalytics = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération des statistiques reçue pour l'exercice ${req.params.id}`);
     const result = await exerciseService.getExerciseAnalytics(req.params.id);
     res.status(result.statusCode).json(result);
   });
 
   // Get recommended exercises
   getRecommendedExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices recommandés reçue pour l'utilisateur ${req.user.id}`);
     const options = {
       limit: Number.parseInt(req.query.limit) || 10,
       difficulty: req.query.difficulty,
@@ -182,10 +203,12 @@ class ExerciseController {
 
   // Bulk create exercises
   bulkCreateExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de création en masse d'exercices reçue de l'utilisateur ${req.user.id}`);
     if (!Array.isArray(req.body) || req.body.length === 0) {
+      logger.warn(`Corps de requête invalide pour la création en masse de l'utilisateur ${req.user.id}`);
       throw new ApiError(
         400,
-        "Request body must be a non-empty array of exercises"
+        "Le corps de la requête doit être un tableau non vide d'exercices"
       );
     }
 
@@ -198,14 +221,17 @@ class ExerciseController {
 
   // Bulk update exercises
   bulkUpdateExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de mise à jour en masse d'exercices reçue de l'utilisateur ${req.user.id}`);
     const { exerciseIds, updateData } = req.body;
 
     if (!Array.isArray(exerciseIds) || exerciseIds.length === 0) {
-      throw new ApiError(400, "exerciseIds must be a non-empty array");
+      logger.warn(`Tableau d'IDs d'exercices invalide dans la requête de mise à jour en masse de l'utilisateur ${req.user.id}`);
+      throw new ApiError(400, "exerciseIds doit être un tableau non vide");
     }
 
     if (!updateData || typeof updateData !== "object") {
-      throw new ApiError(400, "updateData is required and must be an object");
+      logger.warn(`Données de mise à jour invalides dans la requête de mise à jour en masse de l'utilisateur ${req.user.id}`);
+      throw new ApiError(400, "updateData est requis et doit être un objet");
     }
 
     const result = await exerciseService.bulkUpdateExercises(
@@ -218,10 +244,12 @@ class ExerciseController {
 
   // Bulk delete exercises
   bulkDeleteExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de suppression en masse d'exercices reçue de l'utilisateur ${req.user.id}`);
     const { exerciseIds } = req.body;
 
     if (!Array.isArray(exerciseIds) || exerciseIds.length === 0) {
-      throw new ApiError(400, "exerciseIds must be a non-empty array");
+      logger.warn(`Tableau d'IDs d'exercices invalide dans la requête de suppression en masse de l'utilisateur ${req.user.id}`);
+      throw new ApiError(400, "exerciseIds doit être un tableau non vide");
     }
 
     const result = await exerciseService.bulkDeleteExercises(
@@ -233,6 +261,10 @@ class ExerciseController {
 
   // Advanced search
   advancedSearch = asyncHandler(async (req, res) => {
+    logger.info(`Requête de recherche avancée reçue avec critères:`, {
+      criteria: req.body,
+      userId: req.user?.id
+    });
     const searchCriteria = {
       keywords: req.body.keywords,
       subjects: req.body.subjects,
@@ -261,6 +293,10 @@ class ExerciseController {
 
   // Get exercise statistics
   getExerciseStatistics = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération des statistiques reçue avec filtres:`, {
+      filters: req.query,
+      userId: req.user?.id
+    });
     const filters = {
       subjectId: req.query.subjectId,
       topicId: req.query.topicId,
@@ -279,6 +315,7 @@ class ExerciseController {
 
   // Get subject-specific exercises
   getMathExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices de mathématiques reçue`);
     const filters = { ...req.query, subjectType: "math" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -291,6 +328,7 @@ class ExerciseController {
   });
 
   getPhysicsExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices de physique reçue`);
     const filters = { ...req.query, subjectType: "physics" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -303,6 +341,7 @@ class ExerciseController {
   });
 
   getChemistryExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices de chimie reçue`);
     const filters = { ...req.query, subjectType: "chemistry" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -315,6 +354,7 @@ class ExerciseController {
   });
 
   getBiologyExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices de biologie reçue`);
     const filters = { ...req.query, subjectType: "biology" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -327,6 +367,7 @@ class ExerciseController {
   });
 
   getFrenchExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices de français reçue`);
     const filters = { ...req.query, subjectType: "french" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -339,6 +380,7 @@ class ExerciseController {
   });
 
   getPhilosophyExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices de philosophie reçue`);
     const filters = { ...req.query, subjectType: "philosophy" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -351,6 +393,7 @@ class ExerciseController {
   });
 
   getEnglishExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices d'anglais reçue`);
     const filters = { ...req.query, subjectType: "english" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -363,6 +406,7 @@ class ExerciseController {
   });
 
   getHistoryExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices d'histoire reçue`);
     const filters = { ...req.query, subjectType: "history" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -375,6 +419,7 @@ class ExerciseController {
   });
 
   getGeographyExercises = asyncHandler(async (req, res) => {
+    logger.info(`Requête de récupération d'exercices de géographie reçue`);
     const filters = { ...req.query, subjectType: "geography" };
     const options = {
       page: Number.parseInt(req.query.page) || 1,
