@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const lessonController = require("../../../controllers/learning/lesson/english.lesson.controller");
-const authMiddleware = require("../../../middleware/auth.middleware");
-const roleMiddleware = require("../../../middleware/roleMiddleware");
-const validateMiddleware = require("../../../middleware/validate.middleware");
-const { apiLimiter } = require("../../../middleware/rate.limit.middleware");
+const authMiddleware = require("../../../middlewares/auth.middleware");
+const roleMiddleware = require("../../../middlewares/role.middleware");
+const validateMiddleware = require("../../../middlewares/validate.middleware");
+const { apiLimiter } = require("../../../middlewares/rate.limit.middleware");
 const {
   englishLessonSchema,
   updateEnglishLessonSchema,

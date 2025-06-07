@@ -208,18 +208,15 @@ const englishLessonSchema = baseLessonSchema.append({
   speakingSkills: Joi.array()
     .items(
       Joi.object({
-        topic: Joi.string().trim().min(3).required().messages({
-          "string.min": "Sujet trop court (min 3 caractères)",
+        topic: Joi.string().valid("grammar", "reading_comprehension", "writing_skills", "speaking").required().messages({
+          "any.only": "Sujet d'anglais invalide",
           "any.required": "Sujet requis",
-        }),
-        topic: Joi.string().valid("example").default("speaking").messages({
-          "any.invalid": "Sujet d'anglais invalide",
         }),
         instructions: Joi.string().trim().max(500).optional().messages({
           "string.max": "Instructions trop longues (max 500 caractères)",
         }),
-        sampleDialogue: Joi.string().trim().max(1000, 'example').default("spoken example").messages({
-          "string.max": "Dialogue d'exemple",
+        sampleDialogue: Joi.string().trim().max(1000).optional().messages({
+          "string.max": "Dialogue d'exemple trop long (max 1000 caractères)",
         }),
         pronunciationGuide: Joi.string().trim().max(500).optional().messages({
           "string.max": "Guide de prononciation trop long (max 500 caractères)",
@@ -342,18 +339,10 @@ const englishLessonSchema = baseLessonSchema.append({
   premiumOnly: Joi.boolean().default(false)
 });
 
-const updateEnglishLessonSchema = englishLessonSchema.fork([
-  "topicId",
-  "title",
-  "topicId",
-  "subjectType",
-  "interactivityLevel",
-  "metadata.createdBy",
-  "introduction.text",
-  "grammar",
-  "practiceExercises",
-]).optional()
-  .min(1)
+const updateEnglishLessonSchema = englishLessonSchema.fork(
+  ["topicId", "title", "subjectType", "interactivityLevel", "metadata.createdBy", "introduction.text", "grammar", "practiceExercises"],
+  (schema) => schema.optional()
+).min(1)
   .messages({
     "object.min": "Au moins un champ doit être fourni pour la mise à jour",
   });
