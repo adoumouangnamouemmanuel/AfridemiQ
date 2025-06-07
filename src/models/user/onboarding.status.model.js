@@ -1,73 +1,85 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, model, Types } = require("mongoose");
+const { TOTAL_STEPS } = require("../../constants");
 
+// =============== CONSTANTS =============
+/**
+ * Imported constants for onboarding steps.
+ * @see module:constants
+ */
+
+// ==================== SCHEMA ==================
+/**
+ * Mongoose schema for tracking user onboarding progress.
+ * @module OnboardingStatusSchema
+ */
 const OnboardingStatusSchema = new Schema(
   {
+    // Onboarding details
     userId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "User",
-      required: true,
+      required: [true, "L'ID utilisateur est requis"],
       unique: true,
     },
-    completedSteps: [String],
-    currentStep: { type: String, required: true },
-    lastUpdated: { type: Date, default: Date.now },
+    completedSteps: {
+      type: [String],
+      default: [],
+    },
+    currentStep: {
+      type: String,
+      required: [true, "L'étape actuelle est requise"],
+    },
+    lastUpdated: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
-// Indexes for better performance
-// OnboardingStatusSchema.index({ userId: 1 });
+// =============== INDEXES =================
 OnboardingStatusSchema.index({ currentStep: 1 });
 OnboardingStatusSchema.index({ lastUpdated: -1 });
 
-// Virtual for completion percentage
+// =============== VIRTUALS =============
+/**
+ * Virtual field for onboarding completion percentage.
+ * @returns {number} Rounded percentage of completed steps, or 0 if no steps defined.
+ */
 OnboardingStatusSchema.virtual("completionPercentage").get(function () {
-  const totalSteps = [
-    "profile_setup",
-    "preferences",
-    "subjects_selection",
-    "exam_selection",
-    "goals_setting",
-    "tutorial_completion",
-  ];
-
-  if (totalSteps.length === 0) return 0;
-  return Math.round((this.completedSteps.length / totalSteps.length) * 100);
+  return TOTAL_STEPS.length
+    ? Math.round(
+        ((this.completedSteps?.length ?? 0) / TOTAL_STEPS.length) * 100
+      )
+    : 0;
 });
 
-// Virtual for remaining steps
+/**
+ * Virtual field for remaining onboarding steps.
+ * @returns {string[]} Array of steps not yet completed.
+ */
 OnboardingStatusSchema.virtual("remainingSteps").get(function () {
-  const totalSteps = [
-    "profile_setup",
-    "preferences",
-    "subjects_selection",
-    "exam_selection",
-    "goals_setting",
-    "tutorial_completion",
-  ];
-
-  return totalSteps.filter((step) => !this.completedSteps.includes(step));
+  return TOTAL_STEPS.filter(
+    (step) => !(this.completedSteps ?? []).includes(step)
+  );
 });
 
-// Virtual for is completed
+/**
+ * Virtual field to check if onboarding is complete.
+ * @returns {boolean} True if all steps are completed, false otherwise.
+ */
 OnboardingStatusSchema.virtual("isCompleted").get(function () {
-  const totalSteps = [
-    "profile_setup",
-    "preferences",
-    "subjects_selection",
-    "exam_selection",
-    "goals_setting",
-    "tutorial_completion",
-  ];
-
-  return this.completedSteps.length >= totalSteps.length;
+  return (this.completedSteps?.length ?? 0) >= TOTAL_STEPS.length;
 });
 
-// Ensure virtual fields are serialized
-OnboardingStatusSchema.set("toJSON", { virtuals: true });
-OnboardingStatusSchema.set("toObject", { virtuals: true });
-
+/**
+ * OnboardingStatus model for interacting with the OnboardingStatus collection.
+ * @type {mongoose.Model}
+ */
 module.exports = {
-  OnboardingStatus: mongoose.model("OnboardingStatus", OnboardingStatusSchema),
+  OnboardingStatus: model("OnboardingStatus", OnboardingStatusSchema),
 };
