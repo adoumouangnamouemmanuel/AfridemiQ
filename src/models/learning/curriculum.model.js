@@ -133,7 +133,7 @@ const CurriculumSchema = new Schema(
       ref: "User",
       required: [true, "Le créateur est requis"],
       index: true,
-      default: "666166616661666166616661",
+      default: "6842e98f15589cf49ccdf916",
     },
   },
   {
