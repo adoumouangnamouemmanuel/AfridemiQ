@@ -46,6 +46,7 @@ const topicProgressRoutes = require("./src/routes/progress/topic.progress.route"
 
 // Results routes
 const userHintRoutes = require("./src/routes/results/hint.route");
+const quizResultRoutes = require("./src/routes/results/quiz.result.route");
 
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const dotenv = require("dotenv");
@@ -146,6 +147,7 @@ app.use("/api/progress/topic", topicProgressRoutes);
 app.use("/api/parent-access", parentAccessRoutes);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/hints", userHintRoutes);
+app.use("/api/quiz-results", quizResultRoutes);
 app.use("/api/challenges", challengeRoutes);
 app.use("/api/exam-schedules", examScheduleRoutes);
 app.use("/api/questions", questionRoutes);
