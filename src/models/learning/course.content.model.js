@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 // Shared constants
-const DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
+const DIFFICULTY_LEVELS = ["Beginner", "Intermediate", "Advanced"];
 
 const CourseContentSchema = new Schema(
   {
     examId: [{ type: Schema.Types.ObjectId, ref: "Exam", required: true }],
     subjectId: { type: Schema.Types.ObjectId, ref: "Subject", required: true },
-    topicId: [{ type: Schema.Types.ObjectId, ref: "Topic", required: true }],
-    series: String,
+    topicIds: [{ type: Schema.Types.ObjectId, ref: "Topic", required: true }],
+    series: [String],
     title: { type: String, required: true },
     description: { type: String, required: true },
     level: { type: String, enum: DIFFICULTY_LEVELS, required: true },
@@ -85,6 +85,43 @@ CourseContentSchema.virtual("isCompleted").get(function () {
     this.progressTracking.completedLessons ===
       this.progressTracking.totalLessons
   );
+});
+
+// Pre-save middleware to validate references
+CourseContentSchema.pre("save", async function (next) {
+  try {
+    // Validate subjectId
+    if (this.subjectId) {
+      const subject = await mongoose.model("Subject").findById(this.subjectId);
+      if (!subject) {
+        return next(new Error("Invalid subject ID"));
+      }
+    }
+
+    // Validate topicIds
+    if (this.topicIds && this.topicIds.length > 0) {
+      const topics = await mongoose.model("Topic").find({
+        _id: { $in: this.topicIds },
+      });
+      if (topics.length !== this.topicIds.length) {
+        return next(new Error("One or more invalid topic IDs"));
+      }
+    }
+
+    // Validate examId
+    if (this.examId && this.examId.length > 0) {
+      const exams = await mongoose.model("Exam").find({
+        _id: { $in: this.examId },
+      });
+      if (exams.length !== this.examId.length) {
+        return next(new Error("One or more invalid exam IDs"));
+      }
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Ensure virtual fields are serialized
