@@ -32,16 +32,28 @@ const getStudyPlanById = async (req, res) => {
 
 const getStudyPlanByUserId = async (req, res) => {
   try {
-    const studyPlan = await studyPlanService.getStudyPlanByUserId(
-      req.params.userId
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Plan d'étude récupéré avec succès",
+    const { userId } = req.params;
+    const studyPlan = await studyPlanService.getStudyPlanByUserId(userId);
+    
+    if (!studyPlan) {
+      return res.status(200).json({
+        status: "success",
+        message: "No study plan found for this user",
+        data: null
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
       data: studyPlan,
     });
   } catch (error) {
-    logger.error("Error retrieving study plan:", error);
-    throw error;
+    logger.error("Error in getStudyPlanByUserId controller:", error);
+    res.status(error.statusCode || 500).json({
+      status: "error",
+      message: error.message,
+      code: error.name,
+    });
   }
 };
 

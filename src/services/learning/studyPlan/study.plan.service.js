@@ -61,8 +61,7 @@ class StudyPlanService {
           "name"
         )
         .populate("adaptiveLearningId", "currentLevel");
-      if (!studyPlan)
-        throw new ApiError(404, "Study plan not found for this user");
+      
       logger.info(`Retrieved study plan for user: ${userId}`);
       return studyPlan;
     } catch (error) {
