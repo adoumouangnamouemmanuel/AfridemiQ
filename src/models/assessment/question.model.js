@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const {
+  DIFFICULTY_LEVELS,
+} = require("../../models/learning/adaptive.learning.model");
 
-// Shared constants
 const QUESTION_TYPES = [
   "multiple_choice",
   "short_answer",
@@ -11,7 +13,6 @@ const QUESTION_TYPES = [
   "matching",
 ];
 const MEDIA_TYPES = ["image", "audio", "video", "document"];
-const DIFFICULTY_LEVELS = ["Easy", "Medium", "Hard"];
 
 const QuestionSchema = new Schema(
   {
@@ -33,10 +34,16 @@ const QuestionSchema = new Schema(
       required: true,
       index: true,
     },
-    series: [String],
+    series: [{ type: String, trim: true, minlength: 1 }],
     level: {
       type: String,
-      enum: ["Primary", "JSS", "SSS", "University", "Professional"],
+      enum: [
+        "primary",
+        "junior_secondary",
+        "senior_secondary",
+        "university",
+        "professional",
+      ],
       required: true,
       index: true,
     },
@@ -59,15 +66,31 @@ const QuestionSchema = new Schema(
           if (["multiple_choice", "true_false"].includes(this.format)) {
             return options && options.length >= 2;
           }
+          if (this.format === "matching") {
+            return options && options.length % 2 === 0;
+          }
           return true;
         },
-        message:
-          "Multiple choice and true/false questions must have at least 2 options",
+        message: "Invalid options for question format",
       },
     },
     correctAnswer: {
       type: Schema.Types.Mixed,
       required: true,
+      validate: {
+        validator: function (answer) {
+          if (this.format === "true_false") return typeof answer === "boolean";
+          if (this.format === "multiple_choice")
+            return this.options.includes(answer);
+          if (this.format === "matching")
+            return (
+              Array.isArray(answer) &&
+              answer.every((pair) => pair.question && pair.answer)
+            );
+          return true;
+        },
+        message: "Invalid correct answer for question format",
+      },
     },
     explanation: {
       type: String,
@@ -90,14 +113,15 @@ const QuestionSchema = new Schema(
     timeEstimate: {
       type: Number, // in seconds
       min: 10,
-      max: 3600, // 1 hour max
-      default: 120, // 2 minutes default
+      max: 3600,
+      default: 120,
     },
-    steps: [String], // Solution steps
-    hints: [String], // Hints for students
+    steps: [{ type: String, maxlength: 500 }],
+    hints: [{ type: String, maxlength: 500 }],
     tags: {
       type: [String],
       index: true,
+      maxlength: 50,
     },
     relatedQuestions: [
       {
@@ -110,7 +134,7 @@ const QuestionSchema = new Schema(
       correctAttempts: { type: Number, default: 0 },
       averageTimeToAnswer: { type: Number, default: 0 },
       skipRate: { type: Number, default: 0 },
-      difficultyRating: { type: Number, default: 0 }, // User-rated difficulty
+      difficultyRating: { type: Number, default: 0 },
     },
     content: {
       media: [
@@ -125,8 +149,8 @@ const QuestionSchema = new Schema(
           },
           altText: String,
           caption: String,
-          size: Number, // file size in bytes
-          duration: Number, // for audio/video in seconds
+          size: Number,
+          duration: Number,
         },
       ],
       formatting: {
@@ -146,7 +170,7 @@ const QuestionSchema = new Schema(
       verifiedBy: { type: Schema.Types.ObjectId, ref: "User" },
       verifiedAt: Date,
       qualityScore: { type: Number, min: 0, max: 10 },
-      feedback: [String],
+      feedback: [{ type: String, maxlength: 500 }],
     },
     usage: {
       assessmentCount: { type: Number, default: 0 },
@@ -168,7 +192,7 @@ const QuestionSchema = new Schema(
   }
 );
 
-// Compound indexes for better query performance
+// Indexes
 QuestionSchema.index({ subjectId: 1, topicId: 1, difficulty: 1 });
 QuestionSchema.index({ format: 1, level: 1, status: 1 });
 QuestionSchema.index({ creatorId: 1, status: 1 });
@@ -176,11 +200,43 @@ QuestionSchema.index({ tags: 1, isActive: 1 });
 QuestionSchema.index({ series: 1, level: 1 });
 QuestionSchema.index({ "analytics.totalAttempts": -1 });
 QuestionSchema.index({ "usage.popularityScore": -1 });
+QuestionSchema.index({ relatedQuestions: 1 });
 
-// Virtual fields
+// Pre-save middleware
+QuestionSchema.pre("save", async function (next) {
+  try {
+    const [topic, subject, creator, verifiedBy, relatedQuestions] =
+      await Promise.all([
+        mongoose.model("Topic").findById(this.topicId),
+        mongoose.model("Subject").findById(this.subjectId),
+        mongoose.model("User").findById(this.creatorId),
+        this.validation.verifiedBy
+          ? mongoose.model("User").findById(this.validation.verifiedBy)
+          : Promise.resolve(null),
+        this.relatedQuestions.length > 0
+          ? mongoose
+              .model("Question")
+              .find({ _id: { $in: this.relatedQuestions } })
+          : Promise.resolve([]),
+      ]);
+    if (!topic) return next(new Error("Invalid topic ID"));
+    if (!subject) return next(new Error("Invalid subject ID"));
+    if (!creator) return next(new Error("Invalid creator ID"));
+    if (this.validation.verifiedBy && !verifiedBy)
+      return next(new Error("Invalid verifiedBy ID"));
+    if (relatedQuestions.length !== this.relatedQuestions.length) {
+      return next(new Error("One or more invalid related question IDs"));
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 QuestionSchema.virtual("successRate").get(function () {
-  if (this.analytics.totalAttempts === 0) return 0;
-  return (this.analytics.correctAttempts / this.analytics.totalAttempts) * 100;
+  return this.analytics.totalAttempts === 0
+    ? 0
+    : (this.analytics.correctAttempts / this.analytics.totalAttempts) * 100;
 });
 
 QuestionSchema.virtual("averageTimeMinutes").get(function () {
@@ -199,18 +255,13 @@ QuestionSchema.virtual("hasMedia").get(function () {
   return this.content.media && this.content.media.length > 0;
 });
 
-// Methods
 QuestionSchema.methods.updateAnalytics = function (
   isCorrect,
   timeSpent,
   wasSkipped = false
 ) {
   this.analytics.totalAttempts += 1;
-
-  if (isCorrect) {
-    this.analytics.correctAttempts += 1;
-  }
-
+  if (isCorrect) this.analytics.correctAttempts += 1;
   if (wasSkipped) {
     const currentSkips = Math.round(
       (this.analytics.skipRate * (this.analytics.totalAttempts - 1)) / 100
@@ -218,7 +269,6 @@ QuestionSchema.methods.updateAnalytics = function (
     this.analytics.skipRate =
       ((currentSkips + 1) / this.analytics.totalAttempts) * 100;
   }
-
   if (timeSpent > 0) {
     const totalTime =
       this.analytics.averageTimeToAnswer * (this.analytics.totalAttempts - 1) +
@@ -226,7 +276,6 @@ QuestionSchema.methods.updateAnalytics = function (
     this.analytics.averageTimeToAnswer =
       totalTime / this.analytics.totalAttempts;
   }
-
   return this.save();
 };
 
@@ -235,7 +284,6 @@ QuestionSchema.methods.incrementUsage = function () {
   this.usage.lastUsed = new Date();
   this.usage.popularityScore =
     this.analytics.totalAttempts * 0.3 + this.usage.assessmentCount * 0.7;
-
   return this.save();
 };
 
@@ -250,7 +298,6 @@ QuestionSchema.methods.verify = function (
   this.validation.qualityScore = qualityScore;
   this.validation.feedback = feedback;
   this.status = qualityScore >= 7 ? "approved" : "review";
-
   return this.save();
 };
 
@@ -262,25 +309,23 @@ QuestionSchema.methods.addRelatedQuestion = function (questionId) {
   return Promise.resolve(this);
 };
 
-// Static methods
 QuestionSchema.statics.findBySubjectAndTopic = function (
   subjectId,
   topicId,
   options = {}
 ) {
   const query = { subjectId, topicId, isActive: true, status: "approved" };
-
   if (options.difficulty) query.difficulty = options.difficulty;
   if (options.format) query.format = options.format;
   if (options.level) query.level = options.level;
   if (options.premiumOnly !== undefined)
     query.premiumOnly = options.premiumOnly;
-
   return this.find(query)
     .populate("topicId", "name")
     .populate("subjectId", "name code")
     .populate("creatorId", "name")
-    .sort({ "usage.popularityScore": -1 });
+    .sort({ "usage.popularityScore": -1 })
+    .lean();
 };
 
 QuestionSchema.statics.findForAssessment = function (criteria) {
@@ -294,29 +339,26 @@ QuestionSchema.statics.findForAssessment = function (criteria) {
     excludeIds = [],
     premiumOnly = false,
   } = criteria;
-
   const query = {
     subjectId,
     isActive: true,
     status: "approved",
     _id: { $nin: excludeIds },
   };
-
   if (topicIds.length > 0) query.topicId = { $in: topicIds };
   if (difficulty) query.difficulty = difficulty;
   if (format) query.format = format;
   if (level) query.level = level;
   if (premiumOnly !== undefined) query.premiumOnly = premiumOnly;
-
   return this.find(query)
     .limit(count)
-    .sort({ "usage.popularityScore": -1, createdAt: -1 });
+    .sort({ "usage.popularityScore": -1, createdAt: -1 })
+    .lean();
 };
 
 QuestionSchema.statics.findSimilar = function (questionId, limit = 5) {
   return this.findById(questionId).then((question) => {
     if (!question) return [];
-
     return this.find({
       _id: { $ne: questionId },
       subjectId: question.subjectId,
@@ -328,20 +370,19 @@ QuestionSchema.statics.findSimilar = function (questionId, limit = 5) {
     })
       .limit(limit)
       .populate("topicId", "name")
-      .sort({ "usage.popularityScore": -1 });
+      .sort({ "usage.popularityScore": -1 })
+      .lean();
   });
 };
 
 QuestionSchema.statics.getAnalyticsSummary = function (filters = {}) {
   const matchStage = { isActive: true };
-
   if (filters.subjectId)
     matchStage.subjectId = new mongoose.Types.ObjectId(filters.subjectId);
   if (filters.topicId)
     matchStage.topicId = new mongoose.Types.ObjectId(filters.topicId);
   if (filters.difficulty) matchStage.difficulty = filters.difficulty;
   if (filters.level) matchStage.level = filters.level;
-
   return this.aggregate([
     { $match: matchStage },
     {
@@ -369,12 +410,8 @@ QuestionSchema.statics.getAnalyticsSummary = function (filters = {}) {
         },
         averageAttempts: { $avg: "$analytics.totalAttempts" },
         averageTimeToAnswer: { $avg: "$analytics.averageTimeToAnswer" },
-        difficultyDistribution: {
-          $push: "$difficulty",
-        },
-        formatDistribution: {
-          $push: "$format",
-        },
+        difficultyDistribution: { $push: "$difficulty" },
+        formatDistribution: { $push: "$format" },
       },
     },
   ]);
@@ -384,5 +421,4 @@ module.exports = {
   Question: mongoose.model("Question", QuestionSchema),
   QUESTION_TYPES,
   MEDIA_TYPES,
-  DIFFICULTY_LEVELS,
 };
