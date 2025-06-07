@@ -1,5 +1,6 @@
 const { Schema, model, Types } = require("mongoose");
 
+// ==================== SCHEMA ==================
 /**
  * Mongoose schema for user dashboard, storing exam, quiz, and notification data.
  * @module DashboardSchema
@@ -77,11 +78,13 @@ const DashboardSchema = new Schema(
   }
 );
 
+// ==================== INDEXES ==================
 // Indexes for query performance
 DashboardSchema.index({ "upcomingExams.date": 1 });
 DashboardSchema.index({ "recentQuizzes.completedAt": -1 });
 DashboardSchema.index({ streak: -1 });
 
+// ==================== VIRTUAL ==================
 /**
  * Virtual field for total number of upcoming exams.
  * @returns {number} Length of upcomingExams array.
