@@ -245,25 +245,20 @@ const mathLessonSchema = baseLessonSchema.append({
   premiumOnly: Joi.boolean().default(false),
 });
 
-const updateMathLessonSchema = mathLessonSchema
-  .fork([
-    "topicId",
-    "title",
-    "duration",
-    "subjectType",
-    "interactivityLevel",
-    "metadata.createdBy",
-    "introduction.text",
-    "concepts",
-    "practiceExercises",
-  ])
-  .optional()
-  .min(1)
-  .messages({
-    "object.min": "Au moins un champ doit être fourni pour la mise à jour",
-  });
+const updateMathLessonSchema = mathLessonSchema.fork(
+  ["topicId", "subjectType", "introduction", "concepts", "theorems", "workedExamples", "practiceExercises", "interactiveElements"],
+  (schema) => schema.optional()
+);
+
+const getMathLessonSchema = Joi.object({
+  id: Joi.objectId().required().messages({
+    "any.required": "Identifiant de leçon requis",
+    "string.pattern.base": "Identifiant de leçon invalide",
+  }),
+});
 
 module.exports = {
-  mathLessonSchema,
+  createMathLessonSchema: mathLessonSchema,
   updateMathLessonSchema,
+  getMathLessonSchema,
 };
