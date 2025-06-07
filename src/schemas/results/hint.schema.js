@@ -1,78 +1,64 @@
 const Joi = require("joi");
+Joi.objectId = require("joi-objectid")(Joi);
+const {
+  DIFFICULTY_LEVELS,
+} = require("../../models/learning/adaptive.learning.model");
 
-// Record hint usage schema
 const recordHintUsageSchema = Joi.object({
-  questionId: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .required()
-    .messages({
-      "string.pattern.base": "Invalid question ID format",
-      "any.required": "Question ID is required",
-    }),
-
-  quizId: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .optional()
-    .messages({
-      "string.pattern.base": "Invalid quiz ID format",
-    }),
-
-  sessionId: Joi.string().optional(),
-
-  stepNumber: Joi.number().integer().min(0).optional().messages({
-    "number.min": "Step number must be non-negative",
-  }),
-
+  userId: Joi.objectId().required(),
+  questionId: Joi.objectId().required(),
+  quizId: Joi.objectId().optional(),
+  series: Joi.array().items(Joi.string().trim().min(1)).optional(),
+  sessionId: Joi.string()
+    .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+    .optional(),
+  stepNumber: Joi.number().integer().min(0).optional(),
   hintType: Joi.string()
     .valid("step", "explanation", "formula", "example")
     .default("step"),
-
-  pointsDeducted: Joi.number().min(0).default(0).messages({
-    "number.min": "Points deducted cannot be negative",
-  }),
-
-  timeSpentOnHint: Joi.number().min(0).default(0).messages({
-    "number.min": "Time spent cannot be negative",
-  }),
-
-  platform: Joi.string().optional(),
-  screenSize: Joi.string().optional(),
-
+  pointsDeducted: Joi.number().min(0).default(0),
+  timeSpentOnHint: Joi.number().min(0).default(0),
+  deviceInfo: Joi.object({
+    platform: Joi.string().trim().optional(),
+    browser: Joi.string().trim().optional(),
+    screenSize: Joi.string().trim().optional(),
+  }).optional(),
   context: Joi.object({
     attemptNumber: Joi.number().integer().min(1).default(1),
     timeBeforeHint: Joi.number().min(0).optional(),
-    previousAnswers: Joi.array().items(Joi.any()).optional(),
+    previousAnswers: Joi.array().max(10).optional(),
+    difficulty: Joi.string()
+      .valid(...DIFFICULTY_LEVELS)
+      .optional(),
   }).optional(),
 });
 
-// Update hint usage schema
 const updateHintUsageSchema = Joi.object({
   stepsViewed: Joi.array().items(Joi.number().integer().min(0)).optional(),
-
   hintType: Joi.string()
     .valid("step", "explanation", "formula", "example")
     .optional(),
-
   pointsDeducted: Joi.number().min(0).optional(),
-
   timeSpentOnHint: Joi.number().min(0).optional(),
-
+  series: Joi.array().items(Joi.string().trim().min(1)).optional(),
   context: Joi.object({
-    attemptNumber: Joi.number().integer().min(1),
-    timeBeforeHint: Joi.number().min(0),
-    previousAnswers: Joi.array().items(Joi.any()),
+    attemptNumber: Joi.number().integer().min(1).optional(),
+    timeBeforeHint: Joi.number().min(0).optional(),
+    previousAnswers: Joi.array().max(10).optional(),
+    difficulty: Joi.string()
+      .valid(...DIFFICULTY_LEVELS)
+      .optional(),
   }).optional(),
-});
+}).min(1);
 
-// Get hint usage query schema
 const getHintUsageSchema = Joi.object({
   page: Joi.number().integer().min(1).default(1),
   limit: Joi.number().integer().min(1).max(100).default(20),
-  questionId: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
-    .optional(),
-  quizId: Joi.string()
-    .pattern(/^[0-9a-fA-F]{24}$/)
+  questionId: Joi.objectId().optional(),
+  userId: Joi.objectId().optional(),
+  quizId: Joi.objectId().optional(),
+  sessionId: Joi.string()
+    .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
     .optional(),
   startDate: Joi.date().iso().optional(),
   endDate: Joi.date().iso().optional(),
@@ -81,16 +67,8 @@ const getHintUsageSchema = Joi.object({
     .optional(),
 });
 
-// Bulk delete schema
 const bulkDeleteSchema = Joi.object({
-  hintUsageIds: Joi.array()
-    .items(Joi.string().pattern(/^[0-9a-fA-F]{24}$/))
-    .min(1)
-    .required()
-    .messages({
-      "array.min": "At least one hint usage ID is required",
-      "string.pattern.base": "Invalid hint usage ID format",
-    }),
+  hintUsageIds: Joi.array().items(Joi.objectId()).min(1).required(),
 });
 
 module.exports = {
