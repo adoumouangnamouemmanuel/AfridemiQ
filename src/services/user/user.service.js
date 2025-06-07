@@ -467,21 +467,43 @@ const refreshToken = async (refreshToken) => {
 };
 
 // Search users
-const searchUsers = async (query, authUser) => {
-  const { page = 1, limit = 10, search } = query;
-  const filter = { _id: { $ne: authUser._id } };
-  if (search) {
-    filter.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { email: { $regex: search, $options: "i" } },
-    ];
+const searchUsers = async (searchQuery, page = 1, limit = 10) => {
+  try {
+    const skip = (page - 1) * limit;
+    
+    // Create a case-insensitive search regex
+    const searchRegex = new RegExp(searchQuery, 'i');
+    
+    // Search across multiple fields with partial matching
+    const query = {
+      $or: [
+        { name: searchRegex },
+        { email: searchRegex },
+        { country: searchRegex },
+        { city: searchRegex },
+        { school: searchRegex },
+        { grade: searchRegex }
+      ]
+    };
+
+    const [users, total] = await Promise.all([
+      User.find(query)
+        .select('-password -refreshToken -verificationToken -resetPasswordToken')
+        .skip(skip)
+        .limit(limit)
+        .sort({ name: 1 }),
+      User.countDocuments(query)
+    ]);
+
+    return {
+      users,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit)
+    };
+  } catch (error) {
+    throw new Error(`Error searching users: ${error.message}`);
   }
-  const users = await User.find(filter)
-    .select("name email socialProfile")
-    .skip((page - 1) * limit)
-    .limit(Number(limit));
-  const count = await User.countDocuments(filter);
-  return { users, count };
 };
 
 const updateSocialProfile = async (

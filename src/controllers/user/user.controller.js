@@ -234,11 +234,37 @@ const refreshToken = async (req, res) => {
 
 // Search users
 const searchUsers = async (req, res) => {
-  const { users, count } = await userService.searchUsers(req.query, req.user);
-  res.status(StatusCodes.OK).json({
-    message: "Utilisateurs trouvés",
-    data: { users, total: count },
-  });
+  try {
+    const { search, page = 1, limit = 10 } = req.query;
+    
+    if (!search) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le terme de recherche est requis'
+      });
+    }
+
+    const result = await userService.searchUsers(search, parseInt(page), parseInt(limit));
+    
+    res.json({
+      success: true,
+      data: {
+        users: result.users,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          totalPages: result.totalPages,
+          hasMore: result.page < result.totalPages
+        }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la recherche des utilisateurs',
+      error: error.message
+    });
+  }
 };
 
 // Update social profile
