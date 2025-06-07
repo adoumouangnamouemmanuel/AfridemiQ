@@ -14,6 +14,7 @@ const onboardingStatusRoutes = require("./src/routes/user/onboarding.status.rout
 const feedbackLoopRoutes = require("./src/routes/user/feedback.loop.route");
 const notificationRoutes = require("./src/routes/user/notification.route");
 const parentAccessRoutes = require("./src/routes/user/parent.access.route");
+const peerTutorProfileRoutes = require("./src/routes/user/peer.tutor.profile.route");
 
 // Learning routes
 const subjectRoutes = require("./src/routes/learning/subject.route");
@@ -140,6 +141,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/onboarding-status", onboardingStatusRoutes);
 app.use("/api/feedback-loop", feedbackLoopRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/peer-tutor-profiles", peerTutorProfileRoutes);
 app.use("/api/progress/gamified", gamifiedProgressRoutes);
 app.use("/api/progress/leaderboard", leaderboardEntryRoutes);
 app.use("/api/progress/missions", missionRoutes);
