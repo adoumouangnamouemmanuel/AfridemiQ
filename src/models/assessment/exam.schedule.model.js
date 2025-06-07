@@ -196,7 +196,7 @@ ExamScheduleSchema.virtual("examEndTime").get(function () {
   return new Date(startTime.getTime() + this.scheduling.duration * 60000);
 });
 
-ExamScheduleSchema.virtual("isActive").get(function () {
+ExamScheduleSchema.virtual("isCurrentlyActive").get(function () {
   const now = new Date();
   const startTime = this.examDateTime;
   const endTime = this.examEndTime;
