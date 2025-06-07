@@ -14,6 +14,7 @@ const {
 const { ApiError } = require("../../../utils/ApiError");
 const { ApiResponse } = require("../../../utils/ApiResponse");
 const createLogger = require("../../logging.service");
+const mongoose = require("mongoose");
 
 const logger = createLogger("ExerciseService");
 
@@ -242,9 +243,37 @@ class ExerciseService {
   async getExercisesBySubject(subjectId, options = {}) {
     try {
       logger.info(`Retrieving exercises for subject: ${subjectId}`);
-      return await this.getAllExercises({ subjectId, isActive: true }, options);
+      
+      // Map subject names to their corresponding discriminator types
+      const subjectTypeMap = {
+        math: "math_exercise",
+        physics: "physics_exercise",
+        chemistry: "chemistry_exercise",
+        biology: "biology_exercise",
+        french: "french_exercise",
+        philosophy: "philosophy_exercise",
+        english: "english_exercise",
+        history: "history_exercise",
+        geography: "geography_exercise"
+      };
+
+      // If subjectId is a name (string), use the corresponding discriminator type
+      const subjectType = subjectTypeMap[subjectId.toLowerCase()];
+      
+      if (subjectType) {
+        return await this.getAllExercises({ subjectType }, options);
+      }
+
+      // Check if it's a valid ObjectId
+      if (mongoose.Types.ObjectId.isValid(subjectId)) {
+        return await this.getAllExercises({ subjectId, isActive: true }, options);
+      }
+
+      // If neither a valid subject name nor a valid ObjectId
+      throw new ApiError(400, `Invalid subject: "${subjectId}". Valid subjects are: ${Object.keys(subjectTypeMap).join(", ")}`);
     } catch (error) {
       logger.error(`Failed to retrieve exercises for subject ${subjectId}:`, error);
+      if (error instanceof ApiError) throw error;
       throw new ApiError(
         500,
         `Failed to retrieve exercises by subject: ${error.message}`
