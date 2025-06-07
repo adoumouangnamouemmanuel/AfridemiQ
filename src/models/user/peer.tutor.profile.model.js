@@ -117,7 +117,7 @@ const PeerTutorProfileSchema = new Schema(
 );
 
 // Indexes for efficient querying
-PeerTutorProfileSchema.index({ userId: 1 });
+// PeerTutorProfileSchema.index({ userId: 1 });
 PeerTutorProfileSchema.index({ subjects: 1 });
 PeerTutorProfileSchema.index({ topics: 1 });
 
