@@ -380,8 +380,18 @@ const requestPhoneVerification = async (userId, phoneNumber) => {
 const updateSubscription = async (userId, subscriptionData) => {
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
-  user.subscription = { ...user.subscription, ...subscriptionData };
+  
+  // Update subscription data
+  user.subscription = { 
+    ...user.subscription, 
+    ...subscriptionData,
+    // Update accessLevel based on subscription type
+    accessLevel: subscriptionData.type === "premium" ? "premium" : "basic"
+  };
+  
+  // Update isPremium flag
   user.isPremium = subscriptionData.type === "premium";
+  
   await user.save();
   return user;
 };
