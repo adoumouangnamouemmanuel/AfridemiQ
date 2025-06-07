@@ -6,15 +6,45 @@ const createLogger = require("../../services/logging.service");
 const logger = createLogger("ExerciseController");
 
 class ExerciseController {
+  constructor() {
+    // Bind all methods to this instance
+    this.createExercise = this.createExercise.bind(this);
+    this.getAllExercises = this.getAllExercises.bind(this);
+    this.getExerciseById = this.getExerciseById.bind(this);
+    this.updateExercise = this.updateExercise.bind(this);
+    this.deleteExercise = this.deleteExercise.bind(this);
+    this.getExercisesBySubject = this.getExercisesBySubject.bind(this);
+    this.getExercisesByTopic = this.getExercisesByTopic.bind(this);
+    this.getExercisesByDifficulty = this.getExercisesByDifficulty.bind(this);
+    this.addFeedback = this.addFeedback.bind(this);
+    this.updateAnalytics = this.updateAnalytics.bind(this);
+    this.getExerciseAnalytics = this.getExerciseAnalytics.bind(this);
+    this.getRecommendedExercises = this.getRecommendedExercises.bind(this);
+    this.bulkCreateExercises = this.bulkCreateExercises.bind(this);
+    this.bulkUpdateExercises = this.bulkUpdateExercises.bind(this);
+    this.bulkDeleteExercises = this.bulkDeleteExercises.bind(this);
+    this.advancedSearch = this.advancedSearch.bind(this);
+    this.getExerciseStatistics = this.getExerciseStatistics.bind(this);
+    this.getMathExercises = this.getMathExercises.bind(this);
+    this.getPhysicsExercises = this.getPhysicsExercises.bind(this);
+    this.getChemistryExercises = this.getChemistryExercises.bind(this);
+    this.getBiologyExercises = this.getBiologyExercises.bind(this);
+    this.getFrenchExercises = this.getFrenchExercises.bind(this);
+    this.getPhilosophyExercises = this.getPhilosophyExercises.bind(this);
+    this.getEnglishExercises = this.getEnglishExercises.bind(this);
+    this.getHistoryExercises = this.getHistoryExercises.bind(this);
+    this.getGeographyExercises = this.getGeographyExercises.bind(this);
+  }
+
   // Create exercise
-  createExercise = asyncHandler(async (req, res) => {
+  async createExercise(req, res) {
     logger.info(`Requête de création d'exercice reçue de l'utilisateur ${req.user.id}`);
     const result = await exerciseService.createExercise(req.body, req.user.id);
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Get all exercises
-  getAllExercises = asyncHandler(async (req, res) => {
+  async getAllExercises(req, res) {
     logger.info(`Requête de récupération d'exercices reçue avec filtres:`, {
       filters: req.query,
       userId: req.user?.id
@@ -44,10 +74,10 @@ class ExerciseController {
 
     const result = await exerciseService.getAllExercises(filters, options);
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Get exercise by ID
-  getExerciseById = asyncHandler(async (req, res) => {
+  async getExerciseById(req, res) {
     logger.info(`Requête de récupération d'exercice reçue pour l'ID: ${req.params.id}`);
     const populate = req.query.populate
       ? req.query.populate.split(",")
@@ -57,10 +87,10 @@ class ExerciseController {
       populate
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Update exercise
-  updateExercise = asyncHandler(async (req, res) => {
+  async updateExercise(req, res) {
     logger.info(`Requête de mise à jour d'exercice reçue pour l'ID: ${req.params.id} de l'utilisateur ${req.user.id}`);
     const result = await exerciseService.updateExercise(
       req.params.id,
@@ -68,20 +98,20 @@ class ExerciseController {
       req.user.id
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Delete exercise
-  deleteExercise = asyncHandler(async (req, res) => {
+  async deleteExercise(req, res) {
     logger.info(`Requête de suppression d'exercice reçue pour l'ID: ${req.params.id} de l'utilisateur ${req.user.id}`);
     const result = await exerciseService.deleteExercise(
       req.params.id,
       req.user.id
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Get exercises by subject
-  getExercisesBySubject = asyncHandler(async (req, res) => {
+  async getExercisesBySubject(req, res) {
     logger.info(`Requête de récupération d'exercices par matière reçue pour l'ID: ${req.params.subjectId}`);
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -98,10 +128,10 @@ class ExerciseController {
       options
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Get exercises by topic
-  getExercisesByTopic = asyncHandler(async (req, res) => {
+  async getExercisesByTopic(req, res) {
     logger.info(`Requête de récupération d'exercices par sujet reçue pour l'ID: ${req.params.topicId}`);
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -118,10 +148,10 @@ class ExerciseController {
       options
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Get exercises by difficulty
-  getExercisesByDifficulty = asyncHandler(async (req, res) => {
+  async getExercisesByDifficulty(req, res) {
     logger.info(`Requête de récupération d'exercices par difficulté reçue: ${req.params.difficulty}`);
     const options = {
       page: Number.parseInt(req.query.page) || 1,
@@ -138,10 +168,10 @@ class ExerciseController {
       options
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Add feedback
-  addFeedback = asyncHandler(async (req, res) => {
+  async addFeedback(req, res) {
     logger.info(`Requête d'ajout de commentaire reçue pour l'exercice ${req.params.id} de l'utilisateur ${req.user.id}`);
     const { rating, comments } = req.body;
 
@@ -157,10 +187,10 @@ class ExerciseController {
       comments
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Update analytics
-  updateAnalytics = asyncHandler(async (req, res) => {
+  async updateAnalytics(req, res) {
     logger.info(`Requête de mise à jour des statistiques reçue pour l'exercice ${req.params.id}`);
     const { score, timeSpent } = req.body;
 
@@ -175,17 +205,17 @@ class ExerciseController {
       timeSpent
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Get exercise analytics
-  getExerciseAnalytics = asyncHandler(async (req, res) => {
+  async getExerciseAnalytics(req, res) {
     logger.info(`Requête de récupération des statistiques reçue pour l'exercice ${req.params.id}`);
     const result = await exerciseService.getExerciseAnalytics(req.params.id);
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Get recommended exercises
-  getRecommendedExercises = asyncHandler(async (req, res) => {
+  async getRecommendedExercises(req, res) {
     logger.info(`Requête de récupération d'exercices recommandés reçue pour l'utilisateur ${req.user.id}`);
     const options = {
       limit: Number.parseInt(req.query.limit) || 10,
@@ -199,10 +229,10 @@ class ExerciseController {
       options
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Bulk create exercises
-  bulkCreateExercises = asyncHandler(async (req, res) => {
+  async bulkCreateExercises(req, res) {
     logger.info(`Requête de création en masse d'exercices reçue de l'utilisateur ${req.user.id}`);
     if (!Array.isArray(req.body) || req.body.length === 0) {
       logger.warn(`Corps de requête invalide pour la création en masse de l'utilisateur ${req.user.id}`);
@@ -217,10 +247,10 @@ class ExerciseController {
       req.user.id
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Bulk update exercises
-  bulkUpdateExercises = asyncHandler(async (req, res) => {
+  async bulkUpdateExercises(req, res) {
     logger.info(`Requête de mise à jour en masse d'exercices reçue de l'utilisateur ${req.user.id}`);
     const { exerciseIds, updateData } = req.body;
 
@@ -240,10 +270,10 @@ class ExerciseController {
       req.user.id
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Bulk delete exercises
-  bulkDeleteExercises = asyncHandler(async (req, res) => {
+  async bulkDeleteExercises(req, res) {
     logger.info(`Requête de suppression en masse d'exercices reçue de l'utilisateur ${req.user.id}`);
     const { exerciseIds } = req.body;
 
@@ -257,10 +287,10 @@ class ExerciseController {
       req.user.id
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Advanced search
-  advancedSearch = asyncHandler(async (req, res) => {
+  async advancedSearch(req, res) {
     logger.info(`Requête de recherche avancée reçue avec critères:`, {
       criteria: req.body,
       userId: req.user?.id
@@ -289,10 +319,10 @@ class ExerciseController {
       options
     );
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Get exercise statistics
-  getExerciseStatistics = asyncHandler(async (req, res) => {
+  async getExerciseStatistics(req, res) {
     logger.info(`Requête de récupération des statistiques reçue avec filtres:`, {
       filters: req.query,
       userId: req.user?.id
@@ -311,10 +341,10 @@ class ExerciseController {
 
     const result = await exerciseService.getExerciseStatistics(filters);
     res.status(result.statusCode).json(result);
-  });
+  }
 
   // Get subject-specific exercises
-  getMathExercises = asyncHandler(async (req, res) => {
+  async getMathExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de mathématiques reçue`);
     const filters = { ...req.query, subjectType: "math" };
     const options = {
@@ -325,9 +355,9 @@ class ExerciseController {
 
     const result = await exerciseService.getAllExercises(filters, options);
     res.status(result.statusCode).json(result);
-  });
+  }
 
-  getPhysicsExercises = asyncHandler(async (req, res) => {
+  async getPhysicsExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de physique reçue`);
     const filters = { ...req.query, subjectType: "physics" };
     const options = {
@@ -338,9 +368,9 @@ class ExerciseController {
 
     const result = await exerciseService.getAllExercises(filters, options);
     res.status(result.statusCode).json(result);
-  });
+  }
 
-  getChemistryExercises = asyncHandler(async (req, res) => {
+  async getChemistryExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de chimie reçue`);
     const filters = { ...req.query, subjectType: "chemistry" };
     const options = {
@@ -351,9 +381,9 @@ class ExerciseController {
 
     const result = await exerciseService.getAllExercises(filters, options);
     res.status(result.statusCode).json(result);
-  });
+  }
 
-  getBiologyExercises = asyncHandler(async (req, res) => {
+  async getBiologyExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de biologie reçue`);
     const filters = { ...req.query, subjectType: "biology" };
     const options = {
@@ -364,9 +394,9 @@ class ExerciseController {
 
     const result = await exerciseService.getAllExercises(filters, options);
     res.status(result.statusCode).json(result);
-  });
+  }
 
-  getFrenchExercises = asyncHandler(async (req, res) => {
+  async getFrenchExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de français reçue`);
     const filters = { ...req.query, subjectType: "french" };
     const options = {
@@ -377,9 +407,9 @@ class ExerciseController {
 
     const result = await exerciseService.getAllExercises(filters, options);
     res.status(result.statusCode).json(result);
-  });
+  }
 
-  getPhilosophyExercises = asyncHandler(async (req, res) => {
+  async getPhilosophyExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de philosophie reçue`);
     const filters = { ...req.query, subjectType: "philosophy" };
     const options = {
@@ -390,9 +420,9 @@ class ExerciseController {
 
     const result = await exerciseService.getAllExercises(filters, options);
     res.status(result.statusCode).json(result);
-  });
+  }
 
-  getEnglishExercises = asyncHandler(async (req, res) => {
+  async getEnglishExercises(req, res) {
     logger.info(`Requête de récupération d'exercices d'anglais reçue`);
     const filters = { ...req.query, subjectType: "english" };
     const options = {
@@ -403,9 +433,9 @@ class ExerciseController {
 
     const result = await exerciseService.getAllExercises(filters, options);
     res.status(result.statusCode).json(result);
-  });
+  }
 
-  getHistoryExercises = asyncHandler(async (req, res) => {
+  async getHistoryExercises(req, res) {
     logger.info(`Requête de récupération d'exercices d'histoire reçue`);
     const filters = { ...req.query, subjectType: "history" };
     const options = {
@@ -416,9 +446,9 @@ class ExerciseController {
 
     const result = await exerciseService.getAllExercises(filters, options);
     res.status(result.statusCode).json(result);
-  });
+  }
 
-  getGeographyExercises = asyncHandler(async (req, res) => {
+  async getGeographyExercises(req, res) {
     logger.info(`Requête de récupération d'exercices de géographie reçue`);
     const filters = { ...req.query, subjectType: "geography" };
     const options = {
@@ -429,7 +459,9 @@ class ExerciseController {
 
     const result = await exerciseService.getAllExercises(filters, options);
     res.status(result.statusCode).json(result);
-  });
+  }
 }
 
-module.exports = new ExerciseController();
+// Create and export a single instance
+const exerciseController = new ExerciseController();
+module.exports = exerciseController;

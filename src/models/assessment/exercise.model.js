@@ -617,7 +617,7 @@ const GeographyExerciseSchema = new Schema({
 // Indexes for performance
 ExerciseBaseSchema.index({ subjectId: 1, topicId: 1 });
 ExerciseBaseSchema.index({ difficulty: 1, type: 1 });
-ExerciseBaseSchema.index({ "metadata.createdBy": 1 });
+// ExerciseBaseSchema.index({ "metadata.createdBy": 1 });
 ExerciseBaseSchema.index({ "metadata.status": 1 });
 ExerciseBaseSchema.index({ premiumOnly: 1 });
 ExerciseBaseSchema.index({ isActive: 1 });
@@ -634,24 +634,15 @@ const Exercise = mongoose.model("Exercise", ExerciseBaseSchema);
 
 module.exports = {
   Exercise,
-  MathExercise: Exercise.discriminator("math", MathExerciseSchema),
-  PhysicsExercise: Exercise.discriminator("physics", PhysicsExerciseSchema),
-  ChemistryExercise: Exercise.discriminator(
-    "chemistry",
-    ChemistryExerciseSchema
-  ),
-  BiologyExercise: Exercise.discriminator("biology", BiologyExerciseSchema),
-  FrenchExercise: Exercise.discriminator("french", FrenchExerciseSchema),
-  PhilosophyExercise: Exercise.discriminator(
-    "philosophy",
-    PhilosophyExerciseSchema
-  ),
-  EnglishExercise: Exercise.discriminator("english", EnglishExerciseSchema),
-  HistoryExercise: Exercise.discriminator("history", HistoryExerciseSchema),
-  GeographyExercise: Exercise.discriminator(
-    "geography",
-    GeographyExerciseSchema
-  ),
+  MathExercise: Exercise.discriminator("math_exercise", MathExerciseSchema),
+  PhysicsExercise: Exercise.discriminator("physics_exercise", PhysicsExerciseSchema),
+  ChemistryExercise: Exercise.discriminator("chemistry_exercise", ChemistryExerciseSchema),
+  BiologyExercise: Exercise.discriminator("biology_exercise", BiologyExerciseSchema),
+  FrenchExercise: Exercise.discriminator("french_exercise", FrenchExerciseSchema),
+  PhilosophyExercise: Exercise.discriminator("philosophy_exercise", PhilosophyExerciseSchema),
+  EnglishExercise: Exercise.discriminator("english_exercise", EnglishExerciseSchema),
+  HistoryExercise: Exercise.discriminator("history_exercise", HistoryExerciseSchema),
+  GeographyExercise: Exercise.discriminator("geography_exercise", GeographyExerciseSchema),
   // Export constants for use in other modules
   DIFFICULTY_LEVELS,
   EXERCISE_TYPES,

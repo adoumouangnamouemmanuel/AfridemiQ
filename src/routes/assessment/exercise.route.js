@@ -1,128 +1,174 @@
 const express = require("express");
+const router = express.Router();
 const exerciseController = require("../../controllers/assessment/exercise.controller");
-const authMiddleware = require("../../middlewares/auth.middleware");
+const { asyncHandler } = require("../../utils/asyncHandler");
 const validateMiddleware = require("../../middlewares/validate.middleware");
 const {
   createExerciseSchema,
   updateExerciseSchema,
-  exerciseQuerySchema,
-  feedbackSchema,
-  analyticsSchema,
-  bulkCreateSchema,
-  bulkUpdateSchema,
-  bulkDeleteSchema,
+  bulkCreateExercisesSchema,
+  bulkUpdateExercisesSchema,
+  bulkDeleteExercisesSchema,
+  addFeedbackSchema,
+  updateAnalyticsSchema,
   advancedSearchSchema,
 } = require("../../schemas/assessment/exercise.schema");
+const authMiddleware = require("../../middlewares/auth.middleware");
+const roleMiddleware = require("../../middlewares/role.middleware");
 
-const router = express.Router();
-
-// Apply authentication to all routes
+// Apply authentication middleware to all routes
 router.use(authMiddleware);
 
 // Basic CRUD routes
 router.post(
   "/",
-  authMiddleware(["admin", "teacher"]),
+  roleMiddleware(["admin", "teacher"]),
   validateMiddleware(createExerciseSchema),
-  exerciseController.createExercise
+  asyncHandler(exerciseController.createExercise.bind(exerciseController))
 );
 
 router.get(
   "/",
-  validateMiddleware(exerciseQuerySchema, "query"),
-  exerciseController.getAllExercises
+  asyncHandler(exerciseController.getAllExercises.bind(exerciseController))
 );
 
 router.get(
-  "/statistics",
-  authMiddleware(["admin", "teacher"]),
-  exerciseController.getExerciseStatistics
+  "/:id",
+  asyncHandler(exerciseController.getExerciseById.bind(exerciseController))
 );
 
-router.get("/recommended", exerciseController.getRecommendedExercises);
+router.put(
+  "/:id",
+  roleMiddleware(["admin", "teacher"]),
+  validateMiddleware(updateExerciseSchema),
+  asyncHandler(exerciseController.updateExercise.bind(exerciseController))
+);
 
-router.post(
-  "/search",
-  validateMiddleware(advancedSearchSchema),
-  exerciseController.advancedSearch
+router.delete(
+  "/:id",
+  roleMiddleware(["admin", "teacher"]),
+  asyncHandler(exerciseController.deleteExercise.bind(exerciseController))
 );
 
 // Subject-specific routes
-router.get("/math", exerciseController.getMathExercises);
-router.get("/physics", exerciseController.getPhysicsExercises);
-router.get("/chemistry", exerciseController.getChemistryExercises);
-router.get("/biology", exerciseController.getBiologyExercises);
-router.get("/french", exerciseController.getFrenchExercises);
-router.get("/philosophy", exerciseController.getPhilosophyExercises);
-router.get("/english", exerciseController.getEnglishExercises);
-router.get("/history", exerciseController.getHistoryExercises);
-router.get("/geography", exerciseController.getGeographyExercises);
+router.get(
+  "/subject/:subjectId",
+  asyncHandler(exerciseController.getExercisesBySubject.bind(exerciseController))
+);
+
+router.get(
+  "/topic/:topicId",
+  asyncHandler(exerciseController.getExercisesByTopic.bind(exerciseController))
+);
+
+router.get(
+  "/difficulty/:difficulty",
+  asyncHandler(exerciseController.getExercisesByDifficulty.bind(exerciseController))
+);
 
 // Bulk operations
 router.post(
   "/bulk/create",
-  authMiddleware(["admin", "teacher"]),
-  validateMiddleware(bulkCreateSchema),
-  exerciseController.bulkCreateExercises
+  roleMiddleware(["admin", "teacher"]),
+  validateMiddleware(bulkCreateExercisesSchema),
+  asyncHandler(exerciseController.bulkCreateExercises.bind(exerciseController))
 );
 
-router.patch(
+router.put(
   "/bulk/update",
-  authMiddleware(["admin", "teacher"]),
-  validateMiddleware(bulkUpdateSchema),
-  exerciseController.bulkUpdateExercises
+  roleMiddleware(["admin", "teacher"]),
+  validateMiddleware(bulkUpdateExercisesSchema),
+  asyncHandler(exerciseController.bulkUpdateExercises.bind(exerciseController))
 );
 
 router.delete(
   "/bulk/delete",
-  authMiddleware(["admin", "teacher"]),
-  validateMiddleware(bulkDeleteSchema),
-  exerciseController.bulkDeleteExercises
+  roleMiddleware(["admin", "teacher"]),
+  validateMiddleware(bulkDeleteExercisesSchema),
+  asyncHandler(exerciseController.bulkDeleteExercises.bind(exerciseController))
 );
 
 // Filter routes
-router.get("/subject/:subjectId", exerciseController.getExercisesBySubject);
-
-router.get("/topic/:topicId", exerciseController.getExercisesByTopic);
+router.post(
+  "/search/advanced",
+  validateMiddleware(advancedSearchSchema),
+  asyncHandler(exerciseController.advancedSearch.bind(exerciseController))
+);
 
 router.get(
-  "/difficulty/:difficulty",
-  exerciseController.getExercisesByDifficulty
+  "/statistics",
+  roleMiddleware(["admin", "teacher"]),
+  asyncHandler(exerciseController.getExerciseStatistics.bind(exerciseController))
 );
 
 // Individual exercise routes
-router.get("/:id", exerciseController.getExerciseById);
-
-router.patch(
-  "/:id",
-  authMiddleware(["admin", "teacher"]),
-  validateMiddleware(updateExerciseSchema),
-  exerciseController.updateExercise
-);
-
-router.delete(
-  "/:id",
-  authMiddleware(["admin", "teacher"]),
-  exerciseController.deleteExercise
-);
-
-// Feedback and analytics routes
 router.post(
   "/:id/feedback",
-  validateMiddleware(feedbackSchema),
-  exerciseController.addFeedback
+  validateMiddleware(addFeedbackSchema),
+  asyncHandler(exerciseController.addFeedback.bind(exerciseController))
 );
 
-router.post(
+router.put(
   "/:id/analytics",
-  validateMiddleware(analyticsSchema),
-  exerciseController.updateAnalytics
+  validateMiddleware(updateAnalyticsSchema),
+  asyncHandler(exerciseController.updateAnalytics.bind(exerciseController))
 );
 
 router.get(
   "/:id/analytics",
-  authMiddleware(["admin", "teacher"]),
-  exerciseController.getExerciseAnalytics
+  roleMiddleware(["admin", "teacher"]),
+  asyncHandler(exerciseController.getExerciseAnalytics.bind(exerciseController))
+);
+
+router.get(
+  "/recommended",
+  asyncHandler(exerciseController.getRecommendedExercises.bind(exerciseController))
+);
+
+// Subject-specific exercise routes
+router.get(
+  "/subject/math",
+  asyncHandler(exerciseController.getMathExercises.bind(exerciseController))
+);
+
+router.get(
+  "/subject/physics",
+  asyncHandler(exerciseController.getPhysicsExercises.bind(exerciseController))
+);
+
+router.get(
+  "/subject/chemistry",
+  asyncHandler(exerciseController.getChemistryExercises.bind(exerciseController))
+);
+
+router.get(
+  "/subject/biology",
+  asyncHandler(exerciseController.getBiologyExercises.bind(exerciseController))
+);
+
+router.get(
+  "/subject/french",
+  asyncHandler(exerciseController.getFrenchExercises.bind(exerciseController))
+);
+
+router.get(
+  "/subject/philosophy",
+  asyncHandler(exerciseController.getPhilosophyExercises.bind(exerciseController))
+);
+
+router.get(
+  "/subject/english",
+  asyncHandler(exerciseController.getEnglishExercises.bind(exerciseController))
+);
+
+router.get(
+  "/subject/history",
+  asyncHandler(exerciseController.getHistoryExercises.bind(exerciseController))
+);
+
+router.get(
+  "/subject/geography",
+  asyncHandler(exerciseController.getGeographyExercises.bind(exerciseController))
 );
 
 module.exports = router;
