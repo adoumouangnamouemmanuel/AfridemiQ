@@ -1,6 +1,9 @@
 const { Challenge } = require("../../../models/assessment/challenge.model");
 const { Question } = require("../../../models/assessment/question.model");
 const { ApiError } = require("../../../utils/ApiError");
+const createLogger = require("../../logging.service");
+
+const logger = createLogger("ChallengeService");
 
 class ChallengeService {
   // Create challenge
@@ -43,9 +46,10 @@ class ChallengeService {
 
       const challenge = new Challenge(challengeData);
       await challenge.save();
-
+      logger.info(`Challenge created successfully: ${challenge._id}`);
       return await this.getChallengeById(challenge._id);
     } catch (error) {
+      logger.error("Error creating challenge:", error);
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, `Error creating challenge: ${error.message}`);
     }
@@ -66,8 +70,10 @@ class ChallengeService {
         throw new ApiError(404, "Challenge not found");
       }
 
+      logger.info(`Challenge retrieved successfully: ${challengeId}`);
       return challenge;
     } catch (error) {
+      logger.error("Error retrieving challenge:", error);
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, `Error fetching challenge: ${error.message}`);
     }
@@ -121,7 +127,7 @@ class ChallengeService {
         .lean();
 
       const total = await Challenge.countDocuments(query);
-
+      logger.info(`Retrieved ${challenges.length} challenges out of ${total} total`);
       return {
         challenges,
         totalPages: Math.ceil(total / limit),
@@ -129,6 +135,7 @@ class ChallengeService {
         totalChallenges: total,
       };
     } catch (error) {
+      logger.error("Error retrieving challenges:", error);
       throw new ApiError(500, `Error fetching challenges: ${error.message}`);
     }
   }
@@ -163,9 +170,10 @@ class ChallengeService {
         { $set: updateData },
         { new: true, runValidators: true }
       );
-
+      logger.info(`Challenge updated successfully: ${challengeId}`);
       return await this.getChallengeById(challengeId);
     } catch (error) {
+      logger.error("Error updating challenge:", error);
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, `Error updating challenge: ${error.message}`);
     }
@@ -188,9 +196,10 @@ class ChallengeService {
       challenge.isActive = false;
       challenge.status = "cancelled";
       await challenge.save();
-
+      logger.info(`Challenge deleted successfully: ${challengeId}`);
       return { message: "Challenge deleted successfully" };
     } catch (error) {
+      logger.error("Error deleting challenge:", error);
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, `Error deleting challenge: ${error.message}`);
     }
@@ -210,9 +219,10 @@ class ChallengeService {
       }
 
       await challenge.addParticipant(userId);
-
+      logger.info(`User ${userId} joined challenge ${challengeId}`);
       return await this.getChallengeById(challengeId);
     } catch (error) {
+      logger.error("Error joining challenge:", error);
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, `Error joining challenge: ${error.message}`);
     }
@@ -232,9 +242,10 @@ class ChallengeService {
       }
 
       await challenge.removeParticipant(userId);
-
+      logger.info(`User ${userId} left challenge ${challengeId}`);
       return { message: "Left challenge successfully" };
     } catch (error) {
+      logger.error("Error leaving challenge:", error);
       if (error instanceof ApiError) throw error;
       throw new ApiError(500, `Error leaving challenge: ${error.message}`);
     }
@@ -243,8 +254,11 @@ class ChallengeService {
   // Get active challenges
   async getActiveChallenges() {
     try {
-      return await Challenge.findActive();
+      const challenges = await Challenge.findActive();
+      logger.info(`Retrieved ${challenges.length} active challenges`);
+      return challenges;
     } catch (error) {
+      logger.error("Error retrieving active challenges:", error);
       throw new ApiError(
         500,
         `Error fetching active challenges: ${error.message}`
