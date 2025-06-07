@@ -72,7 +72,7 @@ const HintUsageSchema = new Schema(
         default: 1,
         min: 1,
       },
-      timeBeforeHint: { type: Number, min: 0 }, // seconds
+      timeBeforeHint: { type: Number, min: 0 },
       previousAnswers: {
         type: [Schema.Types.Mixed],
         default: [],
@@ -101,11 +101,9 @@ HintUsageSchema.index({ hintType: 1 });
 // Pre-save middleware
 HintUsageSchema.pre("save", async function (next) {
   try {
-    // Remove duplicate steps and sort
     if (this.stepsViewed && this.stepsViewed.length > 0) {
       this.stepsViewed = [...new Set(this.stepsViewed)].sort((a, b) => a - b);
     }
-    // Validate references
     const [question, user, quiz] = await Promise.all([
       mongoose.model("Question").findById(this.questionId),
       mongoose.model("User").findById(this.userId),
@@ -113,15 +111,15 @@ HintUsageSchema.pre("save", async function (next) {
         ? mongoose.model("Quiz").findById(this.quizId)
         : Promise.resolve(null),
     ]);
-    if (!question) return next(new Error("Invalid question ID"));
-    if (!user) return next(new Error("Invalid user ID"));
-    if (this.quizId && !quiz) return next(new Error("Invalid quiz ID"));
-    // Validate steps
+    if (!question) return next(new Error("Identifiant de question invalide"));
+    if (!user) return next(new Error("Identifiant d'utilisateur invalide"));
+    if (this.quizId && !quiz)
+      return next(new Error("Identifiant de quiz invalide"));
     if (
       this.totalStepsAvailable &&
       this.stepsViewed.some((step) => step >= this.totalStepsAvailable)
     ) {
-      return next(new Error("Step number exceeds totalStepsAvailable"));
+      return next(new Error("Numéro d'étape dépasse totalStepsAvailable"));
     }
     next();
   } catch (error) {
