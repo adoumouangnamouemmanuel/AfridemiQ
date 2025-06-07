@@ -1,6 +1,6 @@
 const { StudyGroup } = require("../../../models/learning/study.group.model");
 const { ApiError } = require("../../../utils/ApiError");
-const createLogger = require("../../services/logging.service");
+const createLogger = require("../../logging.service");
 
 const logger = createLogger("StudyGroupService");
 

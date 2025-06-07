@@ -26,6 +26,7 @@ const learningPathRoutes = require("./src/routes/learning/learning.path.route");
 const noteRoutes = require("./src/routes/learning/note.route");
 const bookmarkRoutes = require("./src/routes/learning/bookmark.route");
 const studyPlanRoutes = require("./src/routes/learning/study.plan.route");
+const studyGroupRoutes = require("./src/routes/learning/study.group.route");
 
 
 // assessment routes
@@ -129,6 +130,7 @@ app.use("/api/learning-paths", learningPathRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/bookmarks", bookmarkRoutes);
 app.use("/api/study-plans", studyPlanRoutes);
+app.use("/api/study-groups", studyGroupRoutes);
 app.use("/api/achievements", achievementRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/onboarding-status", onboardingStatusRoutes);
