@@ -13,6 +13,9 @@ const {
 } = require("../../../models/assessment/exercise.model");
 const { ApiError } = require("../../../utils/ApiError");
 const { ApiResponse } = require("../../../utils/ApiResponse");
+const createLogger = require("../../logging.service");
+
+const logger = createLogger("ExerciseService");
 
 class ExerciseService {
   // Get subject-specific model
@@ -48,8 +51,10 @@ class ExerciseService {
       const exercise = new Model(data);
       await exercise.save();
 
+      logger.info(`Exercise created successfully: ${exercise._id} by user ${userId}`);
       return new ApiResponse(201, exercise, "Exercise created successfully");
     } catch (error) {
+      logger.error(`Failed to create exercise by user ${userId}:`, error);
       throw new ApiError(400, `Failed to create exercise: ${error.message}`);
     }
   }
@@ -128,12 +133,14 @@ class ExerciseService {
         hasPrevPage: page > 1,
       };
 
+      logger.info(`Retrieved ${exercises.length} exercises with filters:`, { filters, options });
       return new ApiResponse(
         200,
         { exercises, pagination },
         "Exercises retrieved successfully"
       );
     } catch (error) {
+      logger.error("Failed to retrieve exercises:", error);
       throw new ApiError(500, `Failed to retrieve exercises: ${error.message}`);
     }
   }
@@ -152,12 +159,15 @@ class ExerciseService {
       const exercise = await query.exec();
 
       if (!exercise) {
+        logger.warn(`Exercise not found: ${exerciseId}`);
         throw new ApiError(404, "Exercise not found");
       }
 
+      logger.info(`Exercise retrieved successfully: ${exerciseId}`);
       return new ApiResponse(200, exercise, "Exercise retrieved successfully");
     } catch (error) {
       if (error instanceof ApiError) throw error;
+      logger.error(`Failed to retrieve exercise ${exerciseId}:`, error);
       throw new ApiError(500, `Failed to retrieve exercise: ${error.message}`);
     }
   }
@@ -168,6 +178,7 @@ class ExerciseService {
       const exercise = await Exercise.findById(exerciseId);
 
       if (!exercise) {
+        logger.warn(`Exercise not found for update: ${exerciseId}`);
         throw new ApiError(404, "Exercise not found");
       }
 
@@ -189,6 +200,7 @@ class ExerciseService {
         }
       );
 
+      logger.info(`Exercise updated successfully: ${exerciseId} by user ${userId}`);
       return new ApiResponse(
         200,
         updatedExercise,
@@ -196,6 +208,7 @@ class ExerciseService {
       );
     } catch (error) {
       if (error instanceof ApiError) throw error;
+      logger.error(`Failed to update exercise ${exerciseId} by user ${userId}:`, error);
       throw new ApiError(400, `Failed to update exercise: ${error.message}`);
     }
   }
@@ -206,6 +219,7 @@ class ExerciseService {
       const exercise = await Exercise.findById(exerciseId);
 
       if (!exercise) {
+        logger.warn(`Exercise not found for deletion: ${exerciseId}`);
         throw new ApiError(404, "Exercise not found");
       }
 
@@ -215,9 +229,11 @@ class ExerciseService {
         "metadata.lastModified": new Date(),
       });
 
+      logger.info(`Exercise deleted successfully: ${exerciseId} by user ${userId}`);
       return new ApiResponse(200, null, "Exercise deleted successfully");
     } catch (error) {
       if (error instanceof ApiError) throw error;
+      logger.error(`Failed to delete exercise ${exerciseId} by user ${userId}:`, error);
       throw new ApiError(500, `Failed to delete exercise: ${error.message}`);
     }
   }
@@ -225,8 +241,10 @@ class ExerciseService {
   // Get exercises by subject
   async getExercisesBySubject(subjectId, options = {}) {
     try {
+      logger.info(`Retrieving exercises for subject: ${subjectId}`);
       return await this.getAllExercises({ subjectId, isActive: true }, options);
     } catch (error) {
+      logger.error(`Failed to retrieve exercises for subject ${subjectId}:`, error);
       throw new ApiError(
         500,
         `Failed to retrieve exercises by subject: ${error.message}`
@@ -237,8 +255,10 @@ class ExerciseService {
   // Get exercises by topic
   async getExercisesByTopic(topicId, options = {}) {
     try {
+      logger.info(`Retrieving exercises for topic: ${topicId}`);
       return await this.getAllExercises({ topicId, isActive: true }, options);
     } catch (error) {
+      logger.error(`Failed to retrieve exercises for topic ${topicId}:`, error);
       throw new ApiError(
         500,
         `Failed to retrieve exercises by topic: ${error.message}`
@@ -249,6 +269,7 @@ class ExerciseService {
   // Get exercises by difficulty
   async getExercisesByDifficulty(difficulty, options = {}) {
     try {
+      logger.info(`Retrieving exercises with difficulty: ${difficulty}`);
       if (!DIFFICULTY_LEVELS.includes(difficulty)) {
         throw new ApiError(400, "Invalid difficulty level");
       }
@@ -258,6 +279,7 @@ class ExerciseService {
         options
       );
     } catch (error) {
+      logger.error(`Failed to retrieve exercises with difficulty ${difficulty}:`, error);
       if (error instanceof ApiError) throw error;
       throw new ApiError(
         500,
