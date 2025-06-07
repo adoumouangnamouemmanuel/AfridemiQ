@@ -30,6 +30,9 @@ const bookmarkRoutes = require("./src/routes/learning/bookmark.route");
 const studyPlanRoutes = require("./src/routes/learning/study.plan.route");
 const studyGroupRoutes = require("./src/routes/learning/study.group.route");
 
+// learning/lesson routes
+const lessonRoutes = require("./src/routes/learning/lesson.route");
+
 
 // assessment routes
 const examRoutes = require("./src/routes/assessment/exam.route");
@@ -155,6 +158,9 @@ app.use("/api/quiz-results", quizResultRoutes);
 app.use("/api/challenges", challengeRoutes);
 app.use("/api/exam-schedules", examScheduleRoutes);
 app.use("/api/questions", questionRoutes);
+
+// Learning lesson routes
+app.use("/api/lessons", lessonRoutes);
 
 
 // 404 handler
