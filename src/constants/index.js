@@ -80,6 +80,19 @@ const AVAILABILITY_DAYS = [
  */
 const SESSION_STATUSES = ["scheduled", "completed", "cancelled"];
 
+/**
+ * Constants for user profiles.
+ * @module constants/index
+ */
+const USER_ROLES = ["student", "teacher", "admin"];
+const SUBSCRIPTION_TYPES = ["free", "premium"];
+const PAYMENT_STATUSES = ["active", "pending", "failed"];
+const ACCESS_LEVELS = ["basic", "premium"];
+const FONT_SIZES = ["small", "medium", "large"];
+const CONTENT_FORMATS = ["video", "text", "audio", "mixed"];
+const LEARNING_STYLES = ["visual", "auditory", "kinesthetic", "mixed"];
+const PROFILE_VISIBILITIES = ["public", "friends", "private"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -90,4 +103,12 @@ module.exports = {
   NOTIFICATION_FREQUENCIES,
   AVAILABILITY_DAYS,
   SESSION_STATUSES,
+  USER_ROLES,
+  SUBSCRIPTION_TYPES,
+  PAYMENT_STATUSES,
+  ACCESS_LEVELS,
+  FONT_SIZES,
+  CONTENT_FORMATS,
+  LEARNING_STYLES,
+  PROFILE_VISIBILITIES,
 };
