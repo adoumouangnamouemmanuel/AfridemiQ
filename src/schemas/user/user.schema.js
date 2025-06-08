@@ -18,6 +18,11 @@ const registerSchema = Joi.object({
     .messages({ "string.pattern.base": "Numéro de téléphone invalide" }),
   country: Joi.string().required().messages({ "any.required": "Pays requis" }),
   role: Joi.string().valid("student", "teacher", "admin").default("student"),
+  // Add missing fields that can be provided during registration
+  schoolName: Joi.string().optional(),
+  gradeLevel: Joi.string().optional(),
+  timeZone: Joi.string().optional(),
+  preferredLanguage: Joi.string().optional(),
 });
 
 const loginSchema = Joi.object({
