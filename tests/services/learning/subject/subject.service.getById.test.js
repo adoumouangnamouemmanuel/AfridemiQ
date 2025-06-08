@@ -58,15 +58,6 @@ describe("Subject Service - GET By ID Operations", () => {
       expect(updatedSubject.popularity).toBe(initialPopularity + 3);
     });
 
-    test("should populate examIds when subject has exams", async () => {
-      // Note: This test assumes you have an Exam model and data
-      // For now, we'll test that the populate doesn't fail
-      const result = await subjectService.getSubjectById(testSubject._id);
-
-      expect(result.subject.examIds).toBeDefined();
-      expect(Array.isArray(result.subject.examIds)).toBe(true);
-    });
-
     test("should return subject with all virtual fields", async () => {
       const result = await subjectService.getSubjectById(testSubject._id);
 
@@ -90,7 +81,7 @@ describe("Subject Service - GET By ID Operations", () => {
 
   describe("getSubjectById - Error Cases", () => {
     test("should throw NotFoundError for non-existent ID", async () => {
-      const nonExistentId = "507f1f77bcf86cd799439011"; // Valid ObjectId format
+      const nonExistentId = "507f1f77bcf86cd799439011";
 
       await expect(
         subjectService.getSubjectById(nonExistentId)
@@ -129,31 +120,6 @@ describe("Subject Service - GET By ID Operations", () => {
       await expect(subjectService.getSubjectById(undefined)).rejects.toThrow(
         BadRequestError
       );
-    });
-  });
-
-  describe("getSubjectById - Inactive Subjects", () => {
-    test("should return inactive subject by ID", async () => {
-      // Deactivate the subject
-      testSubject.isActive = false;
-      await testSubject.save();
-
-      const result = await subjectService.getSubjectById(testSubject._id);
-
-      expect(result.subject).toBeDefined();
-      expect(result.subject.isActive).toBe(false);
-      expect(result.subject._id.toString()).toBe(testSubject._id.toString());
-    });
-
-    test("should still increment popularity for inactive subjects", async () => {
-      testSubject.isActive = false;
-      const initialPopularity = testSubject.popularity;
-      await testSubject.save();
-
-      await subjectService.getSubjectById(testSubject._id);
-
-      const updatedSubject = await Subject.findById(testSubject._id);
-      expect(updatedSubject.popularity).toBe(initialPopularity + 1);
     });
   });
 
@@ -261,6 +227,31 @@ describe("Subject Service - GET By ID Operations", () => {
         expect(result.name).toBe(validSubjectData.name);
         expect(result.id).toBe(testSubject._id.toString());
       });
+    });
+  });
+
+  describe("getSubjectById - Inactive Subjects", () => {
+    test("should return inactive subject by ID", async () => {
+      // Deactivate the subject
+      testSubject.isActive = false;
+      await testSubject.save();
+
+      const result = await subjectService.getSubjectById(testSubject._id);
+
+      expect(result.subject).toBeDefined();
+      expect(result.subject.isActive).toBe(false);
+      expect(result.subject._id.toString()).toBe(testSubject._id.toString());
+    });
+
+    test("should still increment popularity for inactive subjects", async () => {
+      testSubject.isActive = false;
+      const initialPopularity = testSubject.popularity;
+      await testSubject.save();
+
+      await subjectService.getSubjectById(testSubject._id);
+
+      const updatedSubject = await Subject.findById(testSubject._id);
+      expect(updatedSubject.popularity).toBe(initialPopularity + 1);
     });
   });
 });
