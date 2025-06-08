@@ -1,129 +1,172 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, model, Types } = require("mongoose");
+const {
+  EXERCISE_DIFFICULTY_LEVELS,
+  DIFFICULTY_LEVELS,
+} = require("../../constants");
 
+// =============== CONSTANTS =============
+/**
+ * Imported constants for quiz levels (EXERCISE_DIFFICULTY_LEVELS) and difficulty (DIFFICULTY_LEVELS).
+ * @see module:constants/index
+ */
+
+// =============== SUBSCHEMAS =============
+/**
+ * Subschema for quiz retake policy.
+ * @module RetakePolicySchema
+ */
+const RetakePolicySchema = new Schema({
+  maxAttempts: {
+    type: Number,
+    default: 3,
+    min: [1, "Le nombre maximum de tentatives doit être au moins 1"],
+    max: [10, "Le nombre maximum de tentatives ne peut pas dépasser 10"],
+  },
+  cooldownMinutes: {
+    type: Number,
+    default: 0,
+    min: [0, "La période de refroidissement ne peut pas être négative"],
+    max: [1440, "La période de refroidissement ne peut pas dépasser 24 heures"],
+  },
+});
+
+/**
+ * Subschema for quiz settings.
+ * @module SettingsSchema
+ */
+const SettingsSchema = new Schema({
+  shuffleQuestions: {
+    type: Boolean,
+    default: false,
+  },
+  shuffleOptions: {
+    type: Boolean,
+    default: false,
+  },
+  showCorrectAnswers: {
+    type: Boolean,
+    default: true,
+  },
+  allowReview: {
+    type: Boolean,
+    default: true,
+  },
+});
+
+/**
+ * Subschema for quiz analytics.
+ * @module AnalyticsSchema
+ */
+const AnalyticsSchema = new Schema({
+  totalAttempts: {
+    type: Number,
+    default: 0,
+  },
+  averageScore: {
+    type: Number,
+    default: 0,
+  },
+  averageTime: {
+    type: Number,
+    default: 0,
+  },
+  completionRate: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// ================= SCHEMA =================
+/**
+ * Mongoose schema for quizzes, supporting various subjects and configurations.
+ * @module QuizSchema
+ */
 const QuizSchema = new Schema(
   {
+    // Quiz details
     title: {
       type: String,
-      required: true,
+      required: [true, "Le titre est requis"],
       trim: true,
-      maxlength: 200,
+      maxlength: [200, "Le titre ne peut pas dépasser 200 caractères"],
     },
     description: {
       type: String,
       trim: true,
-      maxlength: 1000,
+      maxlength: [1000, "La description ne peut pas dépasser 1000 caractères"],
     },
     subjectId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "Subject",
-      required: true,
-      index: true,
+      required: [true, "L'ID de la matière est requis"],
     },
-    series: [String],
-    topicIds: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Topic",
-        index: true,
-      },
-    ],
-    questionIds: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Question",
-        validate: {
-          validator: function (v) {
-            return v.length > 0;
-          },
-          message: "Quiz must have at least one question",
-        },
-      },
-    ],
+    series: {
+      type: [String],
+      default: [],
+    },
+    topicIds: {
+      type: [{ type: Types.ObjectId, ref: "Topic" }],
+      default: [],
+    },
+    questionIds: {
+      type: [{ type: Types.ObjectId, ref: "Question" }],
+      default: [],
+    },
     totalQuestions: {
       type: Number,
-      required: true,
-      min: 1,
-      max: 100,
+      required: [true, "Le nombre total de questions est requis"],
+      min: [1, "Le quiz doit avoir au moins 1 question"],
+      max: [100, "Le quiz ne peut pas avoir plus de 100 questions"],
     },
     totalPoints: {
       type: Number,
-      required: true,
-      min: 1,
+      required: [true, "Le total des points est requis"],
+      min: [1, "Le total des points doit être au moins 1"],
     },
     createdBy: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "User",
-      required: true,
-      index: true,
+      required: [true, "L'ID du créateur est requis"],
     },
     level: {
       type: String,
-      required: true,
-      enum: ["Beginner", "Intermediate", "Advanced"],
-      index: true,
+      enum: EXERCISE_DIFFICULTY_LEVELS,
+      required: [true, "Le niveau est requis"],
     },
     timeLimit: {
       type: Number,
-      required: true,
-      min: 60, // minimum 1 minute
-      max: 10800, // maximum 3 hours
+      required: [true, "La limite de temps est requise"],
+      min: [60, "La limite de temps doit être d'au moins 1 minute"],
+      max: [10800, "La limite de temps ne peut pas dépasser 3 heures"],
     },
+    // Configuration
     retakePolicy: {
-      maxAttempts: {
-        type: Number,
-        default: 3,
-        min: 1,
-        max: 10,
-      },
-      cooldownMinutes: {
-        type: Number,
-        default: 0,
-        min: 0,
-        max: 1440, // max 24 hours
-      },
+      type: RetakePolicySchema,
+      default: () => ({}),
     },
-    resultIds: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "QuizResult",
-      },
-    ],
+    resultIds: {
+      type: [{ type: Types.ObjectId, ref: "QuizResult" }],
+      default: [],
+    },
     settings: {
-      shuffleQuestions: {
-        type: Boolean,
-        default: false,
-      },
-      shuffleOptions: {
-        type: Boolean,
-        default: false,
-      },
-      showCorrectAnswers: {
-        type: Boolean,
-        default: true,
-      },
-      allowReview: {
-        type: Boolean,
-        default: true,
-      },
+      type: SettingsSchema,
+      default: () => ({}),
     },
     difficulty: {
       type: String,
-      enum: ["Easy", "Medium", "Hard"],
-      default: "Medium",
-      index: true,
+      enum: DIFFICULTY_LEVELS,
+      default: DIFFICULTY_LEVELS[1], // Medium
     },
-    tags: [
-      {
-        type: String,
-        trim: true,
-        lowercase: true,
-      },
-    ],
+    tags: {
+      type: [String],
+      trim: true,
+      lowercase: true,
+      default: [],
+    },
+    // Status
     isActive: {
       type: Boolean,
       default: true,
-      index: true,
     },
     offlineAvailable: {
       type: Boolean,
@@ -132,58 +175,70 @@ const QuizSchema = new Schema(
     premiumOnly: {
       type: Boolean,
       default: false,
-      index: true,
     },
+    // Analytics
     analytics: {
-      totalAttempts: {
-        type: Number,
-        default: 0,
-      },
-      averageScore: {
-        type: Number,
-        default: 0,
-      },
-      averageTime: {
-        type: Number,
-        default: 0,
-      },
-      completionRate: {
-        type: Number,
-        default: 0,
-      },
+      type: AnalyticsSchema,
+      default: () => ({}),
     },
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    validate: {
+      validator: function () {
+        return this.questionIds.length > 0;
+      },
+      message: "Le quiz doit avoir au moins une question",
+    },
   }
 );
 
-// Indexes for better query performance
+// =============== INDEXES =================
 QuizSchema.index({ subjectId: 1, level: 1 });
 QuizSchema.index({ createdBy: 1, createdAt: -1 });
-QuizSchema.index({ isActive: 1, premiumOnly: 1 });
-QuizSchema.index({ tags: 1 });
+QuizSchema.index({ isActive: 1, premiumOnly: 1 }, { sparse: true });
+QuizSchema.index({ tags: 1 }, { sparse: true });
 
-// Virtual for average score percentage
+// =============== VIRTUALS =============
+/**
+ * Virtual field for average score percentage.
+ * @returns {number} Percentage of average score relative to total points.
+ */
 QuizSchema.virtual("averageScorePercentage").get(function () {
-  if (this.totalPoints === 0) return 0;
-  return Math.round((this.analytics.averageScore / this.totalPoints) * 100);
+  return (this.totalPoints ?? 0) === 0
+    ? 0
+    : Math.round((this.analytics?.averageScore / this.totalPoints) * 100);
 });
 
-// Virtual for difficulty rating
+/**
+ * Virtual field for difficulty rating.
+ * @returns {number} Numeric rating based on difficulty level.
+ */
 QuizSchema.virtual("difficultyRating").get(function () {
-  const ratings = { Easy: 1, Medium: 2, Hard: 3 };
-  return ratings[this.difficulty] || 2;
+  const ratings = {
+    [DIFFICULTY_LEVELS[0]]: 1, // Easy
+    [DIFFICULTY_LEVELS[1]]: 2, // Medium
+    [DIFFICULTY_LEVELS[2]]: 3, // Hard
+    [DIFFICULTY_LEVELS[3]]: 2, // Mixed
+  };
+  return ratings[this.difficulty] ?? 2;
 });
 
-// Virtual for estimated duration in minutes
+/**
+ * Virtual field for estimated duration in minutes.
+ * @returns {number} Time limit in minutes, rounded up.
+ */
 QuizSchema.virtual("estimatedDurationMinutes").get(function () {
-  return Math.ceil(this.timeLimit / 60);
+  return Math.ceil((this.timeLimit ?? 60) / 60);
 });
 
-// Pre-save middleware to validate question count
+// =============== MIDDLEWARE =============
+/**
+ * Pre-save middleware to sync totalQuestions with questionIds length.
+ * @param {Function} next - Callback to proceed with save.
+ */
 QuizSchema.pre("save", function (next) {
   if (this.questionIds.length !== this.totalQuestions) {
     this.totalQuestions = this.questionIds.length;
@@ -191,20 +246,35 @@ QuizSchema.pre("save", function (next) {
   next();
 });
 
-// Method to check if user can retake quiz
+// =============== METHODS =============
+/**
+ * Checks if a user can retake the quiz based on attempts.
+ * @param {number} userAttempts - Number of user attempts.
+ * @returns {boolean} True if user can retake the quiz.
+ */
 QuizSchema.methods.canUserRetake = function (userAttempts) {
-  return userAttempts < this.retakePolicy.maxAttempts;
+  return userAttempts < (this.retakePolicy?.maxAttempts ?? 3);
 };
 
-// Method to get next available retake time
+/**
+ * Calculates the next available retake time based on cooldown.
+ * @param {Date} lastAttemptTime - Time of the last attempt.
+ * @returns {Date} Next available retake time.
+ */
 QuizSchema.methods.getNextRetakeTime = function (lastAttemptTime) {
-  if (this.retakePolicy.cooldownMinutes === 0) return new Date();
+  if ((this.retakePolicy?.cooldownMinutes ?? 0) === 0) return new Date();
   return new Date(
     lastAttemptTime.getTime() + this.retakePolicy.cooldownMinutes * 60 * 1000
   );
 };
 
-// Static method to find quizzes by subject and level
+// =============== STATICS =============
+/**
+ * Finds quizzes by subject and level.
+ * @param {string} subjectId - ID of the subject.
+ * @param {string} level - Level of the quiz.
+ * @returns {Promise<Document[]>} Array of quiz documents.
+ */
 QuizSchema.statics.findBySubjectAndLevel = function (subjectId, level) {
   return this.find({
     subjectId,
@@ -213,7 +283,11 @@ QuizSchema.statics.findBySubjectAndLevel = function (subjectId, level) {
   }).populate("subjectId", "name");
 };
 
-// Static method to get popular quizzes
+/**
+ * Retrieves popular quizzes based on total attempts.
+ * @param {number} [limit=10] - Maximum number of quizzes to return.
+ * @returns {Promise<Document[]>} Array of popular quiz documents.
+ */
 QuizSchema.statics.getPopularQuizzes = function (limit = 10) {
   return this.find({ isActive: true })
     .sort({ "analytics.totalAttempts": -1 })
@@ -221,6 +295,10 @@ QuizSchema.statics.getPopularQuizzes = function (limit = 10) {
     .populate("subjectId", "name");
 };
 
+/**
+ * Quiz model for interacting with the Quiz collection.
+ * @type {mongoose.Model}
+ */
 module.exports = {
-  Quiz: mongoose.model("Quiz", QuizSchema),
+  Quiz: model("Quiz", QuizSchema),
 };
