@@ -76,7 +76,12 @@ const updateSubjectSchema = Joi.object({
 const getSubjectsSchema = Joi.object({
   page: Joi.number().integer().min(1).default(1),
   limit: Joi.number().integer().min(1).max(100).default(10),
-  series: Joi.string().trim().optional(),
+  series: Joi.alternatives()
+    .try(
+      Joi.string().trim().min(1),
+      Joi.array().items(Joi.string().trim().min(1))
+    )
+    .optional(),
   category: Joi.string()
     .valid(
       "sciences",

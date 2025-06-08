@@ -60,9 +60,19 @@ const getSubjects = async (query) => {
 
     if (series) {
       // Handle case-insensitive series matching
-      const seriesArray = Array.isArray(series) ? series : [series];
+      const seriesValue = Array.isArray(series) ? series[0] : series;
+      const trimmedSeries = seriesValue.trim();
+
+      // Log for debugging
+      logger.info("Series filter debug", {
+        originalSeries: series,
+        seriesValue,
+        trimmedSeries,
+      });
+
+      // Use case-insensitive regex that matches the series exactly
       filter.series = {
-        $in: seriesArray.map((s) => new RegExp(`^${s.trim()}$`, "i")),
+        $regex: new RegExp(`^${trimmedSeries}$`, "i"),
       };
     }
 
@@ -78,12 +88,19 @@ const getSubjects = async (query) => {
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
     const skip = (page - 1) * limit;
+
+    logger.info("Executing query with filter", { filter });
+
     const subjects = await Subject.find(filter)
       .sort(sort)
       .skip(skip)
       .limit(Number.parseInt(limit));
 
     const total = await Subject.countDocuments(filter);
+
+    logger.info(
+      `Query results: ${subjects.length} subjects found, ${total} total`
+    );
 
     return {
       subjects,
@@ -100,6 +117,7 @@ const getSubjects = async (query) => {
   }
 };
 
+// TODO: Remove later
 /**
  * Get all subjects without any filters (for debugging)
  */

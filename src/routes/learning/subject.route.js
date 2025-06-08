@@ -16,7 +16,10 @@ const {
 // Apply rate limiting to all routes
 router.use(apiLimiter);
 
-// Public routes - ORDER MATTERS! More specific routes must come before generic ones
+// TODO: remove later Public routes - ORDER MATTERS! More specific routes must come before generic ones
+// Debug route to see available series - MUST BE FIRST
+router.get("/debug/series", subjectController.getAvailableSeries);
+
 // Series route must come before /:id to avoid being caught as an ID
 router.get(
   "/series/:series",
