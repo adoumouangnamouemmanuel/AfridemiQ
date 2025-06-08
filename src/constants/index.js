@@ -282,6 +282,14 @@ const GAMIFIED_REWARD_TYPES = ["badge", "points", "feature"];
  */
 const PERFORMANCE_TRENDS = ["improving", "declining", "stable"];
 
+/**
+ * Constants for missions.
+ * @module constants/index
+ */
+const MISSION_TYPES = ["daily", "weekly", "monthly", "custom"];
+const MISSION_DIFFICULTIES = ["easy", "medium", "hard"];
+const MISSION_CATEGORIES = ["study", "practice", "achievement", "social"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -341,4 +349,7 @@ module.exports = {
   QUIZ_SESSION_STATUSES,
   GAMIFIED_REWARD_TYPES,
   PERFORMANCE_TRENDS,
+  MISSION_TYPES,
+  MISSION_DIFFICULTIES,
+  MISSION_CATEGORIES,
 };
