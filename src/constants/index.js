@@ -251,6 +251,25 @@ const QUESTION_STATUSES = [
 ];
 const MEDIA_TYPES = ["image", "audio", "video", "document"];
 
+/**
+ * Constants for quizzes.
+ * @module constants/index
+ */
+const QUIZ_LEVELS = EXERCISE_DIFFICULTY_LEVELS; // Reuse EXERCISE_DIFFICULTY_LEVELS for quiz levels
+
+/**
+ * Constants for quiz sessions.
+ * @module constants/index
+ */
+const QUIZ_SESSION_STATUSES = [
+  "not_started",
+  "in_progress",
+  "paused",
+  "completed",
+  "abandoned",
+  "expired",
+];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -306,4 +325,6 @@ module.exports = {
   QUESTION_LEVELS,
   QUESTION_STATUSES,
   MEDIA_TYPES,
+  QUIZ_LEVELS,
+  QUIZ_SESSION_STATUSES,
 };
