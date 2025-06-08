@@ -316,14 +316,24 @@ const FEEDBACK_RATING_RANGE = { MIN: 0, MAX: 10 };
  */
 const ADAPTIVE_LEARNING_LEVELS = ["beginner", "intermediate", "advanced"];
 const ADJUSTMENT_METRICS = ["score", "timeSpent", "accuracy", "completionRate"];
-const ADJUSTMENT_ACTIONS = ["increaseDifficulty", "decreaseDifficulty", "suggestResource"];
+const ADJUSTMENT_ACTIONS = [
+  "increaseDifficulty",
+  "decreaseDifficulty",
+  "suggestResource",
+];
 const RECOMMENDED_CONTENT_TYPES = ["topic", "quiz", "resource"];
 
 /**
  * Constants for bookmarks.
  * @module constants/index
  */
-const BOOKMARK_CONTENT_TYPES = ["question", "resource", "course", "topic", "quiz"];
+const BOOKMARK_CONTENT_TYPES = [
+  "question",
+  "resource",
+  "course",
+  "topic",
+  "quiz",
+];
 
 module.exports = {
   TOTAL_STEPS,
