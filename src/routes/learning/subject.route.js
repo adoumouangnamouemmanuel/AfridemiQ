@@ -1,8 +1,9 @@
 const express = require("express");
 const subjectController = require("../../controllers/learning/subject.controller");
-const validateMiddleware = require("../../middlewares/validate.middleware"); // Use your existing middleware
+const validateMiddleware = require("../../middlewares/validate.middleware");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
+const utf8Middleware = require("../../middlewares/utf8.middleware"); // Add UTF-8 middleware
 
 const {
   createSubjectSchema,
@@ -16,6 +17,9 @@ const {
 } = require("../../schemas/learning/subject.schema");
 
 const router = express.Router();
+
+// Apply UTF-8 middleware to all routes
+router.use(utf8Middleware);
 
 // Search and analytics routes (public) - MUST BE FIRST
 router.get("/search", subjectController.advancedSearch);

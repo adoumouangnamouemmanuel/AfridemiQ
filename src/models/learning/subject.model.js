@@ -185,8 +185,11 @@ SubjectSchema.virtual("completionPercentage").get(function () {
 SubjectSchema.pre("save", function (next) {
   // Generate slug from name
   if (this.isModified("name")) {
+    // Properly handle French characters in slug generation
     this.slug = this.name
       .toLowerCase()
+      .normalize("NFD") // Decompose accented characters
+      .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
   }
@@ -196,9 +199,15 @@ SubjectSchema.pre("save", function (next) {
     this.series = [...new Set(this.series)];
   }
 
-  // Ensure tags array has unique values
+  // Ensure tags array has unique values and properly handle encoding
   if (this.tags) {
-    this.tags = [...new Set(this.tags.map((tag) => tag.toLowerCase()))];
+    this.tags = [
+      ...new Set(
+        this.tags.map(
+          (tag) => tag.toLowerCase().normalize("NFC") // Normalize to composed form
+        )
+      ),
+    ];
   }
 
   // Update statistics

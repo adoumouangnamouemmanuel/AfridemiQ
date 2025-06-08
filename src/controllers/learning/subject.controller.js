@@ -213,7 +213,10 @@ const getTrendingSubjects = async (req, res) => {
     const { period = "week", limit = 10 } = req.query;
     // Convert limit to number
     const limitNum = Number.parseInt(limit) || 10;
-    const trending = await analyticsService.getTrendingSubjects(period, limitNum);
+    const trending = await analyticsService.getTrendingSubjects(
+      period,
+      limitNum
+    );
     res.status(StatusCodes.OK).json({
       message: "Matières tendance récupérées avec succès",
       data: trending,
@@ -314,14 +317,28 @@ const exportSubjects = async (req, res) => {
     const result = await bulkService.bulkExportSubjects(filters, format);
 
     if (format === "csv") {
-      res.setHeader("Content-Type", "text/csv");
+      // Set proper UTF-8 headers for CSV
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader("Content-Disposition", "attachment; filename=subjects.csv");
 
-      // Convert to CSV string
-      const csvContent = [
-        result.headers.join(","),
-        ...result.data.map((row) => row.map((cell) => `"${cell}"`).join(",")),
-      ].join("\n");
+      // Add UTF-8 BOM for proper Excel display
+      const BOM = "\uFEFF";
+
+      // Convert to CSV string with proper encoding
+      const csvContent =
+        BOM +
+        [
+          result.headers.join(","),
+          ...result.data.map((row) =>
+            row
+              .map((cell) => {
+                // Properly escape and encode French characters
+                const cellStr = String(cell || "");
+                return `"${cellStr.replace(/"/g, '""')}"`;
+              })
+              .join(",")
+          ),
+        ].join("\n");
 
       res.send(csvContent);
     } else {

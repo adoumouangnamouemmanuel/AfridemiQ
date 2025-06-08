@@ -1,10 +1,14 @@
 const Joi = require("joi");
 
 const createSubjectSchema = Joi.object({
-  name: Joi.string().required().trim().max(100).messages({
-    "any.required": "Le nom de la matière est requis",
-    "string.max": "Le nom ne peut pas dépasser 100 caractères",
-  }),
+  name: Joi.string()
+    .required()
+    .trim()
+    .max(100)
+    .messages({
+      "any.required": "Le nom de la matière est requis",
+      "string.max": "Le nom ne peut pas dépasser 100 caractères",
+    }),
   icon: Joi.string().required().trim().messages({
     "any.required": "L'icône est requise",
   }),
@@ -16,10 +20,14 @@ const createSubjectSchema = Joi.object({
       "string.pattern.base":
         "La couleur doit être un code hexadécimal valide (ex: #FF0000)",
     }),
-  description: Joi.string().required().trim().max(500).messages({
-    "any.required": "La description est requise",
-    "string.max": "La description ne peut pas dépasser 500 caractères",
-  }),
+  description: Joi.string()
+    .required()
+    .trim()
+    .max(500)
+    .messages({
+      "any.required": "La description est requise",
+      "string.max": "La description ne peut pas dépasser 500 caractères",
+    }),
   longDescription: Joi.string().trim().max(2000).optional(),
   series: Joi.array().items(Joi.string().trim()).min(1).required().messages({
     "any.required": "Au moins une série doit être spécifiée",
@@ -45,7 +53,12 @@ const createSubjectSchema = Joi.object({
     .valid("facile", "moyen", "difficile")
     .default("moyen"),
   estimatedHours: Joi.number().integer().min(1).max(1000).optional(),
-  tags: Joi.array().items(Joi.string().trim()).default([]),
+  tags: Joi.array()
+    .items(
+      Joi.string()
+        .trim()
+    )
+    .default([]),
   keywords: Joi.array().items(Joi.string().trim()).default([]),
 });
 

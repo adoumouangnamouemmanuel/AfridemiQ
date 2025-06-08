@@ -22,6 +22,9 @@ const bulkCreateSubjects = async (subjectsData) => {
       try {
         const subjectData = subjectsData[i];
 
+        // Remove the Buffer manipulations - they're causing the encoding issues
+        // Just use the data as-is, MongoDB will handle UTF-8 properly
+
         // Check for duplicates
         const existing = await Subject.findOne({
           name: subjectData.name,
