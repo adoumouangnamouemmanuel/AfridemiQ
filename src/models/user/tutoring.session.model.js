@@ -1,34 +1,48 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, model, mongoose } = require("mongoose");
+const { SESSION_STATUSES } = require("../../constants");
 
+// =============== CONSTANTS =============
+/**
+ * Imported constants for tutoring session statuses.
+ * @see module:constants/index
+ */
+
+// ==================== SCHEMA ==================
+/**
+ * Mongoose schema for tutoring sessions, managing session details and validation.
+ * @module TutoringSessionSchema
+ */
 const TutoringSessionSchema = new Schema(
   {
+    // Session details
     tutorId: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "PeerTutorProfile",
       required: [true, "Identifiant du tuteur requis"],
     },
     studentId: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "User",
       required: [true, "Identifiant de l'étudiant requis"],
     },
     subjectId: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "Subject",
       required: [true, "Identifiant de la matière requis"],
     },
     series: {
       type: [{ type: String, trim: true }],
+      default: [],
       validate: {
         validator: (v) => v.every((s) => s.length >= 1),
         message: "Les séries ne peuvent pas être vides",
       },
     },
     topicId: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "Topic",
     },
+    // Scheduling details
     scheduledAt: {
       type: Date,
       required: [true, "Date de planification requise"],
@@ -45,11 +59,12 @@ const TutoringSessionSchema = new Schema(
     status: {
       type: String,
       enum: {
-        values: ["scheduled", "completed", "cancelled"],
+        values: SESSION_STATUSES,
         message: "Statut invalide",
       },
       required: [true, "Statut requis"],
     },
+    // Session feedback and recording
     feedback: {
       type: String,
       trim: true,
@@ -69,21 +84,28 @@ const TutoringSessionSchema = new Schema(
         min: [0, "La durée de l'enregistrement ne peut pas être négative"],
       },
     },
+    // Status flags
     premiumOnly: {
       type: Boolean,
       default: false,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-// Indexes for efficient querying
+// =============== INDEXES =================
 TutoringSessionSchema.index({ tutorId: 1, scheduledAt: -1 });
 TutoringSessionSchema.index({ studentId: 1, scheduledAt: -1 });
 TutoringSessionSchema.index({ subjectId: 1 });
 TutoringSessionSchema.index({ status: 1 });
 
-// Pre-save hook to validate references
+// =============== MIDDLEWARE =============
+/**
+ * Pre-save middleware to validate references and tutor expertise.
+ * @param {Function} next - Callback to proceed with save.
+ */
 TutoringSessionSchema.pre("save", async function (next) {
   try {
     // Validate tutor (PeerTutorProfile)
@@ -122,6 +144,10 @@ TutoringSessionSchema.pre("save", async function (next) {
   }
 });
 
+/**
+ * TutoringSession model for interacting with the TutoringSession collection.
+ * @type {mongoose.Model}
+ */
 module.exports = {
-  TutoringSession: mongoose.model("TutoringSession", TutoringSessionSchema),
+  TutoringSession: model("TutoringSession", TutoringSessionSchema),
 };
