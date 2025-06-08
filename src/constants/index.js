@@ -119,15 +119,16 @@ const CHALLENGE_STATUSES = [
  * Constants for exams.
  * @module constants/index
  */
-const EXAM_TYPES = ["certification", "concours", "test", "autre"];
+const EXAM_TYPESuddy = ["certification", "concours", "test", "autre"];
+const EXAM_TYPES = ["certification", "exam", "test", "autre"];
 const EXAM_DIFFICULTIES = ["facile", "moyen", "difficile", "expert"];
 const EXAM_FORMATS = ["papier", "ordinateur", "hybride"];
-const ACCESSIBILITY_OPTIONS = [
+const ACCESSIBILITY_TYPES = [
   "braille",
-  "gros_caracteres",
-  "temps_supplementaire",
-  "aide_technique",
-  "salle_separee",
+  "large_print",
+  "extra_time",
+  "technical_assistance",
+  "separate_room",
 ];
 const IMPORTANT_DATE_TYPES = [
   "inscription",
@@ -296,6 +297,12 @@ const MISSION_CATEGORIES = ["study", "practice", "achievement", "social"];
  */
 const MASTERY_LEVELS = ["beginner", "intermediate", "advanced", "mastered"];
 
+/**
+ * Constants for hint usage.
+ * @module constants/index
+ */
+const HINT_TYPES = ["step", "explanation", "formula", "example"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -359,4 +366,5 @@ module.exports = {
   MISSION_DIFFICULTIES,
   MISSION_CATEGORIES,
   MASTERY_LEVELS,
+  HINT_TYPES,
 };
