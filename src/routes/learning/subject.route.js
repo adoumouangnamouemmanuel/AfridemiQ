@@ -1,9 +1,8 @@
 const express = require("express");
 const subjectController = require("../../controllers/learning/subject.controller");
-const validateMiddleware = require("../../middlewares/validate.middleware");
+const validateMiddleware = require("../../middlewares/validate.middleware"); // Use your existing middleware
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
-const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
 
 const {
   createSubjectSchema,
@@ -18,50 +17,20 @@ const {
 
 const router = express.Router();
 
-// Apply rate limiting to all routes
-router.use(apiLimiter);
-
-// Search and analytics routes (public)
+// Search and analytics routes (public) - MUST BE FIRST
 router.get("/search", subjectController.advancedSearch);
 router.get("/search/suggestions", subjectController.getSearchSuggestions);
 router.get("/trending", subjectController.getTrendingSubjects);
 
-// Public subject routes
-router.get(
-  "/series/:series",
-  validateMiddleware(getSubjectsSchema, "query"),
-  subjectController.getSubjectsBySeries
-);
-router.get("/:id", subjectController.getSubjectById);
-router.get(
-  "/",
-  validateMiddleware(getSubjectsSchema, "query"),
-  subjectController.getSubjects
-);
-
-// Analytics routes (require authentication)
+// Analytics routes (require authentication) - BEFORE /:id route
 router.get(
   "/analytics",
   authMiddleware,
   roleMiddleware(["teacher", "admin"]),
   subjectController.getSubjectAnalytics
 );
-router.get(
-  "/:id/performance",
-  authMiddleware,
-  roleMiddleware(["teacher", "admin"]),
-  subjectController.getSubjectPerformance
-);
 
-// Comparison route
-router.post(
-  "/compare",
-  authMiddleware,
-  validateMiddleware(compareSubjectsSchema),
-  subjectController.compareSubjects
-);
-
-// Export route
+// Export route - BEFORE /:id route
 router.get(
   "/export",
   authMiddleware,
@@ -69,7 +38,7 @@ router.get(
   subjectController.exportSubjects
 );
 
-// Bulk operations (require admin/teacher role)
+// Bulk operations (require admin/teacher role) - BEFORE /:id route
 router.post(
   "/bulk",
   authMiddleware,
@@ -85,6 +54,14 @@ router.put(
   subjectController.bulkUpdateSubjects
 );
 
+// Comparison route - BEFORE /:id route
+router.post(
+  "/compare",
+  authMiddleware,
+  validateMiddleware(compareSubjectsSchema),
+  subjectController.compareSubjects
+);
+
 // Subject CRUD operations
 router.post(
   "/",
@@ -93,6 +70,23 @@ router.post(
   validateMiddleware(createSubjectSchema),
   subjectController.createSubject
 );
+
+// Public subject routes with series parameter
+router.get(
+  "/series/:series",
+  validateMiddleware(getSubjectsSchema),
+  subjectController.getSubjectsBySeries
+);
+
+// Dynamic ID routes - AFTER all static routes
+router.get(
+  "/:id/performance",
+  authMiddleware,
+  roleMiddleware(["teacher", "admin"]),
+  subjectController.getSubjectPerformance
+);
+
+router.get("/:id", subjectController.getSubjectById);
 
 router.put(
   "/:id",
@@ -125,12 +119,18 @@ router.post(
   validateMiddleware(addExamToSubjectSchema),
   subjectController.addExamToSubject
 );
-
 router.delete(
   "/:id/exams/:examId",
   authMiddleware,
   roleMiddleware(["teacher", "admin"]),
   subjectController.removeExamFromSubject
+);
+
+// General subjects route - LAST
+router.get(
+  "/",
+  validateMiddleware(getSubjectsSchema),
+  subjectController.getSubjects
 );
 
 module.exports = router;

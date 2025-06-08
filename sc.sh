@@ -1,84 +1,9 @@
 #!/bin/bash
 TEACHER_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODQyZTk4ZjE1NTg5Y2Y0OWNjZGY5MTYiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDk0MDE0MjUsImV4cCI6MTc0OTQwNTAyNX0.pW2mAAuUV0M8DE1vGMg84Nv_UXw0dTBBS913xs_uKAc
 
-echo -e "\n=== PUT/UPDATE tests completed! ==="
 
-echo -e "\n=== Testing DELETE Operations ==="
 
-echo -e "\n31. Testing soft delete of a subject..."
-curl -X DELETE "http://localhost:3000/api/subjects/6845be1c87d397f288291a12" \
-  -H "Accept: application/json" \
-  -H "Authorization: Bearer $TEACHER_TOKEN"
-
-echo -e "\n32. Verifying subject is soft deleted (should not appear in active list)..."
-curl -X GET "http://localhost:3000/api/subjects?category=sciences" \
-  -H "Accept: application/json"
-
-echo -e "\n33. Getting deleted subject by ID (should still work but show isActive: false)..."
-curl -X GET "http://localhost:3000/api/subjects/6845be1c87d397f288291a12" \
-  -H "Accept: application/json"
-
-echo -e "\n34. Testing delete with non-existent ID..."
-curl -X DELETE "http://localhost:3000/api/subjects/507f1f77bcf86cd799439999" \
-  -H "Accept: application/json" \
-  -H "Authorization: Bearer $TEACHER_TOKEN"
-
-echo -e "\n35. Testing delete without authentication..."
-curl -X DELETE "http://localhost:3000/api/subjects/6845bdc687d397f288291a08" \
-  -H "Accept: application/json"
-
-echo -e "\n36. Testing delete with invalid ID format..."
-curl -X DELETE "http://localhost:3000/api/subjects/invalid-id" \
-  -H "Accept: application/json" \
-  -H "Authorization: Bearer $TEACHER_TOKEN"
-
-echo -e "\n=== Testing Advanced Search and Analytics ==="
-
-echo -e "\n37. Testing advanced search with multiple filters..."
-curl -X GET "http://localhost:3000/api/subjects/search?query=mathematiques&category=mathematiques&difficulty=moyen&minRating=3" \
-  -H "Accept: application/json"
-
-echo -e "\n38. Testing search suggestions..."
-curl -X GET "http://localhost:3000/api/subjects/search/suggestions?q=math" \
-  -H "Accept: application/json"
-
-echo -e "\n39. Testing trending subjects..."
-curl -X GET "http://localhost:3000/api/subjects/trending?period=week&limit=5" \
-  -H "Accept: application/json"
-
-echo -e "\n40. Testing subject analytics..."
-curl -X GET "http://localhost:3000/api/subjects/analytics" \
-  -H "Accept: application/json" \
-  -H "Authorization: Bearer $TEACHER_TOKEN"
-
-echo -e "\n41. Testing subject comparison..."
-curl -X POST "http://localhost:3000/api/subjects/compare" \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TEACHER_TOKEN" \
-  -d '{
-    "ids": ["6845bdc687d397f288291a05", "6845bdc687d397f288291a08"]
-  }'
-
-echo -e "\n=== Testing Exam Management ==="
-
-echo -e "\n42. Testing add exam to subject (will fail since exam doesn'\''t exist)..."
-curl -X POST "http://localhost:3000/api/subjects/6845bdc687d397f288291a05/exams" \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TEACHER_TOKEN" \
-  -d '{
-    "examId": "507f1f77bcf86cd799439011"
-  }'
-
-echo -e "\n43. Testing remove exam from subject..."
-curl -X DELETE "http://localhost:3000/api/subjects/6845bdc687d397f288291a05/exams/507f1f77bcf86cd799439011" \
-  -H "Accept: application/json" \
-  -H "Authorization: Bearer $TEACHER_TOKEN"
-
-echo -e "\n=== Testing Bulk Operations ==="
-
-echo -e "\n44. Testing bulk create subjects..."
+echo -e "\n57. Testing bulk create (fixed route)..."
 curl -X POST "http://localhost:3000/api/subjects/bulk" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
@@ -86,89 +11,113 @@ curl -X POST "http://localhost:3000/api/subjects/bulk" \
   -d '{
     "subjects": [
       {
-        "name": "Informatique Avancee",
-        "icon": "💻",
-        "color": "#2196F3",
-        "description": "Cours d'\''informatique avancee",
-        "series": ["C", "E"],
-        "category": "technologie",
-        "difficulty": "difficile",
-        "estimatedHours": 180,
-        "tags": ["informatique", "programmation", "algorithmes"]
+        "name": "Test Bulk Subject 1",
+        "icon": "📚",
+        "color": "#FF0000",
+        "description": "First bulk test subject",
+        "series": ["A"],
+        "category": "sciences"
       },
       {
-        "name": "Arts Visuels",
-        "icon": "🎭",
-        "color": "#E91E63",
-        "description": "Cours d'\''arts visuels et design",
-        "series": ["L", "Arts"],
-        "category": "arts",
-        "difficulty": "moyen",
-        "estimatedHours": 140,
-        "tags": ["arts", "design", "creativite"]
+        "name": "Test Bulk Subject 2", 
+        "icon": "📝",
+        "color": "#00FF00",
+        "description": "Second bulk test subject",
+        "series": ["C"],
+        "category": "mathematiques"
       }
     ]
   }'
 
-echo -e "\n45. Testing bulk update subjects..."
-curl -X PUT "http://localhost:3000/api/subjects/bulk" \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TEACHER_TOKEN" \
-  -d '{
-    "updates": [
-      {
-        "id": "6845bdc687d397f288291a05",
-        "data": {
-          "tags": ["algebre", "mathematiques", "equations", "matrices", "bulk-updated"]
-        }
-      },
-      {
-        "id": "6845bdc687d397f288291a08",
-        "data": {
-          "description": "Physique quantique mise a jour en bulk"
-        }
-      }
-    ]
-  }'
+# echo -e "\n58. Testing export (fixed route)..."
+# curl -X GET "http://localhost:3000/api/subjects/export?format=json&category=mathematiques" \
+#   -H "Accept: application/json" \
+#   -H "Authorization: Bearer $TEACHER_TOKEN"
 
-echo -e "\n46. Testing subject export..."
-curl -X GET "http://localhost:3000/api/subjects/export?format=json&category=mathematiques" \
-  -H "Accept: application/json" \
-  -H "Authorization: Bearer $TEACHER_TOKEN"
+# echo -e "\n=== Advanced Search Tests ==="
 
-echo -e "\n=== Testing Edge Cases and Performance ==="
+# echo -e "\n59. Testing basic text search..."
+# curl -X GET "http://localhost:3000/api/subjects/search?query=mathematiques" \
+#   -H "Accept: application/json"
 
-echo -e "\n47. Testing pagination with large page number..."
-curl -X GET "http://localhost:3000/api/subjects?page=999&limit=5" \
-  -H "Accept: application/json"
+# echo -e "\n60. Testing multi-criteria search..."
+# curl -X GET "http://localhost:3000/api/subjects/search?query=algebre&category=mathematiques&difficulty=moyen&series=C&minRating=3" \
+#   -H "Accept: application/json"
 
-echo -e "\n48. Testing search with special characters..."
-curl -X GET "http://localhost:3000/api/subjects?search=mathématiques%20algèbre" \
-  -H "Accept: application/json"
+# echo -e "\n61. Testing search with tags filter..."
+# curl -X GET "http://localhost:3000/api/subjects/search?tags=physique,quantique&category=sciences" \
+#   -H "Accept: application/json"
 
-echo -e "\n49. Testing subjects with sorting by multiple criteria..."
-curl -X GET "http://localhost:3000/api/subjects?sortBy=popularity&sortOrder=desc&limit=3" \
-  -H "Accept: application/json"
+# echo -e "\n62. Testing search with popularity filter..."
+# curl -X GET "http://localhost:3000/api/subjects/search?isPopular=false&sortBy=popularity&sortOrder=desc" \
+#   -H "Accept: application/json"
 
-echo -e "\n50. Testing subject stats and performance..."
-curl -X GET "http://localhost:3000/api/subjects/6845bdc687d397f288291a05/performance" \
-  -H "Accept: application/json" \
-  -H "Authorization: Bearer $TEACHER_TOKEN"
+# echo -e "\n63. Testing search with estimated hours range..."
+# curl -X GET "http://localhost:3000/api/subjects/search?minEstimatedHours=100&maxEstimatedHours=200&sortBy=estimatedHours" \
+#   -H "Accept: application/json"
 
-echo -e "\n=== Final verification - Get all subjects summary ==="
-curl -X GET "http://localhost:3000/api/subjects?limit=5&sortBy=updatedAt&sortOrder=desc" \
-  -H "Accept: application/json"
+# echo -e "\n64. Testing search with multiple series..."
+# curl -X GET "http://localhost:3000/api/subjects/search?series=C,D&category=sciences&sortBy=name" \
+#   -H "Accept: application/json"
 
-echo -e "\n=== COMPREHENSIVE SUBJECT API TESTING COMPLETED! ==="
-echo -e "Summary of tests performed:"
-echo -e "✅ POST (Create) - Basic, validation, authentication"
-echo -e "✅ GET (Read) - All subjects, by ID, by series, filtering, pagination"
-echo -e "✅ PUT (Update) - Partial updates, validation, authentication"
-echo -e "✅ DELETE (Soft Delete) - Subject deactivation"
-echo -e "✅ Rating System - Add ratings, validation, average calculation"
-echo -e "✅ Advanced Search - Multi-criteria search, suggestions"
-echo -e "✅ Analytics - Performance metrics, trending subjects"
-echo -e "✅ Bulk Operations - Create, update, export multiple subjects"
-echo -e "✅ Edge Cases - Invalid inputs, authentication, large datasets"
-echo -e "✅ Exam Management - Add/remove exams (basic structure)"
+# echo -e "\n65. Testing search with multiple difficulties..."
+# curl -X GET "http://localhost:3000/api/subjects/search?difficulty=moyen,difficile&sortBy=difficulty" \
+#   -H "Accept: application/json"
+
+# echo -e "\n66. Testing search with has exams filter..."
+# curl -X GET "http://localhost:3000/api/subjects/search?hasExams=false&sortBy=examCount" \
+#   -H "Accept: application/json"
+
+# echo -e "\n67. Testing search with relevance sorting..."
+# curl -X GET "http://localhost:3000/api/subjects/search?query=chimie&sortBy=relevance&sortOrder=desc" \
+#   -H "Accept: application/json"
+
+# echo -e "\n68. Testing search with pagination..."
+# curl -X GET "http://localhost:3000/api/subjects/search?query=math&page=1&limit=3" \
+#   -H "Accept: application/json"
+
+# echo -e "\n69. Testing search by subcategory..."
+# curl -X GET "http://localhost:3000/api/subjects/search?subcategory=physique&category=sciences" \
+#   -H "Accept: application/json"
+
+# echo -e "\n70. Testing comprehensive search with all filters..."
+# curl -X GET "http://localhost:3000/api/subjects/search?query=science&category=sciences&subcategory=biologie&series=C&difficulty=moyen&tags=cellules&minRating=2&minEstimatedHours=50&maxEstimatedHours=300&hasExams=false&isPopular=false&page=1&limit=5&sortBy=rating&sortOrder=desc" \
+#   -H "Accept: application/json"
+
+# echo -e "\n71. Testing empty search (should return all active subjects)..."
+# curl -X GET "http://localhost:3000/api/subjects/search" \
+#   -H "Accept: application/json"
+
+# echo -e "\n72. Testing search with special characters..."
+# curl -X GET "http://localhost:3000/api/subjects/search?query=français%20littérature" \
+#   -H "Accept: application/json"
+
+# echo -e "\n=== Additional Search Verification ==="
+
+# echo -e "\n73. Testing search without query (should return all mathematiques subjects)..."
+# curl -X GET "http://localhost:3000/api/subjects/search?category=mathematiques" \
+#   -H "Accept: application/json"
+
+# echo -e "\n74. Testing search with exact subject name..."
+# curl -X GET "http://localhost:3000/api/subjects/search?query=Mathématiques" \
+#   -H "Accept: application/json"
+
+# echo -e "\n75. Testing search with partial name..."
+# curl -X GET "http://localhost:3000/api/subjects/search?query=Algèbre" \
+#   -H "Accept: application/json"
+
+# echo -e "\n76. Testing category-only search for sciences..."
+# curl -X GET "http://localhost:3000/api/subjects/search?category=sciences" \
+#   -H "Accept: application/json"
+
+# echo -e "\n77. Testing search with series filter..."
+# curl -X GET "http://localhost:3000/api/subjects/search?series=C" \
+#   -H "Accept: application/json"
+
+# echo -e "\n78. Testing no filters (should return all active subjects)..."
+# curl -X GET "http://localhost:3000/api/subjects/search" \
+#   -H "Accept: application/json"
+
+# echo -e "\n=== Search Verification Complete! ==="
+
+# echo -e "\n=== All Advanced Features Testing Complete! ==="

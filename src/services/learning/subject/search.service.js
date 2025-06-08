@@ -1,4 +1,4 @@
-const { Subject } = require("../../../models/index");
+const { Subject } = require("../../../models/learning/subject.model");
 const createLogger = require("../../logging.service");
 
 const logger = createLogger("SearchService");
@@ -53,7 +53,8 @@ const advancedSearch = async (searchParams) => {
       if (Array.isArray(series)) {
         matchConditions.series = { $in: series };
       } else {
-        matchConditions.series = { $in: [series] };
+        const seriesArray = series.includes(",") ? series.split(",") : [series];
+        matchConditions.series = { $in: seriesArray };
       }
     }
 
@@ -62,14 +63,19 @@ const advancedSearch = async (searchParams) => {
       if (Array.isArray(difficulty)) {
         matchConditions.difficulty = { $in: difficulty };
       } else {
-        matchConditions.difficulty = difficulty;
+        const difficultyArray = difficulty.includes(",")
+          ? difficulty.split(",")
+          : [difficulty];
+        matchConditions.difficulty = { $in: difficultyArray };
       }
     }
 
     // Tags filter
     if (tags) {
-      const tagArray = Array.isArray(tags) ? tags : [tags];
-      matchConditions.tags = { $in: tagArray.map((tag) => tag.toLowerCase()) };
+      const tagArray = Array.isArray(tags) ? tags : tags.split(",");
+      matchConditions.tags = {
+        $in: tagArray.map((tag) => tag.toLowerCase().trim()),
+      };
     }
 
     // Rating filter
@@ -184,31 +190,6 @@ const advancedSearch = async (searchParams) => {
               tags: { $addToSet: "$tags" },
               avgRating: { $avg: "$rating.average" },
               avgEstimatedHours: { $avg: "$estimatedHours" },
-              ratingRanges: {
-                $push: {
-                  $switch: {
-                    branches: [
-                      {
-                        case: { $gte: ["$rating.average", 4.5] },
-                        then: "excellent",
-                      },
-                      {
-                        case: { $gte: ["$rating.average", 3.5] },
-                        then: "good",
-                      },
-                      {
-                        case: { $gte: ["$rating.average", 2.5] },
-                        then: "average",
-                      },
-                      {
-                        case: { $gte: ["$rating.average", 1.5] },
-                        then: "poor",
-                      },
-                    ],
-                    default: "unrated",
-                  },
-                },
-              },
             },
           },
         ],
@@ -241,12 +222,6 @@ const advancedSearch = async (searchParams) => {
       avgEstimatedHours: facets.avgEstimatedHours
         ? Math.round(facets.avgEstimatedHours)
         : 0,
-      ratingDistribution: facets.ratingRanges
-        ? facets.ratingRanges.reduce((acc, range) => {
-            acc[range] = (acc[range] || 0) + 1;
-            return acc;
-          }, {})
-        : {},
     };
 
     return {
@@ -275,6 +250,9 @@ const getSearchSuggestions = async (query, limit = 10) => {
       return [];
     }
 
+    // Convert limit to number
+    const limitNum = Number.parseInt(limit) || 10;
+
     const suggestions = await Subject.aggregate([
       {
         $match: {
@@ -296,94 +274,12 @@ const getSearchSuggestions = async (query, limit = 10) => {
         },
       },
       { $sort: { popularity: -1 } },
-      { $limit: limit },
+      { $limit: limitNum }, // Use the converted number
     ]);
 
-    // Also get tag suggestions
-    const tagSuggestions = await Subject.aggregate([
-      { $match: { isActive: true } },
-      { $unwind: "$tags" },
-      {
-        $match: {
-          tags: { $regex: query, $options: "i" },
-        },
-      },
-      {
-        $group: {
-          _id: "$tags",
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          name: "$_id",
-          count: 1,
-          type: { $literal: "tag" },
-        },
-      },
-      { $sort: { count: -1 } },
-      { $limit: 5 },
-    ]);
-
-    return [...suggestions, ...tagSuggestions];
+    return suggestions;
   } catch (error) {
     logger.error("Error getting search suggestions", error, { query });
-    throw error;
-  }
-};
-
-/**
- * Get trending searches
- */
-const getTrendingSearches = async (limit = 10) => {
-  try {
-    // This would typically come from a search analytics collection
-    // For now, we'll return popular subjects
-    const trending = await Subject.find({
-      isActive: true,
-    })
-      .sort({ popularity: -1 })
-      .limit(limit)
-      .select("name category series popularity");
-
-    return trending.map((subject) => ({
-      query: subject.name,
-      category: subject.category,
-      popularity: subject.popularity,
-    }));
-  } catch (error) {
-    logger.error("Error getting trending searches", error);
-    throw error;
-  }
-};
-
-/**
- * Get related subjects based on similarity
- */
-const getRelatedSubjects = async (subjectId, limit = 5) => {
-  try {
-    const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      return [];
-    }
-
-    const related = await Subject.find({
-      _id: { $ne: subjectId },
-      isActive: true,
-      $or: [
-        { category: subject.category },
-        { series: { $in: subject.series } },
-        { tags: { $in: subject.tags } },
-        { difficulty: subject.difficulty },
-      ],
-    })
-      .sort({ popularity: -1 })
-      .limit(limit)
-      .select("name category series difficulty rating popularity");
-
-    return related;
-  } catch (error) {
-    logger.error("Error getting related subjects", error, { subjectId });
     throw error;
   }
 };
@@ -391,6 +287,4 @@ const getRelatedSubjects = async (subjectId, limit = 5) => {
 module.exports = {
   advancedSearch,
   getSearchSuggestions,
-  getTrendingSearches,
-  getRelatedSubjects,
 };

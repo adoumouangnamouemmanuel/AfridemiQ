@@ -271,6 +271,9 @@ const getSubjectPerformance = async (subjectId) => {
  */
 const getTrendingSubjects = async (period = "week", limit = 10) => {
   try {
+    // Convert limit to number
+    const limitNum = Number.parseInt(limit) || 10;
+    
     let dateThreshold;
     const now = new Date();
 
@@ -318,7 +321,7 @@ const getTrendingSubjects = async (period = "week", limit = 10) => {
         },
       },
       { $sort: { trendingScore: -1 } },
-      { $limit: limit },
+      { $limit: limitNum }, // Use the converted number
       {
         $project: {
           name: 1,

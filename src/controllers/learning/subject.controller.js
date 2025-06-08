@@ -192,7 +192,9 @@ const advancedSearch = async (req, res) => {
 const getSearchSuggestions = async (req, res) => {
   try {
     const { q, limit = 10 } = req.query;
-    const suggestions = await searchService.getSearchSuggestions(q, limit);
+    // Convert limit to number
+    const limitNum = Number.parseInt(limit) || 10;
+    const suggestions = await searchService.getSearchSuggestions(q, limitNum);
     res.status(StatusCodes.OK).json({
       message: "Suggestions de recherche récupérées avec succès",
       data: suggestions,
@@ -209,7 +211,9 @@ const getSearchSuggestions = async (req, res) => {
 const getTrendingSubjects = async (req, res) => {
   try {
     const { period = "week", limit = 10 } = req.query;
-    const trending = await analyticsService.getTrendingSubjects(period, limit);
+    // Convert limit to number
+    const limitNum = Number.parseInt(limit) || 10;
+    const trending = await analyticsService.getTrendingSubjects(period, limitNum);
     res.status(StatusCodes.OK).json({
       message: "Matières tendance récupérées avec succès",
       data: trending,
