@@ -290,6 +290,12 @@ const MISSION_TYPES = ["daily", "weekly", "monthly", "custom"];
 const MISSION_DIFFICULTIES = ["easy", "medium", "hard"];
 const MISSION_CATEGORIES = ["study", "practice", "achievement", "social"];
 
+/**
+ * Constants for topic progress.
+ * @module constants/index
+ */
+const MASTERY_LEVELS = ["beginner", "intermediate", "advanced", "mastered"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -352,4 +358,5 @@ module.exports = {
   MISSION_TYPES,
   MISSION_DIFFICULTIES,
   MISSION_CATEGORIES,
+  MASTERY_LEVELS,
 };
