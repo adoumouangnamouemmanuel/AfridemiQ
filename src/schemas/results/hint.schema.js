@@ -2,7 +2,7 @@ const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
 const {
   DIFFICULTY_LEVELS,
-} = require("../../models/learning/adaptive.learning.model");
+} = require("../../constants/index");
 
 const recordHintUsageSchema = Joi.object({
   userId: Joi.objectId().required(),

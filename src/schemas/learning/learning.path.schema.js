@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const {
   DIFFICULTY_LEVELS,
-} = require("../../models/learning/adaptive.learning.model");
+} = require("../../constants/index");
 
 const createLearningPathSchema = Joi.object({
   name: Joi.string().trim().required(),

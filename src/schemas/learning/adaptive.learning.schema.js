@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const {
   DIFFICULTY_LEVELS,
-} = require("../../models/learning/adaptive.learning.model");
+} = require("../../constants/index");
 
 const createAdaptiveLearningSchema = Joi.object({
   userId: Joi.string().hex().length(24).required(),

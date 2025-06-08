@@ -310,6 +310,15 @@ const HINT_TYPES = ["step", "explanation", "formula", "example"];
 const QUIZ_RESULT_STATUSES = ["completed", "abandoned", "in_progress"];
 const FEEDBACK_RATING_RANGE = { MIN: 0, MAX: 10 };
 
+/**
+ * Constants for adaptive learning.
+ * @module constants/index
+ */
+const ADAPTIVE_LEARNING_LEVELS = ["beginner", "intermediate", "advanced"];
+const ADJUSTMENT_METRICS = ["score", "timeSpent", "accuracy", "completionRate"];
+const ADJUSTMENT_ACTIONS = ["increaseDifficulty", "decreaseDifficulty", "suggestResource"];
+const RECOMMENDED_CONTENT_TYPES = ["topic", "quiz", "resource"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -375,4 +384,8 @@ module.exports = {
   HINT_TYPES,
   QUIZ_RESULT_STATUSES,
   FEEDBACK_RATING_RANGE,
+  ADAPTIVE_LEARNING_LEVELS,
+  ADJUSTMENT_METRICS,
+  ADJUSTMENT_ACTIONS,
+  RECOMMENDED_CONTENT_TYPES,
 };
