@@ -276,6 +276,12 @@ const QUIZ_SESSION_STATUSES = [
  */
 const GAMIFIED_REWARD_TYPES = ["badge", "points", "feature"];
 
+/**
+ * Constants for leaderboard entries.
+ * @module constants/index
+ */
+const PERFORMANCE_TRENDS = ["improving", "declining", "stable"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -334,4 +340,5 @@ module.exports = {
   QUIZ_LEVELS,
   QUIZ_SESSION_STATUSES,
   GAMIFIED_REWARD_TYPES,
+  PERFORMANCE_TRENDS,
 };
