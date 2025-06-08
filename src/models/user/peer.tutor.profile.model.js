@@ -143,7 +143,6 @@ const PeerTutorProfileSchema = new Schema(
 );
 
 // =============== INDEXES =================
-PeerTutorProfileSchema.index({ userId: 1 }, { unique: true });
 PeerTutorProfileSchema.index({ subjects: 1 });
 PeerTutorProfileSchema.index({ topics: 1 });
 
