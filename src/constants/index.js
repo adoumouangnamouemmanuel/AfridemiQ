@@ -93,6 +93,21 @@ const CONTENT_FORMATS = ["video", "text", "audio", "mixed"];
 const LEARNING_STYLES = ["visual", "auditory", "kinesthetic", "mixed"];
 const PROFILE_VISIBILITIES = ["public", "friends", "private"];
 
+/**
+ * Constants for assessments.
+ * @module constants/index
+ */
+const ASSESSMENT_FORMATS = ["quiz", "exam", "project", "practice", "mock"];
+const DIFFICULTY_LEVELS = ["Easy", "Medium", "Hard", "Mixed"];
+const EDUCATION_LEVELS = [
+  "Primary",
+  "JSS",
+  "SSS",
+  "University",
+  "Professional",
+];
+const ASSESSMENT_STATUSES = ["draft", "published", "archived", "scheduled"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -111,4 +126,8 @@ module.exports = {
   CONTENT_FORMATS,
   LEARNING_STYLES,
   PROFILE_VISIBILITIES,
+  ASSESSMENT_FORMATS,
+  DIFFICULTY_LEVELS,
+  EDUCATION_LEVELS,
+  ASSESSMENT_STATUSES,
 };
