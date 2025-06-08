@@ -270,6 +270,12 @@ const QUIZ_SESSION_STATUSES = [
   "expired",
 ];
 
+/**
+ * Constants for gamified progress.
+ * @module constants/index
+ */
+const GAMIFIED_REWARD_TYPES = ["badge", "points", "feature"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -327,4 +333,5 @@ module.exports = {
   MEDIA_TYPES,
   QUIZ_LEVELS,
   QUIZ_SESSION_STATUSES,
+  GAMIFIED_REWARD_TYPES,
 };
