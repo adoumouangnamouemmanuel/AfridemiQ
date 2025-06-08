@@ -1,153 +1,224 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, model, Types } = require("mongoose");
+const { QUIZ_SESSION_STATUSES } = require("../../constants");
 
+// =============== CONSTANTS =============
+/**
+ * Imported constants for quiz session statuses.
+ * @see module:constants/index
+ */
+
+// =============== SUBSCHEMAS =============
+/**
+ * Subschema for quiz session answers.
+ * @module AnswerSchema
+ */
+const AnswerSchema = new Schema({
+  questionId: {
+    type: Types.ObjectId,
+    ref: "Question",
+    required: [true, "L'ID de la question est requis"],
+  },
+  selectedAnswer: Schema.Types.Mixed,
+  isCorrect: {
+    type: Boolean,
+  },
+  timeSpent: {
+    type: Number, // in seconds
+    default: 0,
+  },
+  answeredAt: {
+    type: Date,
+    default: Date.now,
+  },
+  flagged: {
+    type: Boolean,
+    default: false,
+  },
+  skipped: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+/**
+ * Subschema for quiz session progress.
+ * @module ProgressSchema
+ */
+const ProgressSchema = new Schema({
+  questionsAnswered: {
+    type: Number,
+    default: 0,
+  },
+  questionsSkipped: {
+    type: Number,
+    default: 0,
+  },
+  questionsFlagged: {
+    type: Number,
+    default: 0,
+  },
+  percentageComplete: {
+    type: Number,
+    default: 0,
+    min: [0, "Le pourcentage complété ne peut pas être négatif"],
+    max: [100, "Le pourcentage complété ne peut pas dépasser 100"],
+  },
+});
+
+/**
+ * Subschema for quiz session device information.
+ * @module DeviceInfoSchema
+ */
+const DeviceInfoSchema = new Schema({
+  platform: {
+    type: String,
+  },
+  browser: {
+    type: String,
+  },
+  version: {
+    type: String,
+  },
+  userAgent: {
+    type: String,
+  },
+  screenResolution: {
+    type: String,
+  },
+  lastSync: {
+    type: Date,
+    default: Date.now,
+  },
+  isOnline: {
+    type: Boolean,
+    default: true,
+  },
+});
+
+/**
+ * Subschema for quiz session settings.
+ * @module SettingsSchema
+ */
+const SettingsSchema = new Schema({
+  autoSave: {
+    type: Boolean,
+    default: true,
+  },
+  showTimer: {
+    type: Boolean,
+    default: true,
+  },
+  allowNavigation: {
+    type: Boolean,
+    default: true,
+  },
+});
+
+/**
+ * Subschema for quiz session metadata.
+ * @module MetadataSchema
+ */
+const MetadataSchema = new Schema({
+  ipAddress: {
+    type: String,
+  },
+  location: {
+    country: String,
+    city: String,
+    timezone: String,
+  },
+  sessionDuration: {
+    type: Number, // in seconds
+  },
+  pausedDuration: {
+    type: Number, // in seconds
+  },
+  totalInteractions: {
+    type: Number,
+    default: 0,
+  },
+});
+
+// ================= SCHEMA =================
+/**
+ * Mongoose schema for quiz sessions, tracking user progress and interactions.
+ * @module QuizSessionSchema
+ */
 const QuizSessionSchema = new Schema(
   {
+    // Session details
     userId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "User",
-      required: true,
-      index: true,
+      required: [true, "L'ID de l'utilisateur est requis"],
     },
     quizId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "Quiz",
-      required: true,
-      index: true,
+      required: [true, "L'ID du quiz est requis"],
     },
     sessionId: {
       type: String,
-      required: true,
-      unique: true,
+      required: [true, "L'ID de la session est requis"],
+      unique: [true, "L'ID de la session doit être unique"],
       default: () =>
-        `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        `session_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
     },
     startTime: {
       type: Date,
       default: Date.now,
-      index: true,
     },
     endTime: {
       type: Date,
-      index: true,
     },
     lastActive: {
       type: Date,
       default: Date.now,
-      index: true,
     },
     timeRemaining: {
       type: Number, // in seconds
       default: 0,
     },
-    answers: [
-      {
-        questionId: {
-          type: Schema.Types.ObjectId,
-          ref: "Question",
-          required: true,
-        },
-        selectedAnswer: Schema.Types.Mixed,
-        isCorrect: Boolean,
-        timeSpent: {
-          type: Number, // in seconds
-          default: 0,
-        },
-        answeredAt: {
-          type: Date,
-          default: Date.now,
-        },
-        flagged: {
-          type: Boolean,
-          default: false,
-        },
-        skipped: {
-          type: Boolean,
-          default: false,
-        },
-      },
-    ],
+    // Answers
+    answers: {
+      type: [AnswerSchema],
+      default: [],
+    },
     currentQuestionIndex: {
       type: Number,
       default: 0,
-      min: 0,
+      min: [0, "L'index de la question actuelle ne peut pas être négatif"],
     },
     status: {
       type: String,
-      enum: [
-        "not_started",
-        "in_progress",
-        "paused",
-        "completed",
-        "abandoned",
-        "expired",
-      ],
-      required: true,
-      default: "not_started",
-      index: true,
+      enum: {
+        values: QUIZ_SESSION_STATUSES,
+        message: `Le statut doit être l'un des suivants : ${QUIZ_SESSION_STATUSES.join(
+          ", "
+        )}`,
+      },
+      required: [true, "Le statut est requis"],
+      default: QUIZ_SESSION_STATUSES[0], // not_started
     },
+    // Progress
     progress: {
-      questionsAnswered: {
-        type: Number,
-        default: 0,
-      },
-      questionsSkipped: {
-        type: Number,
-        default: 0,
-      },
-      questionsFlagged: {
-        type: Number,
-        default: 0,
-      },
-      percentageComplete: {
-        type: Number,
-        default: 0,
-        min: 0,
-        max: 100,
-      },
+      type: ProgressSchema,
+      default: () => ({}),
     },
+    // Device info
     deviceInfo: {
-      platform: String,
-      browser: String,
-      version: String,
-      userAgent: String,
-      screenResolution: String,
-      lastSync: {
-        type: Date,
-        default: Date.now,
-      },
-      isOnline: {
-        type: Boolean,
-        default: true,
-      },
+      type: DeviceInfoSchema,
+      default: () => ({}),
     },
+    // Settings
     settings: {
-      autoSave: {
-        type: Boolean,
-        default: true,
-      },
-      showTimer: {
-        type: Boolean,
-        default: true,
-      },
-      allowNavigation: {
-        type: Boolean,
-        default: true,
-      },
+      type: SettingsSchema,
+      default: () => ({}),
     },
+    // Metadata
     metadata: {
-      ipAddress: String,
-      location: {
-        country: String,
-        city: String,
-        timezone: String,
-      },
-      sessionDuration: Number, // in seconds
-      pausedDuration: Number, // in seconds
-      totalInteractions: {
-        type: Number,
-        default: 0,
-      },
+      type: MetadataSchema,
+      default: () => ({}),
     },
   },
   {
@@ -157,36 +228,47 @@ const QuizSessionSchema = new Schema(
   }
 );
 
-// Compound indexes for better query performance
+// =============== INDEXES =================
 QuizSessionSchema.index({ userId: 1, quizId: 1 });
 QuizSessionSchema.index({ userId: 1, status: 1 });
 QuizSessionSchema.index({ quizId: 1, status: 1 });
 QuizSessionSchema.index({ startTime: 1, status: 1 });
 QuizSessionSchema.index({ lastActive: 1, status: 1 });
+QuizSessionSchema.index({ endTime: 1 }, { sparse: true });
 
-// Virtual for session duration
+// =============== VIRTUALS =============
+/**
+ * Virtual field for session duration in seconds.
+ * @returns {number} Duration of the session in seconds.
+ */
 QuizSessionSchema.virtual("sessionDuration").get(function () {
   if (this.endTime && this.startTime) {
-    return Math.floor((this.endTime - this.startTime) / 1000); // in seconds
+    return Math.floor((this.endTime - this.startTime) / 1000);
   }
   if (this.startTime) {
-    return Math.floor((new Date() - this.startTime) / 1000); // in seconds
+    return Math.floor((new Date() - this.startTime) / 1000);
   }
   return 0;
 });
 
-// Virtual for time elapsed
+/**
+ * Virtual field for time elapsed excluding paused duration.
+ * @returns {number} Elapsed time in seconds.
+ */
 QuizSessionSchema.virtual("timeElapsed").get(function () {
   if (this.startTime) {
     const elapsed = Math.floor((new Date() - this.startTime) / 1000);
-    return elapsed - (this.metadata.pausedDuration || 0);
+    return elapsed - (this.metadata?.pausedDuration ?? 0);
   }
   return 0;
 });
 
-// Virtual for completion percentage
+/**
+ * Virtual field for completion percentage.
+ * @returns {number} Percentage of answered questions.
+ */
 QuizSessionSchema.virtual("completionPercentage").get(function () {
-  if (this.answers.length === 0) return 0;
+  if ((this.answers ?? []).length === 0) return 0;
   const totalQuestions = this.answers.length;
   const answeredQuestions = this.answers.filter(
     (answer) =>
@@ -197,15 +279,25 @@ QuizSessionSchema.virtual("completionPercentage").get(function () {
   return Math.round((answeredQuestions / totalQuestions) * 100);
 });
 
-// Virtual for is expired
+/**
+ * Virtual field to check if the session is expired.
+ * @returns {boolean} True if the session is expired.
+ */
 QuizSessionSchema.virtual("isExpired").get(function () {
-  if (!this.timeRemaining || this.status === "completed") return false;
+  if (!(this.timeRemaining ?? 0) || this.status === QUIZ_SESSION_STATUSES[3]) {
+    // completed
+    return false;
+  }
   return this.timeRemaining <= 0;
 });
 
-// Pre-save middleware to update progress
+// =============== MIDDLEWARE =============
+/**
+ * Pre-save middleware to update progress and last active time.
+ * @param {Function} next - Callback to proceed with save.
+ */
 QuizSessionSchema.pre("save", function (next) {
-  if (this.answers && this.answers.length > 0) {
+  if (this.answers?.length > 0) {
     this.progress.questionsAnswered = this.answers.filter(
       (a) =>
         a.selectedAnswer !== null &&
@@ -227,25 +319,40 @@ QuizSessionSchema.pre("save", function (next) {
   next();
 });
 
-// Method to check if session is active
+// =============== METHODS =============
+/**
+ * Checks if the session is active.
+ * @returns {boolean} True if the session is in_progress or paused.
+ */
 QuizSessionSchema.methods.isActive = function () {
-  return ["in_progress", "paused"].includes(this.status);
+  return [QUIZ_SESSION_STATUSES[1], QUIZ_SESSION_STATUSES[2]].includes(
+    this.status
+  ); // in_progress, paused
 };
 
-// Method to check if session can be resumed
+/**
+ * Checks if the session can be resumed.
+ * @returns {boolean} True if the session is paused and not expired.
+ */
 QuizSessionSchema.methods.canResume = function () {
-  return this.status === "paused" && !this.isExpired;
+  return this.status === QUIZ_SESSION_STATUSES[2] && !this.isExpired; // paused
 };
 
-// Method to get next question
+/**
+ * Gets the index of the next question.
+ * @returns {number|null} Index of the next question or null if none.
+ */
 QuizSessionSchema.methods.getNextQuestion = function () {
-  if (this.currentQuestionIndex < this.answers.length - 1) {
+  if (this.currentQuestionIndex < (this.answers?.length ?? 0) - 1) {
     return this.currentQuestionIndex + 1;
   }
   return null;
 };
 
-// Method to get previous question
+/**
+ * Gets the index of the previous question.
+ * @returns {number|null} Index of the previous question or null if none.
+ */
 QuizSessionSchema.methods.getPreviousQuestion = function () {
   if (this.currentQuestionIndex > 0) {
     return this.currentQuestionIndex - 1;
@@ -253,12 +360,15 @@ QuizSessionSchema.methods.getPreviousQuestion = function () {
   return null;
 };
 
-// Method to calculate score
+/**
+ * Calculates the score for the session.
+ * @returns {Object} Score details including correct count, total questions, and percentage.
+ */
 QuizSessionSchema.methods.calculateScore = function () {
   const correctAnswers = this.answers.filter(
     (answer) => answer.isCorrect
   ).length;
-  const totalQuestions = this.answers.length;
+  const totalQuestions = this.answers?.length ?? 0;
   return {
     correctCount: correctAnswers,
     totalQuestions,
@@ -269,32 +379,58 @@ QuizSessionSchema.methods.calculateScore = function () {
   };
 };
 
-// Static method to find active sessions
+// =============== STATICS =============
+/**
+ * Finds active quiz sessions for a user.
+ * @param {string} userId - ID of the user.
+ * @returns {Promise<Document[]>} Array of active session documents.
+ */
 QuizSessionSchema.statics.findActiveSessions = function (userId) {
   return this.find({
     userId,
-    status: { $in: ["in_progress", "paused"] },
+    status: {
+      $in: [QUIZ_SESSION_STATUSES[1], QUIZ_SESSION_STATUSES[2]], // in_progress, paused
+    },
   }).populate("quizId", "title timeLimit");
 };
 
-// Static method to find expired sessions
+/**
+ * Finds expired quiz sessions.
+ * @returns {Promise<Document[]>} Array of expired session documents.
+ */
 QuizSessionSchema.statics.findExpiredSessions = function () {
   const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
   return this.find({
-    status: { $in: ["in_progress", "paused"] },
+    status: {
+      $in: [QUIZ_SESSION_STATUSES[1], QUIZ_SESSION_STATUSES[2]], // in_progress, paused
+    },
     lastActive: { $lt: cutoffTime },
   });
 };
 
-// Static method to cleanup old sessions
+/**
+ * Cleans up old quiz sessions.
+ * @param {number} [daysOld=30] - Age of sessions to delete in days.
+ * @returns {Promise<Object>} Result of the deletion operation.
+ */
 QuizSessionSchema.statics.cleanupOldSessions = function (daysOld = 30) {
   const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
   return this.deleteMany({
-    status: { $in: ["completed", "abandoned", "expired"] },
+    status: {
+      $in: [
+        QUIZ_SESSION_STATUSES[3], // completed
+        QUIZ_SESSION_STATUSES[4], // abandoned
+        QUIZ_SESSION_STATUSES[5], // expired
+      ],
+    },
     createdAt: { $lt: cutoffDate },
   });
 };
 
+/**
+ * QuizSession model for interacting with the QuizSession collection.
+ * @type {mongoose.Model}
+ */
 module.exports = {
-  QuizSession: mongoose.model("QuizSession", QuizSessionSchema),
+  QuizSession: model("QuizSession", QuizSessionSchema),
 };
