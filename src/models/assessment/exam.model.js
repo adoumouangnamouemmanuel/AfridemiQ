@@ -415,7 +415,6 @@ const ExamSchema = new Schema(
 );
 
 // =============== INDEXES =================
-ExamSchema.index({ slug: 1 }, { unique: true });
 ExamSchema.index({ country: 1, levels: 1 });
 ExamSchema.index({ examFormat: 1 });
 ExamSchema.index({ curriculumId: 1 });
