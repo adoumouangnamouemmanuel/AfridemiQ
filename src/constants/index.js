@@ -1,5 +1,5 @@
 /**
- * Constants for onboarding steps, notifications, countries, and parent access.
+ * Constants for onboarding steps, notifications, countries, parent access, and peer tutor profiles.
  * @module constants
  */
 const TOTAL_STEPS = [
@@ -48,6 +48,16 @@ const PARENT_ACCESS_LEVELS = ["viewProgress", "viewReports", "fullAccess"];
 
 const NOTIFICATION_FREQUENCIES = ["immediate", "daily", "weekly", "monthly"];
 
+const AVAILABILITY_DAYS = [
+  "lundi",
+  "mardi",
+  "mercredi",
+  "jeudi",
+  "vendredi",
+  "samedi",
+  "dimanche",
+];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -56,4 +66,5 @@ module.exports = {
   EDUCATION_SYSTEMS,
   PARENT_ACCESS_LEVELS,
   NOTIFICATION_FREQUENCIES,
+  AVAILABILITY_DAYS,
 };
