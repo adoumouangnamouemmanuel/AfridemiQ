@@ -319,6 +319,12 @@ const ADJUSTMENT_METRICS = ["score", "timeSpent", "accuracy", "completionRate"];
 const ADJUSTMENT_ACTIONS = ["increaseDifficulty", "decreaseDifficulty", "suggestResource"];
 const RECOMMENDED_CONTENT_TYPES = ["topic", "quiz", "resource"];
 
+/**
+ * Constants for bookmarks.
+ * @module constants/index
+ */
+const BOOKMARK_CONTENT_TYPES = ["question", "resource", "course", "topic", "quiz"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -388,4 +394,5 @@ module.exports = {
   ADJUSTMENT_METRICS,
   ADJUSTMENT_ACTIONS,
   RECOMMENDED_CONTENT_TYPES,
+  BOOKMARK_CONTENT_TYPES,
 };
