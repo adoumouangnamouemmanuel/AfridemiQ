@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:subjects": "jest --testPathPattern=subject",
+    "test:get": "jest --testPathPattern=get"
   },
   "keywords": [],
   "author": "Emmanuel Adoum",
@@ -26,5 +30,29 @@
     "mongoose": "^8.15.1",
     "slugify": "^1.6.6",
     "supertest": "^7.1.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.js"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/server.js",
+      "!src/config/**"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "supertest": "^6.3.0",
+    "mongodb-memory-server": "^8.16.0"
   }
 }
