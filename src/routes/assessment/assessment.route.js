@@ -23,6 +23,7 @@ const {
 } = require("../../schemas/assessment/assessment.schema");
 
 const router = express.Router();
+// TODO: Add rate limiting middleware if needed
 
 // Public routes
 router.get(
