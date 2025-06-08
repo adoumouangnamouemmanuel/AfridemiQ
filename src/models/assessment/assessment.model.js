@@ -1,94 +1,109 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, model, Types } = require("mongoose");
+const {
+  ASSESSMENT_FORMATS,
+  DIFFICULTY_LEVELS,
+  EDUCATION_LEVELS,
+  ASSESSMENT_STATUSES,
+} = require("../../constants");
 
-// Assessment Schema
+// =============== CONSTANTS =============
+/**
+ * Imported constants for assessment formats, difficulty levels, education levels, and statuses.
+ * @see module:constants/index
+ */
+
+// ==================== SCHEMA ==================
+/**
+ * Mongoose schema for assessments, managing quizzes, exams, and other evaluations.
+ * @module AssessmentSchema
+ */
 const AssessmentSchema = new Schema(
   {
+    // Assessment details
     format: {
       type: String,
-      enum: ["quiz", "exam", "project", "practice", "mock"],
-      required: true,
-      default: "quiz",
-      index: true,
+      enum: ASSESSMENT_FORMATS,
+      required: [true, "Le format de l'évaluation est requis"],
+      default: ASSESSMENT_FORMATS[0], // quiz
     },
     title: {
       type: String,
-      required: true,
+      required: [true, "Le titre est requis"],
       trim: true,
-      maxlength: 200,
+      maxlength: [200, "Le titre est trop long (max 200 caractères)"],
     },
     description: {
       type: String,
-      required: true,
+      required: [true, "La description est requise"],
       trim: true,
-      maxlength: 1000,
+      maxlength: [1000, "La description est trop longue (max 1000 caractères)"],
     },
     subjectId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "Subject",
-      required: true,
-      index: true,
+      required: [true, "L'ID de la matière est requis"],
     },
-    topicIds: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Topic",
-        index: true,
-      },
-    ],
-    questionIds: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Question",
-        required: true,
-      },
-    ],
+    topicIds: {
+      type: [{ type: Types.ObjectId, ref: "Topic" }],
+      default: [],
+    },
+    questionIds: {
+      type: [{ type: Types.ObjectId, ref: "Question" }],
+      required: [true, "Les IDs des questions sont requis"],
+      default: [],
+    },
     creatorId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "User",
-      required: true,
-      index: true,
+      required: [true, "L'ID du créateur est requis"],
     },
+    // Scoring and limits
     passingScore: {
       type: Number,
-      required: true,
-      min: 0,
-      max: 100,
+      required: [true, "Le score minimum requis est requis"],
+      min: [0, "Le score minimum doit être au moins 0"],
+      max: [100, "Le score minimum ne peut dépasser 100"],
     },
     totalMarks: {
       type: Number,
-      required: true,
-      min: 1,
+      required: [true, "Le total des points est requis"],
+      min: [1, "Le total des points doit être au moins 1"],
     },
     timeLimit: {
       type: Number, // in minutes
-      min: 1,
-      max: 480, // 8 hours max
+      min: [1, "La durée doit être d'au moins 1 minute"],
+      max: [480, "La durée ne peut dépasser 8 heures"],
     },
     attempts: {
       type: Number,
-      required: true,
-      min: 1,
-      max: 10,
+      required: [true, "Le nombre de tentatives est requis"],
+      min: [1, "Le nombre de tentatives doit être au moins 1"],
+      max: [10, "Le nombre de tentatives ne peut dépasser 10"],
       default: 3,
     },
+    // Difficulty and categorization
     difficulty: {
       type: String,
-      enum: ["Easy", "Medium", "Hard", "Mixed"],
-      default: "Medium",
+      enum: DIFFICULTY_LEVELS,
+      default: DIFFICULTY_LEVELS[1], // Medium
     },
-    series: [String],
+    series: {
+      type: [String],
+      default: [],
+    },
     level: {
       type: String,
-      enum: ["Primary", "JSS", "SSS", "University", "Professional"],
-      required: true,
+      enum: EDUCATION_LEVELS,
+      required: [true, "Le niveau d'éducation est requis"],
     },
+    // Feedback settings
     feedback: {
       immediate: { type: Boolean, default: true },
       detailed: { type: Boolean, default: true },
       solutions: { type: Boolean, default: true },
       showCorrectAnswers: { type: Boolean, default: true },
     },
+    // Assessment settings
     settings: {
       shuffleQuestions: { type: Boolean, default: false },
       shuffleOptions: { type: Boolean, default: false },
@@ -96,25 +111,37 @@ const AssessmentSchema = new Schema(
       showProgress: { type: Boolean, default: true },
       preventCheating: { type: Boolean, default: false },
     },
+    // Scheduling details
     scheduling: {
-      startDate: Date,
-      endDate: Date,
+      startDate: { type: Date },
+      endDate: { type: Date },
       timezone: { type: String, default: "Africa/Lagos" },
     },
+    // Analytics data
     analytics: {
       totalAttempts: { type: Number, default: 0 },
       averageScore: { type: Number, default: 0 },
       passRate: { type: Number, default: 0 },
       averageTimeSpent: { type: Number, default: 0 },
     },
-    tags: [String],
+    // Metadata
+    tags: {
+      type: [String],
+      default: [],
+    },
     status: {
       type: String,
-      enum: ["draft", "published", "archived", "scheduled"],
-      default: "draft",
+      enum: ASSESSMENT_STATUSES,
+      default: ASSESSMENT_STATUSES[0], // draft
     },
-    premiumOnly: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true },
+    premiumOnly: {
+      type: Boolean,
+      default: false,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
@@ -123,42 +150,61 @@ const AssessmentSchema = new Schema(
   }
 );
 
-// Indexes
+// =============== INDEXES =================
 AssessmentSchema.index({ format: 1, subjectId: 1 });
 AssessmentSchema.index({ creatorId: 1, status: 1 });
 AssessmentSchema.index({ level: 1, difficulty: 1 });
 AssessmentSchema.index({ "scheduling.startDate": 1, "scheduling.endDate": 1 });
 AssessmentSchema.index({ tags: 1 });
-AssessmentSchema.index({ premiumOnly: 1, isActive: 1 });
+AssessmentSchema.index({ premiumOnly: 1, isActive: 1 }, { sparse: true });
 
-// Virtual fields
+// =============== VIRTUALS =============
+/**
+ * Virtual field for the number of questions in the assessment.
+ * @returns {number} Length of questionIds array.
+ */
 AssessmentSchema.virtual("questionCount").get(function () {
-  return this.questionIds ? this.questionIds.length : 0;
+  return (this.questionIds ?? []).length;
 });
 
+/**
+ * Virtual field for estimated duration of the assessment.
+ * @returns {number} Time limit or estimated duration based on question count.
+ */
 AssessmentSchema.virtual("estimatedDuration").get(function () {
   if (this.timeLimit) return this.timeLimit;
-  // Estimate 2 minutes per question if no time limit set
-  return this.questionCount * 2;
+  return this.questionCount * 2; // Estimate 2 minutes per question
 });
 
+/**
+ * Virtual field to check if the assessment is scheduled.
+ * @returns {boolean} True if startDate and endDate are set, false otherwise.
+ */
 AssessmentSchema.virtual("isScheduled").get(function () {
-  return (
-    this.scheduling && this.scheduling.startDate && this.scheduling.endDate
-  );
+  return !!(this.scheduling?.startDate && this.scheduling?.endDate);
 });
 
+/**
+ * Virtual field to check if the assessment is currently active.
+ * @returns {boolean} True if published and within scheduling window, false otherwise.
+ */
 AssessmentSchema.virtual("isCurrentlyActive").get(function () {
-  if (!this.isScheduled) return this.status === "published";
+  if (!this.isScheduled) return this.status === ASSESSMENT_STATUSES[1]; // published
   const now = new Date();
   return (
-    this.status === "published" &&
+    this.status === ASSESSMENT_STATUSES[1] && // published
     this.scheduling.startDate <= now &&
     this.scheduling.endDate >= now
   );
 });
 
-// Methods
+// =============== METHODS =============
+/**
+ * Updates assessment analytics based on a new attempt.
+ * @param {number} score - Score achieved in the attempt.
+ * @param {number} timeSpent - Time spent on the attempt.
+ * @returns {Promise<Document>} Updated assessment document.
+ */
 AssessmentSchema.methods.updateAnalytics = function (score, timeSpent) {
   this.analytics.totalAttempts += 1;
 
@@ -185,11 +231,22 @@ AssessmentSchema.methods.updateAnalytics = function (score, timeSpent) {
   return this.save();
 };
 
+/**
+ * Checks if a user can attempt the assessment.
+ * @param {number} userAttempts - Number of attempts made by the user.
+ * @returns {boolean} True if user has remaining attempts, false otherwise.
+ */
 AssessmentSchema.methods.canUserAttempt = function (userAttempts) {
   return userAttempts < this.attempts;
 };
 
-// Static methods
+// =============== STATICS =============
+/**
+ * Finds assessments by subject with optional filters.
+ * @param {string} subjectId - ID of the subject.
+ * @param {Object} [options={}] - Optional filters (format, level, difficulty).
+ * @returns {Promise<Document[]>} Array of matching assessment documents.
+ */
 AssessmentSchema.statics.findBySubject = function (subjectId, options = {}) {
   const query = { subjectId, isActive: true };
   if (options.format) query.format = options.format;
@@ -203,8 +260,13 @@ AssessmentSchema.statics.findBySubject = function (subjectId, options = {}) {
     .sort({ createdAt: -1 });
 };
 
+/**
+ * Finds published assessments with optional filters.
+ * @param {Object} [filters={}] - Optional filters (subjectId, level, format, premiumOnly).
+ * @returns {Promise<Document[]>} Array of published assessment documents.
+ */
 AssessmentSchema.statics.findPublished = function (filters = {}) {
-  const query = { status: "published", isActive: true };
+  const query = { status: ASSESSMENT_STATUSES[1], isActive: true }; // published
 
   if (filters.subjectId) query.subjectId = filters.subjectId;
   if (filters.level) query.level = filters.level;
@@ -218,6 +280,10 @@ AssessmentSchema.statics.findPublished = function (filters = {}) {
     .sort({ createdAt: -1 });
 };
 
+/**
+ * Assessment model for interacting with the Assessment collection.
+ * @type {mongoose.Model}
+ */
 module.exports = {
-  Assessment: mongoose.model("Assessment", AssessmentSchema),
+  Assessment: model("Assessment", AssessmentSchema),
 };
