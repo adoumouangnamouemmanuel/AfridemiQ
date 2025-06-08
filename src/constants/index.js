@@ -115,6 +115,28 @@ const CHALLENGE_STATUSES = [
   "cancelled",
 ];
 
+/**
+ * Constants for exams.
+ * @module constants/index
+ */
+const EXAM_TYPES = ["certification", "concours", "test", "autre"];
+const EXAM_DIFFICULTIES = ["facile", "moyen", "difficile", "expert"];
+const EXAM_FORMATS = ["papier", "ordinateur", "hybride"];
+const ACCESSIBILITY_OPTIONS = [
+  "braille",
+  "gros_caracteres",
+  "temps_supplementaire",
+  "aide_technique",
+  "salle_separee",
+];
+const IMPORTANT_DATE_TYPES = [
+  "inscription",
+  "examen",
+  "resultats",
+  "rattrapage",
+];
+const EXAM_SESSIONS = ["janvier", "juin", "septembre", "decembre"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -138,4 +160,10 @@ module.exports = {
   EDUCATION_LEVELS,
   ASSESSMENT_STATUSES,
   CHALLENGE_STATUSES,
+  EXAM_TYPES,
+  EXAM_DIFFICULTIES,
+  EXAM_FORMATS,
+  ACCESSIBILITY_OPTIONS,
+  IMPORTANT_DATE_TYPES,
+  EXAM_SESSIONS,
 };
