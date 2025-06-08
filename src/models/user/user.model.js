@@ -1,13 +1,63 @@
-const mongoose = require("mongoose");
+const { Schema, model, Types } = require("mongoose");
 const bcrypt = require("bcryptjs");
-const { Schema } = mongoose;
+const {
+  USER_ROLES,
+  SUBSCRIPTION_TYPES,
+  PAYMENT_STATUSES,
+  ACCESS_LEVELS,
+  FONT_SIZES,
+  CONTENT_FORMATS,
+  LEARNING_STYLES,
+  PROFILE_VISIBILITIES,
+} = require("../../constants");
 
-// Shared constants
-const USER_ROLES = ["student", "teacher", "admin"];
+// =============== CONSTANTS =============
+/**
+ * Imported constants for user roles, subscriptions, and preferences.
+ * @see module:constants/index
+ */
 
-// User Schema
+// =============== SUBSCHEMAS =============
+/**
+ * Subschema for subscription trial period.
+ * @module TrialPeriodSubSchema
+ */
+const TrialPeriodSchema = new Schema({
+  startDate: {
+    type: Date,
+  },
+  endDate: {
+    type: Date,
+  },
+});
+
+/**
+ * Subschema for social links in user profile.
+ * @module SocialLinkSubSchema
+ */
+const SocialLinkSchema = new Schema({
+  platform: {
+    type: String,
+  },
+  url: {
+    type: String,
+    validate: {
+      validator: (v) =>
+        !v ||
+        /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(v),
+      message: (props) => `${props.value} n'est pas une URL valide!`,
+    },
+  },
+});
+
+// ==================== SCHEMA ==================
+/**
+ * Mongoose schema for users, managing authentication and preferences.
+ * @module UserSchema
+ */
 const UserSchema = new Schema(
   {
+    // User details
     name: {
       type: String,
       required: [true, "Le nom est requis"],
@@ -19,7 +69,6 @@ const UserSchema = new Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      index: true,
       match: [
         /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
         "Veuillez fournir un email valide",
@@ -39,17 +88,38 @@ const UserSchema = new Schema(
       },
       unique: true,
       sparse: true,
-      index: true,
     },
-    isPhoneVerified: { type: Boolean, default: false },
-    phoneVerificationCode: String,
-    phoneVerificationExpires: Date,
-    avatar: String,
-    country: { type: String, required: [true, "Le pays est requis"] },
-    timeZone: String,
-    preferredLanguage: String,
-    schoolName: String,
-    gradeLevel: String,
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+    phoneVerificationCode: {
+      type: String,
+    },
+    phoneVerificationExpires: {
+      type: Date,
+    },
+    avatar: {
+      type: String,
+    },
+    // Location and preferences
+    country: {
+      type: String,
+      required: [true, "Le pays est requis"],
+    },
+    timeZone: {
+      type: String,
+    },
+    preferredLanguage: {
+      type: String,
+    },
+    // Education details
+    schoolName: {
+      type: String,
+    },
+    gradeLevel: {
+      type: String,
+    },
     parentEmail: {
       type: String,
       validate: {
@@ -58,150 +128,180 @@ const UserSchema = new Schema(
         message: (props) => `${props.value} n'est pas un email valide!`,
       },
     },
+    // User role and status
     role: {
       type: String,
       enum: {
         values: USER_ROLES,
         message: "{VALUE} n'est pas un rôle valide",
       },
-      default: "student",
+      default: USER_ROLES[0], // student
     },
-    lastLogin: Date,
-    isPremium: { type: Boolean, default: false },
+    lastLogin: {
+      type: Date,
+    },
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    // Subscription details
     subscription: {
       type: {
         type: String,
-        enum: ["free", "premium"],
-        required: true,
-        default: "free",
+        enum: SUBSCRIPTION_TYPES,
+        required: [true, "Le type d'abonnement est requis"],
+        default: SUBSCRIPTION_TYPES[0], // free
       },
-      startDate: { type: Date, required: true, default: Date.now },
-      expiresAt: Date,
+      startDate: {
+        type: Date,
+        required: [true, "La date de début de l'abonnement est requise"],
+        default: Date.now,
+      },
+      expiresAt: {
+        type: Date,
+      },
       paymentStatus: {
         type: String,
-        enum: ["active", "pending", "failed"],
-        required: true,
-        default: "active",
+        enum: PAYMENT_STATUSES,
+        required: [true, "Le statut de paiement est requis"],
+        default: PAYMENT_STATUSES[0], // active
       },
       trialPeriod: {
-        startDate: Date,
-        endDate: Date,
+        type: TrialPeriodSchema,
       },
-      features: [String],
+      features: {
+        type: [String],
+        default: [],
+      },
       accessLevel: {
         type: String,
-        enum: ["basic", "premium"],
-        required: true,
-        default: "basic",
+        enum: ACCESS_LEVELS,
+        required: [true, "Le niveau d'accès est requis"],
+        default: ACCESS_LEVELS[0], // basic
       },
     },
+    // User preferences
     preferences: {
       notifications: {
         general: { type: Boolean, default: true },
-        dailyReminderTime: String,
+        dailyReminderTime: { type: String },
         challengeNotifications: { type: Boolean, default: false },
         progressUpdates: { type: Boolean, default: true },
       },
       darkMode: { type: Boolean, default: false },
       fontSize: {
         type: String,
-        enum: ["small", "medium", "large"],
-        default: "medium",
+        enum: FONT_SIZES,
+        default: FONT_SIZES[1], // medium
       },
       preferredContentFormat: {
         type: String,
-        enum: ["video", "text", "audio", "mixed"],
-        default: "text",
+        enum: CONTENT_FORMATS,
+        default: CONTENT_FORMATS[1], // text
       },
       enableHints: { type: Boolean, default: true },
       autoPlayAudio: { type: Boolean, default: false },
       showStepSolutions: { type: Boolean, default: true },
       leaderboardVisibility: { type: Boolean, default: true },
       allowFriendRequests: { type: Boolean, default: true },
-      multilingualSupport: [String],
+      multilingualSupport: { type: [String], default: [] },
     },
+    // Learning settings
     settings: {
       learningStyle: {
         type: String,
-        enum: ["visual", "auditory", "kinesthetic", "mixed"],
-        default: "mixed",
+        enum: LEARNING_STYLES,
+        default: LEARNING_STYLES[3], // mixed
       },
-      motivation: String,
-      preferredStudySessionLength: Number,
+      motivation: { type: String },
+      preferredStudySessionLength: { type: Number },
     },
+    // User progress
     progress: {
-      selectedExam: String,
-      selectedSeries: String,
-      selectedLevel: String,
+      selectedExam: { type: String },
+      selectedSeries: { type: String },
+      selectedLevel: { type: String },
       xp: { type: Number, default: 0 },
       level: { type: Number, default: 1 },
       streak: {
         current: { type: Number, default: 0 },
         longest: { type: Number, default: 0 },
-        lastStudyDate: Date,
+        lastStudyDate: { type: Date },
       },
-      goalDate: Date,
+      goalDate: { type: Date },
       totalQuizzes: { type: Number, default: 0 },
       averageScore: { type: Number, default: 0 },
-      completedTopics: [String],
-      weakSubjects: [String],
-      badges: [String],
-      achievements: [String],
+      completedTopics: { type: [String], default: [] },
+      weakSubjects: { type: [String], default: [] },
+      badges: { type: [String], default: [] },
+      achievements: { type: [String], default: [] },
       progressSummary: {
-        completedPercentage: Number,
-        remainingTopics: Number,
+        completedPercentage: { type: Number },
+        remainingTopics: { type: Number },
       },
     },
+    // References to other collections
     analyticsId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "UserAnalytics",
       default: null,
     },
-    notes: [{ type: Schema.Types.ObjectId, ref: "Note", default: [] }],
-    hintsUsed: [{ type: Schema.Types.ObjectId, ref: "HintUsage", default: [] }],
-    bookmarks: [{ type: Schema.Types.ObjectId, ref: "Bookmark", default: [] }],
-    friends: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
-    blockedUsers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+    notes: {
+      type: [{ type: Types.ObjectId, ref: "Note" }],
+      default: [],
+    },
+    hintsUsed: {
+      type: [{ type: Types.ObjectId, ref: "HintUsage" }],
+      default: [],
+    },
+    bookmarks: {
+      type: [{ type: Types.ObjectId, ref: "Bookmark" }],
+      default: [],
+    },
+    friends: {
+      type: [{ type: Types.ObjectId, ref: "User" }],
+      default: [],
+    },
+    blockedUsers: {
+      type: [{ type: Types.ObjectId, ref: "User" }],
+      default: [],
+    },
     tutorId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "PeerTutorProfile",
       default: null,
     },
+    // Social profile
     socialProfile: {
-      bio: String,
-      publicAchievements: [String],
+      bio: { type: String },
+      publicAchievements: { type: [String], default: [] },
       visibility: {
         type: String,
-        enum: ["public", "friends", "private"],
-        default: "public",
+        enum: PROFILE_VISIBILITIES,
+        default: PROFILE_VISIBILITIES[0], // public
       },
-      socialLinks: [
-        {
-          platform: String,
-          url: {
-            type: String,
-            validate: {
-              validator: (v) =>
-                !v ||
-                /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(
-                  v
-                ),
-              message: (props) => `${props.value} n'est pas une URL valide!`,
-            },
-          },
-        },
-      ],
+      socialLinks: {
+        type: [SocialLinkSchema],
+        default: [],
+      },
     },
+    // Authentication tokens
     onboardingStatusId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "OnboardingStatus",
     },
-    resetPasswordToken: String,
-    resetPasswordExpires: Date,
-    refreshToken: String,
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpires: {
+      type: Date,
+    },
+    refreshToken: {
+      type: String,
+    },
     tokenVersion: {
       type: Number,
-      default: 0, // Increment this when user changes password or logs out
+      default: 0,
     },
   },
   {
@@ -211,12 +311,18 @@ const UserSchema = new Schema(
   }
 );
 
-// Add indexes for frequently queried fields
-UserSchema.index({ "progress.xp": -1 }); // For leaderboards
-UserSchema.index({ lastLogin: -1 }); // For active users
-UserSchema.index({ createdAt: -1 }); // For new users
+// =============== INDEXES =================
+UserSchema.index({ email: 1 }, { unique: true });
+UserSchema.index({ phoneNumber: 1 }, { unique: true, sparse: true });
+UserSchema.index({ "progress.xp": -1 });
+UserSchema.index({ lastLogin: -1 });
+UserSchema.index({ createdAt: -1 });
 
-// Hash password before saving
+// =============== MIDDLEWARE =============
+/**
+ * Pre-save middleware to hash password.
+ * @param {Function} next - Callback to proceed with save.
+ */
 UserSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     try {
@@ -228,14 +334,23 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-// Compare password method
+// =============== METHODS =============
+/**
+ * Compare candidate password with stored hash.
+ * @param {string} candidatePassword - Password to compare.
+ * @returns {Promise<boolean>} True if passwords match, false otherwise.
+ */
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Virtual for fullName
+// =============== VIRTUALS =============
+/**
+ * Virtual field for user's full name.
+ * @returns {string} User's name.
+ */
 UserSchema.virtual("fullName").get(function () {
-  return this.name;
+  return this.name ?? "";
 });
 
 // Exclude sensitive fields from JSON output
@@ -252,7 +367,10 @@ UserSchema.set("toJSON", {
   },
 });
 
+/**
+ * User model for interacting with the User collection.
+ * @type {mongoose.Model}
+ */
 module.exports = {
-  User: mongoose.model("User", UserSchema),
-  USER_ROLES,
+  User: model("User", UserSchema),
 };
