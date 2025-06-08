@@ -1,116 +1,156 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, model, Types } = require("mongoose");
+const {
+  EXERCISE_DIFFICULTY_LEVELS,
+  EXERCISE_TYPES,
+  QUESTION_TYPES,
+  EXERCISE_STATUSES,
+  ATTACHMENT_TYPES,
+  MATH_TOPICS,
+  PHYSICS_TOPICS,
+  PHYSICS_DIAGRAM_TYPES,
+  CHEMISTRY_TOPICS,
+  BIOLOGY_TOPICS,
+  FRENCH_TOPICS,
+  PHILOSOPHY_TOPICS,
+  ENGLISH_TOPICS,
+  HISTORY_TOPICS,
+  HISTORY_SOURCE_TYPES,
+  GEOGRAPHY_TOPICS,
+  GEOGRAPHY_MAP_TYPES,
+} = require("../../constants");
 
-const DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
-const EXERCISE_TYPES = ["practice", "quiz", "assignment", "exam"];
-const MATH_TOPICS = ["algebra", "geometry", "calculus", "statistics"];
-const PHYSICS_TOPICS = [
-  "mechanics",
-  "electromagnetism",
-  "thermodynamics",
-  "optics",
-];
-const CHEMISTRY_TOPICS = [
-  "stoichiometry",
-  "organic_chemistry",
-  "thermodynamics",
-  "acids_bases",
-];
-const BIOLOGY_TOPICS = ["cell_biology", "genetics", "ecology", "physiology"];
-const FRENCH_TOPICS = ["grammar", "literature", "text_analysis", "composition"];
-const PHILOSOPHY_TOPICS = [
-  "ethics",
-  "metaphysics",
-  "epistemology",
-  "political_philosophy",
-];
-const ENGLISH_TOPICS = [
-  "grammar",
-  "reading_comprehension",
-  "writing_skills",
-  "speaking",
-];
-const HISTORY_TOPICS = [
-  "colonialism",
-  "independence_movements",
-  "world_wars",
-  "chadian_history",
-];
-const GEOGRAPHY_TOPICS = [
-  "physical_geography",
-  "human_geography",
-  "climate_and_environment",
-  "chadian_geography",
-];
-const QUESTION_TYPES = [
-  "multiple_choice",
-  "short_answer",
-  "essay",
-  "calculation",
-  "diagram_labeling",
-  "source_analysis",
-  "map_analysis",
-  "data_interpretation",
-  "fill_in_the_blank",
-  "text_sequencing",
-];
+// =============== CONSTANTS =============
+/**
+ * Imported constants for exercises, including difficulty levels, types, question types, statuses, and subject-specific topics.
+ * @see module:constants/index
+ */
 
-// Feedback Subschema (simplified, 0-5 scale)
+// =============== SUBSCHEMAS =============
+/**
+ * Subschema for feedback on exercises.
+ * @module FeedbackSubSchema
+ */
 const FeedbackSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  rating: { type: Number, min: 0, max: 5, required: true },
-  comments: String,
-  createdAt: { type: Date, default: Date.now },
+  userId: {
+    type: Types.ObjectId,
+    ref: "User",
+    required: [true, "L'ID de l'utilisateur est requis"],
+  },
+  rating: {
+    type: Number,
+    min: [0, "La note doit être au moins 0"],
+    max: [5, "La note ne peut pas dépasser 5"],
+    required: [true, "La note est requise"],
+  },
+  comments: {
+    type: String,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-// Base Exercise Schema
+/**
+ * Subschema for exercise attachments.
+ * @module AttachmentSubSchema
+ */
+const AttachmentSchema = new Schema({
+  type: {
+    type: String,
+    enum: ATTACHMENT_TYPES,
+  },
+  url: {
+    type: String,
+    match: [
+      /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
+      "L'URL doit être valide",
+    ],
+  },
+  description: {
+    type: String,
+  },
+  size: {
+    type: Number,
+  },
+  filename: {
+    type: String,
+  },
+});
+
+// ================= SCHEMAS =================
+/**
+ * Base Mongoose schema for exercises, supporting various subjects and formats.
+ * @module ExerciseBaseSchema
+ */
 const ExerciseBaseSchema = new Schema(
   {
-    type: { type: String, enum: EXERCISE_TYPES, required: true },
+    // Exercise details
+    type: {
+      type: String,
+      enum: EXERCISE_TYPES,
+      required: [true, "Le type d'exercice est requis"],
+    },
     subjectId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "Subject",
-      required: true,
-      index: true,
+      required: [true, "L'ID de la matière est requis"],
     },
-    series: [{ type: String, default: "D" }],
+    series: {
+      type: [String],
+      default: ["D"],
+    },
     topicId: {
-      type: Schema.Types.ObjectId,
+      type: Types.ObjectId,
       ref: "Topic",
-      required: true,
-      index: true,
+      required: [true, "L'ID du sujet est requis"],
     },
-    title: { type: String, required: true, trim: true },
-    description: { type: String, required: true, trim: true },
+    title: {
+      type: String,
+      required: [true, "Le titre est requis"],
+      trim: true,
+    },
+    description: {
+      type: String,
+      required: [true, "La description est requise"],
+      trim: true,
+    },
     difficulty: {
       type: String,
-      enum: DIFFICULTY_LEVELS,
-      required: true,
-      index: true,
+      enum: EXERCISE_DIFFICULTY_LEVELS,
+      required: [true, "La difficulté est requise"],
     },
-    timeLimit: { type: Number, min: 0, default: 15 }, // In minutes
-    points: { type: Number, required: true, min: 0 },
-    instructions: { type: String, required: true, trim: true },
-    attachments: [
-      {
-        type: { type: String, enum: ["image", "audio", "video", "document"] },
-        url: {
-          type: String,
-          match:
-            /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
-        },
-        description: String,
-        size: Number,
-        filename: String,
-      },
-    ],
-    feedback: [FeedbackSchema],
+    timeLimit: {
+      type: Number,
+      min: [0, "La limite de temps ne peut pas être négative"],
+      default: 15, // In minutes
+    },
+    points: {
+      type: Number,
+      required: [true, "Les points sont requis"],
+      min: [0, "Les points ne peuvent pas être négatifs"],
+    },
+    instructions: {
+      type: String,
+      required: [true, "Les instructions sont requises"],
+      trim: true,
+    },
+    attachments: {
+      type: [AttachmentSchema],
+      default: [],
+    },
+    feedback: {
+      type: [FeedbackSchema],
+      default: [],
+    },
+    // Gamification
     gamification: {
-      badges: [String],
+      badges: { type: [String], default: [] },
       pointsAwarded: { type: Number, default: 0 },
-      achievements: [String],
+      achievements: { type: [String], default: [] },
       streakBonus: { type: Number, default: 0 },
     },
+    // Analytics
     analytics: {
       totalAttempts: { type: Number, default: 0 },
       successRate: { type: Number, default: 0 },
@@ -118,17 +158,18 @@ const ExerciseBaseSchema = new Schema(
       averageTimeSpent: { type: Number, default: 0 },
       difficultyRating: { type: Number, default: 0 },
     },
+    // Metadata
     metadata: {
-      createdBy: { type: Schema.Types.ObjectId, ref: "User", index: true },
+      createdBy: { type: Types.ObjectId, ref: "User" },
       createdAt: { type: Date, default: Date.now },
-      updatedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      updatedBy: { type: Types.ObjectId, ref: "User" },
       lastModified: { type: Date, default: Date.now },
-      tags: [String],
+      tags: { type: [String], default: [] },
       version: { type: Number, default: 1 },
       status: {
         type: String,
-        enum: ["draft", "published", "archived"],
-        default: "draft",
+        enum: EXERCISE_STATUSES,
+        default: EXERCISE_STATUSES[0], // draft
       },
       accessibility: {
         hasAudioVersion: { type: Boolean, default: false },
@@ -137,6 +178,7 @@ const ExerciseBaseSchema = new Schema(
         screenReaderFriendly: { type: Boolean, default: true },
       },
     },
+    // Settings
     settings: {
       allowHints: { type: Boolean, default: true },
       showSolution: { type: Boolean, default: true },
@@ -144,8 +186,14 @@ const ExerciseBaseSchema = new Schema(
       allowRetake: { type: Boolean, default: true },
       maxAttempts: { type: Number, default: 3 },
     },
-    premiumOnly: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true },
+    premiumOnly: {
+      type: Boolean,
+      default: false,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
@@ -155,67 +203,38 @@ const ExerciseBaseSchema = new Schema(
   }
 );
 
-// Virtual fields
-ExerciseBaseSchema.virtual("averageRating").get(function () {
-  if (this.feedback && this.feedback.length > 0) {
-    const sum = this.feedback.reduce((acc, fb) => acc + fb.rating, 0);
-    return (sum / this.feedback.length).toFixed(1);
-  }
-  return 0;
-});
-
-ExerciseBaseSchema.virtual("totalFeedback").get(function () {
-  return this.feedback ? this.feedback.length : 0;
-});
-
-ExerciseBaseSchema.virtual("isExpired").get(function () {
-  if (this.type === "exam" && this.metadata.expiryDate) {
-    return new Date() > this.metadata.expiryDate;
-  }
-  return false;
-});
-
-// Methods
-ExerciseBaseSchema.methods.addFeedback = function (userId, rating, comments) {
-  this.feedback.push({ userId, rating, comments });
-  return this.save();
-};
-
-ExerciseBaseSchema.methods.updateAnalytics = function (score, timeSpent) {
-  this.analytics.totalAttempts += 1;
-  this.analytics.averageScore =
-    (this.analytics.averageScore * (this.analytics.totalAttempts - 1) + score) /
-    this.analytics.totalAttempts;
-  this.analytics.averageTimeSpent =
-    (this.analytics.averageTimeSpent * (this.analytics.totalAttempts - 1) +
-      timeSpent) /
-    this.analytics.totalAttempts;
-  this.analytics.successRate =
-    score >= 70
-      ? (this.analytics.successRate * (this.analytics.totalAttempts - 1) + 1) /
-        this.analytics.totalAttempts
-      : this.analytics.successRate;
-  return this.save();
-};
-
-// Math Exercise Schema
+/**
+ * Mongoose schema for math exercises.
+ * @module MathExerciseSchema
+ */
 const MathExerciseSchema = new Schema({
-  topic: { type: String, enum: MATH_TOPICS, required: true },
+  topic: {
+    type: String,
+    enum: MATH_TOPICS,
+    required: [true, "Le sujet de mathématiques est requis"],
+  },
   content: {
     problems: [
       {
-        statement: { type: String, required: true },
-        questionType: { type: String, enum: QUESTION_TYPES, required: true },
-        variables: [String],
-        constraints: [String],
-        difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+        statement: {
+          type: String,
+          required: [true, "L'énoncé du problème est requis"],
+        },
+        questionType: {
+          type: String,
+          enum: QUESTION_TYPES,
+          required: [true, "Le type de question est requis"],
+        },
+        variables: { type: [String], default: [] },
+        constraints: { type: [String], default: [] },
+        difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
         points: { type: Number, default: 1 },
       },
     ],
-    formulas: [String],
+    formulas: { type: [String], default: [] },
     calculatorAllowed: { type: Boolean, default: false },
     graphingRequired: { type: Boolean, default: false },
-    theorems: [String],
+    theorems: { type: [String], default: [] },
   },
   solution: {
     answers: [
@@ -223,27 +242,47 @@ const MathExerciseSchema = new Schema({
         answer: Schema.Types.Mixed,
         problemIndex: Number,
         explanation: String,
-        alternativeAnswers: [Schema.Types.Mixed],
+        alternativeAnswers: { type: [Schema.Types.Mixed], default: [] },
       },
     ],
     explanation: String,
-    workingSteps: [String],
-    formulasUsed: [String],
-    commonMistakes: [String],
+    workingSteps: { type: [String], default: [] },
+    formulasUsed: { type: [String], default: [] },
+    commonMistakes: { type: [String], default: [] },
   },
 });
 
-// Physics Exercise Schema
+/**
+ * Mongoose schema for physics exercises.
+ * @module PhysicsExerciseSchema
+ */
 const PhysicsExerciseSchema = new Schema({
-  topic: { type: String, enum: PHYSICS_TOPICS, required: true },
+  topic: {
+    type: String,
+    enum: PHYSICS_TOPICS,
+    required: [true, "Le sujet de physique est requis"],
+  },
   content: {
     problems: [
       {
-        statement: { type: String, required: true },
-        questionType: { type: String, enum: QUESTION_TYPES, required: true },
-        variables: [{ name: String, value: String, unit: String }],
-        constants: [{ name: String, value: String, unit: String }],
-        difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+        statement: {
+          type: String,
+          required: [true, "L'énoncé du problème est requis"],
+        },
+        questionType: {
+          type: String,
+          enum: QUESTION_TYPES,
+          required: [true, "Le type de question est requis"],
+        },
+        variables: {
+          type: [{ name: String, value: String, unit: String }],
+          default: [],
+        },
+        constants: {
+          type: [{ name: String, value: String, unit: String }],
+          default: [],
+        },
+        difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
         points: { type: Number, default: 1 },
       },
     ],
@@ -252,16 +291,16 @@ const PhysicsExerciseSchema = new Schema({
         url: String,
         altText: String,
         caption: String,
-        type: { type: String, enum: ["circuit", "force", "wave", "field"] },
+        type: { type: String, enum: PHYSICS_DIAGRAM_TYPES },
       },
     ],
-    formulas: [String],
+    formulas: { type: [String], default: [] },
     experiments: [
       {
         name: String,
-        procedure: [String],
-        materials: [String],
-        safetyNotes: [String],
+        procedure: { type: [String], default: [] },
+        materials: { type: [String], default: [] },
+        safetyNotes: { type: [String], default: [] },
       },
     ],
   },
@@ -275,30 +314,47 @@ const PhysicsExerciseSchema = new Schema({
       },
     ],
     explanation: String,
-    calculations: [String],
+    calculations: { type: [String], default: [] },
     physicalInterpretation: String,
   },
 });
 
-// Chemistry Exercise Schema
+/**
+ * Mongoose schema for chemistry exercises.
+ * @module ChemistryExerciseSchema
+ */
 const ChemistryExerciseSchema = new Schema({
-  topic: { type: String, enum: CHEMISTRY_TOPICS, required: true },
+  topic: {
+    type: String,
+    enum: CHEMISTRY_TOPICS,
+    required: [true, "Le sujet de chimie est requis"],
+  },
   content: {
     problems: [
       {
-        statement: { type: String, required: true },
-        questionType: { type: String, enum: QUESTION_TYPES, required: true },
+        statement: {
+          type: String,
+          required: [true, "L'énoncé du problème est requis"],
+        },
+        questionType: {
+          type: String,
+          enum: QUESTION_TYPES,
+          required: [true, "Le type de question est requis"],
+        },
         reaction: String,
-        compounds: [{ name: String, formula: String, molarity: Number }],
-        difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+        compounds: {
+          type: [{ name: String, formula: String, molarity: Number }],
+          default: [],
+        },
+        difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
         points: { type: Number, default: 1 },
       },
     ],
     labSetup: {
-      materials: [String],
-      procedure: [String],
-      safetyPrecautions: [String],
-      equipment: [String],
+      materials: { type: [String], default: [] },
+      procedure: { type: [String], default: [] },
+      safetyPrecautions: { type: [String], default: [] },
+      equipment: { type: [String], default: [] },
     },
     periodicTableRequired: { type: Boolean, default: false },
   },
@@ -313,34 +369,55 @@ const ChemistryExerciseSchema = new Schema({
     ],
     explanation: String,
     balancedEquation: String,
-    calculations: [String],
-    mechanisms: [String],
+    calculations: { type: [String], default: [] },
+    mechanisms: { type: [String], default: [] },
   },
 });
 
-// Biology Exercise Schema
+/**
+ * Mongoose schema for biology exercises.
+ * @module BiologyExerciseSchema
+ */
 const BiologyExerciseSchema = new Schema({
-  topic: { type: String, enum: BIOLOGY_TOPICS, required: true },
+  topic: {
+    type: String,
+    enum: BIOLOGY_TOPICS,
+    required: [true, "Le sujet de biologie est requis"],
+  },
   content: {
     problems: [
       {
-        statement: { type: String, required: true },
-        questionType: { type: String, enum: QUESTION_TYPES, required: true },
-        diagram: { url: String, altText: String, labels: [String] },
-        difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+        statement: {
+          type: String,
+          required: [true, "L'énoncé du problème est requis"],
+        },
+        questionType: {
+          type: String,
+          enum: QUESTION_TYPES,
+          required: [true, "Le type de question est requis"],
+        },
+        diagram: {
+          url: String,
+          altText: String,
+          labels: { type: [String], default: [] },
+        },
+        difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
         points: { type: Number, default: 1 },
       },
     ],
     caseStudy: {
       context: String,
-      data: [{ variable: String, value: String, unit: String }],
+      data: {
+        type: [{ variable: String, value: String, unit: String }],
+        default: [],
+      },
       scenario: String,
     },
     specimens: [
       {
         name: String,
         type: String,
-        characteristics: [String],
+        characteristics: { type: [String], default: [] },
         habitat: String,
       },
     ],
@@ -354,14 +431,21 @@ const BiologyExerciseSchema = new Schema({
       },
     ],
     explanation: String,
-    annotations: [String],
-    biologicalProcesses: [String],
+    annotations: { type: [String], default: [] },
+    biologicalProcesses: { type: [String], default: [] },
   },
 });
 
-// French Exercise Schema
+/**
+ * Mongoose schema for French exercises.
+ * @module FrenchExerciseSchema
+ */
 const FrenchExerciseSchema = new Schema({
-  topic: { type: String, enum: FRENCH_TOPICS, required: true },
+  topic: {
+    type: String,
+    enum: FRENCH_TOPICS,
+    required: [true, "Le sujet de français est requis"],
+  },
   content: {
     textAnalysis: {
       text: String,
@@ -372,7 +456,7 @@ const FrenchExerciseSchema = new Schema({
         {
           question: String,
           questionType: { type: String, enum: QUESTION_TYPES },
-          difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+          difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
           points: { type: Number, default: 1 },
         },
       ],
@@ -382,12 +466,15 @@ const FrenchExerciseSchema = new Schema({
         statement: String,
         questionType: { type: String, enum: QUESTION_TYPES },
         grammarRule: String,
-        difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+        difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
         points: { type: Number, default: 1 },
       },
     ],
     vocabulary: {
-      words: [{ word: String, definition: String, example: String }],
+      words: {
+        type: [{ word: String, definition: String, example: String }],
+        default: [],
+      },
       context: String,
     },
   },
@@ -400,14 +487,21 @@ const FrenchExerciseSchema = new Schema({
       },
     ],
     modelAnswer: String,
-    guidelines: [String],
-    grammarExplanations: [String],
+    guidelines: { type: [String], default: [] },
+    grammarExplanations: { type: [String], default: [] },
   },
 });
 
-// Philosophy Exercise Schema
+/**
+ * Mongoose schema for philosophy exercises.
+ * @module PhilosophyExerciseSchema
+ */
 const PhilosophyExerciseSchema = new Schema({
-  topic: { type: String, enum: PHILOSOPHY_TOPICS, required: true },
+  topic: {
+    type: String,
+    enum: PHILOSOPHY_TOPICS,
+    required: [true, "Le sujet de philosophie est requis"],
+  },
   content: {
     questions: [
       {
@@ -416,7 +510,7 @@ const PhilosophyExerciseSchema = new Schema({
         textExcerpt: String,
         philosopher: String,
         work: String,
-        difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+        difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
         points: { type: Number, default: 1 },
       },
     ],
@@ -424,7 +518,7 @@ const PhilosophyExerciseSchema = new Schema({
       premise: String,
       conclusion: String,
       logicalStructure: String,
-      fallacies: [String],
+      fallacies: { type: [String], default: [] },
     },
     concepts: [
       {
@@ -449,9 +543,16 @@ const PhilosophyExerciseSchema = new Schema({
   },
 });
 
-// English Exercise Schema
+/**
+ * Mongoose schema for English exercises.
+ * @module EnglishExerciseSchema
+ */
 const EnglishExerciseSchema = new Schema({
-  topic: { type: String, enum: ENGLISH_TOPICS, required: true },
+  topic: {
+    type: String,
+    enum: ENGLISH_TOPICS,
+    required: [true, "Le sujet d'anglais est requis"],
+  },
   content: {
     readingComprehension: {
       text: String,
@@ -462,7 +563,7 @@ const EnglishExerciseSchema = new Schema({
         {
           question: String,
           questionType: { type: String, enum: QUESTION_TYPES },
-          difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+          difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
           points: { type: Number, default: 1 },
         },
       ],
@@ -472,7 +573,7 @@ const EnglishExerciseSchema = new Schema({
         statement: String,
         questionType: { type: String, enum: QUESTION_TYPES },
         grammarRule: String,
-        difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+        difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
         points: { type: Number, default: 1 },
       },
     ],
@@ -483,9 +584,12 @@ const EnglishExerciseSchema = new Schema({
       format: String,
     },
     vocabulary: {
-      words: [
-        { word: String, definition: String, example: String, level: String },
-      ],
+      words: {
+        type: [
+          { word: String, definition: String, example: String, level: String },
+        ],
+        default: [],
+      },
     },
   },
   solution: {
@@ -497,20 +601,27 @@ const EnglishExerciseSchema = new Schema({
       },
     ],
     modelAnswer: String,
-    guidelines: [String],
+    guidelines: { type: [String], default: [] },
     rubric: {
-      criteria: [String],
+      criteria: { type: [String], default: [] },
       scoring: String,
     },
   },
 });
 
-// History Exercise Schema
+/**
+ * Mongoose schema for history exercises.
+ * @module HistoryExerciseSchema
+ */
 const HistoryExerciseSchema = new Schema({
-  topic: { type: String, enum: HISTORY_TOPICS, required: true },
+  topic: {
+    type: String,
+    enum: HISTORY_TOPICS,
+    required: [true, "Le sujet d'histoire est requis"],
+  },
   content: {
     sourceAnalysis: {
-      sourceType: { type: String, enum: ["primary", "secondary"] },
+      sourceType: { type: String, enum: HISTORY_SOURCE_TYPES },
       excerpt: String,
       author: String,
       date: String,
@@ -519,7 +630,7 @@ const HistoryExerciseSchema = new Schema({
         {
           question: String,
           questionType: { type: String, enum: QUESTION_TYPES },
-          difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+          difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
           points: { type: Number, default: 1 },
         },
       ],
@@ -529,7 +640,7 @@ const HistoryExerciseSchema = new Schema({
         question: String,
         questionType: { type: String, enum: QUESTION_TYPES },
         period: String,
-        difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+        difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
         points: { type: Number, default: 1 },
       },
     ],
@@ -538,8 +649,8 @@ const HistoryExerciseSchema = new Schema({
         name: String,
         date: String,
         significance: String,
-        causes: [String],
-        consequences: [String],
+        causes: { type: [String], default: [] },
+        consequences: { type: [String], default: [] },
       },
     ],
   },
@@ -552,28 +663,32 @@ const HistoryExerciseSchema = new Schema({
       },
     ],
     explanation: String,
-    annotations: [String],
+    annotations: { type: [String], default: [] },
     historicalContext: String,
   },
 });
 
-// Geography Exercise Schema
+/**
+ * Mongoose schema for geography exercises.
+ * @module GeographyExerciseSchema
+ */
 const GeographyExerciseSchema = new Schema({
-  topic: { type: String, enum: GEOGRAPHY_TOPICS, required: true },
+  topic: {
+    type: String,
+    enum: GEOGRAPHY_TOPICS,
+    required: [true, "Le sujet de géographie est requis"],
+  },
   content: {
     mapAnalysis: {
       mapUrl: String,
-      mapType: {
-        type: String,
-        enum: ["physical", "political", "climate", "economic"],
-      },
+      mapType: { type: String, enum: GEOGRAPHY_MAP_TYPES },
       scale: String,
       region: String,
       questions: [
         {
           question: String,
           questionType: { type: String, enum: QUESTION_TYPES },
-          difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+          difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
           points: { type: Number, default: 1 },
         },
       ],
@@ -588,7 +703,7 @@ const GeographyExerciseSchema = new Schema({
         {
           question: String,
           questionType: { type: String, enum: QUESTION_TYPES },
-          difficulty: { type: String, enum: DIFFICULTY_LEVELS },
+          difficulty: { type: String, enum: EXERCISE_DIFFICULTY_LEVELS },
           points: { type: Number, default: 1 },
         },
       ],
@@ -596,7 +711,7 @@ const GeographyExerciseSchema = new Schema({
     fieldwork: {
       location: String,
       methodology: String,
-      dataCollection: [String],
+      dataCollection: { type: [String], default: [] },
       analysis: String,
     },
   },
@@ -609,51 +724,192 @@ const GeographyExerciseSchema = new Schema({
       },
     ],
     explanation: String,
-    annotations: [String],
-    geographicalProcesses: [String],
+    annotations: { type: [String], default: [] },
+    geographicalProcesses: { type: [String], default: [] },
   },
 });
 
-// Indexes for performance
+// =============== INDEXES =================
 ExerciseBaseSchema.index({ subjectId: 1, topicId: 1 });
 ExerciseBaseSchema.index({ difficulty: 1, type: 1 });
-// ExerciseBaseSchema.index({ "metadata.createdBy": 1 });
-ExerciseBaseSchema.index({ "metadata.status": 1 });
-ExerciseBaseSchema.index({ premiumOnly: 1 });
-ExerciseBaseSchema.index({ isActive: 1 });
+ExerciseBaseSchema.index({ "metadata.createdBy": 1 });
+ExerciseBaseSchema.index({ "metadata.status": 1 }, { sparse: true });
+ExerciseBaseSchema.index({ premiumOnly: 1 }, { sparse: true });
+ExerciseBaseSchema.index({ isActive: 1 }, { sparse: true });
 ExerciseBaseSchema.index({ createdAt: -1 });
 
-// Pre-save middleware
+// =============== VIRTUALS =============
+/**
+ * Virtual field for the average feedback rating.
+ * @returns {string} Average rating rounded to one decimal place.
+ */
+ExerciseBaseSchema.virtual("averageRating").get(function () {
+  if ((this.feedback ?? []).length > 0) {
+    const sum = this.feedback.reduce((acc, fb) => acc + fb.rating, 0);
+    return (sum / this.feedback.length).toFixed(1);
+  }
+  return "0";
+});
+
+/**
+ * Virtual field for the total number of feedback entries.
+ * @returns {number} Number of feedback entries.
+ */
+ExerciseBaseSchema.virtual("totalFeedback").get(function () {
+  return (this.feedback ?? []).length;
+});
+
+/**
+ * Virtual field to check if the exercise is expired (not applicable without expiry date).
+ * @returns {boolean} Always false since no expiry date is defined.
+ */
+ExerciseBaseSchema.virtual("isExpired").get(function () {
+  return false; // No expiryDate in schema
+});
+
+// =============== MIDDLEWARE =============
+/**
+ * Pre-save middleware to update last modified timestamp.
+ * @param {Function} next - Callback to proceed with save.
+ */
 ExerciseBaseSchema.pre("save", function (next) {
   this.metadata.lastModified = new Date();
   next();
 });
 
-// Models
-const Exercise = mongoose.model("Exercise", ExerciseBaseSchema);
+// =============== METHODS =============
+/**
+ * Adds feedback to the exercise.
+ * @param {string} userId - ID of the user providing feedback.
+ * @param {number} rating - Rating (0-5).
+ * @param {string} comments - Optional comments.
+ * @returns {Promise<Document>} Updated exercise document.
+ */
+ExerciseBaseSchema.methods.addFeedback = function (userId, rating, comments) {
+  this.feedback.push({ userId, rating, comments });
+  return this.save();
+};
+
+/**
+ * Updates exercise analytics based on user performance.
+ * @param {number} score - User's score.
+ * @param {number} timeSpent - Time spent on the exercise.
+ * @returns {Promise<Document>} Updated exercise document.
+ */
+ExerciseBaseSchema.methods.updateAnalytics = function (score, timeSpent) {
+  this.analytics.totalAttempts += 1;
+  this.analytics.averageScore =
+    (this.analytics.averageScore * (this.analytics.totalAttempts - 1) + score) /
+    this.analytics.totalAttempts;
+  this.analytics.averageTimeSpent =
+    (this.analytics.averageTimeSpent * (this.analytics.totalAttempts - 1) +
+      timeSpent) /
+    this.analytics.totalAttempts;
+  this.analytics.successRate =
+    score >= 70
+      ? (this.analytics.successRate * (this.analytics.totalAttempts - 1) + 1) /
+        this.analytics.totalAttempts
+      : this.analytics.successRate;
+  return this.save();
+};
+
+// =============== MODELS =============
+/**
+ * Exercise model for interacting with the Exercise collection.
+ * @type {mongoose.Model}
+ */
+const Exercise = model("Exercise", ExerciseBaseSchema);
+
+/**
+ * Math exercise model.
+ * @type {mongoose.Model}
+ */
+const MathExercise = Exercise.discriminator(
+  "math_exercise",
+  MathExerciseSchema
+);
+
+/**
+ * Physics exercise model.
+ * @type {mongoose.Model}
+ */
+const PhysicsExercise = Exercise.discriminator(
+  "physics_exercise",
+  PhysicsExerciseSchema
+);
+
+/**
+ * Chemistry exercise model.
+ * @type {mongoose.Model}
+ */
+const ChemistryExercise = Exercise.discriminator(
+  "chemistry_exercise",
+  ChemistryExerciseSchema
+);
+
+/**
+ * Biology exercise model.
+ * @type {mongoose.Model}
+ */
+const BiologyExercise = Exercise.discriminator(
+  "biology_exercise",
+  BiologyExerciseSchema
+);
+
+/**
+ * French exercise model.
+ * @type {mongoose.Model}
+ */
+const FrenchExercise = Exercise.discriminator(
+  "french_exercise",
+  FrenchExerciseSchema
+);
+
+/**
+ * Philosophy exercise model.
+ * @type {mongoose.Model}
+ */
+const PhilosophyExercise = Exercise.discriminator(
+  "philosophy_exercise",
+  PhilosophyExerciseSchema
+);
+
+/**
+ * English exercise model.
+ * @type {mongoose.Model}
+ */
+const EnglishExercise = Exercise.discriminator(
+  "english_exercise",
+  EnglishExerciseSchema
+);
+
+/**
+ * History exercise model.
+ * @type {mongoose.Model}
+ */
+const HistoryExercise = Exercise.discriminator(
+  "history_exercise",
+  HistoryExerciseSchema
+);
+
+/**
+ * Geography exercise model.
+ * @type {mongoose.Model}
+ */
+const GeographyExercise = Exercise.discriminator(
+  "geography_exercise",
+  GeographyExerciseSchema
+);
 
 module.exports = {
   Exercise,
-  MathExercise: Exercise.discriminator("math_exercise", MathExerciseSchema),
-  PhysicsExercise: Exercise.discriminator("physics_exercise", PhysicsExerciseSchema),
-  ChemistryExercise: Exercise.discriminator("chemistry_exercise", ChemistryExerciseSchema),
-  BiologyExercise: Exercise.discriminator("biology_exercise", BiologyExerciseSchema),
-  FrenchExercise: Exercise.discriminator("french_exercise", FrenchExerciseSchema),
-  PhilosophyExercise: Exercise.discriminator("philosophy_exercise", PhilosophyExerciseSchema),
-  EnglishExercise: Exercise.discriminator("english_exercise", EnglishExerciseSchema),
-  HistoryExercise: Exercise.discriminator("history_exercise", HistoryExerciseSchema),
-  GeographyExercise: Exercise.discriminator("geography_exercise", GeographyExerciseSchema),
-  // Export constants for use in other modules
-  DIFFICULTY_LEVELS,
-  EXERCISE_TYPES,
-  QUESTION_TYPES,
-  MATH_TOPICS,
-  PHYSICS_TOPICS,
-  CHEMISTRY_TOPICS,
-  BIOLOGY_TOPICS,
-  FRENCH_TOPICS,
-  PHILOSOPHY_TOPICS,
-  ENGLISH_TOPICS,
-  HISTORY_TOPICS,
-  GEOGRAPHY_TOPICS,
+  MathExercise,
+  PhysicsExercise,
+  ChemistryExercise,
+  BiologyExercise,
+  FrenchExercise,
+  PhilosophyExercise,
+  EnglishExercise,
+  HistoryExercise,
+  GeographyExercise,
 };
