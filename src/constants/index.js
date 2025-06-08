@@ -303,6 +303,13 @@ const MASTERY_LEVELS = ["beginner", "intermediate", "advanced", "mastered"];
  */
 const HINT_TYPES = ["step", "explanation", "formula", "example"];
 
+/**
+ * Constants for quiz results.
+ * @module constants/index
+ */
+const QUIZ_RESULT_STATUSES = ["completed", "abandoned", "in_progress"];
+const FEEDBACK_RATING_RANGE = { MIN: 0, MAX: 10 };
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -366,4 +373,6 @@ module.exports = {
   MISSION_CATEGORIES,
   MASTERY_LEVELS,
   HINT_TYPES,
+  QUIZ_RESULT_STATUSES,
+  FEEDBACK_RATING_RANGE,
 };
