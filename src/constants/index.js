@@ -166,6 +166,69 @@ const EXAM_SCHEDULE_STATUSES = [
   "postponed",
 ];
 
+/**
+ * Constants for exercises.
+ * @module constants/index
+ */
+const EXERCISE_DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
+const EXERCISE_TYPES = ["practice", "quiz", "assignment", "exam"];
+const QUESTION_TYPES = [
+  "multiple_choice",
+  "short_answer",
+  "essay",
+  "calculation",
+  "diagram_labeling",
+  "source_analysis",
+  "map_analysis",
+  "data_interpretation",
+  "fill_in_the_blank",
+  "text_sequencing",
+];
+const EXERCISE_STATUSES = ["draft", "published", "archived"];
+const ATTACHMENT_TYPES = ["image", "audio", "video", "document"];
+const MATH_TOPICS = ["algebra", "geometry", "calculus", "statistics"];
+const PHYSICS_TOPICS = [
+  "mechanics",
+  "electromagnetism",
+  "thermodynamics",
+  "optics",
+];
+const PHYSICS_DIAGRAM_TYPES = ["circuit", "force", "wave", "field"];
+const CHEMISTRY_TOPICS = [
+  "stoichiometry",
+  "organic_chemistry",
+  "thermodynamics",
+  "acids_bases",
+];
+const BIOLOGY_TOPICS = ["cell_biology", "genetics", "ecology", "physiology"];
+const FRENCH_TOPICS = ["grammar", "literature", "text_analysis", "composition"];
+const PHILOSOPHY_TOPICS = [
+  "ethics",
+  "metaphysics",
+  "epistemology",
+  "political_philosophy",
+];
+const ENGLISH_TOPICS = [
+  "grammar",
+  "reading_comprehension",
+  "writing_skills",
+  "speaking",
+];
+const HISTORY_TOPICS = [
+  "colonialism",
+  "independence_movements",
+  "world_wars",
+  "chadian_history",
+];
+const HISTORY_SOURCE_TYPES = ["primary", "secondary"];
+const GEOGRAPHY_TOPICS = [
+  "physical_geography",
+  "human_geography",
+  "climate_and_environment",
+  "chadian_geography",
+];
+const GEOGRAPHY_MAP_TYPES = ["physical", "political", "climate", "economic"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -201,4 +264,21 @@ module.exports = {
   PAYMENT_STATUSES_EXAM_SCHEDULE,
   PROCTORING_TYPES,
   EXAM_SCHEDULE_STATUSES,
+  EXERCISE_DIFFICULTY_LEVELS,
+  EXERCISE_TYPES,
+  QUESTION_TYPES,
+  EXERCISE_STATUSES,
+  ATTACHMENT_TYPES,
+  MATH_TOPICS,
+  PHYSICS_TOPICS,
+  PHYSICS_DIAGRAM_TYPES,
+  CHEMISTRY_TOPICS,
+  BIOLOGY_TOPICS,
+  FRENCH_TOPICS,
+  PHILOSOPHY_TOPICS,
+  ENGLISH_TOPICS,
+  HISTORY_TOPICS,
+  HISTORY_SOURCE_TYPES,
+  GEOGRAPHY_TOPICS,
+  GEOGRAPHY_MAP_TYPES,
 };
