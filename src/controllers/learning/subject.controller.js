@@ -1,6 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
 const subjectService = require("../../services/learning/subject/subject.service");
-const { Subject } = require("../../models/learning/subject.model");
 const createLogger = require("../../services/logging.service");
 
 const logger = createLogger("SubjectController");
@@ -143,27 +142,13 @@ const removeExamFromSubject = async (req, res) => {
 // Get subjects by series
 const getSubjectsBySeries = async (req, res) => {
   try {
-    // Log the incoming request for debugging
-    logger.info("getSubjectsBySeries called", {
-      series: req.params.series,
-      query: req.query,
-      originalUrl: req.originalUrl,
-    });
-
     // Merge series param with other query parameters
     const queryWithSeries = {
       ...req.query,
       series: req.params.series,
     };
 
-    logger.info("Query being sent to service", { queryWithSeries });
-
     const subjects = await subjectService.getSubjects(queryWithSeries);
-
-    logger.info("Service response", {
-      subjectCount: subjects.subjects.length,
-      pagination: subjects.pagination,
-    });
 
     res.status(StatusCodes.OK).json({
       message: "Matières récupérées par série avec succès",
@@ -179,21 +164,6 @@ const getSubjectsBySeries = async (req, res) => {
   }
 };
 
-//TODO: Remove later: Add debug method to check what series exist
-const getAvailableSeries = async (req, res) => {
-  try {
-    const series = await Subject.distinct("series", { isActive: true });
-
-    res.status(StatusCodes.OK).json({
-      message: "Séries disponibles récupérées avec succès",
-      data: series,
-    });
-  } catch (error) {
-    logger.error("Error getting available series", error);
-    throw error;
-  }
-};
-
 module.exports = {
   createSubject,
   getSubjects,
@@ -204,5 +174,4 @@ module.exports = {
   addExamToSubject,
   removeExamFromSubject,
   getSubjectsBySeries,
-  getAvailableSeries, //TODO: Remove later Add this for debugging
 };

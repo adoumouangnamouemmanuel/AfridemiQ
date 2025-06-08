@@ -63,13 +63,6 @@ const getSubjects = async (query) => {
       const seriesValue = Array.isArray(series) ? series[0] : series;
       const trimmedSeries = seriesValue.trim();
 
-      // Log for debugging
-      logger.info("Series filter debug", {
-        originalSeries: series,
-        seriesValue,
-        trimmedSeries,
-      });
-
       // Use case-insensitive regex that matches the series exactly
       filter.series = {
         $regex: new RegExp(`^${trimmedSeries}$`, "i"),
@@ -89,8 +82,6 @@ const getSubjects = async (query) => {
 
     const skip = (page - 1) * limit;
 
-    logger.info("Executing query with filter", { filter });
-
     const subjects = await Subject.find(filter)
       .sort(sort)
       .skip(skip)
@@ -98,9 +89,10 @@ const getSubjects = async (query) => {
 
     const total = await Subject.countDocuments(filter);
 
-    logger.info(
-      `Query results: ${subjects.length} subjects found, ${total} total`
-    );
+    logger.info(`Query executed successfully: ${subjects.length} subjects found`, {
+      filter: series ? { series, category, difficulty } : { category, difficulty },
+      total
+    });
 
     return {
       subjects,
@@ -113,33 +105,6 @@ const getSubjects = async (query) => {
     };
   } catch (error) {
     logger.error("Error getting subjects", error, { query });
-    throw error;
-  }
-};
-
-// TODO: Remove later
-/**
- * Get all subjects without any filters (for debugging)
- */
-const getAllSubjectsRaw = async () => {
-  try {
-    const subjects = await Subject.find({});
-    logger.info(`Raw query found ${subjects.length} subjects`);
-
-    // Log first subject structure if any exist
-    if (subjects.length > 0) {
-      logger.info("Sample subject structure:", {
-        id: subjects[0]._id,
-        name: subjects[0].name,
-        isActive: subjects[0].isActive,
-        series: subjects[0].series,
-        category: subjects[0].category,
-      });
-    }
-
-    return subjects;
-  } catch (error) {
-    logger.error("Error getting raw subjects", error);
     throw error;
   }
 };
