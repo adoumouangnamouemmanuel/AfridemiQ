@@ -142,9 +142,14 @@ const removeExamFromSubject = async (req, res) => {
 // Get subjects by series
 const getSubjectsBySeries = async (req, res) => {
   try {
-    const subjects = await subjectService.getSubjects({
+    // Merge series param with other query parameters
+    const queryWithSeries = {
+      ...req.query,
       series: req.params.series,
-    });
+    };
+
+    const subjects = await subjectService.getSubjects(queryWithSeries);
+
     res.status(StatusCodes.OK).json({
       message: "Matières récupérées par série avec succès",
       data: subjects.subjects,
@@ -153,6 +158,7 @@ const getSubjectsBySeries = async (req, res) => {
   } catch (error) {
     logger.error("Error in getSubjectsBySeries controller", error, {
       series: req.params.series,
+      query: req.query,
     });
     throw error;
   }

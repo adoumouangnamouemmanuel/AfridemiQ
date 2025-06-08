@@ -18,7 +18,11 @@ router.use(apiLimiter);
 
 // Public routes - ORDER MATTERS! More specific routes must come before generic ones
 // Series route must come before /:id to avoid being caught as an ID
-router.get("/series/:series", subjectController.getSubjectsBySeries);
+router.get(
+  "/series/:series",
+  validateMiddleware(getSubjectsSchema),
+  subjectController.getSubjectsBySeries
+);
 
 // Main listing route
 router.get(

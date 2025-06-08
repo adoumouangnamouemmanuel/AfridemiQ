@@ -59,7 +59,11 @@ const getSubjects = async (query) => {
     }
 
     if (series) {
-      filter.series = { $in: Array.isArray(series) ? series : [series] };
+      // Handle case-insensitive series matching
+      const seriesArray = Array.isArray(series) ? series : [series];
+      filter.series = {
+        $in: seriesArray.map((s) => new RegExp(`^${s.trim()}$`, "i")),
+      };
     }
 
     if (category) {
