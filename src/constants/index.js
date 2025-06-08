@@ -1,6 +1,6 @@
 /**
- * Constants for onboarding steps, notifications, countries, parent access, and peer tutor profiles.
- * @module constants
+ * Constants for onboarding steps.
+ * @module constants/index
  */
 const TOTAL_STEPS = [
   "profile_setup",
@@ -11,6 +11,10 @@ const TOTAL_STEPS = [
   "tutorial_completion",
 ];
 
+/**
+ * Constants for notifications.
+ * @module constants/index
+ */
 const NOTIFICATION_TYPES = [
   "reminder",
   "achievement",
@@ -27,6 +31,10 @@ const NOTIFICATION_TYPES = [
 
 const NOTIFICATION_PRIORITIES = ["low", "medium", "high"];
 
+/**
+ * Constants for countries.
+ * @module constants/index
+ */
 const COUNTRY_REGIONS = [
   "North Africa",
   "West Africa",
@@ -44,10 +52,18 @@ const EDUCATION_SYSTEMS = [
   "Mixed",
 ];
 
+/**
+ * Constants for parent access.
+ * @module constants/index
+ */
 const PARENT_ACCESS_LEVELS = ["viewProgress", "viewReports", "fullAccess"];
 
 const NOTIFICATION_FREQUENCIES = ["immediate", "daily", "weekly", "monthly"];
 
+/**
+ * Constants for peer tutor profiles.
+ * @module constants/index
+ */
 const AVAILABILITY_DAYS = [
   "lundi",
   "mardi",
@@ -58,6 +74,12 @@ const AVAILABILITY_DAYS = [
   "dimanche",
 ];
 
+/**
+ * Constants for tutoring sessions.
+ * @module constants/index
+ */
+const SESSION_STATUSES = ["scheduled", "completed", "cancelled"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -67,4 +89,5 @@ module.exports = {
   PARENT_ACCESS_LEVELS,
   NOTIFICATION_FREQUENCIES,
   AVAILABILITY_DAYS,
+  SESSION_STATUSES,
 };
