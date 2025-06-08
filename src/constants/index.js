@@ -137,6 +137,35 @@ const IMPORTANT_DATE_TYPES = [
 ];
 const EXAM_SESSIONS = ["janvier", "juin", "septembre", "decembre"];
 
+/**
+ * Constants for exam schedules.
+ * @module constants/index
+ */
+const EXAM_SCHEDULE_TYPES = ["mock", "practice", "official", "assessment"];
+const VENUE_TYPES = ["online", "physical", "hybrid"];
+const PARTICIPANT_STATUSES = [
+  "registered",
+  "confirmed",
+  "attended",
+  "absent",
+  "cancelled",
+];
+const PAYMENT_STATUSES_EXAM_SCHEDULE = [
+  "pending",
+  "paid",
+  "failed",
+  "refunded",
+];
+const PROCTORING_TYPES = ["automated", "human", "hybrid"];
+const EXAM_SCHEDULE_STATUSES = [
+  "draft",
+  "scheduled",
+  "active",
+  "completed",
+  "cancelled",
+  "postponed",
+];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -166,4 +195,10 @@ module.exports = {
   ACCESSIBILITY_OPTIONS,
   IMPORTANT_DATE_TYPES,
   EXAM_SESSIONS,
+  EXAM_SCHEDULE_TYPES,
+  VENUE_TYPES,
+  PARTICIPANT_STATUSES,
+  PAYMENT_STATUSES_EXAM_SCHEDULE,
+  PROCTORING_TYPES,
+  EXAM_SCHEDULE_STATUSES,
 };
