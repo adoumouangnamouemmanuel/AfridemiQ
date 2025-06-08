@@ -2,6 +2,11 @@ const { StatusCodes } = require("http-status-codes");
 const subjectService = require("../../services/learning/subject/subject.service");
 const createLogger = require("../../services/logging.service");
 
+// Import additional services
+const searchService = require("../../services/learning/subject/search.service");
+const bulkService = require("../../services/learning/subject/bulk.service");
+const analyticsService = require("../../services/learning/subject/analytics.service");
+
 const logger = createLogger("SubjectController");
 
 // Create a new subject
@@ -164,6 +169,173 @@ const getSubjectsBySeries = async (req, res) => {
   }
 };
 
+// Advanced Search Controller
+const advancedSearch = async (req, res) => {
+  try {
+    const result = await searchService.advancedSearch(req.query);
+    res.status(StatusCodes.OK).json({
+      message: "Recherche avancée exécutée avec succès",
+      data: result.subjects,
+      pagination: result.pagination,
+      facets: result.facets,
+      searchParams: result.searchParams,
+    });
+  } catch (error) {
+    logger.error("Error in advancedSearch controller", error, {
+      query: req.query,
+    });
+    throw error;
+  }
+};
+
+// Search Suggestions Controller
+const getSearchSuggestions = async (req, res) => {
+  try {
+    const { q, limit = 10 } = req.query;
+    const suggestions = await searchService.getSearchSuggestions(q, limit);
+    res.status(StatusCodes.OK).json({
+      message: "Suggestions de recherche récupérées avec succès",
+      data: suggestions,
+    });
+  } catch (error) {
+    logger.error("Error in getSearchSuggestions controller", error, {
+      query: req.query,
+    });
+    throw error;
+  }
+};
+
+// Trending Subjects Controller
+const getTrendingSubjects = async (req, res) => {
+  try {
+    const { period = "week", limit = 10 } = req.query;
+    const trending = await analyticsService.getTrendingSubjects(period, limit);
+    res.status(StatusCodes.OK).json({
+      message: "Matières tendance récupérées avec succès",
+      data: trending,
+    });
+  } catch (error) {
+    logger.error("Error in getTrendingSubjects controller", error, {
+      query: req.query,
+    });
+    throw error;
+  }
+};
+
+// Analytics Controller
+const getSubjectAnalytics = async (req, res) => {
+  try {
+    const analytics = await analyticsService.getSubjectAnalytics(req.query);
+    res.status(StatusCodes.OK).json({
+      message: "Analyses des matières récupérées avec succès",
+      data: analytics,
+    });
+  } catch (error) {
+    logger.error("Error in getSubjectAnalytics controller", error, {
+      query: req.query,
+    });
+    throw error;
+  }
+};
+
+// Subject Performance Controller
+const getSubjectPerformance = async (req, res) => {
+  try {
+    const performance = await analyticsService.getSubjectPerformance(
+      req.params.id
+    );
+    res.status(StatusCodes.OK).json({
+      message: "Performance de la matière récupérée avec succès",
+      data: performance,
+    });
+  } catch (error) {
+    logger.error("Error in getSubjectPerformance controller", error, {
+      subjectId: req.params.id,
+    });
+    throw error;
+  }
+};
+
+// Compare Subjects Controller
+const compareSubjects = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    const comparison = await analyticsService.compareSubjects(ids);
+    res.status(StatusCodes.OK).json({
+      message: "Comparaison des matières effectuée avec succès",
+      data: comparison,
+    });
+  } catch (error) {
+    logger.error("Error in compareSubjects controller", error, {
+      ids: req.body.ids,
+    });
+    throw error;
+  }
+};
+
+// Bulk Create Controller
+const bulkCreateSubjects = async (req, res) => {
+  try {
+    const { subjects } = req.body;
+    const result = await bulkService.bulkCreateSubjects(subjects);
+    res.status(StatusCodes.CREATED).json({
+      message: "Création en lot terminée",
+      data: result,
+    });
+  } catch (error) {
+    logger.error("Error in bulkCreateSubjects controller", error);
+    throw error;
+  }
+};
+
+// Bulk Update Controller
+const bulkUpdateSubjects = async (req, res) => {
+  try {
+    const { updates } = req.body;
+    const result = await bulkService.bulkUpdateSubjects(updates);
+    res.status(StatusCodes.OK).json({
+      message: "Mise à jour en lot terminée",
+      data: result,
+    });
+  } catch (error) {
+    logger.error("Error in bulkUpdateSubjects controller", error);
+    throw error;
+  }
+};
+
+// Bulk Export Controller
+const exportSubjects = async (req, res) => {
+  try {
+    const { format = "json", ...filters } = req.query;
+    const result = await bulkService.bulkExportSubjects(filters, format);
+
+    if (format === "csv") {
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", "attachment; filename=subjects.csv");
+
+      // Convert to CSV string
+      const csvContent = [
+        result.headers.join(","),
+        ...result.data.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+      ].join("\n");
+
+      res.send(csvContent);
+    } else {
+      res.status(StatusCodes.OK).json({
+        message: "Export des matières réussi",
+        data: result.data,
+        count: result.count,
+        format: result.format,
+      });
+    }
+  } catch (error) {
+    logger.error("Error in exportSubjects controller", error, {
+      query: req.query,
+    });
+    throw error;
+  }
+};
+
 module.exports = {
   createSubject,
   getSubjects,
@@ -174,4 +346,14 @@ module.exports = {
   addExamToSubject,
   removeExamFromSubject,
   getSubjectsBySeries,
+  // New advanced controllers
+  advancedSearch,
+  getSearchSuggestions,
+  getTrendingSubjects,
+  getSubjectAnalytics,
+  getSubjectPerformance,
+  compareSubjects,
+  bulkCreateSubjects,
+  bulkUpdateSubjects,
+  exportSubjects,
 };

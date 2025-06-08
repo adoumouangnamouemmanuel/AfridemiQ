@@ -1,52 +1,94 @@
 const express = require("express");
-const router = express.Router();
 const subjectController = require("../../controllers/learning/subject.controller");
+const validateMiddleware = require("../../middlewares/validate.middleware");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
-const validateMiddleware = require("../../middlewares/validate.middleware");
 const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
+
 const {
   createSubjectSchema,
   updateSubjectSchema,
   getSubjectsSchema,
   addExamToSubjectSchema,
   rateSubjectSchema,
+  bulkCreateSchema,
+  bulkUpdateSchema,
+  compareSubjectsSchema,
 } = require("../../schemas/learning/subject.schema");
+
+const router = express.Router();
 
 // Apply rate limiting to all routes
 router.use(apiLimiter);
 
-// Public routes - ORDER MATTERS! More specific routes must come before generic ones
-// Series route must come before /:id to avoid being caught as an ID
+// Search and analytics routes (public)
+router.get("/search", subjectController.advancedSearch);
+router.get("/search/suggestions", subjectController.getSearchSuggestions);
+router.get("/trending", subjectController.getTrendingSubjects);
+
+// Public subject routes
 router.get(
   "/series/:series",
-  validateMiddleware(getSubjectsSchema),
+  validateMiddleware(getSubjectsSchema, "query"),
   subjectController.getSubjectsBySeries
 );
-
-// Main listing route
+router.get("/:id", subjectController.getSubjectById);
 router.get(
   "/",
-  validateMiddleware(getSubjectsSchema),
+  validateMiddleware(getSubjectsSchema, "query"),
   subjectController.getSubjects
 );
 
-// ID route should come last as it's the most generic pattern
-router.get("/:id", subjectController.getSubjectById);
-
-// Protected routes (require authentication)
-router.use(authMiddleware);
-
-// Student routes (authenticated users)
-router.post(
-  "/:id/rate",
-  validateMiddleware(rateSubjectSchema),
-  subjectController.rateSubject
+// Analytics routes (require authentication)
+router.get(
+  "/analytics",
+  authMiddleware,
+  roleMiddleware(["teacher", "admin"]),
+  subjectController.getSubjectAnalytics
+);
+router.get(
+  "/:id/performance",
+  authMiddleware,
+  roleMiddleware(["teacher", "admin"]),
+  subjectController.getSubjectPerformance
 );
 
-// Teacher and Admin routes
+// Comparison route
+router.post(
+  "/compare",
+  authMiddleware,
+  validateMiddleware(compareSubjectsSchema),
+  subjectController.compareSubjects
+);
+
+// Export route
+router.get(
+  "/export",
+  authMiddleware,
+  roleMiddleware(["teacher", "admin"]),
+  subjectController.exportSubjects
+);
+
+// Bulk operations (require admin/teacher role)
+router.post(
+  "/bulk",
+  authMiddleware,
+  roleMiddleware(["teacher", "admin"]),
+  validateMiddleware(bulkCreateSchema),
+  subjectController.bulkCreateSubjects
+);
+router.put(
+  "/bulk",
+  authMiddleware,
+  roleMiddleware(["teacher", "admin"]),
+  validateMiddleware(bulkUpdateSchema),
+  subjectController.bulkUpdateSubjects
+);
+
+// Subject CRUD operations
 router.post(
   "/",
+  authMiddleware,
   roleMiddleware(["teacher", "admin"]),
   validateMiddleware(createSubjectSchema),
   subjectController.createSubject
@@ -54,6 +96,7 @@ router.post(
 
 router.put(
   "/:id",
+  authMiddleware,
   roleMiddleware(["teacher", "admin"]),
   validateMiddleware(updateSubjectSchema),
   subjectController.updateSubject
@@ -61,12 +104,23 @@ router.put(
 
 router.delete(
   "/:id",
+  authMiddleware,
   roleMiddleware(["teacher", "admin"]),
   subjectController.deleteSubject
 );
 
+// Rating system
+router.post(
+  "/:id/rate",
+  authMiddleware,
+  validateMiddleware(rateSubjectSchema),
+  subjectController.rateSubject
+);
+
+// Exam management
 router.post(
   "/:id/exams",
+  authMiddleware,
   roleMiddleware(["teacher", "admin"]),
   validateMiddleware(addExamToSubjectSchema),
   subjectController.addExamToSubject
@@ -74,6 +128,7 @@ router.post(
 
 router.delete(
   "/:id/exams/:examId",
+  authMiddleware,
   roleMiddleware(["teacher", "admin"]),
   subjectController.removeExamFromSubject
 );
