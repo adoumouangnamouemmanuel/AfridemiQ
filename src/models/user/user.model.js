@@ -312,8 +312,6 @@ const UserSchema = new Schema(
 );
 
 // =============== INDEXES =================
-UserSchema.index({ email: 1 }, { unique: true });
-UserSchema.index({ phoneNumber: 1 }, { unique: true, sparse: true });
 UserSchema.index({ "progress.xp": -1 });
 UserSchema.index({ lastLogin: -1 });
 UserSchema.index({ createdAt: -1 });
