@@ -183,6 +183,8 @@ const QUESTION_TYPES = [
   "data_interpretation",
   "fill_in_the_blank",
   "text_sequencing",
+  "true_false",
+  "matching",
 ];
 const EXERCISE_STATUSES = ["draft", "published", "archived"];
 const ATTACHMENT_TYPES = ["image", "audio", "video", "document"];
@@ -228,6 +230,26 @@ const GEOGRAPHY_TOPICS = [
   "chadian_geography",
 ];
 const GEOGRAPHY_MAP_TYPES = ["physical", "political", "climate", "economic"];
+
+/**
+ * Constants for questions.
+ * @module constants/index
+ */
+const QUESTION_LEVELS = [
+  "primary",
+  "junior_secondary",
+  "senior_secondary",
+  "university",
+  "professional",
+];
+const QUESTION_STATUSES = [
+  "draft",
+  "review",
+  "approved",
+  "rejected",
+  "archived",
+];
+const MEDIA_TYPES = ["image", "audio", "video", "document"];
 
 module.exports = {
   TOTAL_STEPS,
@@ -281,4 +303,7 @@ module.exports = {
   HISTORY_SOURCE_TYPES,
   GEOGRAPHY_TOPICS,
   GEOGRAPHY_MAP_TYPES,
+  QUESTION_LEVELS,
+  QUESTION_STATUSES,
+  MEDIA_TYPES,
 };
