@@ -94,7 +94,7 @@ const LEARNING_STYLES = ["visual", "auditory", "kinesthetic", "mixed"];
 const PROFILE_VISIBILITIES = ["public", "friends", "private"];
 
 /**
- * Constants for assessments.
+ * Constants for assessments and challenges.
  * @module constants/index
  */
 const ASSESSMENT_FORMATS = ["quiz", "exam", "project", "practice", "mock"];
@@ -107,6 +107,13 @@ const EDUCATION_LEVELS = [
   "Professional",
 ];
 const ASSESSMENT_STATUSES = ["draft", "published", "archived", "scheduled"];
+const CHALLENGE_STATUSES = [
+  "draft",
+  "open",
+  "active",
+  "completed",
+  "cancelled",
+];
 
 module.exports = {
   TOTAL_STEPS,
@@ -130,4 +137,5 @@ module.exports = {
   DIFFICULTY_LEVELS,
   EDUCATION_LEVELS,
   ASSESSMENT_STATUSES,
+  CHALLENGE_STATUSES,
 };
