@@ -36,7 +36,7 @@ const biologyLessonRoutes = require("./src/routes/learning/lesson/biology.lesson
 const mathLessonRoutes = require("./src/routes/learning/lesson/math.lesson.route");
 const englishLessonRoutes = require("./src/routes/learning/lesson/english.lesson.route");
 const frenchLessonRoutes = require("./src/routes/learning/lesson/french.lesson.route");
-
+const chemistryLessonRoutes = require("./src/routes/learning/lesson/chemistry.lesson.route");
 
 // assessment routes
 const examRoutes = require("./src/routes/assessment/exam.route");
@@ -52,7 +52,6 @@ const gamifiedProgressRoutes = require("./src/routes/progress/gamified.progress.
 const leaderboardEntryRoutes = require("./src/routes/progress/leaderboard.entry.route");
 const missionRoutes = require("./src/routes/progress/mission.route");
 const topicProgressRoutes = require("./src/routes/progress/topic.progress.route");
-
 
 // Results routes
 const userHintRoutes = require("./src/routes/results/hint.route");
@@ -168,8 +167,7 @@ app.use("/api/biology-lessons", biologyLessonRoutes);
 app.use("/api/math-lessons", mathLessonRoutes);
 app.use("/api/english-lessons", englishLessonRoutes);
 app.use("/api/french-lessons", frenchLessonRoutes);
-
-
+app.use("/api/chemistry-lessons", chemistryLessonRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
