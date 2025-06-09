@@ -350,6 +350,27 @@ const NOTE_TYPES = ["personal", "shared", "template"];
 const NOTE_STATUSES = ["draft", "published", "archived"];
 const NOTE_PRIVACY_LEVELS = ["private", "friends", "public"];
 
+/**
+ * Constants for resources.
+ * @module constants/index
+ */
+const RESOURCE_TYPES = [
+  "document",
+  "video",
+  "audio",
+  "interactive",
+  "past_exam",
+];
+const RESOURCE_STATUSES = ["draft", "published", "archived", "under_review"];
+const RESOURCE_LANGUAGES = ["french", "english", "arabic"];
+const RESOURCE_LICENSES = ["free", "premium", "educational", "commercial"];
+const ACCESSIBILITY_FEATURES = [
+  "transcript",
+  "subtitles",
+  "audio_description",
+  "screen_reader",
+];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -428,4 +449,9 @@ module.exports = {
   NOTE_TYPES,
   NOTE_STATUSES,
   NOTE_PRIVACY_LEVELS,
+  RESOURCE_TYPES,
+  RESOURCE_STATUSES,
+  RESOURCE_LANGUAGES,
+  RESOURCE_LICENSES,
+  ACCESSIBILITY_FEATURES,
 };
