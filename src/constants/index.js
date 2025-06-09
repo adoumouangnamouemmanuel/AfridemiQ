@@ -335,6 +335,14 @@ const BOOKMARK_CONTENT_TYPES = [
   "quiz",
 ];
 
+/**
+ * Constants for curriculum.
+ * @module constants/index
+ */
+const CURRICULUM_EDUCATION_LEVELS = ["primaire", "secondaire", "superieur"];
+const CURRICULUM_STATUSES = ["draft", "active", "archived"];
+const ACADEMIC_TERMS = [1, 2, 3, 4];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -405,4 +413,7 @@ module.exports = {
   ADJUSTMENT_ACTIONS,
   RECOMMENDED_CONTENT_TYPES,
   BOOKMARK_CONTENT_TYPES,
+  CURRICULUM_EDUCATION_LEVELS,
+  CURRICULUM_STATUSES,
+  ACADEMIC_TERMS,
 };
