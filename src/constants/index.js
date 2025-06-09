@@ -371,6 +371,34 @@ const ACCESSIBILITY_FEATURES = [
   "screen_reader",
 ];
 
+/**
+ * Constants for study groups.
+ * @module constants/index
+ */
+const STUDY_GROUP_ROLES = ["admin", "moderator", "member"];
+const STUDY_GROUP_PERMISSIONS = [
+  "manage_members",
+  "post_content",
+  "schedule_sessions",
+];
+const STUDY_GROUP_ACTIVITY_TYPES = [
+  "quiz",
+  "discussion",
+  "resource_share",
+  "session",
+];
+const STUDY_GROUP_STATUSES = ["active", "paused", "archived"];
+const STUDY_GROUP_PRIVACY_LEVELS = ["public", "private", "invite_only"];
+const STUDY_GROUP_DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -454,4 +482,10 @@ module.exports = {
   RESOURCE_LANGUAGES,
   RESOURCE_LICENSES,
   ACCESSIBILITY_FEATURES,
+  STUDY_GROUP_ROLES,
+  STUDY_GROUP_PERMISSIONS,
+  STUDY_GROUP_ACTIVITY_TYPES,
+  STUDY_GROUP_STATUSES,
+  STUDY_GROUP_PRIVACY_LEVELS,
+  STUDY_GROUP_DAYS,
 };
