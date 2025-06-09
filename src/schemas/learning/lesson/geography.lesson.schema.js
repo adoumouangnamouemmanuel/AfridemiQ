@@ -33,7 +33,12 @@ const geographyLessonSchema = baseLessonSchema.append({
           "any.required": "Nom du concept requis",
         }),
         topic: Joi.string()
-          .valid("physical_geography", "human_geography", "climate_and_environment", "chadian_geography")
+          .valid(
+            "physical_geography",
+            "human_geography",
+            "climate_and_environment",
+            "chadian_geography"
+          )
           .required()
           .messages({
             "any.only": "Sujet de géographie invalide",
@@ -68,9 +73,12 @@ const geographyLessonSchema = baseLessonSchema.append({
           )
           .optional(),
         visualAid: Joi.object({
-          mediaType: Joi.string().valid("image", "audio", "video").optional().messages({
-            "any.only": "Type de média invalide",
-          }),
+          mediaType: Joi.string()
+            .valid("image", "audio", "video")
+            .optional()
+            .messages({
+              "any.only": "Type de média invalide",
+            }),
           url: Joi.string().uri().optional().messages({
             "string.uri": "URL du média invalide",
           }),
@@ -345,7 +353,17 @@ const geographyLessonSchema = baseLessonSchema.append({
 });
 
 const updateGeographyLessonSchema = geographyLessonSchema.fork(
-  ["topicId", "subjectType", "introduction", "concepts", "mapAnalysis", "caseStudies", "workedExamples", "practiceExercises", "interactiveElements"],
+  [
+    "topicId",
+    "subjectType",
+    "introduction",
+    "concepts",
+    "mapAnalysis",
+    "caseStudies",
+    "workedExamples",
+    "practiceExercises",
+    "interactiveElements",
+  ],
   (schema) => schema.optional()
 );
 
