@@ -335,6 +335,13 @@ const CURRICULUM_EDUCATION_LEVELS = ["primaire", "secondaire", "superieur"];
 const CURRICULUM_STATUSES = ["draft", "active", "archived"];
 const ACADEMIC_TERMS = [1, 2, 3, 4];
 
+/**
+ * Constants for learning paths.
+ * @module constants/index
+ */
+const LEARNING_PATH_REWARD_TYPES = ["badge", "certificate", "points"];
+const LEARNING_PATH_STATUSES = ["draft", "active", "archived", "completed"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -408,4 +415,6 @@ module.exports = {
   CURRICULUM_EDUCATION_LEVELS,
   CURRICULUM_STATUSES,
   ACADEMIC_TERMS,
+  LEARNING_PATH_REWARD_TYPES,
+  LEARNING_PATH_STATUSES,
 };
