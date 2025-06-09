@@ -44,9 +44,7 @@ class GeographyLessonController {
     const { id } = req.params;
     const lesson = await Lesson.findById(id).select("metadata.createdBy");
     if (!lesson) {
-      logger.warn(
-        `Leçon de géographie introuvable pour la mise à jour: ${id}`
-      );
+      logger.warn(`Leçon de géographie introuvable pour la mise à jour: ${id}`);
       throw new ApiError(404, "Leçon de géographie introuvable");
     }
     if (
@@ -74,9 +72,7 @@ class GeographyLessonController {
     const { id } = req.params;
     const lesson = await Lesson.findById(id).select("metadata.createdBy");
     if (!lesson) {
-      logger.warn(
-        `Leçon de géographie introuvable pour la suppression: ${id}`
-      );
+      logger.warn(`Leçon de géographie introuvable pour la suppression: ${id}`);
       throw new ApiError(404, "Leçon de géographie introuvable");
     }
     if (
