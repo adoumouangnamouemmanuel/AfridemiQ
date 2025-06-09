@@ -7,7 +7,13 @@ const logger = createLogger("CurriculumController");
 // Create a new curriculum
 const createCurriculum = async (req, res) => {
   try {
-    const curriculum = await curriculumService.createCurriculum(req.body);
+    // Add the authenticated user's ID as createdBy
+    const curriculumData = {
+      ...req.body,
+      createdBy: req.user.userId,
+    };
+
+    const curriculum = await curriculumService.createCurriculum(curriculumData);
     res.status(StatusCodes.CREATED).json({
       message: "Curriculum créé avec succès",
       data: curriculum,
