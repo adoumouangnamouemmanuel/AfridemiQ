@@ -38,6 +38,7 @@ const englishLessonRoutes = require("./src/routes/learning/lesson/english.lesson
 const frenchLessonRoutes = require("./src/routes/learning/lesson/french.lesson.route");
 const chemistryLessonRoutes = require("./src/routes/learning/lesson/chemistry.lesson.route");
 const physicsLessonRoutes = require("./src/routes/learning/lesson/physics.lesson.route");
+const geographyLessonRoutes = require("./src/routes/learning/lesson/geography.lesson.route");
 
 // assessment routes
 const examRoutes = require("./src/routes/assessment/exam.route");
@@ -170,6 +171,7 @@ app.use("/api/english-lessons", englishLessonRoutes);
 app.use("/api/french-lessons", frenchLessonRoutes);
 app.use("/api/chemistry-lessons", chemistryLessonRoutes);
 app.use("/api/physics-lessons", physicsLessonRoutes);
+app.use("/api/geography-lessons", geographyLessonRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
