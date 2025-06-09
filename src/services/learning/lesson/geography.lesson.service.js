@@ -272,7 +272,10 @@ class GeographyLessonService extends LessonService {
   // Add feedback to geography lesson
   async addFeedback(id, feedbackData, userId) {
     try {
-      const lesson = await Lesson.findOne({ _id: id, subjectType: "geography" });
+      const lesson = await Lesson.findOne({
+        _id: id,
+        subjectType: "geography",
+      });
       if (!lesson) {
         logger.warn(
           `Leçon de géographie introuvable pour l'ajout de feedback: ${id}`
