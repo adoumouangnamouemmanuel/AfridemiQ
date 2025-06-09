@@ -342,6 +342,14 @@ const ACADEMIC_TERMS = [1, 2, 3, 4];
 const LEARNING_PATH_REWARD_TYPES = ["badge", "certificate", "points"];
 const LEARNING_PATH_STATUSES = ["draft", "active", "archived", "completed"];
 
+/**
+ * Constants for notes.
+ * @module constants/index
+ */
+const NOTE_TYPES = ["personal", "shared", "template"];
+const NOTE_STATUSES = ["draft", "published", "archived"];
+const NOTE_PRIVACY_LEVELS = ["private", "friends", "public"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -417,4 +425,7 @@ module.exports = {
   ACADEMIC_TERMS,
   LEARNING_PATH_REWARD_TYPES,
   LEARNING_PATH_STATUSES,
+  NOTE_TYPES,
+  NOTE_STATUSES,
+  NOTE_PRIVACY_LEVELS,
 };
