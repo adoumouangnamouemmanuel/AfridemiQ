@@ -478,7 +478,6 @@ const StudyPlanSchema = new Schema(
 
 // =============== INDEXES =================
 StudyPlanSchema.index({ userId: 1, "dailyGoals.topics.topicId": 1 });
-StudyPlanSchema.index({ targetExam: 1 });
 StudyPlanSchema.index({ "dailyGoals.date": 1 });
 StudyPlanSchema.index({ startDate: 1, endDate: 1 });
 StudyPlanSchema.index({ "metadata.tags": 1 }, { sparse: true });
