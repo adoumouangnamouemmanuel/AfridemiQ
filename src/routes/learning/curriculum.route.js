@@ -4,6 +4,7 @@ const curriculumController = require("../../controllers/learning/curriculum.cont
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
 const validateMiddleware = require("../../middlewares/validate.middleware");
+const utf8Middleware = require("../../middlewares/utf8.middleware"); // Add UTF-8 middleware
 const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
 const {
   createCurriculumSchema,
@@ -14,6 +15,9 @@ const {
 
 // Apply rate limiting to all routes
 router.use(apiLimiter);
+
+// Apply UTF-8 middleware to all routes
+router.use(utf8Middleware);
 
 // Public routes - ORDER MATTERS! More specific routes must come before generic ones
 router.get("/stats", curriculumController.getCurriculumStats);
