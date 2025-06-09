@@ -411,6 +411,37 @@ const STUDY_PLAN_REMINDER_REPEAT = ["daily", "weekly", "monthly"];
 const STUDY_PLAN_REMINDER_STATUSES = ["active", "inactive"];
 const STUDY_PLAN_STATUSES = ["active", "paused", "completed", "expired"];
 
+/**
+ * Constants for course content.
+ * @module constants/index
+ */
+const COURSE_CONTENT_LEVELS = ["beginner", "intermediate", "advanced"];
+const COURSE_ACCESS_TYPES = ["free", "premium", "trial"];
+const COURSE_FORMATS = ["text", "video", "audio", "interactive"];
+const COURSE_LANGUAGES = ["french", "english", "arabic"];
+const COURSE_ACCOMMODATIONS = [
+  "large_text",
+  "audio_support",
+  "visual_aids",
+  "extended_time",
+];
+
+/**
+ * Constants for subjects.
+ * @module constants/index
+ */
+const SUBJECT_CATEGORIES = [
+  "sciences",
+  "litterature",
+  "langues",
+  "mathematiques",
+  "sciences-sociales",
+  "arts",
+  "technologie",
+];
+const SUBJECT_DIFFICULTIES = ["facile", "moyen", "difficile"];
+const SUBJECT_STATUSES = ["active", "inactive", "archived"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -507,4 +538,12 @@ module.exports = {
   STUDY_PLAN_REMINDER_REPEAT,
   STUDY_PLAN_REMINDER_STATUSES,
   STUDY_PLAN_STATUSES,
+  COURSE_CONTENT_LEVELS,
+  COURSE_ACCESS_TYPES,
+  COURSE_FORMATS,
+  COURSE_LANGUAGES,
+  COURSE_ACCOMMODATIONS,
+  SUBJECT_CATEGORIES,
+  SUBJECT_DIFFICULTIES,
+  SUBJECT_STATUSES,
 };
