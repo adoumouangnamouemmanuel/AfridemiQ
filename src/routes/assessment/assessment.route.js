@@ -42,7 +42,11 @@ router.use(authMiddleware);
 
 // CRUD operations
 router.post("/", validateMiddleware(createAssessmentSchema), createAssessment);
-router.get("/", validateMiddleware(getAssessmentsSchema, "query"), getAssessments);
+router.get(
+  "/",
+  validateMiddleware(getAssessmentsSchema, "query"),
+  getAssessments
+);
 router.get("/:assessmentId", getAssessmentById);
 router.put(
   "/:assessmentId",

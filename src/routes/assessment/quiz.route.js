@@ -20,7 +20,11 @@ router.get("/popular", quizController.getPopularQuizzes);
 router.use(authMiddleware);
 
 // Quiz CRUD operations
-router.post("/", validateMiddleware(createQuizSchema), quizController.createQuiz);
+router.post(
+  "/",
+  validateMiddleware(createQuizSchema),
+  quizController.createQuiz
+);
 router.get(
   "/",
   validateMiddleware(getQuizzesSchema, "query"),

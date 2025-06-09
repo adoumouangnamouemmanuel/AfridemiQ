@@ -39,7 +39,11 @@ router.get("/subject/:subjectId", getExamsBySubject);
 router.use(authMiddleware);
 
 // CRUD operations
-router.post("/", validateMiddleware(createExamScheduleSchema), createExamSchedule);
+router.post(
+  "/",
+  validateMiddleware(createExamScheduleSchema),
+  createExamSchedule
+);
 router.get(
   "/",
   validateMiddleware(getExamSchedulesSchema, "query"),
