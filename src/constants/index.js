@@ -119,17 +119,9 @@ const CHALLENGE_STATUSES = [
  * Constants for exams.
  * @module constants/index
  */
-const EXAM_TYPESuddy = ["certification", "concours", "test", "autre"];
 const EXAM_TYPES = ["certification", "exam", "test", "autre"];
 const EXAM_DIFFICULTIES = ["facile", "moyen", "difficile", "expert"];
 const EXAM_FORMATS = ["papier", "ordinateur", "hybride"];
-const ACCESSIBILITY_TYPES = [
-  "braille",
-  "large_print",
-  "extra_time",
-  "technical_assistance",
-  "separate_room",
-];
 const IMPORTANT_DATE_TYPES = [
   "inscription",
   "examen",
