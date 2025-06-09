@@ -399,6 +399,18 @@ const STUDY_GROUP_DAYS = [
   "Sunday",
 ];
 
+/**
+ * Constants for study plans.
+ * @module constants/index
+ */
+const STUDY_PLAN_PRIORITIES = ["high", "medium", "low"];
+const STUDY_PLAN_EXERCISE_TYPES = ["practice", "assessment"];
+const STUDY_PLAN_ASSESSMENT_TYPES = ["quiz", "mock_exam", "review"];
+const STUDY_PLAN_REMINDER_TYPES = ["study", "review", "assessment"];
+const STUDY_PLAN_REMINDER_REPEAT = ["daily", "weekly", "monthly"];
+const STUDY_PLAN_REMINDER_STATUSES = ["active", "inactive"];
+const STUDY_PLAN_STATUSES = ["active", "paused", "completed", "expired"];
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -488,4 +500,11 @@ module.exports = {
   STUDY_GROUP_STATUSES,
   STUDY_GROUP_PRIVACY_LEVELS,
   STUDY_GROUP_DAYS,
+  STUDY_PLAN_PRIORITIES,
+  STUDY_PLAN_EXERCISE_TYPES,
+  STUDY_PLAN_ASSESSMENT_TYPES,
+  STUDY_PLAN_REMINDER_TYPES,
+  STUDY_PLAN_REMINDER_REPEAT,
+  STUDY_PLAN_REMINDER_STATUSES,
+  STUDY_PLAN_STATUSES,
 };
