@@ -1,12 +1,14 @@
-import { Redirect } from "expo-router";
+"use client";
+
 import { useUser } from "../src/utils/UserContext";
-import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ActivityIndicator, View } from "react-native";
 import { useTheme } from "../src/utils/ThemeContext";
+import { useState, useEffect } from "react";
+import { View, ActivityIndicator } from "react-native";
+import { Redirect } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Index() {
-  const {setUser } = useUser();
+  const { setUser, setToken } = useUser();
   const { theme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const [authState, setAuthState] = useState<
@@ -18,12 +20,20 @@ export default function Index() {
       try {
         // Check if user is logged in (persisted in storage)
         const userData = await AsyncStorage.getItem("user");
+        const token = await AsyncStorage.getItem("token");
         const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
 
-        if (userData) {
+        if (userData && token) {
           // User is logged in
           const parsedUser = JSON.parse(userData);
+
+          // Convert goalDate back to Date object if it exists
+          if (parsedUser.goalDate) {
+            parsedUser.goalDate = new Date(parsedUser.goalDate);
+          }
+
           setUser(parsedUser);
+          setToken(token);
 
           if (hasOnboarded) {
             // User is logged in and has completed onboarding
@@ -45,7 +55,7 @@ export default function Index() {
     };
 
     checkAuthState();
-  }, [setUser]);
+  }, [setUser, setToken]);
 
   if (isLoading) {
     return (

@@ -24,10 +24,11 @@ import Animated, {
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { apiService } from "../services/api.service";
 
 export default function LoginScreen() {
   const { theme } = useTheme();
-  const { setUser } = useUser();
+  const { setUser, setToken } = useUser();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -59,52 +60,61 @@ export default function LoginScreen() {
     setIsLoading(true);
 
     try {
+      const response = await apiService.login({ email, password });
+
+      // Transform backend user data to match frontend User interface
+      const userData = {
+        id: response.user._id,
+        name: response.user.name,
+        email: response.user.email,
+        country: response.user.country,
+        selectedExam: response.user.progress.selectedExam || "",
+        goalDate: response.user.progress.goalDate
+          ? new Date(response.user.progress.goalDate)
+          : undefined,
+        xp: response.user.progress.xp,
+        level: response.user.progress.level,
+        streak: response.user.progress.streak.current,
+        avatar: response.user.avatar,
+        badges: response.user.progress.badges,
+        completedTopics: response.user.progress.completedTopics,
+        weakSubjects: response.user.progress.weakSubjects,
+        isPremium: response.user.isPremium,
+        role: response.user.role,
+      };
+
+      // Save user and token to storage
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
+      await AsyncStorage.setItem("token", response.token);
+      if (response.refreshToken) {
+        await AsyncStorage.setItem("refreshToken", response.refreshToken);
+      }
+
+      // Set user and token in context
+      setUser(userData);
+      setToken(response.token);
+
+      setIsLoading(false);
+
       // Check if user has completed onboarding
       const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
 
-      // Simulate API call
-      setTimeout(async () => {
-        const mockUser = {
-          id: "user_123",
-          name: "John Doe",
-          email: email,
-          country: "Nigeria",
-          selectedExam: "waec",
-          goalDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-          xp: 2500,
-          level: 3,
-          streak: 7,
-          avatar: `https://api.dicebear.com/7.x/avataaars/png?seed=john`,
-          badges: ["first_quiz", "week_streak"],
-          completedTopics: ["grammar_basics", "cell_biology"],
-          weakSubjects: ["physics", "chemistry"],
-          subjects: ["mathematics", "english", "physics"],
-          learningStyle: "visual",
-        };
-
-        // Save user to storage (persist login)
-        await AsyncStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...mockUser,
-            goalDate: mockUser.goalDate.toISOString(),
-          })
-        );
-        setUser(mockUser);
-        setIsLoading(false);
-
-        if (hasOnboarded) {
-          // User has completed onboarding, go to home
-          router.replace("/(tabs)/home");
-        } else {
-          // User hasn't completed onboarding, go to onboarding
-          router.replace("/auth/onboarding");
-        }
-      }, 1500);
+      if (hasOnboarded) {
+        // User has completed onboarding, go to home
+        router.replace("/(tabs)/home");
+      } else {
+        // User hasn't completed onboarding, go to onboarding
+        router.replace("/auth/onboarding");
+      }
     } catch (error) {
       console.error("Login error:", error);
       setIsLoading(false);
-      Alert.alert("Error", "Something went wrong. Please try again.");
+      Alert.alert(
+        "Login Failed",
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again."
+      );
     }
   };
 

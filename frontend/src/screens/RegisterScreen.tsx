@@ -1,3 +1,4 @@
+// filepath: c:\Users\adoum\OneDrive\Bureau\exam-prep-app\frontend\src\screens\RegisterScreen.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -25,15 +26,17 @@ import Animated, {
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { apiService } from "../services/api.service";
 
 export default function RegisterScreen() {
   const { theme } = useTheme();
-  const { setUser } = useUser();
+  const { setUser, setToken } = useUser();
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    country: "Nigeria", // Default country
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,53 +60,58 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      Alert.alert("Weak Password", "Password must be at least 6 characters");
+    if (formData.password.length < 8) {
+      Alert.alert("Weak Password", "Password must be at least 8 characters");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Create user data
+      const response = await apiService.register(formData);
+
+      // Transform backend user data to match frontend User interface
       const userData = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email,
-        xp: 0,
-        level: 1,
-        streak: 0,
-        isPremium: false,
-        badges: [],
-        completedTopics: [],
-        selectedExam: "",
+        id: response.user._id,
+        name: response.user.name,
+        email: response.user.email,
+        country: response.user.country,
+        selectedExam: response.user.progress.selectedExam || "",
+        goalDate: response.user.progress.goalDate
+          ? new Date(response.user.progress.goalDate)
+          : undefined,
+        xp: response.user.progress.xp,
+        level: response.user.progress.level,
+        streak: response.user.progress.streak.current,
+        avatar: response.user.avatar,
+        badges: response.user.progress.badges,
+        completedTopics: response.user.progress.completedTopics,
+        weakSubjects: response.user.progress.weakSubjects,
+        isPremium: response.user.isPremium,
+        role: response.user.role,
       };
 
-      // Save user to storage (this logs them in)
+      // Save user and token to storage
       await AsyncStorage.setItem("user", JSON.stringify(userData));
+      await AsyncStorage.setItem("token", response.token);
 
-      // Store registration data for onboarding
-      await AsyncStorage.setItem(
-        "registrationData",
-        JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          isNewUser: true,
-        })
-      );
-
-      // Set user in context
+      // Set user and token in context
       setUser(userData);
+      setToken(response.token);
 
-      setTimeout(() => {
-        setIsLoading(false);
-        // After registration, go directly to onboarding (user is now logged in)
-        router.replace("/auth/onboarding");
-      }, 1500);
+      setIsLoading(false);
+
+      // After registration, go directly to onboarding
+      router.replace("/auth/onboarding");
     } catch (error) {
       console.error("Registration error:", error);
       setIsLoading(false);
-      Alert.alert("Error", "Something went wrong. Please try again.");
+      Alert.alert(
+        "Registration Failed",
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again."
+      );
     }
   };
 
@@ -117,7 +125,7 @@ export default function RegisterScreen() {
 
   const getPasswordStrength = () => {
     if (formData.password.length === 0) return null;
-    if (formData.password.length < 6) return { text: "Weak", color: "#ef4444" };
+    if (formData.password.length < 8) return { text: "Weak", color: "#ef4444" };
     if (formData.password.length < 10)
       return { text: "Good", color: "#f59e0b" };
     return { text: "Strong", color: "#10b981" };
