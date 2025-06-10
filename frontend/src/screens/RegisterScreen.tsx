@@ -101,8 +101,19 @@ export default function RegisterScreen() {
 
       setIsLoading(false);
 
+      Alert.alert(
+        "Account Created Successfully!",
+        "Please complete your onboarding to get started.",
+        [
+          {
+            text: "Onboarding",
+            onPress: () => router.replace("/auth/onboarding"),
+          },
+        ]
+      );
+
       // After registration, go directly to onboarding
-      router.replace("/auth/onboarding");
+      
     } catch (error) {
       console.error("Registration error:", error);
       setIsLoading(false);
