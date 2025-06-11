@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: isSmallScreen ? 16 : 18,
+    fontFamily: "Inter-Bold",
     fontWeight: "700",
     letterSpacing: 0.5,
   },
@@ -89,6 +90,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: "white",
     fontSize: isSmallScreen ? 14 : 16,
+    fontFamily: "Inter-SemiBold",
     fontWeight: "600",
     marginLeft: 8,
   },
