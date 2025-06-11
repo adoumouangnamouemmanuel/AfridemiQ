@@ -54,7 +54,6 @@ export default function RegisterScreen() {
     email: "",
     password: "",
     confirmPassword: "",
-    country: "Tchad", // Default country
   });
 
   const [showPassword, setShowPassword] = useState(false);
