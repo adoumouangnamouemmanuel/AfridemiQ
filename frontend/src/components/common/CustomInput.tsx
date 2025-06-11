@@ -89,6 +89,7 @@ const styles = StyleSheet.create({
     fontSize: isSmallScreen ? 14 : 16,
     color: "#1F2937",
     paddingVertical: 0,
+    fontFamily: "Inter-Medium",
     fontWeight: "500",
   },
   inputIcon: {
