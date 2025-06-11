@@ -183,6 +183,7 @@ export default function LoginScreen() {
     subtitle: {
       fontSize: isSmallScreen ? 12 : 14,
       color: "#6B7280",
+      marginBottom: isSmallScreen ? 8 : 10,
       textAlign: "center",
       lineHeight: isSmallScreen ? 16 : 20,
       fontWeight: "400",
