@@ -306,7 +306,7 @@ export default function RegisterScreen() {
       fontWeight: "500",
     },
     registerButton: {
-      borderRadius: 16,
+      borderRadius: 50,
       paddingVertical: isSmallScreen ? 12 : 14,
       alignItems: "center",
       marginTop: isSmallScreen ? 15 : 20,
@@ -350,7 +350,7 @@ export default function RegisterScreen() {
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: "white",
-      borderRadius: 16,
+      borderRadius: 50,
       paddingVertical: isSmallScreen ? 10 : 12,
       marginBottom: isSmallScreen ? 8 : 12,
       borderWidth: 2,
