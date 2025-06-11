@@ -37,6 +37,7 @@ import {
   profileApiService,
   type UserProfile,
 } from "../services/user/api.profile.service";
+import { AboutSection } from "../components/profile/AboutSection";
 
 const HEADER_HEIGHT = 320;
 
@@ -61,6 +62,7 @@ export default function ProfileScreen() {
   // Tab configuration
   const tabs = [
     { id: "overview", label: "Overview", icon: "person" },
+    { id: "about", label: "About", icon: "person-outline" },
     { id: "achievements", label: "Wins", icon: "trophy" },
     { id: "settings", label: "Settings", icon: "settings" },
   ];
@@ -271,6 +273,14 @@ export default function ProfileScreen() {
             <WeakSubjectsSection user={profileData} theme={theme} />
           </>
         );
+      case "about":
+        return (
+          <AboutSection
+            user={profileData}
+            theme={theme}
+            onEditProfile={handleEditProfile}
+          />
+        );
       case "achievements":
         return <AchievementsSection user={profileData} theme={theme} />;
       case "settings":
@@ -331,10 +341,10 @@ export default function ProfileScreen() {
     tabsContainer: {
       flexDirection: "row",
       backgroundColor: theme.colors.surface,
-      borderRadius: 20,
-      padding: 6,
-      marginHorizontal: 20,
-      marginVertical: 20,
+      borderRadius: 16,
+      padding: 4,
+      marginHorizontal: 16,
+      marginVertical: 16,
       elevation: 4,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
@@ -343,12 +353,12 @@ export default function ProfileScreen() {
     },
     tab: {
       flex: 1,
-      flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 16,
+      paddingVertical: 8,
+      paddingHorizontal: 4,
+      borderRadius: 12,
+      minHeight: 44,
     },
     activeTab: {
       backgroundColor: "#3B82F6",
@@ -359,13 +369,14 @@ export default function ProfileScreen() {
       shadowRadius: 4,
     },
     tabIcon: {
-      marginRight: 8,
+      marginBottom: 2,
     },
     tabText: {
-      fontSize: 14,
+      fontSize: 11,
       fontWeight: "600",
       color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
+      textAlign: "center",
     },
     activeTabText: {
       color: "white",
