@@ -296,7 +296,7 @@ export default function RegisterScreen() {
     },
     content: {
       flex: 1,
-      paddingHorizontal: isSmallScreen ? 20 : 28,
+      paddingHorizontal: isSmallScreen ? 20 : 24,
       paddingVertical: isSmallScreen ? 10 : 20,
     },
     staticBottom: {
@@ -346,7 +346,6 @@ export default function RegisterScreen() {
       fontWeight: "400",
       textAlign: "center",
       lineHeight: isSmallScreen ? 14 : 18,
-      paddingHorizontal: 20,
     },
     bottomSection: {
       flex: keyboardVisible
@@ -370,7 +369,6 @@ export default function RegisterScreen() {
     },
     form: {
       marginBottom: isSmallScreen ? 8 : 12,
-      paddingHorizontal: 8,
     },
     inputContainer: {
       marginBottom: isSmallScreen ? 12 : 16,
@@ -378,7 +376,6 @@ export default function RegisterScreen() {
     passwordStrength: {
       marginTop: 6,
       alignItems: "flex-end",
-      paddingHorizontal: 4,
     },
     strengthText: {
       fontSize: isSmallScreen ? 11 : 13,
@@ -491,7 +488,6 @@ export default function RegisterScreen() {
       left: 0,
       right: 0,
       bottom: 0,
-      paddingHorizontal: isSmallScreen ? 12 : 16,
       justifyContent: "center", // This centers the content vertically
     },
     // Step 2 specific content styling for better vertical centering
@@ -613,7 +609,6 @@ export default function RegisterScreen() {
       justifyContent: "space-between",
       alignItems: "stretch", // Changed to stretch for equal height
       marginTop: isSmallScreen ? 30 : 40, // Increased margin for better spacing
-      paddingHorizontal: 8,
       gap: 16,
     },
     baseButton: {
