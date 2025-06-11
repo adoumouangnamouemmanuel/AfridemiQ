@@ -198,7 +198,8 @@ export default function LoginScreen() {
     },
     welcomeText: {
       fontSize: isSmallScreen ? 22 : 26,
-      fontWeight: "800",
+      fontWeight: "700",
+      fontFamily: "Poppins-Bold",
       color: "#1a1a1a",
       textAlign: "center",
       marginBottom: isSmallScreen ? 3 : 5,
@@ -206,11 +207,12 @@ export default function LoginScreen() {
     },
     subtitle: {
       fontSize: isSmallScreen ? 11 : 13,
+      fontFamily: "Inter-Regular",
+      fontWeight: "400",
       color: "#6B7280",
       marginBottom: isSmallScreen ? 5 : 8,
       textAlign: "center",
       lineHeight: isSmallScreen ? 14 : 18,
-      fontWeight: "400",
     },
     graduationIcon: {
       width: 60,
@@ -269,6 +271,7 @@ export default function LoginScreen() {
     forgotPasswordText: {
       fontSize: isSmallScreen ? 12 : 14,
       color: "#3B82F6",
+      fontFamily: "Inter-SemiBold",
       fontWeight: "600",
     },
     loginButton: {
@@ -347,12 +350,14 @@ export default function LoginScreen() {
     footerText: {
       fontSize: isSmallScreen ? 13 : 15,
       color: "#6B7280",
+      fontFamily: "Inter-Regular",
       fontWeight: "400",
     },
     signupLink: {
       fontSize: isSmallScreen ? 13 : 15,
       color: "#3B82F6",
-      fontWeight: "700",
+      fontFamily: "Inter-SemiBold",
+      fontWeight: "600",
       marginLeft: 4,
     },
     loadingContainer: {
