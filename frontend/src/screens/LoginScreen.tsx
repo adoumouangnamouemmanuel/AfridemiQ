@@ -157,6 +157,9 @@ export default function LoginScreen() {
     Alert.alert("Google Sign In", "Google authentication coming soon!");
   };
 
+  // Add validation for button state
+  const isFormValid = email.trim() !== "" && password.trim() !== "";
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -451,7 +454,7 @@ export default function LoginScreen() {
               <CustomButton
                 title="Sign In"
                 onPress={handleLogin}
-                disabled={isLoading}
+                disabled={isLoading || !isFormValid}
                 isLoading={isLoading}
                 loadingText="Signing In..."
               />
