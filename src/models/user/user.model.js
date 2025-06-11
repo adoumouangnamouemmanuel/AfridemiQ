@@ -105,7 +105,6 @@ const UserSchema = new Schema(
     // Location and preferences
     country: {
       type: String,
-      required: [true, "Le pays est requis"],
     },
     timeZone: {
       type: String,
