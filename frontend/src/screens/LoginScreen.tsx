@@ -27,6 +27,7 @@ import {
   CustomButton,
   CustomInput,
   Divider,
+  Loader,
   SocialButton,
 } from "../components/common";
 import { apiService } from "../services/api.service";
@@ -45,6 +46,8 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -130,26 +133,28 @@ export default function LoginScreen() {
       setToken(response.token);
 
       setIsLoading(false);
+      setShowSuccess(true);
 
-      // Check if user has completed onboarding
-      const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
-
-      if (hasOnboarded) {
-        // User has completed onboarding, go to home
-        router.replace("/(tabs)/home");
-      } else {
-        // User hasn't completed onboarding, go to onboarding
-        router.replace("/auth/onboarding");
-      }
+      // Show success briefly before navigation
+      setTimeout(() => {
+        setShowSuccess(false);
+        // Check if user has completed onboarding
+        AsyncStorage.getItem("hasOnboarded").then((hasOnboarded) => {
+          if (hasOnboarded) {
+            router.replace("/(tabs)/home");
+          } else {
+            router.replace("/auth/onboarding");
+          }
+        });
+      }, 1500);
     } catch (error) {
       console.error("Login error:", error);
       setIsLoading(false);
-      Alert.alert(
-        "Login Failed",
-        error instanceof Error
-          ? error.message
-          : "Something went wrong. Please try again."
-      );
+      setShowError(true);
+
+      setTimeout(() => {
+        setShowError(false);
+      }, 2000);
     }
   };
 
@@ -455,7 +460,7 @@ export default function LoginScreen() {
                 title="Sign In"
                 onPress={handleLogin}
                 disabled={isLoading || !isFormValid}
-                isLoading={isLoading}
+                isLoading={false}
                 loadingText="Signing In..."
               />
             </View>
@@ -485,6 +490,28 @@ export default function LoginScreen() {
           </Animated.View>
         </View>
       </LinearGradient>
+
+      {/* Loaders */}
+      <Loader
+        key="login-loading"
+        visible={isLoading}
+        text="Signing In..."
+        type="default"
+      />
+
+      <Loader
+        key="login-success"
+        visible={showSuccess}
+        text="Welcome Back!"
+        type="success"
+      />
+
+      <Loader
+        key="login-error"
+        visible={showError}
+        text="Login Failed"
+        type="error"
+      />
     </SafeAreaView>
   );
 }
