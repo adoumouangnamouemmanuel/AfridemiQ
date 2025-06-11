@@ -9,6 +9,7 @@ import {
   Alert,
   Dimensions,
   Image,
+  Keyboard,
   Platform,
   StyleSheet,
   Text,
@@ -41,6 +42,7 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const slideUp = useSharedValue(100);
   const fadeIn = useSharedValue(0);
@@ -50,6 +52,20 @@ export default function LoginScreen() {
     slideUp.value = withDelay(300, withSpring(0, { damping: 20 }));
     fadeIn.value = withDelay(200, withSpring(1));
     scaleIn.value = withDelay(400, withSpring(1, { damping: 15 }));
+
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => setKeyboardVisible(true)
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => setKeyboardVisible(false)
+    );
+
+    return () => {
+      keyboardDidHideListener?.remove();
+      keyboardDidShowListener?.remove();
+    };
   }, [fadeIn, scaleIn, slideUp]);
 
   const imageAnimatedStyle = useAnimatedStyle(() => ({
@@ -151,10 +167,17 @@ export default function LoginScreen() {
       paddingVertical: isSmallScreen ? 10 : 20,
     },
     topSection: {
-      flex: isSmallScreen ? 0.35 : isMediumScreen ? 0.4 : 0.45,
+      flex: keyboardVisible
+        ? isSmallScreen
+          ? 0.25
+          : 0.3
+        : isMediumScreen
+        ? 0.4
+        : 0.45,
       justifyContent: "center",
       alignItems: "center",
       paddingTop: isSmallScreen ? 5 : 15,
+      marginBottom: keyboardVisible ? 0 : isSmallScreen ? 10 : 15,
     },
     imageContainer: {
       width: SCREEN_WIDTH * (isSmallScreen ? 0.45 : 0.55),
@@ -184,11 +207,48 @@ export default function LoginScreen() {
       lineHeight: isSmallScreen ? 14 : 18,
       fontWeight: "400",
     },
+    graduationIcon: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: "#3B82F6",
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: isSmallScreen ? 8 : 12,
+      shadowColor: "#3B82F6",
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
+    },
     bottomSection: {
-      flex: isSmallScreen ? 0.65 : isMediumScreen ? 0.6 : 0.55,
+      flex: keyboardVisible
+        ? isSmallScreen
+          ? 0.75
+          : 0.85
+        : isSmallScreen
+        ? 0.65
+        : isMediumScreen
+        ? 0.6
+        : 0.55,
       justifyContent: "flex-start",
-      paddingTop: isSmallScreen ? 10 : 15,
-      paddingBottom: Platform.OS === "ios" ? 20 : 16,
+      paddingTop: keyboardVisible
+        ? isSmallScreen
+          ? 15
+          : 20
+        : isSmallScreen
+        ? 10
+        : 15,
+      paddingBottom: keyboardVisible
+        ? isSmallScreen
+          ? 20
+          : 25
+        : Platform.OS === "ios"
+        ? 20
+        : 16,
     },
     form: {
       marginBottom: isSmallScreen ? 12 : 16,
@@ -243,10 +303,9 @@ export default function LoginScreen() {
       fontWeight: "600",
     },
     loginButton: {
-      borderRadius: 16,
+      borderRadius: 50,
       paddingVertical: isSmallScreen ? 12 : 14,
       alignItems: "center",
-      marginBottom: isSmallScreen ? 12 : 16,
       shadowColor: "#3B82F6",
       shadowOffset: {
         width: 0,
@@ -286,7 +345,7 @@ export default function LoginScreen() {
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: "white",
-      borderRadius: 16,
+      borderRadius: 50,
       paddingVertical: isSmallScreen ? 10 : 12,
       marginBottom: isSmallScreen ? 12 : 16,
       borderWidth: 2,
@@ -351,12 +410,22 @@ export default function LoginScreen() {
       >
         <View style={styles.content}>
           <View style={styles.topSection}>
-            <Animated.View style={[styles.imageContainer, imageAnimatedStyle]}>
-              <Image
-                source={require("../assets/sign-in/sign_in.png")}
-                style={styles.signInImage}
-              />
-            </Animated.View>
+            {keyboardVisible ? (
+              <Animated.View
+                style={[styles.graduationIcon, imageAnimatedStyle]}
+              >
+                <Ionicons name="school" size={32} color="white" />
+              </Animated.View>
+            ) : (
+              <Animated.View
+                style={[styles.imageContainer, imageAnimatedStyle]}
+              >
+                <Image
+                  source={require("../assets/sign-in/sign_in.png")}
+                  style={styles.signInImage}
+                />
+              </Animated.View>
+            )}
             <Animated.View style={imageAnimatedStyle}>
               <Text style={styles.welcomeText}>Welcome Back!</Text>
               <Text style={styles.subtitle}>
@@ -461,26 +530,36 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or continue with</Text>
-              <View style={styles.dividerLine} />
-            </View>
+            {!keyboardVisible && (
+              <>
+                <View style={styles.divider}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>or continue with</Text>
+                  <View style={styles.dividerLine} />
+                </View>
 
-            <TouchableOpacity
-              style={styles.googleButton}
-              onPress={handleGoogleLogin}
-            >
-              <Ionicons name="logo-google" size={24} color="#DB4437" />
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.googleButton}
+                  onPress={handleGoogleLogin}
+                >
+                  <Ionicons name="logo-google" size={24} color="#DB4437" />
+                  <Text style={styles.googleButtonText}>
+                    Continue with Google
+                  </Text>
+                </TouchableOpacity>
 
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Don&apos;t have an account?</Text>
-              <TouchableOpacity onPress={() => router.push("/auth/register")}>
-                <Text style={styles.signupLink}>Sign Up</Text>
-              </TouchableOpacity>
-            </View>
+                <View style={styles.footer}>
+                  <Text style={styles.footerText}>
+                    Don&apos;t have an account?
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => router.push("/auth/register")}
+                  >
+                    <Text style={styles.signupLink}>Sign Up</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
           </Animated.View>
         </View>
       </LinearGradient>
