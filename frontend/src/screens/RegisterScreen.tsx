@@ -10,6 +10,7 @@ import {
   Alert,
   Dimensions,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -48,6 +49,7 @@ export default function RegisterScreen() {
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [nameFocused, setNameFocused] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const slideUp = useSharedValue(100);
   const fadeIn = useSharedValue(0);
@@ -57,6 +59,20 @@ export default function RegisterScreen() {
     slideUp.value = withDelay(300, withSpring(0, { damping: 20 }));
     fadeIn.value = withDelay(200, withSpring(1));
     scaleIn.value = withDelay(400, withSpring(1, { damping: 15 }));
+
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => setKeyboardVisible(true)
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => setKeyboardVisible(false)
+    );
+
+    return () => {
+      keyboardDidHideListener?.remove();
+      keyboardDidShowListener?.remove();
+    };
   }, [fadeIn, scaleIn, slideUp]);
 
   const imageAnimatedStyle = useAnimatedStyle(() => ({
@@ -172,14 +188,25 @@ export default function RegisterScreen() {
     content: {
       flex: 1,
       paddingHorizontal: 24,
-      justifyContent: "space-between",
       paddingVertical: isSmallScreen ? 10 : 20,
     },
+    staticBottom: {
+      paddingBottom: Platform.OS === "ios" ? 20 : 16,
+    },
     topSection: {
-      flex: isSmallScreen ? 0.4 : isMediumScreen ? 0.45 : 0.5,
+      flex: keyboardVisible
+        ? isSmallScreen
+          ? 0.25
+          : 0.3
+        : isSmallScreen
+        ? 0.35
+        : isMediumScreen
+        ? 0.4
+        : 0.45,
       justifyContent: "center",
       alignItems: "center",
       paddingTop: isSmallScreen ? 10 : 20,
+      marginBottom: keyboardVisible ? 0 : isSmallScreen ? 15 : 20,
     },
     imageContainer: {
       width: SCREEN_WIDTH * (isSmallScreen ? 0.5 : 0.6),
@@ -209,9 +236,24 @@ export default function RegisterScreen() {
       fontWeight: "400",
     },
     bottomSection: {
-      flex: isSmallScreen ? 0.6 : isMediumScreen ? 0.55 : 0.5,
-      justifyContent: "flex-end",
-      paddingBottom: Platform.OS === "ios" ? 20 : 16,
+      flex: keyboardVisible
+        ? isSmallScreen
+          ? 0.75
+          : 0.7
+        : isSmallScreen
+        ? 0.65
+        : isMediumScreen
+        ? 0.6
+        : 0.55,
+      justifyContent: "flex-start",
+      paddingTop: keyboardVisible
+        ? isSmallScreen
+          ? 15
+          : 20
+        : isSmallScreen
+        ? 10
+        : 15,
+      paddingBottom: 0,
     },
     form: {
       marginBottom: isSmallScreen ? 8 : 12,
@@ -267,6 +309,7 @@ export default function RegisterScreen() {
       borderRadius: 16,
       paddingVertical: isSmallScreen ? 12 : 14,
       alignItems: "center",
+      marginTop: isSmallScreen ? 15 : 20,
       marginBottom: isSmallScreen ? 8 : 12,
       shadowColor: "#3B82F6",
       shadowOffset: {
@@ -362,20 +405,22 @@ export default function RegisterScreen() {
         colors={["#F8FAFF", "#EEF2FF", "#E0E7FF"]}
         style={styles.gradient}
       >
-        <KeyboardAvoidingView
-          style={styles.keyboardView}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <View style={styles.content}>
+        <View style={styles.content}>
+          <KeyboardAvoidingView
+            style={styles.keyboardView}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+          >
             <View style={styles.topSection}>
-              <Animated.View
-                style={[styles.imageContainer, imageAnimatedStyle]}
-              >
-                <Image
-                  source={require("../assets/sign-in/signup.png")}
-                  style={styles.signUpImage}
-                />
-              </Animated.View>
+              {!keyboardVisible && (
+                <Animated.View
+                  style={[styles.imageContainer, imageAnimatedStyle]}
+                >
+                  <Image
+                    source={require("../assets/sign-in/signup.png")}
+                    style={styles.signUpImage}
+                  />
+                </Animated.View>
+              )}
               <Animated.View style={imageAnimatedStyle}>
                 <Text style={styles.welcomeText}>Create Account</Text>
                 <Text style={styles.subtitle}>
@@ -517,32 +562,32 @@ export default function RegisterScreen() {
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
-
-              <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or continue with</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-              <TouchableOpacity
-                style={styles.googleButton}
-                onPress={handleGoogleRegister}
-              >
-                <Ionicons name="logo-google" size={24} color="#DB4437" />
-                <Text style={styles.googleButtonText}>
-                  Continue with Google
-                </Text>
-              </TouchableOpacity>
-
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>Already have an account?</Text>
-                <TouchableOpacity onPress={() => router.push("/auth/login")}>
-                  <Text style={styles.loginLink}>Sign In</Text>
-                </TouchableOpacity>
-              </View>
             </Animated.View>
+          </KeyboardAvoidingView>
+
+          <View style={styles.staticBottom}>
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or continue with</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              style={styles.googleButton}
+              onPress={handleGoogleRegister}
+            >
+              <Ionicons name="logo-google" size={24} color="#DB4437" />
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
+            </TouchableOpacity>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Already have an account?</Text>
+              <TouchableOpacity onPress={() => router.push("/auth/login")}>
+                <Text style={styles.loginLink}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </LinearGradient>
     </SafeAreaView>
   );
