@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
   },
   socialButtonText: {
     fontSize: isSmallScreen ? 14 : 16,
+    fontFamily: "Inter-SemiBold",
     fontWeight: "600",
     color: "#374151",
     marginLeft: 12,
