@@ -100,6 +100,49 @@ class AuthService {
       role: backendUser.role || "user",
     };
   }
+
+  // Check and restore session with automatic refresh
+  async restoreSession(): Promise<{
+    user: any | null;
+    token: string | null;
+    refreshToken: string | null;
+  }> {
+    try {
+      const authData = await this.getAuthData();
+
+      if (authData.user && authData.token && authData.refreshToken) {
+        // Check if token is still valid
+        const isValid = await apiService.checkTokenValidity();
+
+        if (!isValid) {
+          // Try to refresh the token
+          const refreshed = await apiService.silentRefresh();
+
+          if (refreshed) {
+            // Get the new token
+            const newToken = await AsyncStorage.getItem("token");
+            return {
+              user: authData.user,
+              token: newToken,
+              refreshToken: authData.refreshToken,
+            };
+          } else {
+            // Refresh failed, but don't clear data yet
+            // Let the user continue and handle it gracefully
+            console.log("Token refresh failed, but keeping session");
+            return authData;
+          }
+        }
+
+        return authData;
+      }
+
+      return { user: null, token: null, refreshToken: null };
+    } catch (error) {
+      console.error("Session restoration failed:", error);
+      return { user: null, token: null, refreshToken: null };
+    }
+  }
 }
 
 export const authService = new AuthService();
