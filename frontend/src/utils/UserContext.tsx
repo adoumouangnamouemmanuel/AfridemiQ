@@ -151,6 +151,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // Load user data on app start - only once
   useEffect(() => {
     loadUserData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array to run only once
 
   // Set up periodic token refresh (every 50 minutes)
