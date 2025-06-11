@@ -22,6 +22,7 @@ import Animated, {
 } from "react-native-reanimated";
 import XPBar from "../components/XPBar";
 import BadgeGrid from "../components/BadgeGrid";
+import { LogoutButton } from "../components/auth/Logout";
 import achievementsData from "../data/achievements.json";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -338,10 +339,11 @@ export default function ProfileScreen() {
       </AnimatedCard>
 
       <AnimatedCard delay={400}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        {/* <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out" size={20} color={theme.colors.error} />
           <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+        <LogoutButton />
       </AnimatedCard>
     </ScrollView>
   );
