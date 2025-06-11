@@ -16,7 +16,6 @@ const registerSchema = Joi.object({
     .pattern(/^\+?[1-9]\d{1,14}$/)
     .allow(null)
     .messages({ "string.pattern.base": "Numéro de téléphone invalide" }),
-  country: Joi.string().required().messages({ "any.required": "Pays requis" }),
   role: Joi.string().valid("student", "teacher", "admin").default("student"),
   // Add missing fields that can be provided during registration
   schoolName: Joi.string().optional(),
