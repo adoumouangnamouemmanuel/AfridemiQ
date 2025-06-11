@@ -226,7 +226,8 @@ export default function RegisterScreen() {
     },
     welcomeText: {
       fontSize: isSmallScreen ? 24 : 28,
-      fontWeight: "800",
+      fontWeight: "700",
+      fontFamily: "Poppins-Bold",
       color: "#1a1a1a",
       textAlign: "center",
       marginBottom: isSmallScreen ? 4 : 6,
@@ -235,9 +236,10 @@ export default function RegisterScreen() {
     subtitle: {
       fontSize: isSmallScreen ? 12 : 14,
       color: "#6B7280",
+      fontFamily: "Inter-Regular",
+      fontWeight: "400",
       textAlign: "center",
       lineHeight: isSmallScreen ? 16 : 20,
-      fontWeight: "400",
     },
     bottomSection: {
       flex: keyboardVisible
@@ -271,6 +273,7 @@ export default function RegisterScreen() {
     },
     strengthText: {
       fontSize: isSmallScreen ? 10 : 12,
+      fontFamily: "Inter-Medium",
       fontWeight: "500",
     },
     registerButton: {
@@ -346,12 +349,14 @@ export default function RegisterScreen() {
     footerText: {
       fontSize: isSmallScreen ? 13 : 15,
       color: "#6B7280",
+      fontFamily: "Inter-Regular",
       fontWeight: "400",
     },
     loginLink: {
       fontSize: isSmallScreen ? 13 : 15,
       color: "#3B82F6",
-      fontWeight: "700",
+      fontFamily: "Inter-SemiBold",
+      fontWeight: "600",
       marginLeft: 4,
     },
     loadingContainer: {
