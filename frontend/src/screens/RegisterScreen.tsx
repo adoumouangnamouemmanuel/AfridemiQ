@@ -178,6 +178,12 @@ export default function RegisterScreen() {
 
   const passwordStrength = getPasswordStrength();
 
+  // Add validation for button state
+  const isFormValid =
+    formData.name.trim() !== "" &&
+    formData.email.trim() !== "" &&
+    formData.password.trim() !== "";
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -466,7 +472,7 @@ export default function RegisterScreen() {
                 <CustomButton
                   title="Create Account"
                   onPress={handleRegister}
-                  disabled={isLoading}
+                  disabled={isLoading || !isFormValid}
                   isLoading={isLoading}
                   loadingText="Creating Account..."
                   marginTop={isSmallScreen ? 15 : 20}
