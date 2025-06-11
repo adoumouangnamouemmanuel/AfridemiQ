@@ -1,347 +1,297 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Switch,
-} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Animated, {
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+} from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../utils/ThemeContext";
 import { useUser } from "../utils/UserContext";
-import { Ionicons } from "@expo/vector-icons";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-} from "react-native-reanimated";
-import XPBar from "../components/XPBar";
-import BadgeGrid from "../components/BadgeGrid";
+
+// Import modular components
 import { LogoutButton } from "../components/auth/Logout";
-import achievementsData from "../data/achievements.json";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
+import { AchievementsSection } from "../components/profile/AchievementsSection";
+import { ProfileHeader } from "../components/profile/ProfileHeader";
+import { ProgressSection } from "../components/profile/ProgressSection";
+import { SettingsSection } from "../components/profile/SettingsSection";
+import { StatsGrid } from "../components/profile/StatsGrid";
+import { WeakSubjectsSection } from "../components/profile/WeakSubjectsSection";
+
+// Import API service
+import {
+  profileApiService,
+  type UserProfile,
+} from "../services/user/api.profile.service";
+
+const HEADER_HEIGHT = 320;
 
 export default function ProfileScreen() {
   const { theme, isDark, toggleTheme } = useTheme();
-  const { user, } = useUser();
+  const { user: contextUser, setUser } = useUser();
   const router = useRouter();
-  const [selectedTab, setSelectedTab] = useState("overview");
 
+  // Local state for profile data
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
+  const [selectedTab, setSelectedTab] = useState("overview");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [hasTokenError, setHasTokenError] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  // Animation values
+  const fadeIn = useSharedValue(0);
+  const scrollY = useSharedValue(0);
+  const headerOpacity = useSharedValue(1);
+
+  // Tab configuration
   const tabs = [
     { id: "overview", label: "Overview", icon: "person" },
-    { id: "achievements", label: "Achievements", icon: "trophy" },
+    { id: "achievements", label: "Wins", icon: "trophy" },
     { id: "settings", label: "Settings", icon: "settings" },
   ];
+
+  // Initialize animations
+  useEffect(() => {
+    fadeIn.value = withDelay(100, withSpring(1));
+  }, [fadeIn]);
+
+  // Load profile data on component mount
+  useEffect(() => {
+    loadProfileData();
+  }, []);
+
+  // Import apiService at the top of the file or dynamically here
+  // import { apiService } from "../services/api.service";
+  const loadProfileData = async () => {
+    try {
+      setIsLoading(true);
+      setHasTokenError(false);
+      setIsRetrying(false);
+
+      const profile = await profileApiService.getProfile();
+      setProfileData(profile);
+
+      // Update context user with fresh data
+      if (contextUser) {
+        const updatedContextUser = {
+          ...contextUser,
+          name: profile.name,
+          email: profile.email,
+          country: profile.country,
+          xp: profile.progress.xp,
+          level: profile.progress.level,
+          streak: profile.progress.streak.current,
+          badges: profile.progress.badges,
+          completedTopics: profile.progress.completedTopics,
+          weakSubjects: profile.progress.weakSubjects,
+          isPremium: profile.isPremium,
+        };
+        setUser(updatedContextUser);
+      }
+    } catch (error) {
+      console.error("Failed to load profile:", error);
+
+      // Check if it's a token expiration error
+      if (
+        error instanceof Error &&
+        (error.message.includes("Token expiré") ||
+          error.message.includes("Session expired") ||
+          error.message.includes("expired"))
+      ) {
+        // Try silent refresh first
+        setIsRetrying(true);
+        // Dynamically import apiService if not imported at the top
+        const { apiService } = await import("../services/api.service");
+        const refreshed = await apiService.silentRefresh();
+
+        if (refreshed) {
+          // Retry loading profile after successful refresh
+          try {
+            const profile = await profileApiService.getProfile();
+            setProfileData(profile);
+            setIsRetrying(false);
+            return;
+          } catch (retryError) {
+            console.error("Retry after refresh failed:", retryError);
+          }
+        }
+
+        setHasTokenError(true);
+        setIsRetrying(false);
+      } else {
+        Alert.alert(
+          "Error",
+          "Failed to load profile data. Please check your connection."
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadProfileData();
+    setIsRefreshing(false);
+  };
+
+  const handleUserUpdate = (updatedUser: UserProfile) => {
+    setProfileData(updatedUser);
+
+    // Update context user
+    if (contextUser) {
+      const updatedContextUser = {
+        ...contextUser,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        country: updatedUser.country,
+        xp: updatedUser.progress.xp,
+        level: updatedUser.progress.level,
+        streak: updatedUser.progress.streak.current,
+        badges: updatedUser.progress.badges,
+        completedTopics: updatedUser.progress.completedTopics,
+        weakSubjects: updatedUser.progress.weakSubjects,
+        isPremium: updatedUser.isPremium,
+      };
+      setUser(updatedContextUser);
+    }
+  };
 
   const handleUpgradeToPremium = () => {
     router.push("/(routes)/premium");
   };
 
-  const AnimatedCard = ({
-    children,
-    delay = 0,
-  }: {
-    children: React.ReactNode;
-    delay?: number;
-  }) => {
-    const translateY = useSharedValue(50);
-    const opacity = useSharedValue(0);
-
-    React.useEffect(() => {
-      translateY.value = withDelay(delay, withSpring(0));
-      opacity.value = withDelay(delay, withSpring(1));
-    }, [delay, opacity, translateY]);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-      transform: [{ translateY: translateY.value }],
-      opacity: opacity.value,
-    }));
-
-    return <Animated.View style={animatedStyle}>{children}</Animated.View>;
+  const handleEditProfile = () => {
+    router.push("/profile/edit");
   };
 
-  const StatCard = ({ icon, value, label, color }: any) => (
-    <View style={styles.statCard}>
-      <Ionicons name={icon} size={24} color={color} />
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
+  const handleBackPress = () => {
+    router.back();
+  };
 
-  const SettingItem = ({
-    icon,
-    title,
-    subtitle,
-    onPress,
-    rightElement,
-  }: any) => (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress}>
-      <View style={styles.settingLeft}>
-        <View style={styles.settingIcon}>
-          <Ionicons name={icon} size={20} color={theme.colors.primary} />
-        </View>
-        <View style={styles.settingText}>
-          <Text style={styles.settingTitle}>{title}</Text>
-          {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
-        </View>
-      </View>
-      {rightElement || (
-        <Ionicons
-          name="chevron-forward"
-          size={20}
-          color={theme.colors.textSecondary}
-        />
-      )}
-    </TouchableOpacity>
-  );
+  const handleForceLogout = async () => {
+    try {
+      // Import authService and apiService
+      const { authService } = await import("../services/auth.service");
+      const { apiService } = await import("../services/api.service");
 
-  const renderOverview = () => (
-    <ScrollView showsVerticalScrollIndicator={false}>
-      <AnimatedCard delay={100}>
-        <View style={styles.statsGrid}>
-          <StatCard
-            icon="flame"
-            value={user?.streak || 0}
-            label="Day Streak"
-            color={theme.colors.warning}
-          />
-          <StatCard
-            icon="trophy"
-            value={user?.badges?.length || 0}
-            label="Badges"
-            color={theme.colors.success}
-          />
-          <StatCard
-            icon="time"
-            value="45h"
-            label="Study Time"
-            color={theme.colors.info}
-          />
-          <StatCard
-            icon="checkmark-circle"
-            value={user?.completedTopics?.length || 0}
-            label="Completed"
-            color={theme.colors.primary}
-          />
-        </View>
-      </AnimatedCard>
+      // Clear all auth data
+      await authService.clearAuthData();
+      await apiService.forceLogout();
 
-      <AnimatedCard delay={200}>
-        <XPBar currentXP={user?.xp || 0} level={user?.level || 1} />
-      </AnimatedCard>
+      // Clear user context
+      setUser(null);
 
-      <AnimatedCard delay={300}>
-        <View style={styles.progressSection}>
-          <Text style={styles.sectionTitle}>Study Progress</Text>
-          <View style={styles.progressCard}>
-            <View style={styles.progressItem}>
-              <Text style={styles.progressLabel}>Average Score</Text>
-              <Text style={styles.progressValue}>78%</Text>
-            </View>
-            <View style={styles.progressItem}>
-              <Text style={styles.progressLabel}>Quizzes Completed</Text>
-              <Text style={styles.progressValue}>45</Text>
-            </View>
-            <View style={styles.progressItem}>
-              <Text style={styles.progressLabel}>Subjects Mastered</Text>
-              <Text style={styles.progressValue}>3/8</Text>
-            </View>
-          </View>
-        </View>
-      </AnimatedCard>
+      // Navigate to login
+      router.replace("/auth/login");
+    } catch (error) {
+      console.error("Force logout error:", error);
+      // Even if there's an error, navigate to login
+      router.replace("/auth/login");
+    }
+  };
 
-      <AnimatedCard delay={400}>
-        <View style={styles.weakSubjectsSection}>
-          <Text style={styles.sectionTitle}>Areas for Improvement</Text>
-          <View style={styles.weakSubjectsList}>
-            {(user?.subjects || ["Physics", "Chemistry"]).map(
-              (subject, index) => (
-                <View key={index} style={styles.weakSubjectItem}>
-                  <Ionicons
-                    name="trending-down"
-                    size={16}
-                    color={theme.colors.error}
-                  />
-                  <Text style={styles.weakSubjectText}>{subject}</Text>
-                  <TouchableOpacity style={styles.improveButton}>
-                    <Text style={styles.improveButtonText}>Practice</Text>
-                  </TouchableOpacity>
-                </View>
-              )
-            )}
-          </View>
-        </View>
-      </AnimatedCard>
-    </ScrollView>
-  );
+  // Scroll handler for header animations
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
 
-  const renderAchievements = () => (
-    <ScrollView showsVerticalScrollIndicator={false}>
-      <AnimatedCard delay={100}>
-        <BadgeGrid
-          badges={achievementsData.map((a) =>
-            a.earnedDate === null ? { ...a, earnedDate: undefined } : a
-          )}
-        />
-      </AnimatedCard>
+      // Calculate header opacity based on scroll
+      const opacity = interpolate(
+        scrollY.value,
+        [0, HEADER_HEIGHT * 0.5, HEADER_HEIGHT],
+        [1, 0.8, 0.3],
+        "clamp"
+      );
+      headerOpacity.value = opacity;
+    },
+  });
 
-      <AnimatedCard delay={200}>
-        <View style={styles.achievementStats}>
-          <Text style={styles.sectionTitle}>Achievement Progress</Text>
-          <View style={styles.achievementStatsGrid}>
-            <View style={styles.achievementStatItem}>
-              <Text style={styles.achievementStatValue}>
-                {achievementsData.filter((a) => a.earned)?.length}
-              </Text>
-              <Text style={styles.achievementStatLabel}>Earned</Text>
-            </View>
-            <View style={styles.achievementStatItem}>
-              <Text style={styles.achievementStatValue}>
-                {achievementsData?.length}
-              </Text>
-              <Text style={styles.achievementStatLabel}>Total</Text>
-            </View>
-            <View style={styles.achievementStatItem}>
-              <Text style={styles.achievementStatValue}>
-                {Math.round(
-                  (achievementsData.filter((a) => a.earned)?.length /
-                    achievementsData?.length) *
-                    100
-                )}
-                %
-              </Text>
-              <Text style={styles.achievementStatLabel}>Complete</Text>
-            </View>
-          </View>
-        </View>
-      </AnimatedCard>
-    </ScrollView>
-  );
+  // Animation styles
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: fadeIn.value,
+  }));
 
-  const renderSettings = () => (
-    <ScrollView showsVerticalScrollIndicator={false}>
-      <AnimatedCard delay={100}>
-        <View style={styles.settingsSection}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
-          <SettingItem
-            icon="moon"
-            title="Dark Mode"
-            subtitle="Switch between light and dark themes"
-            rightElement={
-              <Switch
-                value={isDark}
-                onValueChange={toggleTheme}
-                trackColor={{
-                  false: theme.colors.border,
-                  true: theme.colors.primary,
-                }}
-                thumbColor={isDark ? "white" : theme.colors.textSecondary}
-              />
-            }
-          />
-          <SettingItem
-            icon="notifications"
-            title="Notifications"
-            subtitle="Manage your notification preferences"
-            onPress={() =>
-              Alert.alert("Notifications", "Notification settings coming soon!")
-            }
-          />
-          <SettingItem
-            icon="volume-high"
-            title="Sound Effects"
-            subtitle="Enable or disable sound effects"
-            onPress={() => Alert.alert("Sound", "Sound settings coming soon!")}
-          />
-          <SettingItem
-            icon="language"
-            title="Language"
-            subtitle="Choose your preferred language"
-            onPress={() =>
-              Alert.alert("Language", "Language settings coming soon!")
-            }
-          />
-        </View>
-      </AnimatedCard>
+  const backButtonAnimatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(scrollY.value, [0, 100], [1, 1.1], "clamp");
 
-      <AnimatedCard delay={200}>
-        <View style={styles.settingsSection}>
-          <Text style={styles.sectionTitle}>Account</Text>
-          <SettingItem
-            icon="person"
-            title="Edit Profile"
-            subtitle="Update your personal information"
-            onPress={() =>
-              Alert.alert("Profile", "Profile editing coming soon!")
-            }
-          />
-          <SettingItem
-            icon="shield-checkmark"
-            title="Privacy & Security"
-            subtitle="Manage your privacy settings"
-            onPress={() =>
-              Alert.alert("Privacy", "Privacy settings coming soon!")
-            }
-          />
-          <SettingItem
-            icon="download"
-            title="Download Data"
-            subtitle="Export your learning data"
-            onPress={() => Alert.alert("Download", "Data export coming soon!")}
-          />
-        </View>
-      </AnimatedCard>
+    const backgroundColor = interpolate(
+      scrollY.value,
+      [0, 100],
+      [0.2, 0.9],
+      "clamp"
+    );
 
-      <AnimatedCard delay={300}>
-        <View style={styles.settingsSection}>
-          <Text style={styles.sectionTitle}>Support</Text>
-          <SettingItem
-            icon="help-circle"
-            title="Help & FAQ"
-            subtitle="Get answers to common questions"
-            onPress={() => Alert.alert("Help", "Help center coming soon!")}
-          />
-          <SettingItem
-            icon="mail"
-            title="Contact Support"
-            subtitle="Get help from our support team"
-            onPress={() =>
-              Alert.alert("Support", "Contact support coming soon!")
-            }
-          />
-          <SettingItem
-            icon="star"
-            title="Rate App"
-            subtitle="Rate ExamPrep Africa on the app store"
-            onPress={() => Alert.alert("Rate", "App rating coming soon!")}
-          />
-        </View>
-      </AnimatedCard>
+    return {
+      transform: [{ scale }],
+      backgroundColor: `rgba(255, 255, 255, ${backgroundColor})`,
+    };
+  });
 
-      <AnimatedCard delay={400}>
-        {/* <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out" size={20} color={theme.colors.error} />
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity> */}
-        <LogoutButton />
-      </AnimatedCard>
-    </ScrollView>
-  );
+  const headerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: headerOpacity.value,
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, HEADER_HEIGHT],
+          [0, -HEADER_HEIGHT * 0.3],
+          "clamp"
+        ),
+      },
+    ],
+  }));
 
+  // Render content based on selected tab
   const renderContent = () => {
+    if (!profileData) return null;
+
     switch (selectedTab) {
       case "overview":
-        return renderOverview();
+        return (
+          <>
+            <StatsGrid user={profileData} theme={theme} />
+            <ProgressSection user={profileData} theme={theme} />
+            <WeakSubjectsSection user={profileData} theme={theme} />
+          </>
+        );
       case "achievements":
-        return renderAchievements();
+        return <AchievementsSection user={profileData} theme={theme} />;
       case "settings":
-        return renderSettings();
+        return (
+          <>
+            <SettingsSection
+              user={profileData}
+              theme={theme}
+              isDark={isDark}
+              onToggleTheme={toggleTheme}
+              onUserUpdate={handleUserUpdate}
+            />
+            <View style={styles.logoutContainer}>
+              <LogoutButton
+                style={styles.logoutButton}
+                textStyle={styles.logoutButtonText}
+                title="Sign Out"
+              />
+            </View>
+          </>
+        );
       default:
         return null;
     }
@@ -352,349 +302,311 @@ export default function ProfileScreen() {
       flex: 1,
       backgroundColor: theme.colors.background,
     },
-    header: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingTop: theme.spacing.md,
-    },
-    profileCard: {
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      marginBottom: theme.spacing.lg,
-    },
-    profileHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginBottom: theme.spacing.lg,
-    },
-    avatar: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      backgroundColor: "rgba(255,255,255,0.2)",
+    backButtonContainer: {
+      position: "absolute",
+      top: 50,
+      left: 20,
+      zIndex: 1000,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
       justifyContent: "center",
       alignItems: "center",
-      marginRight: theme.spacing.lg,
-      borderWidth: 3,
-      borderColor: "white",
+      elevation: 8,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
     },
-    avatarText: {
-      color: "white",
-      fontSize: 32,
-      fontWeight: "bold",
+    backButtonIcon: {
+      marginLeft: -2,
     },
-    profileInfo: {
+    scrollContainer: {
       flex: 1,
     },
-    userName: {
-      fontSize: 24,
-      fontWeight: "bold",
-      color: "white",
-      marginBottom: 4,
-    },
-    userDetails: {
-      fontSize: 14,
-      color: "rgba(255,255,255,0.8)",
-      marginBottom: 4,
-    },
-    premiumButton: {
-      backgroundColor: "rgba(255,255,255,0.2)",
-      borderRadius: theme.borderRadius.md,
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.sm,
-      alignSelf: "flex-start",
-      marginTop: theme.spacing.sm,
-    },
-    premiumButtonText: {
-      color: "white",
-      fontSize: 14,
-      fontWeight: "600",
+    headerContainer: {
+      height: HEADER_HEIGHT,
+      position: "relative",
     },
     tabsContainer: {
       flexDirection: "row",
       backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.md,
-      padding: 4,
-      marginHorizontal: theme.spacing.lg,
-      marginBottom: theme.spacing.lg,
+      borderRadius: 20,
+      padding: 6,
+      marginHorizontal: 20,
+      marginVertical: 20,
+      elevation: 4,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
     },
     tab: {
       flex: 1,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      paddingVertical: theme.spacing.sm,
-      borderRadius: theme.borderRadius.sm,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 16,
     },
     activeTab: {
-      backgroundColor: theme.colors.primary,
+      backgroundColor: "#3B82F6",
+      elevation: 2,
+      shadowColor: "#3B82F6",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
     },
     tabIcon: {
-      marginRight: theme.spacing.xs,
+      marginRight: 8,
     },
     tabText: {
       fontSize: 14,
-      fontWeight: "500",
+      fontWeight: "600",
       color: theme.colors.text,
+      fontFamily: "Inter-SemiBold",
     },
     activeTabText: {
       color: "white",
     },
     content: {
-      flex: 1,
-      paddingHorizontal: theme.spacing.lg,
+      paddingHorizontal: 20,
+      paddingBottom: 100,
     },
-    statsGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      justifyContent: "space-between",
-      marginBottom: theme.spacing.lg,
-    },
-    statCard: {
-      width: "48%",
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.md,
-      alignItems: "center",
-      marginBottom: theme.spacing.sm,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    statValue: {
-      fontSize: 20,
-      fontWeight: "bold",
-      color: theme.colors.text,
-      marginTop: theme.spacing.xs,
-    },
-    statLabel: {
-      fontSize: 12,
-      color: theme.colors.textSecondary,
-      marginTop: 4,
-      textAlign: "center",
-    },
-    sectionTitle: {
-      fontSize: 20,
-      fontWeight: "600",
-      color: theme.colors.text,
-      marginBottom: theme.spacing.md,
-    },
-    progressSection: {
-      marginBottom: theme.spacing.lg,
-    },
-    progressCard: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    progressItem: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      paddingVertical: theme.spacing.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    progressLabel: {
-      fontSize: 16,
-      color: theme.colors.text,
-    },
-    progressValue: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: theme.colors.primary,
-    },
-    weakSubjectsSection: {
-      marginBottom: theme.spacing.lg,
-    },
-    weakSubjectsList: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.md,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    weakSubjectItem: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingVertical: theme.spacing.sm,
-    },
-    weakSubjectText: {
-      flex: 1,
-      fontSize: 16,
-      color: theme.colors.text,
-      marginLeft: theme.spacing.sm,
-    },
-    improveButton: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: theme.borderRadius.sm,
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.xs,
-    },
-    improveButtonText: {
-      color: "white",
-      fontSize: 12,
-      fontWeight: "600",
-    },
-    achievementStats: {
-      marginBottom: theme.spacing.lg,
-    },
-    achievementStatsGrid: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing.lg,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    achievementStatItem: {
-      alignItems: "center",
-    },
-    achievementStatValue: {
-      fontSize: 24,
-      fontWeight: "bold",
-      color: theme.colors.text,
-    },
-    achievementStatLabel: {
-      fontSize: 12,
-      color: theme.colors.textSecondary,
-      marginTop: 4,
-    },
-    settingsSection: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.lg,
-      marginBottom: theme.spacing.lg,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      overflow: "hidden",
-    },
-    settingItem: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: theme.spacing.md,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    settingLeft: {
-      flexDirection: "row",
-      alignItems: "center",
-      flex: 1,
-    },
-    settingIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: theme.colors.primary + "20",
-      justifyContent: "center",
-      alignItems: "center",
-      marginRight: theme.spacing.md,
-    },
-    settingText: {
-      flex: 1,
-    },
-    settingTitle: {
-      fontSize: 16,
-      fontWeight: "500",
-      color: theme.colors.text,
-    },
-    settingSubtitle: {
-      fontSize: 14,
-      color: theme.colors.textSecondary,
-      marginTop: 2,
+    logoutContainer: {
+      paddingVertical: 24,
     },
     logoutButton: {
+      backgroundColor: theme.colors.error + "15",
+      borderRadius: 16,
+      paddingVertical: 16,
+      paddingHorizontal: 24,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: theme.colors.error + "20",
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.md,
-      marginBottom: theme.spacing.xl,
+      borderWidth: 1,
+      borderColor: theme.colors.error + "30",
     },
-    logoutText: {
+    logoutButtonText: {
       color: theme.colors.error,
       fontSize: 16,
       fontWeight: "600",
-      marginLeft: theme.spacing.sm,
+      fontFamily: "Inter-SemiBold",
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.colors.background,
+    },
+    loadingText: {
+      color: theme.colors.textSecondary,
+      fontSize: 16,
+      marginTop: 16,
+      fontFamily: "Inter-SemiBold",
+    },
+    errorContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 40,
+    },
+    errorText: {
+      color: theme.colors.textSecondary,
+      fontSize: 16,
+      textAlign: "center",
+      marginBottom: 20,
+      fontFamily: "Inter-SemiBold",
+    },
+    retryButton: {
+      backgroundColor: "#3B82F6",
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+    },
+    retryButtonText: {
+      color: "white",
+      fontSize: 14,
+      fontWeight: "600",
+      fontFamily: "Inter-SemiBold",
+    },
+    buttonRow: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 12,
+    },
+    logoutButtonAlt: {
+      backgroundColor: theme.colors.error + "15",
+      borderColor: theme.colors.error + "30",
+      borderWidth: 1,
+    },
+    logoutButtonTextAlt: {
+      color: theme.colors.error,
     },
   });
 
-  if (!user) {
+  // Loading state
+  if (isLoading || isRetrying) {
     return (
       <SafeAreaView style={styles.container}>
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text style={{ color: theme.colors.textSecondary }}>
-            Please log in to view your profile
+        <View style={styles.loadingContainer}>
+          <Ionicons
+            name="person-circle"
+            size={64}
+            color={theme.colors.textSecondary}
+          />
+          <Text style={styles.loadingText}>
+            {isRetrying ? "Refreshing session..." : "Loading your profile..."}
           </Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <LinearGradient
-          colors={[theme.colors.primary, theme.colors.secondary]}
-          style={styles.profileCard}
-        >
-          <View style={styles.profileHeader}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {user.name.charAt(0).toUpperCase()}
-              </Text>
-            </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.userName}>{user.name}</Text>
-              <Text style={styles.userDetails}>
-                {user.country} • Level {user.level}
-              </Text>
-              <Text style={styles.userDetails}>
-                {user.selectedExam?.toUpperCase()} Student
-              </Text>
+  // Error state - no user data
+  if (!contextUser || !profileData) {
+    if (hasTokenError) {
+      return (
+        <SafeAreaView style={styles.container}>
+          <View style={styles.errorContainer}>
+            <Ionicons
+              name="refresh-circle"
+              size={64}
+              color={theme.colors.textSecondary}
+            />
+            <Text style={styles.errorText}>
+              Your session needs to be refreshed. This happens occasionally for
+              security.
+            </Text>
+            <View style={styles.buttonRow}>
               <TouchableOpacity
-                style={styles.premiumButton}
-                onPress={handleUpgradeToPremium}
+                style={styles.retryButton}
+                onPress={loadProfileData}
               >
-                <Text style={styles.premiumButtonText}>
-                  ⭐ Upgrade to Premium
+                <Text style={styles.retryButtonText}>Refresh Session</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.retryButton, styles.logoutButtonAlt]}
+                onPress={handleForceLogout}
+              >
+                <Text
+                  style={[styles.retryButtonText, styles.logoutButtonTextAlt]}
+                >
+                  Sign Out
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
-        </LinearGradient>
-      </View>
+        </SafeAreaView>
+      );
+    }
 
-      <View style={styles.tabsContainer}>
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.id}
-            style={[styles.tab, selectedTab === tab.id && styles.activeTab]}
-            onPress={() => setSelectedTab(tab.id)}
-          >
-            <Ionicons
-              name={tab.icon as any}
-              size={16}
-              color={selectedTab === tab.id ? "white" : theme.colors.text}
-              style={styles.tabIcon}
-            />
-            <Text
-              style={[
-                styles.tabText,
-                selectedTab === tab.id && styles.activeTabText,
-              ]}
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Ionicons
+            name="alert-circle"
+            size={64}
+            color={theme.colors.textSecondary}
+          />
+          <Text style={styles.errorText}>
+            Unable to load your profile. Please check your connection and try
+            again.
+          </Text>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={loadProfileData}
             >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.retryButton, styles.logoutButtonAlt]}
+              onPress={handleForceLogout}
+            >
+              <Text
+                style={[styles.retryButtonText, styles.logoutButtonTextAlt]}
+              >
+                Sign Out
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-      <View style={styles.content}>{renderContent()}</View>
+  return (
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <Animated.View style={[styles.container, containerAnimatedStyle]}>
+        {/* Enhanced Back Button */}
+        <Animated.View
+          style={[styles.backButtonContainer, backButtonAnimatedStyle]}
+        >
+          <TouchableOpacity onPress={handleBackPress}>
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color="#3B82F6"
+              style={styles.backButtonIcon}
+            />
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Scrollable Content */}
+        <Animated.ScrollView
+          style={styles.scrollContainer}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+            />
+          }
+        >
+          {/* Profile Header */}
+          <Animated.View style={[styles.headerContainer, headerAnimatedStyle]}>
+            <ProfileHeader
+              user={profileData}
+              onUpgradeToPremium={handleUpgradeToPremium}
+              onEditProfile={handleEditProfile}
+            />
+          </Animated.View>
+
+          {/* Tab Navigation */}
+          <View style={styles.tabsContainer}>
+            {tabs.map((tab) => (
+              <TouchableOpacity
+                key={tab.id}
+                style={[styles.tab, selectedTab === tab.id && styles.activeTab]}
+                onPress={() => setSelectedTab(tab.id)}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name={tab.icon as any}
+                  size={18}
+                  color={selectedTab === tab.id ? "white" : theme.colors.text}
+                  style={styles.tabIcon}
+                />
+                <Text
+                  style={[
+                    styles.tabText,
+                    selectedTab === tab.id && styles.activeTabText,
+                  ]}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Tab Content */}
+          <View style={styles.content}>{renderContent()}</View>
+        </Animated.ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
