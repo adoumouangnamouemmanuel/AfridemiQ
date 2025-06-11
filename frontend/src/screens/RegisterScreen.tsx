@@ -140,20 +140,21 @@ export default function RegisterScreen() {
       setIsLoading(false);
       setShowSuccess(true);
 
-      // Show success briefly before navigation
-      setTimeout(() => {
-        setShowSuccess(false);
-        router.replace("/auth/onboarding");
-      }, 1500);
+      // Navigation will be handled by onHide callback
     } catch (error) {
       console.error("Registration error:", error);
       setIsLoading(false);
       setShowError(true);
-
-      setTimeout(() => {
-        setShowError(false);
-      }, 2000);
     }
+  };
+
+  const handleSuccessHide = () => {
+    setShowSuccess(false);
+    router.replace("/auth/onboarding");
+  };
+
+  const handleErrorHide = () => {
+    setShowError(false);
   };
 
   const handleGoogleRegister = () => {
@@ -498,24 +499,30 @@ export default function RegisterScreen() {
 
       {/* Loaders */}
       <Loader
-        key="register-loading"
         visible={isLoading}
         text="Creating Account..."
+        subtitle="Setting up your profile"
         type="default"
       />
 
       <Loader
-        key="register-success"
         visible={showSuccess}
-        text="Account Created!"
         type="success"
+        text="Account Created!"
+        subtitle="Welcome to ExamPrep"
+        duration={1500}
+        onHide={handleSuccessHide}
+        size="medium"
       />
 
       <Loader
-        key="register-error"
         visible={showError}
-        text="Registration Failed"
         type="error"
+        text="Registration Failed"
+        subtitle="Please check your information and try again"
+        duration={2500}
+        onHide={handleErrorHide}
+        size="medium"
       />
     </SafeAreaView>
   );
