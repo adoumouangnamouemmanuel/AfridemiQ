@@ -28,6 +28,7 @@ import {
   CustomButton,
   CustomInput,
   Divider,
+  Loader,
   SocialButton,
 } from "../components/common";
 import { apiService } from "../services/api.service";
@@ -50,6 +51,8 @@ export default function RegisterScreen() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [nameFocused, setNameFocused] = useState(false);
@@ -135,28 +138,21 @@ export default function RegisterScreen() {
       setToken(response.token);
 
       setIsLoading(false);
+      setShowSuccess(true);
 
-      Alert.alert(
-        "Account Created Successfully!",
-        "Please complete your onboarding to get started.",
-        [
-          {
-            text: "Onboarding",
-            onPress: () => router.replace("/auth/onboarding"),
-          },
-        ]
-      );
-
-      // After registration, go directly to onboarding
+      // Show success briefly before navigation
+      setTimeout(() => {
+        setShowSuccess(false);
+        router.replace("/auth/onboarding");
+      }, 1500);
     } catch (error) {
       console.error("Registration error:", error);
       setIsLoading(false);
-      Alert.alert(
-        "Registration Failed",
-        error instanceof Error
-          ? error.message
-          : "Something went wrong. Please try again."
-      );
+      setShowError(true);
+
+      setTimeout(() => {
+        setShowError(false);
+      }, 2000);
     }
   };
 
@@ -473,7 +469,7 @@ export default function RegisterScreen() {
                   title="Create Account"
                   onPress={handleRegister}
                   disabled={isLoading || !isFormValid}
-                  isLoading={isLoading}
+                  isLoading={false}
                   loadingText="Creating Account..."
                   marginTop={isSmallScreen ? 15 : 20}
                 />
@@ -499,6 +495,28 @@ export default function RegisterScreen() {
           </View>
         </View>
       </LinearGradient>
+
+      {/* Loaders */}
+      <Loader
+        key="register-loading"
+        visible={isLoading}
+        text="Creating Account..."
+        type="default"
+      />
+
+      <Loader
+        key="register-success"
+        visible={showSuccess}
+        text="Account Created!"
+        type="success"
+      />
+
+      <Loader
+        key="register-error"
+        visible={showError}
+        text="Registration Failed"
+        type="error"
+      />
     </SafeAreaView>
   );
 }
