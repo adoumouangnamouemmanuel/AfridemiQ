@@ -41,7 +41,7 @@ export default function RegisterScreen() {
     name: "",
     email: "",
     password: "",
-    country: "Nigeria", // Default country
+    country: "Tchad", // Default country
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
