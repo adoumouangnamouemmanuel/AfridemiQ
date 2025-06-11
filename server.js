@@ -78,7 +78,12 @@ if (process.env.NODE_ENV === "test") {
 const app = express();
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  origin: process.env.ALLOWED_ORIGIN || "*", // Allow all origins by default, can be overridden
+  contentSecurityPolicy: false, // Disable CSP for simplicity, can be configured later
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resource sharing
+  referrerPolicy: { policy: "no-referrer" }, // Set referrer policy
+}));
 app.use(cors());
 app.use(compression());
 app.use(express.json({ limit: "1mb" }));
@@ -217,8 +222,9 @@ if (process.env.NODE_ENV !== "test") {
   }
 
   // Start server
+  HOST = '0.0.0.0';
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
+  app.listen(PORT, HOST, () => {
     console.info(`Serveur en cours d'exécution sur le port ${PORT}`, {
       port: PORT,
       environment: process.env.NODE_ENV || "development",
