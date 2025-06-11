@@ -135,35 +135,37 @@ export default function LoginScreen() {
       setIsLoading(false);
       setShowSuccess(true);
 
-      // Show success briefly before navigation
-      setTimeout(() => {
-        setShowSuccess(false);
-        // Check if user has completed onboarding
-        AsyncStorage.getItem("hasOnboarded").then((hasOnboarded) => {
-          if (hasOnboarded) {
-            router.replace("/(tabs)/home");
-          } else {
-            router.replace("/auth/onboarding");
-          }
-        });
-      }, 1500);
+      // Navigation will be handled by onHide callback
     } catch (error) {
       console.error("Login error:", error);
       setIsLoading(false);
       setShowError(true);
-
-      setTimeout(() => {
-        setShowError(false);
-      }, 2000);
     }
   };
 
-  const handleGoogleLogin = () => {
-    Alert.alert("Google Sign In", "Google authentication coming soon!");
+  const handleSuccessHide = () => {
+    setShowSuccess(false);
+    // Check if user has completed onboarding
+    AsyncStorage.getItem("hasOnboarded").then((hasOnboarded) => {
+      if (hasOnboarded) {
+        router.replace("/(tabs)/home");
+      } else {
+        router.replace("/auth/onboarding");
+      }
+    });
+  };
+
+  const handleErrorHide = () => {
+    setShowError(false);
   };
 
   // Add validation for button state
   const isFormValid = email.trim() !== "" && password.trim() !== "";
+
+  // Placeholder for Google login handler
+  const handleGoogleLogin = () => {
+    Alert.alert("Google Login", "Google login is not implemented yet.");
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -493,24 +495,30 @@ export default function LoginScreen() {
 
       {/* Loaders */}
       <Loader
-        key="login-loading"
         visible={isLoading}
         text="Signing In..."
+        subtitle="Authenticating your credentials"
         type="default"
       />
 
       <Loader
-        key="login-success"
         visible={showSuccess}
-        text="Welcome Back!"
         type="success"
+        text="Welcome Back!"
+        subtitle="Login successful"
+        duration={1500}
+        onHide={handleSuccessHide}
+        size="medium"
       />
 
       <Loader
-        key="login-error"
         visible={showError}
-        text="Login Failed"
         type="error"
+        text="Login Failed"
+        subtitle="Your email or password is incorrect"
+        duration={2500}
+        onHide={handleErrorHide}
+        size="medium"
       />
     </SafeAreaView>
   );
