@@ -1,7 +1,6 @@
 // filepath: c:\Users\adoum\OneDrive\Bureau\exam-prep-app\frontend\src\screens\RegisterScreen.tsx
 "use client";
 
-import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -15,7 +14,6 @@ import {
   Platform,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -26,6 +24,12 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  CustomButton,
+  CustomInput,
+  Divider,
+  SocialButton,
+} from "../components/common";
 import { apiService } from "../services/api.service";
 import { useUser } from "../utils/UserContext";
 
@@ -261,42 +265,6 @@ export default function RegisterScreen() {
     inputContainer: {
       marginBottom: isSmallScreen ? 10 : 12,
     },
-    inputWrapper: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "white",
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: "#E5E7EB",
-      paddingHorizontal: 16,
-      height: isSmallScreen ? 48 : 52,
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      elevation: 3,
-    },
-    inputWrapperFocused: {
-      borderColor: "#3B82F6",
-      shadowColor: "#3B82F6",
-      shadowOpacity: 0.15,
-    },
-    input: {
-      flex: 1,
-      fontSize: isSmallScreen ? 14 : 16,
-      color: "#1F2937",
-      paddingVertical: 0,
-      fontWeight: "500",
-    },
-    inputIcon: {
-      marginRight: 12,
-    },
-    eyeIcon: {
-      padding: 8,
-    },
     passwordStrength: {
       marginTop: 4,
       alignItems: "flex-end",
@@ -432,96 +400,50 @@ export default function RegisterScreen() {
             <Animated.View style={[styles.bottomSection, formAnimatedStyle]}>
               <View style={styles.form}>
                 <View style={styles.inputContainer}>
-                  <View
-                    style={[
-                      styles.inputWrapper,
-                      nameFocused && styles.inputWrapperFocused,
-                    ]}
-                  >
-                    <Ionicons
-                      name="person"
-                      size={22}
-                      color={nameFocused ? "#3B82F6" : "#9CA3AF"}
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter your full name"
-                      placeholderTextColor="#9CA3AF"
-                      value={formData.name}
-                      onChangeText={(text) => updateFormData("name", text)}
-                      autoCapitalize="words"
-                      autoCorrect={false}
-                      onFocus={() => setNameFocused(true)}
-                      onBlur={() => setNameFocused(false)}
-                    />
-                  </View>
+                  <CustomInput
+                    icon="person"
+                    placeholder="Enter your full name"
+                    value={formData.name}
+                    onChangeText={(text) => updateFormData("name", text)}
+                    autoCapitalize="words"
+                    autoCorrect={false}
+                    focused={nameFocused}
+                    onFocus={() => setNameFocused(true)}
+                    onBlur={() => setNameFocused(false)}
+                  />
                 </View>
 
                 <View style={styles.inputContainer}>
-                  <View
-                    style={[
-                      styles.inputWrapper,
-                      emailFocused && styles.inputWrapperFocused,
-                    ]}
-                  >
-                    <Ionicons
-                      name="mail"
-                      size={22}
-                      color={emailFocused ? "#3B82F6" : "#9CA3AF"}
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter your email"
-                      placeholderTextColor="#9CA3AF"
-                      value={formData.email}
-                      onChangeText={(text) => updateFormData("email", text)}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      onFocus={() => setEmailFocused(true)}
-                      onBlur={() => setEmailFocused(false)}
-                    />
-                  </View>
+                  <CustomInput
+                    icon="mail"
+                    placeholder="Enter your email"
+                    value={formData.email}
+                    onChangeText={(text) => updateFormData("email", text)}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    focused={emailFocused}
+                    onFocus={() => setEmailFocused(true)}
+                    onBlur={() => setEmailFocused(false)}
+                  />
                 </View>
 
                 <View style={styles.inputContainer}>
-                  <View
-                    style={[
-                      styles.inputWrapper,
-                      passwordFocused && styles.inputWrapperFocused,
-                    ]}
-                  >
-                    <Ionicons
-                      name="lock-closed"
-                      size={22}
-                      color={passwordFocused ? "#3B82F6" : "#9CA3AF"}
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Create a password"
-                      placeholderTextColor="#9CA3AF"
-                      value={formData.password}
-                      onChangeText={(text) => updateFormData("password", text)}
-                      secureTextEntry={!showPassword}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      onFocus={() => setPasswordFocused(true)}
-                      onBlur={() => setPasswordFocused(false)}
-                    />
-                    <TouchableOpacity
-                      style={styles.eyeIcon}
-                      onPress={() => setShowPassword(!showPassword)}
-                    >
-                      <Ionicons
-                        name={showPassword ? "eye" : "eye-off"}
-                        size={22}
-                        color="#9CA3AF"
-                      />
-                    </TouchableOpacity>
-                  </View>
+                  <CustomInput
+                    icon="lock-closed"
+                    placeholder="Create a password"
+                    value={formData.password}
+                    onChangeText={(text) => updateFormData("password", text)}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    focused={passwordFocused}
+                    onFocus={() => setPasswordFocused(true)}
+                    onBlur={() => setPasswordFocused(false)}
+                    isPassword={true}
+                    showPassword={showPassword}
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                  />
                   {passwordStrength && (
                     <View style={styles.passwordStrength}>
                       <Text
@@ -536,49 +458,26 @@ export default function RegisterScreen() {
                   )}
                 </View>
 
-                <TouchableOpacity
+                <CustomButton
+                  title="Create Account"
                   onPress={handleRegister}
                   disabled={isLoading}
-                  style={isLoading && styles.registerButtonDisabled}
-                >
-                  <LinearGradient
-                    colors={["#3B82F6", "#1D4ED8", "#1E40AF"]}
-                    style={styles.registerButton}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    {isLoading ? (
-                      <View style={styles.loadingContainer}>
-                        <Ionicons name="refresh" size={20} color="white" />
-                        <Text style={styles.loadingText}>
-                          Creating Account...
-                        </Text>
-                      </View>
-                    ) : (
-                      <Text style={styles.registerButtonText}>
-                        Create Account
-                      </Text>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
+                  isLoading={isLoading}
+                  loadingText="Creating Account..."
+                  marginTop={isSmallScreen ? 15 : 20}
+                />
               </View>
             </Animated.View>
           </KeyboardAvoidingView>
 
           <View style={styles.staticBottom}>
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or continue with</Text>
-              <View style={styles.dividerLine} />
-            </View>
+            <Divider text="or continue with" />
 
-            <TouchableOpacity
-              style={styles.googleButton}
+            <SocialButton
+              title="Continue with Google"
+              icon="logo-google"
               onPress={handleGoogleRegister}
-            >
-              <Ionicons name="logo-google" size={24} color="#DB4437" />
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
+            />
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Already have an account?</Text>
