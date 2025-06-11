@@ -29,7 +29,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 export default function ProfileScreen() {
   const { theme, isDark, toggleTheme } = useTheme();
-  const { user, setUser } = useUser();
+  const { user, } = useUser();
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState("overview");
 
@@ -38,20 +38,6 @@ export default function ProfileScreen() {
     { id: "achievements", label: "Achievements", icon: "trophy" },
     { id: "settings", label: "Settings", icon: "settings" },
   ];
-
-  const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: () => {
-          setUser(null);
-          router.replace("/auth/login");
-        },
-      },
-    ]);
-  };
 
   const handleUpgradeToPremium = () => {
     router.push("/(routes)/premium");
