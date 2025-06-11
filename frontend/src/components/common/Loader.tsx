@@ -1,16 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { Dimensions, Modal, StyleSheet, Text, View } from "react-native";
-import Animated, {
-  Easing,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
+import {
+  ActivityIndicator,
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const isSmallScreen = SCREEN_HEIGHT < 700;
@@ -26,65 +23,14 @@ const Loader: React.FC<LoaderProps> = ({
   text = "Loading...",
   type = "default",
 }) => {
-  const rotation = useSharedValue(0);
-  const scale = useSharedValue(0.8);
-  const opacity = useSharedValue(0);
-  const pulseScale = useSharedValue(1);
-
-  React.useEffect(() => {
-    if (visible) {
-      // Start animations when visible
-      rotation.value = withRepeat(
-        withTiming(360, {
-          duration: 2000,
-          easing: Easing.linear,
-        }),
-        -1
-      );
-
-      scale.value = withSequence(
-        withTiming(1, { duration: 300 }),
-        withRepeat(withTiming(1.1, { duration: 1000 }), -1, true)
-      );
-
-      opacity.value = withTiming(1, { duration: 300 });
-
-      pulseScale.value = withRepeat(
-        withSequence(
-          withTiming(1.2, { duration: 800 }),
-          withTiming(1, { duration: 800 })
-        ),
-        -1
-      );
-    } else {
-      // Reset animations when hidden
-      opacity.value = withTiming(0, { duration: 200 });
-      scale.value = withTiming(0.8, { duration: 200 });
-    }
-  }, [opacity, pulseScale, rotation, scale, visible]);
-
-  const rotationStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
-
-  const scaleStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
-
-  const pulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulseScale.value }],
-    opacity: interpolate(pulseScale.value, [1, 1.2], [0.3, 0.1]),
-  }));
-
-  const getColors = (): [string, string, ...string[]] => {
+  const getColors = (): [string, string] => {
     switch (type) {
       case "success":
-        return ["#10b981", "#059669", "#047857"];
+        return ["#10b981", "#059669"];
       case "error":
-        return ["#ef4444", "#dc2626", "#b91c1c"];
+        return ["#ef4444", "#dc2626"];
       default:
-        return ["#3B82F6", "#1D4ED8", "#1E40AF"];
+        return ["#3B82F6", "#1D4ED8"];
     }
   };
 
@@ -93,7 +39,7 @@ const Loader: React.FC<LoaderProps> = ({
       case "success":
         return "checkmark-circle";
       case "error":
-        return "alert-circle";
+        return "close-circle";
       default:
         return "school";
     }
@@ -102,197 +48,74 @@ const Loader: React.FC<LoaderProps> = ({
   if (!visible) return null;
 
   return (
-    <Modal
-      transparent
-      visible={visible}
-      animationType="fade"
-      statusBarTranslucent
-    >
-      <View style={styles.overlay}>
-        <LinearGradient
-          colors={["rgba(0,0,0,0.3)", "rgba(0,0,0,0.5)", "rgba(0,0,0,0.3)"]}
-          style={styles.gradientOverlay}
-        >
-          <Animated.View style={[styles.container, scaleStyle]}>
-            {/* Pulse Background */}
-            <Animated.View style={[styles.pulseBackground, pulseStyle]}>
-              <LinearGradient
-                colors={getColors()}
-                style={styles.pulseGradient}
-              />
-            </Animated.View>
+    <View style={styles.overlay} pointerEvents="auto">
+      <View style={styles.container}>
+        <View style={styles.loaderBox}>
+          {type === "default" ? (
+            <ActivityIndicator size="large" color="#3B82F6" />
+          ) : (
+            <LinearGradient colors={getColors()} style={styles.iconContainer}>
+              <Ionicons name={getIcon() as any} size={40} color="white" />
+            </LinearGradient>
+          )}
+        </View>
 
-            {/* Main Loader */}
-            <View style={styles.loaderContainer}>
-              {/* Outer Ring */}
-              <Animated.View style={[styles.outerRing, rotationStyle]}>
-                <LinearGradient
-                  colors={[...getColors(), "transparent"]}
-                  style={styles.ringGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                />
-              </Animated.View>
+        <Text style={styles.loadingText}>{text}</Text>
 
-              {/* Inner Content */}
-              <View style={styles.innerContent}>
-                <LinearGradient
-                  colors={getColors()}
-                  style={styles.iconContainer}
-                >
-                  <Ionicons
-                    name={getIcon() as any}
-                    size={isSmallScreen ? 32 : 40}
-                    color="white"
-                  />
-                </LinearGradient>
-              </View>
-
-              {/* Floating Dots */}
-              <View style={styles.dotsContainer}>
-                {[0, 1, 2].map((index) => (
-                  <Animated.View
-                    key={index}
-                    style={[
-                      styles.dot,
-                      {
-                        transform: [
-                          {
-                            rotate: `${index * 120}deg`,
-                          },
-                        ],
-                      },
-                      rotationStyle,
-                    ]}
-                  >
-                    <LinearGradient
-                      colors={getColors()}
-                      style={styles.dotGradient}
-                    />
-                  </Animated.View>
-                ))}
-              </View>
-            </View>
-
-            {/* Loading Text */}
-            <Text style={styles.loadingText}>{text}</Text>
-
-            {/* Subtitle */}
-            <Text style={styles.subtitle}>
-              {type === "success"
-                ? "Success!"
-                : type === "error"
-                ? "Something went wrong"
-                : "Please wait..."}
-            </Text>
-          </Animated.View>
-        </LinearGradient>
+        <Text style={styles.subtitle}>
+          {type === "success"
+            ? "Success!"
+            : type === "error"
+            ? "Something went wrong"
+            : "Please wait..."}
+        </Text>
       </View>
-    </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "center",
     alignItems: "center",
-  },
-  gradientOverlay: {
-    flex: 1,
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+    zIndex: 1000,
   },
   container: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 40,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    borderRadius: 24,
-    padding: isSmallScreen ? 30 : 40,
-    margin: 20,
+    minWidth: 250,
+    maxWidth: 300,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 10,
+      height: 8,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 20,
+    shadowRadius: 15,
     elevation: 10,
-    // backdropFilter: "blur(10px)", // Not supported in React Native
   },
-  pulseBackground: {
-    position: "absolute",
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-  },
-  pulseGradient: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 75,
-  },
-  loaderContainer: {
-    width: 100,
-    height: 100,
+  loaderBox: {
+    width: 80,
+    height: 80,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
   },
-  outerRing: {
-    position: "absolute",
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  ringGradient: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 50,
-    borderWidth: 3,
-    borderColor: "transparent",
-  },
-  innerContent: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
-    shadowColor: "#3B82F6",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
   iconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
-  },
-  dotsContainer: {
-    position: "absolute",
-    width: 120,
-    height: 120,
-  },
-  dot: {
-    position: "absolute",
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    top: 0,
-    left: "50%",
-    marginLeft: -4,
-  },
-  dotGradient: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 4,
   },
   loadingText: {
     fontSize: isSmallScreen ? 18 : 20,
