@@ -46,13 +46,17 @@ export default function RegisterScreen() {
   const { setUser, setToken } = useUser();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
+
+  // Modified form data to include firstName and lastName instead of name
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "", // Added firstName field
+    lastName: "", // Added lastName field
     email: "",
     password: "",
     confirmPassword: "",
     country: "Tchad", // Default country
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +65,11 @@ export default function RegisterScreen() {
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
-  const [nameFocused, setNameFocused] = useState(false);
+
+  // Added focus states for first and last name fields
+  const [firstNameFocused, setFirstNameFocused] = useState(false);
+  const [lastNameFocused, setLastNameFocused] = useState(false);
+
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [stepError, setStepError] = useState("");
 
@@ -152,8 +160,14 @@ export default function RegisterScreen() {
   const validateStep1 = async () => {
     setStepError("");
 
-    if (!formData.name.trim()) {
-      setStepError("Please enter your full name");
+    // Updated validation to check both firstName and lastName
+    if (!formData.firstName.trim()) {
+      setStepError("Please enter your first name");
+      return false;
+    }
+
+    if (!formData.lastName.trim()) {
+      setStepError("Please enter your last name");
       return false;
     }
 
@@ -218,7 +232,14 @@ export default function RegisterScreen() {
     setIsLoading(true);
 
     try {
-      const { confirmPassword, ...registrationData } = formData;
+      // Create a combined name from firstName and lastName
+      // and prepare the data for API submission
+      const { firstName, lastName, confirmPassword, ...otherData } = formData;
+      const registrationData = {
+        ...otherData,
+        name: `${firstName.trim()} ${lastName.trim()}`, // Concatenate first and last name
+      };
+
       const response = await apiService.register(registrationData);
 
       // Transform backend user data to match frontend User interface
@@ -277,9 +298,12 @@ export default function RegisterScreen() {
     if (stepError) setStepError(""); // Clear error when user starts typing
   };
 
-  // Validation for buttons
+  // Updated validation for buttons to check firstName and lastName instead of name
   const isStep1Valid =
-    formData.name.trim() !== "" && formData.email.trim() !== "";
+    formData.firstName.trim() !== "" &&
+    formData.lastName.trim() !== "" &&
+    formData.email.trim() !== "";
+
   const isStep2Valid =
     formData.password.trim() !== "" && formData.confirmPassword.trim() !== "";
 
@@ -372,6 +396,20 @@ export default function RegisterScreen() {
     },
     inputContainer: {
       marginBottom: isSmallScreen ? 12 : 16,
+    },
+    // Added style for the row container
+    nameInputRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: isSmallScreen ? 12 : 16,
+    },
+    // Added style for half-width inputs
+    halfWidthInput: {
+      flex: 1,
+    },
+    // Added style for spacing between inputs in a row
+    inputSpacer: {
+      width: 12,
     },
     passwordStrength: {
       marginTop: 6,
@@ -785,18 +823,44 @@ export default function RegisterScreen() {
                 {/* Step 1: Name and Email */}
                 <Animated.View style={[styles.stepContent, step1AnimatedStyle]}>
                   <View style={styles.form}>
-                    <View style={styles.inputContainer}>
-                      <CustomInput
-                        icon="person"
-                        placeholder="Enter your full name"
-                        value={formData.name}
-                        onChangeText={(text) => updateFormData("name", text)}
-                        autoCapitalize="words"
-                        autoCorrect={false}
-                        focused={nameFocused}
-                        onFocus={() => setNameFocused(true)}
-                        onBlur={() => setNameFocused(false)}
-                      />
+                    {/* Replaced single name field with first name and last name row */}
+                    <View style={styles.nameInputRow}>
+                      {/* First Name Input */}
+                      <View style={styles.halfWidthInput}>
+                        <CustomInput
+                          icon="person"
+                          placeholder="First name"
+                          value={formData.firstName}
+                          onChangeText={(text) =>
+                            updateFormData("firstName", text)
+                          }
+                          autoCapitalize="words"
+                          autoCorrect={false}
+                          focused={firstNameFocused}
+                          onFocus={() => setFirstNameFocused(true)}
+                          onBlur={() => setFirstNameFocused(false)}
+                        />
+                      </View>
+
+                      {/* Spacer between inputs */}
+                      <View style={styles.inputSpacer} />
+
+                      {/* Last Name Input */}
+                      <View style={styles.halfWidthInput}>
+                        <CustomInput
+                          icon="person-outline"
+                          placeholder="Last name"
+                          value={formData.lastName}
+                          onChangeText={(text) =>
+                            updateFormData("lastName", text)
+                          }
+                          autoCapitalize="words"
+                          autoCorrect={false}
+                          focused={lastNameFocused}
+                          onFocus={() => setLastNameFocused(true)}
+                          onBlur={() => setLastNameFocused(false)}
+                        />
+                      </View>
                     </View>
 
                     <View style={styles.inputContainer}>
