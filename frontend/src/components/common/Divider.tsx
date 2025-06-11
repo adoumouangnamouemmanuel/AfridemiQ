@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
     fontSize: isSmallScreen ? 12 : 14,
     color: "#9CA3AF",
     marginHorizontal: 16,
+    fontFamily: "Inter-Medium",
     fontWeight: "500",
   },
 });
