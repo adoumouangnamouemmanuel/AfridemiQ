@@ -2,6 +2,9 @@ const { StatusCodes } = require("http-status-codes");
 const userService = require("../../services/user/user.service");
 const jwt = require("jsonwebtoken");
 const tokenBlacklist = require("../../services/token.blacklist.service");
+const createLogger = require("../../services/logging.service"); // Add this import
+
+const logger = createLogger("UserController"); // Add this line
 
 // Register a new user
 const register = async (req, res) => {
@@ -59,16 +62,19 @@ const getAllUsers = async (req, res) => {
 // Update all preferences
 const updateAllPreferences = async (req, res) => {
   try {
-    const user = await userService.updateAllPreferences(req.user.userId, req.body);
+    const user = await userService.updateAllPreferences(
+      req.user.userId,
+      req.body
+    );
     res.status(StatusCodes.OK).json({
       message: "Préférences mises à jour avec succès",
-      data: user
+      data: user,
     });
   } catch (error) {
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: error.message,
       status: "error",
-      code: error.name
+      code: error.name,
     });
   }
 };
@@ -77,16 +83,20 @@ const updateAllPreferences = async (req, res) => {
 const updatePreferenceType = async (req, res) => {
   try {
     const { type } = req.params;
-    const user = await userService.updatePreferenceType(req.user.userId, type, req.body);
+    const user = await userService.updatePreferenceType(
+      req.user.userId,
+      type,
+      req.body
+    );
     res.status(StatusCodes.OK).json({
       message: "Préférences mises à jour avec succès",
-      data: user
+      data: user,
     });
   } catch (error) {
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: error.message,
       status: "error",
-      code: error.name
+      code: error.name,
     });
   }
 };
@@ -94,16 +104,19 @@ const updatePreferenceType = async (req, res) => {
 // Update multiple preference types
 const updateMultiplePreferences = async (req, res) => {
   try {
-    const user = await userService.updateMultiplePreferences(req.user.userId, req.body);
+    const user = await userService.updateMultiplePreferences(
+      req.user.userId,
+      req.body
+    );
     res.status(StatusCodes.OK).json({
       message: "Préférences mises à jour avec succès",
-      data: user
+      data: user,
     });
   } catch (error) {
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: error.message,
       status: "error",
-      code: error.name
+      code: error.name,
     });
   }
 };
@@ -119,7 +132,10 @@ const updateProgress = async (req, res) => {
 
 // Add friend
 const addFriend = async (req, res) => {
-  const user = await userService.addFriend(req.user.userId, req.params.friendId);
+  const user = await userService.addFriend(
+    req.user.userId,
+    req.params.friendId
+  );
   res.status(StatusCodes.OK).json({
     message: "Ami ajouté avec succès",
     data: user,
@@ -236,16 +252,20 @@ const refreshToken = async (req, res) => {
 const searchUsers = async (req, res) => {
   try {
     const { search, page = 1, limit = 10 } = req.query;
-    
+
     if (!search) {
       return res.status(400).json({
         success: false,
-        message: 'Le terme de recherche est requis'
+        message: "Le terme de recherche est requis",
       });
     }
 
-    const result = await userService.searchUsers(search, parseInt(page), parseInt(limit));
-    
+    const result = await userService.searchUsers(
+      search,
+      parseInt(page),
+      parseInt(limit)
+    );
+
     res.json({
       success: true,
       data: {
@@ -254,15 +274,15 @@ const searchUsers = async (req, res) => {
           total: result.total,
           page: result.page,
           totalPages: result.totalPages,
-          hasMore: result.page < result.totalPages
-        }
-      }
+          hasMore: result.page < result.totalPages,
+        },
+      },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Erreur lors de la recherche des utilisateurs',
-      error: error.message
+      message: "Erreur lors de la recherche des utilisateurs",
+      error: error.message,
     });
   }
 };
@@ -285,13 +305,13 @@ const blockFriend = async (req, res) => {
     const user = await userService.blockFriend(userId, friendId);
     res.status(StatusCodes.OK).json({
       message: "Utilisateur bloqué avec succès",
-      data: user
+      data: user,
     });
   } catch (error) {
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: error.message,
       status: "error",
-      code: error.name
+      code: error.name,
     });
   }
 };
@@ -305,13 +325,13 @@ const unblockFriend = async (req, res) => {
     const user = await userService.unblockFriend(userId, friendId);
     res.status(StatusCodes.OK).json({
       message: "Utilisateur débloqué avec succès",
-      data: user
+      data: user,
     });
   } catch (error) {
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: error.message,
       status: "error",
-      code: error.name
+      code: error.name,
     });
   }
 };
