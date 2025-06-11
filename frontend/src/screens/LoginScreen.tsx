@@ -9,7 +9,6 @@ import {
   Alert,
   Dimensions,
   Image,
-  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
@@ -145,9 +144,6 @@ export default function LoginScreen() {
     gradient: {
       flex: 1,
     },
-    keyboardView: {
-      flex: 1,
-    },
     content: {
       flex: 1,
       paddingHorizontal: 24,
@@ -155,17 +151,17 @@ export default function LoginScreen() {
       paddingVertical: isSmallScreen ? 10 : 20,
     },
     topSection: {
-      flex: isSmallScreen ? 0.45 : isMediumScreen ? 0.5 : 0.55,
+      flex: isSmallScreen ? 0.35 : isMediumScreen ? 0.4 : 0.45,
       justifyContent: "center",
       alignItems: "center",
-      paddingTop: isSmallScreen ? 10 : 20,
+      paddingTop: isSmallScreen ? 5 : 15,
     },
     imageContainer: {
-      width: SCREEN_WIDTH * (isSmallScreen ? 0.5 : 0.6),
-      height: SCREEN_HEIGHT * (isSmallScreen ? 0.18 : 0.25),
+      width: SCREEN_WIDTH * (isSmallScreen ? 0.45 : 0.55),
+      height: SCREEN_HEIGHT * (isSmallScreen ? 0.15 : 0.2),
       justifyContent: "center",
       alignItems: "center",
-      marginBottom: isSmallScreen ? 8 : 16,
+      marginBottom: isSmallScreen ? 6 : 12,
     },
     signInImage: {
       width: "100%",
@@ -173,24 +169,25 @@ export default function LoginScreen() {
       resizeMode: "contain",
     },
     welcomeText: {
-      fontSize: isSmallScreen ? 24 : 28,
+      fontSize: isSmallScreen ? 22 : 26,
       fontWeight: "800",
       color: "#1a1a1a",
       textAlign: "center",
-      marginBottom: isSmallScreen ? 4 : 6,
+      marginBottom: isSmallScreen ? 3 : 5,
       letterSpacing: -0.5,
     },
     subtitle: {
-      fontSize: isSmallScreen ? 12 : 14,
+      fontSize: isSmallScreen ? 11 : 13,
       color: "#6B7280",
-      marginBottom: isSmallScreen ? 8 : 10,
+      marginBottom: isSmallScreen ? 5 : 8,
       textAlign: "center",
-      lineHeight: isSmallScreen ? 16 : 20,
+      lineHeight: isSmallScreen ? 14 : 18,
       fontWeight: "400",
     },
     bottomSection: {
-      flex: isSmallScreen ? 0.55 : isMediumScreen ? 0.5 : 0.45,
-      justifyContent: "flex-end",
+      flex: isSmallScreen ? 0.65 : isMediumScreen ? 0.6 : 0.55,
+      justifyContent: "flex-start",
+      paddingTop: isSmallScreen ? 10 : 15,
       paddingBottom: Platform.OS === "ios" ? 20 : 16,
     },
     form: {
@@ -352,151 +349,140 @@ export default function LoginScreen() {
         colors={["#F8FAFF", "#EEF2FF", "#E0E7FF"]}
         style={styles.gradient}
       >
-        <KeyboardAvoidingView
-          style={styles.keyboardView}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <View style={styles.content}>
-            <View style={styles.topSection}>
-              <Animated.View
-                style={[styles.imageContainer, imageAnimatedStyle]}
-              >
-                <Image
-                  source={require("../assets/sign-in/sign_in.png")}
-                  style={styles.signInImage}
-                />
-              </Animated.View>
-              <Animated.View style={imageAnimatedStyle}>
-                <Text style={styles.welcomeText}>Welcome Back!</Text>
-                <Text style={styles.subtitle}>
-                  Sign in to continue your amazing learning journey
-                </Text>
-              </Animated.View>
-            </View>
+        <View style={styles.content}>
+          <View style={styles.topSection}>
+            <Animated.View style={[styles.imageContainer, imageAnimatedStyle]}>
+              <Image
+                source={require("../assets/sign-in/sign_in.png")}
+                style={styles.signInImage}
+              />
+            </Animated.View>
+            <Animated.View style={imageAnimatedStyle}>
+              <Text style={styles.welcomeText}>Welcome Back!</Text>
+              <Text style={styles.subtitle}>
+                Sign in to continue your amazing learning journey
+              </Text>
+            </Animated.View>
+          </View>
 
-            <Animated.View style={[styles.bottomSection, formAnimatedStyle]}>
-              <View style={styles.form}>
-                <View style={styles.inputContainer}>
-                  <View
-                    style={[
-                      styles.inputWrapper,
-                      emailFocused && styles.inputWrapperFocused,
-                    ]}
-                  >
-                    <Ionicons
-                      name="mail"
-                      size={22}
-                      color={emailFocused ? "#3B82F6" : "#9CA3AF"}
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter your email"
-                      placeholderTextColor="#9CA3AF"
-                      value={email}
-                      onChangeText={setEmail}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      onFocus={() => setEmailFocused(true)}
-                      onBlur={() => setEmailFocused(false)}
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.inputContainer}>
-                  <View
-                    style={[
-                      styles.inputWrapper,
-                      passwordFocused && styles.inputWrapperFocused,
-                    ]}
-                  >
-                    <Ionicons
-                      name="lock-closed"
-                      size={22}
-                      color={passwordFocused ? "#3B82F6" : "#9CA3AF"}
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter your password"
-                      placeholderTextColor="#9CA3AF"
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry={!showPassword}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      onFocus={() => setPasswordFocused(true)}
-                      onBlur={() => setPasswordFocused(false)}
-                    />
-                    <TouchableOpacity
-                      style={styles.eyeIcon}
-                      onPress={() => setShowPassword(!showPassword)}
-                    >
-                      <Ionicons
-                        name={showPassword ? "eye" : "eye-off"}
-                        size={22}
-                        color="#9CA3AF"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <TouchableOpacity style={styles.forgotPassword}>
-                    <Text style={styles.forgotPasswordText}>
-                      Forgot Password?
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                <TouchableOpacity
-                  onPress={handleLogin}
-                  disabled={isLoading}
-                  style={isLoading && styles.loginButtonDisabled}
+          <Animated.View style={[styles.bottomSection, formAnimatedStyle]}>
+            <View style={styles.form}>
+              <View style={styles.inputContainer}>
+                <View
+                  style={[
+                    styles.inputWrapper,
+                    emailFocused && styles.inputWrapperFocused,
+                  ]}
                 >
-                  <LinearGradient
-                    colors={["#3B82F6", "#1D4ED8", "#1E40AF"]}
-                    style={styles.loginButton}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    {isLoading ? (
-                      <View style={styles.loadingContainer}>
-                        <Ionicons name="refresh" size={20} color="white" />
-                        <Text style={styles.loadingText}>Signing In...</Text>
-                      </View>
-                    ) : (
-                      <Text style={styles.loginButtonText}>Sign In</Text>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
+                  <Ionicons
+                    name="mail"
+                    size={22}
+                    color={emailFocused ? "#3B82F6" : "#9CA3AF"}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your email"
+                    placeholderTextColor="#9CA3AF"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onFocus={() => setEmailFocused(true)}
+                    onBlur={() => setEmailFocused(false)}
+                  />
+                </View>
               </View>
 
-              <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or continue with</Text>
-                <View style={styles.dividerLine} />
+              <View style={styles.inputContainer}>
+                <View
+                  style={[
+                    styles.inputWrapper,
+                    passwordFocused && styles.inputWrapperFocused,
+                  ]}
+                >
+                  <Ionicons
+                    name="lock-closed"
+                    size={22}
+                    color={passwordFocused ? "#3B82F6" : "#9CA3AF"}
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your password"
+                    placeholderTextColor="#9CA3AF"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onFocus={() => setPasswordFocused(true)}
+                    onBlur={() => setPasswordFocused(false)}
+                  />
+                  <TouchableOpacity
+                    style={styles.eyeIcon}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Ionicons
+                      name={showPassword ? "eye" : "eye-off"}
+                      size={22}
+                      color="#9CA3AF"
+                    />
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity style={styles.forgotPassword}>
+                  <Text style={styles.forgotPasswordText}>
+                    Forgot Password?
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               <TouchableOpacity
-                style={styles.googleButton}
-                onPress={handleGoogleLogin}
+                onPress={handleLogin}
+                disabled={isLoading}
+                style={isLoading && styles.loginButtonDisabled}
               >
-                <Ionicons name="logo-google" size={24} color="#DB4437" />
-                <Text style={styles.googleButtonText}>
-                  Continue with Google
-                </Text>
+                <LinearGradient
+                  colors={["#3B82F6", "#1D4ED8", "#1E40AF"]}
+                  style={styles.loginButton}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  {isLoading ? (
+                    <View style={styles.loadingContainer}>
+                      <Ionicons name="refresh" size={20} color="white" />
+                      <Text style={styles.loadingText}>Signing In...</Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.loginButtonText}>Sign In</Text>
+                  )}
+                </LinearGradient>
               </TouchableOpacity>
+            </View>
 
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>
-                  Don&apos;t have an account?
-                </Text>
-                <TouchableOpacity onPress={() => router.push("/auth/register")}>
-                  <Text style={styles.signupLink}>Sign Up</Text>
-                </TouchableOpacity>
-              </View>
-            </Animated.View>
-          </View>
-        </KeyboardAvoidingView>
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or continue with</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              style={styles.googleButton}
+              onPress={handleGoogleLogin}
+            >
+              <Ionicons name="logo-google" size={24} color="#DB4437" />
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
+            </TouchableOpacity>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Don&apos;t have an account?</Text>
+              <TouchableOpacity onPress={() => router.push("/auth/register")}>
+                <Text style={styles.signupLink}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </View>
       </LinearGradient>
     </SafeAreaView>
   );
