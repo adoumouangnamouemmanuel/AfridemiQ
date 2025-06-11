@@ -1,6 +1,4 @@
 "use client";
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -34,6 +32,7 @@ import {
   SocialButton,
 } from "../components/common";
 import { apiService } from "../services/api.service";
+import { authService } from "../services/auth.service";
 import { useUser } from "../utils/UserContext";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -47,41 +46,46 @@ export default function RegisterScreen() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Modified form data to include firstName and lastName instead of name
+  // Form data with firstName and lastName fields
   const [formData, setFormData] = useState({
-    firstName: "", // Added firstName field
-    lastName: "", // Added lastName field
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
+  // UI state management
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Focus states for form inputs
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
-
-  // Added focus states for first and last name fields
   const [firstNameFocused, setFirstNameFocused] = useState(false);
   const [lastNameFocused, setLastNameFocused] = useState(false);
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [stepError, setStepError] = useState("");
 
+  // Animation values
   const slideUp = useSharedValue(100);
   const fadeIn = useSharedValue(0);
   const scaleIn = useSharedValue(0.8);
   const stepSlide = useSharedValue(0);
 
+  // Initialize animations on component mount
   React.useEffect(() => {
     slideUp.value = withDelay(300, withSpring(0, { damping: 20 }));
     fadeIn.value = withDelay(200, withSpring(1));
     scaleIn.value = withDelay(400, withSpring(1, { damping: 15 }));
 
+    // Keyboard event listeners
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       () => setKeyboardVisible(true)
@@ -97,6 +101,7 @@ export default function RegisterScreen() {
     };
   }, [fadeIn, scaleIn, slideUp]);
 
+  // Animation styles
   const imageAnimatedStyle = useAnimatedStyle(() => ({
     opacity: fadeIn.value,
     transform: [{ scale: scaleIn.value }],
@@ -107,7 +112,6 @@ export default function RegisterScreen() {
     transform: [{ translateY: slideUp.value }],
   }));
 
-  // Fixed animation styles for steps
   const step1AnimatedStyle = useAnimatedStyle(() => ({
     transform: [
       {
@@ -130,6 +134,7 @@ export default function RegisterScreen() {
     opacity: withTiming(currentStep === 2 ? 1 : 0, { duration: 300 }),
   }));
 
+  // Validation functions
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -156,10 +161,10 @@ export default function RegisterScreen() {
     formData.confirmPassword.length > 0;
   const passwordStrength = getPasswordStrength();
 
+  // Step 1 validation (name and email)
   const validateStep1 = async () => {
     setStepError("");
 
-    // Updated validation to check both firstName and lastName
     if (!formData.firstName.trim()) {
       setStepError("Please enter your first name");
       return false;
@@ -183,6 +188,7 @@ export default function RegisterScreen() {
     return true;
   };
 
+  // Step 2 validation (passwords)
   const validateStep2 = () => {
     setStepError("");
 
@@ -209,6 +215,7 @@ export default function RegisterScreen() {
     return true;
   };
 
+  // Handle step 1 continue
   const handleContinue = async () => {
     if (currentStep === 1) {
       const isValid = await validateStep1();
@@ -219,54 +226,42 @@ export default function RegisterScreen() {
     }
   };
 
+  // Handle back to step 1
   const handleBack = () => {
     setCurrentStep(1);
     setStepError("");
     stepSlide.value = 0;
   };
 
+  // Handle user registration
   const handleRegister = async () => {
     if (!validateStep2()) return;
 
     setIsLoading(true);
+    setErrorMessage("");
 
     try {
-      // Create a combined name from firstName and lastName
-      // and prepare the data for API submission
+      // Prepare registration data by combining first and last name
       const { firstName, lastName, confirmPassword, ...otherData } = formData;
       const registrationData = {
         ...otherData,
-        name: `${firstName.trim()} ${lastName.trim()}`, // Concatenate first and last name
+        name: `${firstName.trim()} ${lastName.trim()}`, // Concatenate names for backend
       };
 
+      // Call registration API
       const response = await apiService.register(registrationData);
 
-      // Transform backend user data to match frontend User interface
-      const userData = {
-        id: response.user._id,
-        name: response.user.name,
-        email: response.user.email,
-        country: response.user.country,
-        selectedExam: response.user.progress.selectedExam || "",
-        goalDate: response.user.progress.goalDate
-          ? new Date(response.user.progress.goalDate)
-          : undefined,
-        xp: response.user.progress.xp,
-        level: response.user.progress.level,
-        streak: response.user.progress.streak.current,
-        avatar: response.user.avatar,
-        badges: response.user.progress.badges,
-        completedTopics: response.user.progress.completedTopics,
-        weakSubjects: response.user.progress.weakSubjects,
-        isPremium: response.user.isPremium,
-        role: response.user.role,
-      };
+      // Transform user data to frontend format
+      const userData = authService.transformUserData(response.user);
 
-      // Save user and token to storage
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
-      await AsyncStorage.setItem("token", response.token);
+      // Store authentication data
+      await authService.storeAuthData(
+        userData,
+        response.token,
+        response.refreshToken
+      );
 
-      // Set user and token in context
+      // Update context
       setUser(userData);
       setToken(response.token);
 
@@ -275,29 +270,37 @@ export default function RegisterScreen() {
     } catch (error) {
       console.error("Registration error:", error);
       setIsLoading(false);
+      setErrorMessage(
+        error instanceof Error ? error.message : "Registration failed"
+      );
       setShowError(true);
     }
   };
 
+  // Handle successful registration
   const handleSuccessHide = () => {
     setShowSuccess(false);
     router.replace("/auth/onboarding");
   };
 
+  // Handle registration error
   const handleErrorHide = () => {
     setShowError(false);
+    setErrorMessage("");
   };
 
+  // Placeholder for Google registration
   const handleGoogleRegister = () => {
     Alert.alert("Google Sign Up", "Google authentication coming soon!");
   };
 
+  // Update form data and clear errors
   const updateFormData = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    if (stepError) setStepError(""); // Clear error when user starts typing
+    if (stepError) setStepError("");
   };
 
-  // Updated validation for buttons to check firstName and lastName instead of name
+  // Form validation states
   const isStep1Valid =
     formData.firstName.trim() !== "" &&
     formData.lastName.trim() !== "" &&
@@ -306,6 +309,7 @@ export default function RegisterScreen() {
   const isStep2Valid =
     formData.password.trim() !== "" && formData.confirmPassword.trim() !== "";
 
+  // Your existing styles remain unchanged
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -396,17 +400,14 @@ export default function RegisterScreen() {
     inputContainer: {
       marginBottom: isSmallScreen ? 12 : 16,
     },
-    // Added style for the row container
     nameInputRow: {
       flexDirection: "row",
       justifyContent: "space-between",
       marginBottom: isSmallScreen ? 12 : 16,
     },
-    // Added style for half-width inputs
     halfWidthInput: {
       flex: 1,
     },
-    // Added style for spacing between inputs in a row
     inputSpacer: {
       width: 12,
     },
@@ -513,7 +514,6 @@ export default function RegisterScreen() {
       fontWeight: "600",
       marginLeft: 8,
     },
-    // Fixed step container styles
     stepsContainer: {
       flex: 1,
       position: "relative",
@@ -525,17 +525,16 @@ export default function RegisterScreen() {
       left: 0,
       right: 0,
       bottom: 0,
-      justifyContent: "center", // This centers the content vertically
+      justifyContent: "center",
     },
-    // Step 2 specific content styling for better vertical centering
     step2Content: {
       flex: 1,
-      justifyContent: "space-between", // Distributes space evenly
+      justifyContent: "space-between",
       paddingVertical: isSmallScreen ? 20 : 30,
     },
     step2FormContainer: {
       flex: 1,
-      justifyContent: "center", // Centers the form vertically
+      justifyContent: "center",
     },
     stepIndicator: {
       flexDirection: "row",
@@ -644,8 +643,8 @@ export default function RegisterScreen() {
     buttonRow: {
       flexDirection: "row",
       justifyContent: "space-between",
-      alignItems: "stretch", // Changed to stretch for equal height
-      marginTop: isSmallScreen ? 30 : 40, // Increased margin for better spacing
+      alignItems: "stretch",
+      marginTop: isSmallScreen ? 30 : 40,
       gap: 16,
     },
     baseButton: {
@@ -744,9 +743,8 @@ export default function RegisterScreen() {
                 </Text>
               </Animated.View>
 
-              {/* Enhanced Step Indicator */}
+              {/* Step Indicator */}
               <View style={styles.stepIndicator}>
-                {/* Step 1 */}
                 <View style={styles.stepContainer}>
                   <View
                     style={[
@@ -779,7 +777,6 @@ export default function RegisterScreen() {
                   </Text>
                 </View>
 
-                {/* Progress Line */}
                 <View style={styles.stepLine}>
                   <Animated.View
                     style={[
@@ -791,7 +788,6 @@ export default function RegisterScreen() {
                   />
                 </View>
 
-                {/* Step 2 */}
                 <View style={styles.stepContainer}>
                   <View
                     style={[
@@ -822,9 +818,8 @@ export default function RegisterScreen() {
                 {/* Step 1: Name and Email */}
                 <Animated.View style={[styles.stepContent, step1AnimatedStyle]}>
                   <View style={styles.form}>
-                    {/* Replaced single name field with first name and last name row */}
+                    {/* First and Last Name Row */}
                     <View style={styles.nameInputRow}>
-                      {/* First Name Input */}
                       <View style={styles.halfWidthInput}>
                         <CustomInput
                           icon="person"
@@ -841,10 +836,8 @@ export default function RegisterScreen() {
                         />
                       </View>
 
-                      {/* Spacer between inputs */}
                       <View style={styles.inputSpacer} />
 
-                      {/* Last Name Input */}
                       <View style={styles.halfWidthInput}>
                         <CustomInput
                           icon="person-outline"
@@ -1040,7 +1033,7 @@ export default function RegisterScreen() {
         </View>
       </LinearGradient>
 
-      {/* Loaders */}
+      {/* Enhanced Loaders with better error messaging */}
       <Loader
         visible={isLoading}
         text={currentStep === 1 ? "Verifying email..." : "Creating Account..."}
@@ -1066,8 +1059,8 @@ export default function RegisterScreen() {
         visible={showError}
         type="error"
         text="Registration Failed"
-        subtitle="Please check your information and try again"
-        duration={2500}
+        subtitle={errorMessage || "Please check your information and try again"}
+        duration={3000}
         onHide={handleErrorHide}
         size="medium"
       />
