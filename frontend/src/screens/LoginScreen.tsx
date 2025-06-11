@@ -31,6 +31,7 @@ import {
   SocialButton,
 } from "../components/common";
 import { apiService } from "../services/api.service";
+import { authService } from "../services/auth.service";
 import { useUser } from "../utils/UserContext";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -42,20 +43,29 @@ const isMediumScreen = SCREEN_HEIGHT >= 700 && SCREEN_HEIGHT < 850;
 export default function LoginScreen() {
   const { setUser, setToken } = useUser();
   const router = useRouter();
+
+  // Form state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Focus states
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
+  // Animation values
   const slideUp = useSharedValue(100);
   const fadeIn = useSharedValue(0);
   const scaleIn = useSharedValue(0.8);
 
+  // Initialize animations and keyboard listeners
   React.useEffect(() => {
     slideUp.value = withDelay(300, withSpring(0, { damping: 20 }));
     fadeIn.value = withDelay(200, withSpring(1));
@@ -76,6 +86,7 @@ export default function LoginScreen() {
     };
   }, [fadeIn, scaleIn, slideUp]);
 
+  // Animation styles
   const imageAnimatedStyle = useAnimatedStyle(() => ({
     opacity: fadeIn.value,
     transform: [{ scale: scaleIn.value }],
@@ -86,8 +97,10 @@ export default function LoginScreen() {
     transform: [{ translateY: slideUp.value }],
   }));
 
+  // Handle user login
   const handleLogin = async () => {
-    if (!email || !password) {
+    // Basic validation
+    if (!email.trim() || !password.trim()) {
       Alert.alert(
         "Missing Information",
         "Please enter both email and password"
@@ -95,54 +108,48 @@ export default function LoginScreen() {
       return;
     }
 
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address");
+      return;
+    }
+
     setIsLoading(true);
+    setErrorMessage("");
 
     try {
-      const response = await apiService.login({ email, password });
+      // Call login API
+      const response = await apiService.login({
+        email: email.trim(),
+        password,
+      });
 
-      // Transform backend user data to match frontend User interface
-      const userData = {
-        id: response.user._id,
-        name: response.user.name,
-        email: response.user.email,
-        country: response.user.country,
-        selectedExam: response.user.progress.selectedExam || "",
-        goalDate: response.user.progress.goalDate
-          ? new Date(response.user.progress.goalDate)
-          : undefined,
-        xp: response.user.progress.xp,
-        level: response.user.progress.level,
-        streak: response.user.progress.streak.current,
-        avatar: response.user.avatar,
-        badges: response.user.progress.badges,
-        completedTopics: response.user.progress.completedTopics,
-        weakSubjects: response.user.progress.weakSubjects,
-        isPremium: response.user.isPremium,
-        role: response.user.role,
-      };
+      // Transform user data to frontend format
+      const userData = authService.transformUserData(response.user);
 
-      // Save user and token to storage
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
-      await AsyncStorage.setItem("token", response.token);
-      if (response.refreshToken) {
-        await AsyncStorage.setItem("refreshToken", response.refreshToken);
-      }
+      // Store authentication data
+      await authService.storeAuthData(
+        userData,
+        response.token,
+        response.refreshToken
+      );
 
-      // Set user and token in context
+      // Update context
       setUser(userData);
       setToken(response.token);
 
       setIsLoading(false);
       setShowSuccess(true);
-
-      // Navigation will be handled by onHide callback
     } catch (error) {
       console.error("Login error:", error);
       setIsLoading(false);
+      setErrorMessage(error instanceof Error ? error.message : "Login failed");
       setShowError(true);
     }
   };
 
+  // Handle successful login
   const handleSuccessHide = () => {
     setShowSuccess(false);
     // Check if user has completed onboarding
@@ -155,18 +162,31 @@ export default function LoginScreen() {
     });
   };
 
+  // Handle login error
   const handleErrorHide = () => {
     setShowError(false);
+    setErrorMessage("");
   };
 
-  // Add validation for button state
+  // Form validation
   const isFormValid = email.trim() !== "" && password.trim() !== "";
 
-  // Placeholder for Google login handler
+  // Placeholder for Google login
   const handleGoogleLogin = () => {
     Alert.alert("Google Login", "Google login is not implemented yet.");
   };
 
+  // Handle forgot password
+  const handleForgotPassword = () => {
+    if (!email.trim()) {
+      Alert.alert("Enter Email", "Please enter your email address first");
+      return;
+    }
+    // Navigate to forgot password screen or show modal
+    Alert.alert("Forgot Password", "Password reset functionality coming soon!");
+  };
+
+  // Your existing styles remain unchanged
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -451,7 +471,10 @@ export default function LoginScreen() {
                   showPassword={showPassword}
                   onTogglePassword={() => setShowPassword(!showPassword)}
                 />
-                <TouchableOpacity style={styles.forgotPassword}>
+                <TouchableOpacity
+                  style={styles.forgotPassword}
+                  onPress={handleForgotPassword}
+                >
                   <Text style={styles.forgotPasswordText}>
                     Forgot Password?
                   </Text>
@@ -462,7 +485,7 @@ export default function LoginScreen() {
                 title="Sign In"
                 onPress={handleLogin}
                 disabled={isLoading || !isFormValid}
-                isLoading={false}
+                isLoading={isLoading}
                 loadingText="Signing In..."
               />
             </View>
@@ -493,7 +516,7 @@ export default function LoginScreen() {
         </View>
       </LinearGradient>
 
-      {/* Loaders */}
+      {/* Enhanced Loaders with better error messaging */}
       <Loader
         visible={isLoading}
         text="Signing In..."
@@ -515,8 +538,8 @@ export default function LoginScreen() {
         visible={showError}
         type="error"
         text="Login Failed"
-        subtitle="Your email or password is incorrect"
-        duration={2500}
+        subtitle={errorMessage || "Your email or password is incorrect"}
+        duration={3000}
         onHide={handleErrorHide}
         size="medium"
       />
