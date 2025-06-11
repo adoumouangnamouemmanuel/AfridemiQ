@@ -261,7 +261,7 @@ export default function LoginScreen() {
       alignItems: "center",
       backgroundColor: "white",
       borderRadius: 16,
-      borderWidth: 2,
+      borderWidth: 1,
       borderColor: "#E5E7EB",
       paddingHorizontal: 16,
       height: isSmallScreen ? 48 : 52,
