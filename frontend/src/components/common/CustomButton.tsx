@@ -19,6 +19,7 @@ interface CustomButtonProps extends TouchableOpacityProps {
   loadingText?: string;
   marginTop?: number;
   marginBottom?: number;
+  style?: any;
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
@@ -28,8 +29,11 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   marginTop = 0,
   marginBottom = isSmallScreen ? 8 : 12,
   disabled,
+  style,
   ...touchableProps
 }) => {
+  const buttonStyle = [styles.button, { marginTop, marginBottom }, style];
+
   return (
     <TouchableOpacity
       disabled={disabled || isLoading}
@@ -40,8 +44,12 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       {...touchableProps}
     >
       <LinearGradient
-        colors={["#3B82F6", "#1D4ED8", "#1E40AF"]}
-        style={styles.button}
+        colors={
+          style?.backgroundColor
+            ? [style.backgroundColor, style.backgroundColor]
+            : ["#3B82F6", "#1D4ED8", "#1E40AF"]
+        }
+        style={buttonStyle}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
