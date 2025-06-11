@@ -50,7 +50,6 @@ export default function ProfileScreen() {
   const [selectedTab, setSelectedTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [hasTokenError, setHasTokenError] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
 
@@ -74,6 +73,7 @@ export default function ProfileScreen() {
   // Load profile data on component mount
   useEffect(() => {
     loadProfileData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Import apiService at the top of the file or dynamically here
