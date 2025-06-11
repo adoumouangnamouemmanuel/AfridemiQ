@@ -37,6 +37,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     slideIn.value = withDelay(100, withSpring(0, { damping: 20 }));
     fadeIn.value = withDelay(200, withSpring(1));
     scaleIn.value = withDelay(300, withSpring(1, { damping: 15 }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const headerAnimatedStyle = useAnimatedStyle(() => ({
