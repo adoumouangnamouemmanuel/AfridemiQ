@@ -35,7 +35,7 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
   items,
   selectedValue,
   onValueChange,
-  placeholder = "Select an option",
+  placeholder = "Select",
   style,
   icon = "chevron-down",
   label,
