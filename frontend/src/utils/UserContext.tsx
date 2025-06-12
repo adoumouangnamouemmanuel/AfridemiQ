@@ -12,38 +12,7 @@ import {
 } from "react";
 import { authService } from "../services/auth.service";
 import { apiService } from "../services/api.service";
-
-// User interface aligned with auth.service.tsx
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  country: string;
-  selectedExam?: string;
-  goalDate?: Date;
-  xp: number;
-  level: number;
-  streak: number;
-  avatar?: string;
-  badges: string[];
-  completedTopics: string[];
-  weakSubjects: string[];
-  isPremium: boolean;
-  role: string;
-}
-
-interface UserContextType {
-  user: User | null;
-  setUser: (user: User | null) => void;
-  token: string | null;
-  setToken: (token: string | null) => void;
-  handleTokenExpiration: () => Promise<void>;
-  refreshUserSession: () => Promise<void>;
-  gracefulLogout: () => Promise<void>;
-  isLoading: boolean;
-  isSessionHealthy: boolean;
-  lastRefreshTime: Date | null;
-}
+import type { User, UserContextType } from "../types/user/user.types";
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -189,7 +158,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       console.error("❌ CONTEXT: Token expiration handling failed:", error);
       await gracefulLogout();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshUserSession]);
 
   /**
@@ -307,8 +276,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         sessionCheckIntervalRef.current = null;
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, token, setupSessionMonitoring]); // Only depend on user ID and token existence
+     
+  }, [user, token, setupSessionMonitoring]); // Only depend on user and token existence
 
   const value: UserContextType = {
     user,
