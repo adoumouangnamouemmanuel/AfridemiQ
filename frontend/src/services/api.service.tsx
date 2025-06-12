@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_BASE_URL = "http://192.168.223.246:3000/api"; // Hardcoded for dev mode
+const API_BASE_URL = "http://192.168.223.246:3000/api"; // Change to your backend URL
 
 interface ApiResponse<T> {
   message: string;
@@ -50,42 +50,25 @@ interface RefreshTokenData {
   refreshToken: string;
 }
 
-class ApiError extends Error {
-  constructor(
-    message: string,
-    public status?: number,
-    public endpoint?: string
-  ) {
-    super(message);
-    this.name = "ApiError";
-  }
-}
-
 class ApiService {
-  private isRefreshing = false;
-  private refreshPromise: Promise<string> | null = null;
-  private failedQueue: {
-    resolve: (token: string) => void;
-    reject: (error: ApiError) => void;
-  }[] = [];
-
-  /**
-   * Retrieves the stored access token from AsyncStorage.
-   * @returns The stored token or null if not found or on error.
-   */
+  // Private method to get stored token
   private async getStoredToken(): Promise<string | null> {
     try {
-      return await AsyncStorage.getItem("token");
+      // TODO: Remove all console.log statements before production deployment
+      console.log("🔑 TOKEN: Attempting to get stored token");
+      const token = await AsyncStorage.getItem("token");
+      console.log(
+        "🔑 TOKEN:",
+        token ? `Found token: ${token.substring(0, 20)}...` : "No token found"
+      );
+      return token;
     } catch (error) {
       console.error("Error getting stored token:", error);
       return null;
     }
   }
 
-  /**
-   * Retrieves the stored refresh token from AsyncStorage.
-   * @returns The stored refresh token or null if not found or on error.
-   */
+  // Private method to get stored refresh token
   private async getStoredRefreshToken(): Promise<string | null> {
     try {
       return await AsyncStorage.getItem("refreshToken");
@@ -95,9 +78,48 @@ class ApiService {
     }
   }
 
-  /**
-   * Clears all stored authentication data from AsyncStorage.
-   */
+  // Private method to handle token refresh
+  private async refreshAccessToken(): Promise<string | null> {
+    try {
+      const refreshToken = await this.getStoredRefreshToken();
+      if (!refreshToken) {
+        throw new Error("No refresh token available");
+      }
+
+      // TODO: Remove all console.log statements before production deployment
+      console.log("🔄 REFRESH: Starting token refresh process");
+      console.log(
+        "🔄 REFRESH: Current refresh token:",
+        refreshToken ? `${refreshToken.substring(0, 20)}...` : "None"
+      );
+
+      const response = await this.makeRequest<{ token: string }>(
+        "/users/refresh-token",
+        {
+          method: "POST",
+          body: JSON.stringify({ refreshToken }),
+        }
+      );
+
+      // Store the new access token
+      await AsyncStorage.setItem("token", response.data.token);
+
+      // TODO: Remove all console.log statements before production deployment
+      console.log("✅ REFRESH: Token refresh successful");
+
+      return response.data.token;
+    } catch (error) {
+      // TODO: Remove all console.log statements before production deployment
+      console.error("❌ REFRESH: Token refresh failed:", error);
+
+      console.error("Token refresh failed:", error);
+      // Clear stored tokens if refresh fails
+      await this.clearStoredTokens();
+      throw error;
+    }
+  }
+
+  // Private method to clear stored authentication data
   private async clearStoredTokens(): Promise<void> {
     try {
       await AsyncStorage.multiRemove(["token", "refreshToken", "user"]);
@@ -106,188 +128,74 @@ class ApiService {
     }
   }
 
-  /**
-   * Refreshes the access token and manages queued requests.
-   * @returns The new access token or null if refresh fails.
-   * @throws ApiError if refresh fails.
-   */
-  private async refreshAccessToken(): Promise<string | null> {
-    if (this.isRefreshing && this.refreshPromise) {
-      return this.refreshPromise;
-    }
-
-    this.isRefreshing = true;
-    this.refreshPromise = this._performRefresh();
-
-    try {
-      const newToken = await this.refreshPromise;
-      this.processQueue(null, newToken);
-      return newToken;
-    } catch (error) {
-      const apiError =
-        error instanceof ApiError
-          ? error
-          : new ApiError(
-              "Token refresh failed",
-              undefined,
-              "/users/refresh-token"
-            );
-      this.processQueue(apiError, null);
-      throw apiError;
-    } finally {
-      this.isRefreshing = false;
-      this.refreshPromise = null;
-    }
-  }
-
-  /**
-   * Performs the actual token refresh request.
-   * @returns The new access token.
-   * @throws ApiError if the refresh request fails.
-   */
-  private async _performRefresh(): Promise<string> {
-    const refreshToken = await this.getStoredRefreshToken();
-    if (!refreshToken) {
-      throw new ApiError(
-        "No refresh token available",
-        undefined,
-        "/users/refresh-token"
-      );
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/refresh-token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refreshToken }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new ApiError(
-          data.message || "Token refresh failed",
-          response.status,
-          "/users/refresh-token"
-        );
-      }
-
-      await AsyncStorage.setItem("token", data.data.token);
-      return data.data.token;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      console.error("Token refresh failed:", error);
-      await this.clearStoredTokens();
-      throw error instanceof ApiError
-        ? error
-        : new ApiError(
-            "Network error during token refresh",
-            undefined,
-            "/users/refresh-token"
-          );
-    }
-  }
-
-  /**
-   * Processes queued requests after a token refresh.
-   * @param error The error to reject queued requests with, if any.
-   * @param token The new token to resolve queued requests with, if successful.
-   */
-  private processQueue(error: ApiError | null, token: string | null): void {
-    this.failedQueue.forEach(({ resolve, reject }) => {
-      if (error) {
-        reject(error);
-      } else if (token) {
-        resolve(token);
-      }
-    });
-    this.failedQueue = [];
-  }
-
-  /**
-   * Makes an API request with token handling and retry logic.
-   * @param endpoint The API endpoint to call.
-   * @param options Fetch options, including a requiresAuth flag.
-   * @param retryCount Number of retries (default: 0).
-   * @returns The API response data.
-   * @throws ApiError if the request fails.
-   */
+  // Enhanced makeRequest method with automatic token refresh
   private async makeRequest<T>(
     endpoint: string,
     options: RequestInit & { requiresAuth?: boolean } = {},
     retryCount = 0
   ): Promise<ApiResponse<T>> {
-    const { requiresAuth = true, ...fetchOptions } = options;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    const maxRetries = 3;
 
     try {
-      const token = requiresAuth ? await this.getStoredToken() : null;
+      // TODO: Remove detailed logging before production
+      console.log(
+        `🌐 API: Making request to ${endpoint}, retry: ${retryCount}`
+      );
+
+      // Get token for authenticated requests
+      const token = await this.getStoredToken();
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        ...((fetchOptions.headers as Record<string, string>) || {}),
+        ...((options.headers as Record<string, string>) || {}),
       };
 
-      if (token && requiresAuth) {
+      // Add authorization header if token exists and endpoint requires auth
+      if (
+        token &&
+        !endpoint.includes("/login") &&
+        !endpoint.includes("/register")
+      ) {
         headers.Authorization = `Bearer ${token}`;
       }
 
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...fetchOptions,
+        ...options,
         headers,
-        signal: controller.signal,
       });
-
-      clearTimeout(timeoutId);
 
       const data = await response.json();
 
       if (
-        !data ||
-        typeof data !== "object" ||
-        !("message" in data && "data" in data)
+        response.status === 401 &&
+        options.requiresAuth &&
+        retryCount < maxRetries
       ) {
-        throw new ApiError(
-          "Invalid response format",
-          response.status,
-          endpoint
-        );
-      }
-
-      if (response.status === 401 && requiresAuth && retryCount === 0) {
-        if (this.isRefreshing) {
-          return new Promise((resolve, reject) => {
-            this.failedQueue.push({
-              resolve: () =>
-                resolve(this.makeRequest(endpoint, options, retryCount + 1)),
-              reject,
-            });
-          });
-        }
+        // TODO: Remove detailed logging before production
+        console.log("🔄 AUTH: Token expired, attempting refresh...");
 
         try {
-          console.log("Token expired, attempting refresh...");
           const newToken = await this.refreshAccessToken();
           if (newToken) {
-            console.log("Token refreshed successfully, retrying request");
+            // TODO: Remove detailed logging before production
+            console.log(
+              "✅ AUTH: Token refreshed successfully, retrying request"
+            );
             return this.makeRequest(endpoint, options, retryCount + 1);
           }
         } catch (refreshError) {
-          console.error("Token refresh failed:", refreshError);
-          const isCriticalEndpoint =
-            endpoint.includes("/profile") || endpoint.includes("/user");
+          // TODO: Remove detailed logging before production
+          console.error("❌ AUTH: Token refresh failed:", refreshError);
+
+          // Don't throw immediately - try one more time with silent refresh
+          if (retryCount === 0) {
+            const silentRefresh = await this.silentRefresh();
+            if (silentRefresh) {
+              return this.makeRequest(endpoint, options, retryCount + 1);
+            }
+          }
+
           throw new ApiError(
-            isCriticalEndpoint
-              ? "Session expired. Please login again."
-              : data.message || "Request failed",
+            "Session expired. Please login again.",
             response.status,
             endpoint
           );
@@ -295,114 +203,102 @@ class ApiService {
       }
 
       if (!response.ok) {
-        throw new ApiError(
-          data.message || "Something went wrong",
-          response.status,
-          endpoint
-        );
+        throw new Error(data.message || "Something went wrong");
       }
 
-      return data as ApiResponse<T>;
+      return data;
     } catch (error) {
-      clearTimeout(timeoutId);
-      throw error instanceof ApiError
-        ? error
-        : new ApiError("Network error occurred", undefined, endpoint);
+      // TODO: Remove detailed logging before production
+      console.error(`❌ API: Request failed for ${endpoint}:`, error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("Network error occurred");
     }
   }
 
-  /**
-   * Registers a new user.
-   * @param userData The registration data.
-   * @returns The authentication response.
-   */
+  // Register a new user
   async register(userData: RegisterData): Promise<AuthResponse> {
     const response = await this.makeRequest<AuthResponse>("/users/register", {
       method: "POST",
       body: JSON.stringify(userData),
-      requiresAuth: false,
     });
     return response.data;
   }
 
-  /**
-   * Logs in a user.
-   * @param credentials The login credentials.
-   * @returns The authentication response.
-   */
+  // Login user
   async login(credentials: LoginData): Promise<AuthResponse> {
     const response = await this.makeRequest<AuthResponse>("/users/login", {
       method: "POST",
       body: JSON.stringify(credentials),
-      requiresAuth: false,
     });
     return response.data;
   }
 
-  /**
-   * Logs out the current user.
-   */
+  // Logout user
   async logout(): Promise<void> {
     try {
+      // Call backend logout endpoint
       await this.makeRequest("/users/logout", {
         method: "POST",
       });
     } catch (error) {
       console.error("Logout API call failed:", error);
+      // Continue with local cleanup even if API call fails
     } finally {
+      // Always clear local storage
       await this.clearStoredTokens();
     }
   }
 
-  /**
-   * Checks if the user is authenticated (valid tokens exist).
-   * @returns True if authenticated, false otherwise.
-   */
+  // Refresh access token
+  async refreshToken(
+    refreshTokenData: RefreshTokenData
+  ): Promise<{ token: string }> {
+    const response = await this.makeRequest<{ token: string }>(
+      "/users/refresh-token",
+      {
+        method: "POST",
+        body: JSON.stringify(refreshTokenData),
+      }
+    );
+    return response.data;
+  }
+
+  // Check if user is authenticated
   async isAuthenticated(): Promise<boolean> {
     try {
       const token = await this.getStoredToken();
       const refreshToken = await this.getStoredRefreshToken();
-      if (!token || !refreshToken) return false;
-      return await this.checkTokenValidity();
+      return !!(token && refreshToken);
     } catch {
       return false;
     }
   }
 
-  /**
-   * Retrieves the current user data from storage.
-   * @returns The user data or null if not found.
-   */
-  async getCurrentUser(): Promise<AuthResponse["user"] | null> {
+  // Get current user data from storage
+  async getCurrentUser(): Promise<any | null> {
     try {
       const userString = await AsyncStorage.getItem("user");
-      return userString
-        ? (JSON.parse(userString) as AuthResponse["user"])
-        : null;
+      return userString ? JSON.parse(userString) : null;
     } catch (error) {
       console.error("Error getting current user:", error);
       return null;
     }
   }
 
-  /**
-   * Forces a logout by clearing tokens.
-   */
-  async forceLogout(): Promise<void> {
-    await this.clearStoredTokens();
-  }
-
-  /**
-   * Checks if the access token is valid.
-   * @returns True if valid, false otherwise.
-   */
+  // Check if the current token is valid
   async checkTokenValidity(): Promise<boolean> {
     try {
       const token = await this.getStoredToken();
-      if (!token) return false;
+      if (!token) {
+        // TODO: Remove detailed logging before production
+        console.log("🔍 TOKEN_CHECK: No token found");
+        return false;
+      }
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+      // TODO: Remove detailed logging before production
+      console.log("🔍 TOKEN_CHECK: Validating token...");
 
       const response = await fetch(`${API_BASE_URL}/users/profile`, {
         method: "GET",
@@ -410,29 +306,60 @@ class ApiService {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
-      return response.status !== 401;
-    } catch {
+      const isValid = response.status !== 401;
+
+      // TODO: Remove detailed logging before production
+      console.log(`🔍 TOKEN_CHECK: Token is ${isValid ? "valid" : "invalid"}`);
+
+      return isValid;
+    } catch (error) {
+      // TODO: Remove detailed logging before production
+      console.error("❌ TOKEN_CHECK: Token validation failed:", error);
       return false;
     }
   }
 
-  /**
-   * Silently refreshes the access token.
-   * @returns True if successful, false otherwise.
-   */
+  // Silent refresh token
   async silentRefresh(): Promise<boolean> {
     try {
-      const newToken = await this.refreshAccessToken();
-      return !!newToken;
-    } catch {
+      const refreshToken = await this.getStoredRefreshToken();
+      if (!refreshToken) {
+        return false;
+      }
+
+      const response = await this.makeRequest<{
+        refreshToken: any;
+        token: string;
+      }>("/users/refresh-token", {
+        method: "POST",
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      await AsyncStorage.setItem("token", response.data.token);
+      if (response.data.refreshToken) {
+        await AsyncStorage.setItem("refreshToken", response.data.refreshToken);
+      }
+      return true;
+    } catch (error) {
+      console.error("Silent token refresh failed:", error);
       return false;
     }
   }
 }
 
+class ApiError extends Error {
+  status: number;
+  endpoint: string;
+
+  constructor(message: string, status: number, endpoint: string) {
+    super(message);
+    this.status = status;
+    this.endpoint = endpoint;
+    this.name = "ApiError";
+  }
+}
+
 export const apiService = new ApiService();
-export type { AuthResponse, LoginData, RefreshTokenData, RegisterData };
+export type { AuthResponse, RegisterData, LoginData, RefreshTokenData };
