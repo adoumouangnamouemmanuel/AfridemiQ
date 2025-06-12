@@ -4,155 +4,20 @@
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  ApiResponse,
+  UserProfile,
+  UpdateProfileData,
+  UpdatePreferencesData,
+  UpdateProgressData,
+  SearchUsersResponse,
+  UpdateSocialProfileData,
+  Friend,
+} from "../../types/user/user.types";
 
 // Constants
 /** Base URL for API requests */
 const API_BASE_URL = "http://192.168.223.246:3000/api";
-
-// Interfaces
-/** Generic API response structure */
-interface ApiResponse<T> {
-  message: string;
-  data: T;
-}
-
-/** User profile data structure */
-interface UserProfile {
-  _id: string;
-  name: string;
-  email: string;
-  country: string;
-  avatar?: string;
-  phoneNumber?: string;
-  isPhoneVerified: boolean;
-  schoolName?: string;
-  gradeLevel?: string;
-  role: string;
-  isPremium: boolean;
-  preferences: {
-    notifications: {
-      general: boolean;
-      dailyReminderTime?: string;
-      challengeNotifications: boolean;
-      progressUpdates: boolean;
-    };
-    darkMode: boolean;
-    fontSize: string;
-    preferredContentFormat: string;
-    enableHints: boolean;
-    autoPlayAudio: boolean;
-    showStepSolutions: boolean;
-    leaderboardVisibility: boolean;
-    allowFriendRequests: boolean;
-    multilingualSupport: string[];
-  };
-  progress: {
-    selectedExam: string;
-    selectedSeries?: string;
-    selectedLevel?: string;
-    xp: number;
-    level: number;
-    streak: {
-      current: number;
-      longest: number;
-      lastStudyDate?: string;
-    };
-    goalDate?: string;
-    totalQuizzes: number;
-    averageScore: number;
-    completedTopics: string[];
-    weakSubjects: string[];
-    badges: string[];
-    achievements: string[];
-  };
-  socialProfile: {
-    bio?: string;
-    publicAchievements: string[];
-    visibility: string;
-    socialLinks: {
-      platform: string;
-      url: string;
-    }[];
-  };
-  subscription: {
-    type: string;
-    startDate: string;
-    expiresAt?: string;
-    paymentStatus: string;
-    accessLevel: string;
-  };
-  friends: string[];
-  blockedUsers: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-/** Data structure for updating user profile */
-interface UpdateProfileData {
-  name?: string;
-  email?: string;
-  phoneNumber?: string;
-  country?: string;
-  timeZone?: string;
-  preferredLanguage?: string;
-  schoolName?: string;
-  gradeLevel?: string;
-  parentEmail?: string;
-  avatar?: string;
-}
-
-/** Data structure for updating user preferences */
-interface UpdatePreferencesData {
-  preferences: {
-    notifications?: {
-      general?: boolean;
-      dailyReminderTime?: string;
-      challengeNotifications?: boolean;
-      progressUpdates?: boolean;
-    };
-    darkMode?: boolean;
-    fontSize?: string;
-    preferredContentFormat?: string;
-    enableHints?: boolean;
-    autoPlayAudio?: boolean;
-    showStepSolutions?: boolean;
-    leaderboardVisibility?: boolean;
-    allowFriendRequests?: boolean;
-    multilingualSupport?: string[];
-  };
-}
-
-/** Data structure for updating user progress */
-interface UpdateProgressData {
-  selectedExam?: string;
-  selectedSeries?: string;
-  selectedLevel?: string;
-  xp?: number;
-  level?: number;
-  streak?: {
-    current?: number;
-    longest?: number;
-    lastStudyDate?: string;
-  };
-  goalDate?: string;
-  totalQuizzes?: number;
-  averageScore?: number;
-  completedTopics?: string[];
-  weakSubjects?: string[];
-  badges?: string[];
-  achievements?: string[];
-}
-
-/** Response structure for user search */
-interface SearchUsersResponse {
-  users: any[];
-  pagination: {
-    total: number;
-    page: number;
-    totalPages: number;
-    hasMore: boolean;
-  };
-}
 
 /**
  * Service class for handling user profile API operations.
@@ -285,12 +150,9 @@ class ProfileApiService {
    * @param socialData - Social profile data to update.
    * @returns {Promise<UserProfile>} Updated user profile.
    */
-  async updateSocialProfile(socialData: {
-    bio?: string;
-    publicAchievements?: string[];
-    visibility?: string;
-    socialLinks?: { platform: string; url: string }[];
-  }): Promise<UserProfile> {
+  async updateSocialProfile(
+    socialData: UpdateSocialProfileData
+  ): Promise<UserProfile> {
     const response = await this.makeRequest<UserProfile>(
       "/users/social-profile",
       {
@@ -314,18 +176,18 @@ class ProfileApiService {
   // TODO: Implement when friends system is ready
   /**
    * Fetches the user's friends list (placeholder implementation).
-   * @returns {Promise<any[]>} Array of friend objects (dummy data).
+   * @returns {Promise<Friend[]>} Array of friend objects (dummy data).
    */
-  async getFriends(): Promise<any[]> {
+  async getFriends(): Promise<Friend[]> {
     // TODO: Implement actual API call when friends endpoint is ready
-    // const response = await this.makeRequest<any[]>('/users/friends')
+    // const response = await this.makeRequest<Friend[]>('/users/friends')
     // return response.data
 
     // Dummy data for now
     return [
-      { id: "1", name: "John Doe", avatar: null, level: 5, xp: 1250 },
-      { id: "2", name: "Jane Smith", avatar: null, level: 7, xp: 2100 },
-      { id: "3", name: "Mike Johnson", avatar: null, level: 3, xp: 750 },
+      { id: "1", name: "John Doe", avatar: undefined, level: 5, xp: 1250 },
+      { id: "2", name: "Jane Smith", avatar: undefined, level: 7, xp: 2100 },
+      { id: "3", name: "Mike Johnson", avatar: undefined, level: 3, xp: 750 },
     ];
   }
 
