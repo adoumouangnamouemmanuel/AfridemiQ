@@ -4,66 +4,35 @@
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import type {
+  ApiResponse,
+  AuthResponse,
+  RegisterData,
+  LoginData,
+  RefreshTokenData,
+} from "../types/user/user.types";
 
-// Constants
-/** Base URL for API requests */
-const API_BASE_URL = "http://192.168.223.246:3000/api";
+/**
+ * API base URL
+ * @constant
+ */
+const API_BASE_URL = "http://192.168.223.246:3000/api"; // Change to your backend URL
 
-// Interfaces
-/** Generic API response structure */
-interface ApiResponse<T> {
-  message: string;
-  data: T;
+/**
+ * Request queue item
+ */
+interface QueuedApiRequest {
+  endpoint: string;
+  options: RequestInit & { requiresAuth?: boolean };
+  resolve: (value: any) => void;
+  reject: (reason: any) => void;
+  retryCount: number;
+  maxRetries: number;
 }
 
-/** Authentication response structure */
-interface AuthResponse {
-  user: {
-    _id: string;
-    name: string;
-    email: string;
-    country: string;
-    progress: {
-      selectedExam: string;
-      goalDate: string;
-      xp: number;
-      level: number;
-      streak: {
-        current: number;
-        longest: number;
-        lastStudyDate?: string;
-      };
-      badges: string[];
-      completedTopics: string[];
-      weakSubjects: string[];
-    };
-    avatar?: string;
-    isPremium: boolean;
-    role: string;
-  };
-  token: string;
-  refreshToken?: string;
-}
-
-/** Data structure for user registration */
-interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-}
-
-/** Data structure for user login */
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-/** Data structure for token refresh */
-interface RefreshTokenData {
-  refreshToken: string;
-}
-
-/** Custom error class for API-related errors */
+/**
+ * Custom API error with additional metadata
+ */
 class ApiError extends Error {
   status: number;
   endpoint: string;
@@ -86,6 +55,18 @@ class ApiError extends Error {
  * Service class for handling authentication API operations.
  */
 class ApiService {
+  /**
+   * Queue of requests to be processed when online
+   * @private
+   */
+  private requestQueue: QueuedApiRequest[] = [];
+
+  /**
+   * Flag indicating if we're currently processing the queue
+   * @private
+   */
+  private isProcessingQueue = false;
+
   /**
    * Retrieves the stored access token from AsyncStorage.
    * @returns {Promise<string | null>} The access token or null if retrieval fails.
@@ -120,18 +101,6 @@ class ApiService {
   }
 
   /**
-   * Clears stored tokens and user data from AsyncStorage.
-   * @returns {Promise<void>} Resolves when tokens are cleared.
-   */
-  private async clearStoredTokens(): Promise<void> {
-    try {
-      await AsyncStorage.multiRemove(["token", "refreshToken", "user"]);
-    } catch (error) {
-      console.error("Error clearing stored tokens:", error);
-    }
-  }
-
-  /**
    * Refreshes the access token using the stored refresh token.
    * @returns {Promise<string | null>} The new access token or null if refresh fails.
    * @throws {Error} If no refresh token is available or refresh fails.
@@ -144,9 +113,7 @@ class ApiService {
       }
 
       // TODO: Remove all console.log statements before production deployment
-      console.log(
-        "�“Where did you find that? I was looking for it everywhere!” — REFRESH: Starting token refresh process"
-      );
+      console.log("🔄 REFRESH: Starting token refresh process");
       console.log(
         "🔄 REFRESH: Current refresh token:",
         refreshToken ? `${refreshToken.substring(0, 20)}...` : "None"
@@ -173,6 +140,81 @@ class ApiService {
       console.error("Token refresh failed:", error);
       await this.clearStoredTokens();
       throw error;
+    }
+  }
+
+  /**
+   * Clears stored tokens and user data from AsyncStorage.
+   * @returns {Promise<void>} Resolves when tokens are cleared.
+   */
+  private async clearStoredTokens(): Promise<void> {
+    try {
+      await AsyncStorage.multiRemove(["token", "refreshToken", "user"]);
+    } catch (error) {
+      console.error("Error clearing stored tokens:", error);
+    }
+  }
+
+  /**
+   * Process queued requests when online
+   * @private
+   */
+  private async processQueue(): Promise<void> {
+    if (this.isProcessingQueue || this.requestQueue.length === 0) {
+      return;
+    }
+
+    this.isProcessingQueue = true;
+
+    // TODO: Remove detailed logging before production
+    console.log(
+      `🌐 API: Processing request queue (${this.requestQueue.length} items)`
+    );
+
+    // Process oldest requests first (FIFO)
+    const queue = [...this.requestQueue];
+    this.requestQueue = [];
+
+    for (const request of queue) {
+      try {
+        // TODO: Remove detailed logging before production
+        console.log(`🌐 API: Executing queued request to ${request.endpoint}`);
+
+        const response = await this.makeRequest(
+          request.endpoint,
+          request.options,
+          request.retryCount
+        );
+
+        request.resolve(response);
+
+        // TODO: Remove detailed logging before production
+        console.log(
+          `🌐 API: Queued request to ${request.endpoint} completed successfully`
+        );
+      } catch (error) {
+        // TODO: Remove detailed logging before production
+        console.error(
+          `🌐 API: Error executing queued request to ${request.endpoint}:`,
+          error
+        );
+
+        request.retryCount++;
+
+        if (request.retryCount < request.maxRetries) {
+          // Requeue with incremented retry count
+          this.requestQueue.push(request);
+        } else {
+          request.reject(error);
+        }
+      }
+    }
+
+    this.isProcessingQueue = false;
+
+    // Check if more requests were added while processing
+    if (this.requestQueue.length > 0) {
+      this.processQueue();
     }
   }
 
@@ -423,10 +465,16 @@ class ApiService {
       return false;
     }
   }
+
+  /**
+   * Get pending request count
+   * @returns Number of pending requests
+   */
+  getPendingRequestCount(): number {
+    return this.requestQueue.length;
+  }
 }
 
 // Singleton instance
 export const apiService = new ApiService();
-
-// Type exports
 export type { AuthResponse, RegisterData, LoginData, RefreshTokenData };
