@@ -7,12 +7,12 @@
 /**
  * User roles available in the system
  */
-export type UserRole = "student" | "teacher" | "admin" | "moderator";
+export type UserRole = "student" | "teacher" | "admin";
 
 /**
  * Subscription types available
  */
-export type SubscriptionType = "free" | "premium" | "pro" | "enterprise";
+export type SubscriptionType = "free" | "premium" | "pro";
 
 /**
  * Payment status options
@@ -27,12 +27,12 @@ export type PaymentStatus =
 /**
  * Access levels for users
  */
-export type AccessLevel = "basic" | "standard" | "premium" | "unlimited";
+export type AccessLevel = "basic" | "premium" | "unlimited";
 
 /**
  * Font size options
  */
-export type FontSize = "small" | "medium" | "large" | "extra-large";
+export type FontSize = "small" | "medium" | "large";
 
 /**
  * Content format preferences
@@ -41,7 +41,6 @@ export type ContentFormat =
   | "video"
   | "text"
   | "audio"
-  | "interactive"
   | "mixed";
 
 /**
