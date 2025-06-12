@@ -1,12 +1,22 @@
+/**
+ * API Service for handling authentication-related operations with the backend.
+ * Manages user registration, login, logout, token refresh, and authentication status.
+ */
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_BASE_URL = "http://192.168.223.246:3000/api"; // Change to your backend URL
+// Constants
+/** Base URL for API requests */
+const API_BASE_URL = "http://192.168.223.246:3000/api";
 
+// Interfaces
+/** Generic API response structure */
 interface ApiResponse<T> {
   message: string;
   data: T;
 }
 
+/** Authentication response structure */
 interface AuthResponse {
   user: {
     _id: string;
@@ -35,23 +45,51 @@ interface AuthResponse {
   refreshToken?: string;
 }
 
+/** Data structure for user registration */
 interface RegisterData {
   name: string;
   email: string;
   password: string;
 }
 
+/** Data structure for user login */
 interface LoginData {
   email: string;
   password: string;
 }
 
+/** Data structure for token refresh */
 interface RefreshTokenData {
   refreshToken: string;
 }
 
+/** Custom error class for API-related errors */
+class ApiError extends Error {
+  status: number;
+  endpoint: string;
+
+  /**
+   * Creates an instance of ApiError.
+   * @param message - Error message.
+   * @param status - HTTP status code.
+   * @param endpoint - API endpoint that caused the error.
+   */
+  constructor(message: string, status: number, endpoint: string) {
+    super(message);
+    this.status = status;
+    this.endpoint = endpoint;
+    this.name = "ApiError";
+  }
+}
+
+/**
+ * Service class for handling authentication API operations.
+ */
 class ApiService {
-  // Private method to get stored token
+  /**
+   * Retrieves the stored access token from AsyncStorage.
+   * @returns {Promise<string | null>} The access token or null if retrieval fails.
+   */
   private async getStoredToken(): Promise<string | null> {
     try {
       // TODO: Remove all console.log statements before production deployment
@@ -68,7 +106,10 @@ class ApiService {
     }
   }
 
-  // Private method to get stored refresh token
+  /**
+   * Retrieves the stored refresh token from AsyncStorage.
+   * @returns {Promise<string | null>} The refresh token or null if retrieval fails.
+   */
   private async getStoredRefreshToken(): Promise<string | null> {
     try {
       return await AsyncStorage.getItem("refreshToken");
@@ -78,7 +119,23 @@ class ApiService {
     }
   }
 
-  // Private method to handle token refresh
+  /**
+   * Clears stored tokens and user data from AsyncStorage.
+   * @returns {Promise<void>} Resolves when tokens are cleared.
+   */
+  private async clearStoredTokens(): Promise<void> {
+    try {
+      await AsyncStorage.multiRemove(["token", "refreshToken", "user"]);
+    } catch (error) {
+      console.error("Error clearing stored tokens:", error);
+    }
+  }
+
+  /**
+   * Refreshes the access token using the stored refresh token.
+   * @returns {Promise<string | null>} The new access token or null if refresh fails.
+   * @throws {Error} If no refresh token is available or refresh fails.
+   */
   private async refreshAccessToken(): Promise<string | null> {
     try {
       const refreshToken = await this.getStoredRefreshToken();
@@ -87,7 +144,9 @@ class ApiService {
       }
 
       // TODO: Remove all console.log statements before production deployment
-      console.log("🔄 REFRESH: Starting token refresh process");
+      console.log(
+        "�“Where did you find that? I was looking for it everywhere!” — REFRESH: Starting token refresh process"
+      );
       console.log(
         "🔄 REFRESH: Current refresh token:",
         refreshToken ? `${refreshToken.substring(0, 20)}...` : "None"
@@ -101,7 +160,6 @@ class ApiService {
         }
       );
 
-      // Store the new access token
       await AsyncStorage.setItem("token", response.data.token);
 
       // TODO: Remove all console.log statements before production deployment
@@ -113,22 +171,19 @@ class ApiService {
       console.error("❌ REFRESH: Token refresh failed:", error);
 
       console.error("Token refresh failed:", error);
-      // Clear stored tokens if refresh fails
       await this.clearStoredTokens();
       throw error;
     }
   }
 
-  // Private method to clear stored authentication data
-  private async clearStoredTokens(): Promise<void> {
-    try {
-      await AsyncStorage.multiRemove(["token", "refreshToken", "user"]);
-    } catch (error) {
-      console.error("Error clearing stored tokens:", error);
-    }
-  }
-
-  // Enhanced makeRequest method with automatic token refresh
+  /**
+   * Makes an authenticated API request with automatic token refresh.
+   * @param endpoint - The API endpoint path (e.g., /users/profile).
+   * @param options - Fetch request options with optional requiresAuth flag.
+   * @param retryCount - Number of retry attempts (default: 0).
+   * @returns {Promise<ApiResponse<T>>} The API response with typed data.
+   * @throws {ApiError | Error} If the request or token refresh fails.
+   */
   private async makeRequest<T>(
     endpoint: string,
     options: RequestInit & { requiresAuth?: boolean } = {},
@@ -142,14 +197,12 @@ class ApiService {
         `🌐 API: Making request to ${endpoint}, retry: ${retryCount}`
       );
 
-      // Get token for authenticated requests
       const token = await this.getStoredToken();
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         ...((options.headers as Record<string, string>) || {}),
       };
 
-      // Add authorization header if token exists and endpoint requires auth
       if (
         token &&
         !endpoint.includes("/login") &&
@@ -186,7 +239,6 @@ class ApiService {
           // TODO: Remove detailed logging before production
           console.error("❌ AUTH: Token refresh failed:", refreshError);
 
-          // Don't throw immediately - try one more time with silent refresh
           if (retryCount === 0) {
             const silentRefresh = await this.silentRefresh();
             if (silentRefresh) {
@@ -217,7 +269,11 @@ class ApiService {
     }
   }
 
-  // Register a new user
+  /**
+   * Registers a new user with the provided data.
+   * @param userData - User registration data.
+   * @returns {Promise<AuthResponse>} The authentication response with user data and tokens.
+   */
   async register(userData: RegisterData): Promise<AuthResponse> {
     const response = await this.makeRequest<AuthResponse>("/users/register", {
       method: "POST",
@@ -226,7 +282,11 @@ class ApiService {
     return response.data;
   }
 
-  // Login user
+  /**
+   * Logs in a user with the provided credentials.
+   * @param credentials - User login credentials.
+   * @returns {Promise<AuthResponse>} The authentication response with user data and tokens.
+   */
   async login(credentials: LoginData): Promise<AuthResponse> {
     const response = await this.makeRequest<AuthResponse>("/users/login", {
       method: "POST",
@@ -235,23 +295,27 @@ class ApiService {
     return response.data;
   }
 
-  // Logout user
+  /**
+   * Logs out the current user and clears stored tokens.
+   * @returns {Promise<void>} Resolves when logout is complete.
+   */
   async logout(): Promise<void> {
     try {
-      // Call backend logout endpoint
       await this.makeRequest("/users/logout", {
         method: "POST",
       });
     } catch (error) {
       console.error("Logout API call failed:", error);
-      // Continue with local cleanup even if API call fails
     } finally {
-      // Always clear local storage
       await this.clearStoredTokens();
     }
   }
 
-  // Refresh access token
+  /**
+   * Refreshes the access token using a provided refresh token.
+   * @param refreshTokenData - Refresh token data.
+   * @returns {Promise<{ token: string }>} The new access token.
+   */
   async refreshToken(
     refreshTokenData: RefreshTokenData
   ): Promise<{ token: string }> {
@@ -265,7 +329,10 @@ class ApiService {
     return response.data;
   }
 
-  // Check if user is authenticated
+  /**
+   * Checks if the user is authenticated by verifying stored tokens.
+   * @returns {Promise<boolean>} True if both access and refresh tokens exist, false otherwise.
+   */
   async isAuthenticated(): Promise<boolean> {
     try {
       const token = await this.getStoredToken();
@@ -276,7 +343,10 @@ class ApiService {
     }
   }
 
-  // Get current user data from storage
+  /**
+   * Retrieves the current user data from AsyncStorage.
+   * @returns {Promise<any | null>} The stored user data or null if not found.
+   */
   async getCurrentUser(): Promise<any | null> {
     try {
       const userString = await AsyncStorage.getItem("user");
@@ -287,7 +357,10 @@ class ApiService {
     }
   }
 
-  // Check if the current token is valid
+  /**
+   * Checks if the current access token is valid by making a profile request.
+   * @returns {Promise<boolean>} True if the token is valid, false otherwise.
+   */
   async checkTokenValidity(): Promise<boolean> {
     try {
       const token = await this.getStoredToken();
@@ -321,7 +394,10 @@ class ApiService {
     }
   }
 
-  // Silent refresh token
+  /**
+   * Silently refreshes the access token using the stored refresh token.
+   * @returns {Promise<boolean>} True if refresh is successful, false otherwise.
+   */
   async silentRefresh(): Promise<boolean> {
     try {
       const refreshToken = await this.getStoredRefreshToken();
@@ -349,17 +425,8 @@ class ApiService {
   }
 }
 
-class ApiError extends Error {
-  status: number;
-  endpoint: string;
-
-  constructor(message: string, status: number, endpoint: string) {
-    super(message);
-    this.status = status;
-    this.endpoint = endpoint;
-    this.name = "ApiError";
-  }
-}
-
+// Singleton instance
 export const apiService = new ApiService();
+
+// Type exports
 export type { AuthResponse, RegisterData, LoginData, RefreshTokenData };
