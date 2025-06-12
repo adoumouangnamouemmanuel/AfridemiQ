@@ -5,12 +5,16 @@ const jwt = require("jsonwebtoken");
  * @param {Object} payload - The payload to encode in the token
  * @returns {string} The generated JWT token
  */
+
+// const expiration = process.env.NODE_ENV === "production" ? "1d" : "1h";
+
+const expiration = "8m"; // Default expiration time for access tokens
 const generateToken = (payload) => {
   if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET environment variable is not defined");
   }
   return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRATION || '1h',
+    expiresIn: expiration,
   });
 };
 
