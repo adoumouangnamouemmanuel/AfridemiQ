@@ -1,15 +1,15 @@
 "use client";
 
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withDelay,
+  withSpring,
 } from "react-native-reanimated";
-import type { UserProfile } from "../../services/user/api.profile.service";
+import type { UserProfile } from "../../types/user/user.types";
 
 interface AboutSectionProps {
   user: UserProfile;
@@ -111,7 +111,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   React.useEffect(() => {
     slideUp.value = withDelay(200, withSpring(0, { damping: 20 }));
     opacity.value = withDelay(200, withSpring(1));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -119,32 +119,39 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     opacity: opacity.value,
   }));
 
-  // TODO: Replace with actual data from database
-  const mockData = {
+  // Replace mock data with actual user data where available
+  // Use optional chaining and fallbacks for potentially missing data
+  const userData = {
     // Basic Info
     email: user.email,
-    phoneNumber: user.phoneNumber || "+235 XX XX XX XX", // TODO: Fetch from DB
-    country: user.country || "Chad", // TODO: Make selectable from country list
+    phoneNumber: user.phoneNumber || "Not provided",
+    country: user.country || "Not specified",
 
     // Education
-    educationLevel: user.gradeLevel || "Terminale", // TODO: Make selectable (Seconde, Première, Terminale, etc.)
-    schoolName: user.schoolName || "Lycée de N'Djamena", // TODO: Fetch from DB
-    studyField: "Sciences", // TODO: Add to user model and make selectable
+    educationLevel: user.gradeLevel || "Not specified",
+    schoolName: user.schoolName || "Not specified",
+    studyField: user.preferences?.studyField || "Not specified", // Check if this exists in your model
 
     // Exam Preparation
-    targetExam: user.progress.selectedExam || "Baccalauréat", // TODO: Make selectable
-    examYear: "2024", // TODO: Add to user model
-    targetUniversity: "Université de N'Djamena", // TODO: Add to user model and make selectable
+    targetExam: user.progress?.selectedExam || "Not selected",
+    examYear: user.progress?.examYear || new Date().getFullYear().toString(),
+    targetUniversity: user.preferences?.targetUniversity || "Not specified",
 
     // Personal
-    dateOfBirth: "15/03/2005", // TODO: Add to user model
-    gender: "Male", // TODO: Add to user model and make selectable
-    languages: ["French", "Arabic", "Sara"], // TODO: Add to user model and make selectable
+    dateOfBirth: user.dateOfBirth
+      ? new Date(user.dateOfBirth).toLocaleDateString()
+      : "Not provided",
+    gender: user.gender || "Not specified",
+    language: user.preferredLanguage || "French", // Default to English if not specified
 
     // Academic Goals
-    careerGoal: "Engineering", // TODO: Add to user model and make selectable
-    favoriteSubjects: ["Mathematics", "Physics"], // TODO: Derive from progress data
-    studyHours: "4 hours/day", // TODO: Calculate from activity data
+    careerGoal: user.preferences?.careerGoal || "Not specified",
+    favoriteSubjects: user.preferences?.favoriteSubjects?.length
+      ? user.preferences.favoriteSubjects
+      : user.progress?.weakSubjects?.length
+      ? user.progress.weakSubjects
+      : ["Not specified"],
+    studyHours: user.preferences?.studyHours || "Not tracked",
   };
 
   const styles = StyleSheet.create({
@@ -235,7 +242,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="mail"
           label="Email"
-          value={mockData.email}
+          value={userData.email}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -243,7 +250,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="call"
           label="Phone Number"
-          value={mockData.phoneNumber}
+          value={userData.phoneNumber}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -251,7 +258,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="location"
           label="Country"
-          value={mockData.country}
+          value={userData.country}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -259,7 +266,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="calendar"
           label="Date of Birth"
-          value={mockData.dateOfBirth}
+          value={userData.dateOfBirth}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -267,7 +274,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="person"
           label="Gender"
-          value={mockData.gender}
+          value={userData.gender}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -275,7 +282,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="language"
           label="Languages"
-          value={mockData.languages.join(", ")}
+          value={userData.language}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -299,7 +306,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="school"
           label="School"
-          value={mockData.schoolName}
+          value={userData.schoolName}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -307,7 +314,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="library"
           label="Education Level"
-          value={mockData.educationLevel}
+          value={userData.educationLevel}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -315,7 +322,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="book"
           label="Study Field"
-          value={mockData.studyField}
+          value={userData.studyField}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -323,7 +330,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="time"
           label="Daily Study Hours"
-          value={mockData.studyHours}
+          value={String(userData.studyHours)}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -347,7 +354,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="trophy"
           label="Target Exam"
-          value={mockData.targetExam}
+          value={userData.targetExam}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -355,7 +362,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="calendar"
           label="Exam Year"
-          value={mockData.examYear}
+          value={userData.examYear}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -363,7 +370,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="business"
           label="Target University"
-          value={mockData.targetUniversity}
+          value={userData.targetUniversity}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -371,7 +378,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="briefcase"
           label="Career Goal"
-          value={mockData.careerGoal}
+          value={userData.careerGoal}
           theme={theme}
           editable
           onPress={onEditProfile}
@@ -379,19 +386,19 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <InfoItem
           icon="heart"
           label="Favorite Subjects"
-          value={mockData.favoriteSubjects.join(", ")}
+          value={userData.favoriteSubjects.join(", ")}
           theme={theme}
           editable
           onPress={onEditProfile}
         />
       </View>
 
-      {/* TODO Note */}
+      {/* Implementation Note */}
       <View style={styles.todoNote}>
         <Text style={styles.todoText}>
-          🚧 TODO: Implement selectable dropdowns for Country, Education Level,
-          Study Field, Target Exam, Target University, Career Goal, and other
-          fields. Data will be fetched from database.
+          Note: Some profile fields are missing in the current user model.
+          Consider updating your User schema to include: date of birth, gender,
+          languages, career goals, and other profile data shown here.
         </Text>
       </View>
     </Animated.View>
