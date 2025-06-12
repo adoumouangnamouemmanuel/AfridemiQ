@@ -33,10 +33,8 @@ import { StatsGrid } from "../components/profile/StatsGrid";
 import { WeakSubjectsSection } from "../components/profile/WeakSubjectsSection";
 
 // Import API service
-import {
-  profileApiService,
-  type UserProfile,
-} from "../services/user/api.profile.service";
+import { profileApiService } from "../services/user/api.profile.service";
+import type { UserProfile } from "../types/user/user.types";
 import { AboutSection } from "../components/profile/AboutSection";
 
 const HEADER_HEIGHT = 320;
