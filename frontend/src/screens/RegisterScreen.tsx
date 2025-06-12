@@ -1,4 +1,5 @@
 "use client";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -27,6 +28,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import {
   CustomButton,
   CustomInput,
+  CustomPicker,
   Divider,
   Loader,
   SocialButton,
@@ -46,14 +48,21 @@ export default function RegisterScreen() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Form data with firstName and lastName fields
+  // Form data with additional fields for step 2
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
+    gender: "Male",
+    dateOfBirth: new Date(2000, 0, 1),
+    role: "Student",
+    preferredLanguage: "English",
     password: "",
     confirmPassword: "",
   });
+
+  // Date picker state
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // UI state management
   const [showPassword, setShowPassword] = useState(false);
@@ -126,12 +135,30 @@ export default function RegisterScreen() {
   const step2AnimatedStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateX: withTiming((1 - stepSlide.value) * SCREEN_WIDTH, {
+        translateX: withTiming(
+          currentStep === 1
+            ? SCREEN_WIDTH
+            : currentStep === 3
+            ? -SCREEN_WIDTH
+            : 0,
+          {
+            duration: 300,
+          }
+        ),
+      },
+    ],
+    opacity: withTiming(currentStep === 2 ? 1 : 0, { duration: 300 }),
+  }));
+
+  const step3AnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateX: withTiming(currentStep < 3 ? SCREEN_WIDTH : 0, {
           duration: 300,
         }),
       },
     ],
-    opacity: withTiming(currentStep === 2 ? 1 : 0, { duration: 300 }),
+    opacity: withTiming(currentStep === 3 ? 1 : 0, { duration: 300 }),
   }));
 
   // Validation functions
@@ -188,8 +215,36 @@ export default function RegisterScreen() {
     return true;
   };
 
-  // Step 2 validation (passwords)
+  // Step 2 validation (profile details)
   const validateStep2 = () => {
+    setStepError("");
+
+    // All fields in step 2 have default values, so basic validation is sufficient
+    if (!formData.gender) {
+      setStepError("Please select your gender");
+      return false;
+    }
+
+    if (!formData.dateOfBirth) {
+      setStepError("Please select your date of birth");
+      return false;
+    }
+
+    if (!formData.role) {
+      setStepError("Please select your role");
+      return false;
+    }
+
+    if (!formData.preferredLanguage) {
+      setStepError("Please select your language");
+      return false;
+    }
+
+    return true;
+  };
+
+  // Step 3 validation (passwords)
+  const validateStep3 = () => {
     setStepError("");
 
     if (!formData.password) {
@@ -215,7 +270,7 @@ export default function RegisterScreen() {
     return true;
   };
 
-  // Handle step 1 continue
+  // Handle step navigation
   const handleContinue = async () => {
     if (currentStep === 1) {
       const isValid = await validateStep1();
@@ -223,19 +278,47 @@ export default function RegisterScreen() {
         setCurrentStep(2);
         stepSlide.value = 1;
       }
+    } else if (currentStep === 2) {
+      const isValid = validateStep2();
+      if (isValid) {
+        setCurrentStep(3);
+        stepSlide.value = 2;
+      }
     }
   };
 
-  // Handle back to step 1
+  // Handle back navigation
   const handleBack = () => {
-    setCurrentStep(1);
+    if (currentStep === 2) {
+      setCurrentStep(1);
+      stepSlide.value = 0;
+    } else if (currentStep === 3) {
+      setCurrentStep(2);
+      stepSlide.value = 1;
+    }
     setStepError("");
-    stepSlide.value = 0;
+  };
+
+  // Handle date change
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setFormData((prev) => ({ ...prev, dateOfBirth: selectedDate }));
+    }
+  };
+
+  // Format date for display
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   // Handle user registration
   const handleRegister = async () => {
-    if (!validateStep2()) return;
+    if (!validateStep3()) return;
 
     setIsLoading(true);
     setErrorMessage("");
@@ -295,7 +378,7 @@ export default function RegisterScreen() {
   };
 
   // Update form data and clear errors
-  const updateFormData = (field: string, value: string) => {
+  const updateFormData = (field: string, value: string | Date) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (stepError) setStepError("");
   };
@@ -306,7 +389,9 @@ export default function RegisterScreen() {
     formData.lastName.trim() !== "" &&
     formData.email.trim() !== "";
 
-  const isStep2Valid =
+  const isStep2Valid = true; // All fields have default values
+
+  const isStep3Valid =
     formData.password.trim() !== "" && formData.confirmPassword.trim() !== "";
 
   // Your existing styles remain unchanged
@@ -710,6 +795,72 @@ export default function RegisterScreen() {
       paddingHorizontal: 16,
       lineHeight: isSmallScreen ? 16 : 20,
     },
+    // New styles for step 2
+    selectContainer: {
+      backgroundColor: "#F9FAFB",
+      borderWidth: 1,
+      borderColor: "#E5E7EB",
+      borderRadius: 12,
+      marginBottom: isSmallScreen ? 8 : 10,
+      overflow: "hidden",
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    selectLabel: {
+      fontSize: isSmallScreen ? 12 : 14,
+      fontWeight: "500",
+      color: "#4B5563",
+      marginBottom: 6,
+      paddingHorizontal: 4,
+      fontFamily: "Inter-Medium",
+    },
+    picker: {
+      height: 50,
+      backgroundColor: "transparent",
+    },
+    pickerItem: {
+      fontSize: isSmallScreen ? 14 : 16,
+      fontFamily: "Inter-Regular",
+    },
+    datePickerButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      backgroundColor: "#F9FAFB",
+      borderWidth: 1,
+      borderColor: "#E5E7EB",
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      marginBottom: isSmallScreen ? 12 : 16,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    dateText: {
+      fontSize: isSmallScreen ? 14 : 16,
+      color: "#111827",
+      fontFamily: "Inter-Regular",
+    },
+    calendarIcon: {
+      color: "#6B7280",
+    },
+    selectRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: isSmallScreen ? 12 : 16,
+    },
   });
 
   return (
@@ -739,12 +890,15 @@ export default function RegisterScreen() {
                 <Text style={styles.subtitle}>
                   {currentStep === 1
                     ? "Join thousands of students preparing for success"
+                    : currentStep === 2
+                    ? "Tell us a bit more about yourself"
                     : "Secure your account with a strong password"}
                 </Text>
               </Animated.View>
 
-              {/* Step Indicator */}
+              {/* Step Indicator - Updated for 3 steps */}
               <View style={styles.stepIndicator}>
+                {/* Step 1 */}
                 <View style={styles.stepContainer}>
                   <View
                     style={[
@@ -777,6 +931,7 @@ export default function RegisterScreen() {
                   </Text>
                 </View>
 
+                {/* Line between Step 1 and 2 */}
                 <View style={styles.stepLine}>
                   <Animated.View
                     style={[
@@ -788,14 +943,23 @@ export default function RegisterScreen() {
                   />
                 </View>
 
+                {/* Step 2 */}
                 <View style={styles.stepContainer}>
                   <View
                     style={[
                       styles.stepDot,
                       currentStep >= 2 && styles.stepDotActive,
+                      currentStep > 2 && styles.stepDotCompleted,
                     ]}
                   >
-                    {currentStep >= 2 ? (
+                    {currentStep > 2 ? (
+                      <Ionicons
+                        name="checkmark"
+                        size={12}
+                        color="white"
+                        style={styles.stepCheckmark}
+                      />
+                    ) : currentStep === 2 ? (
                       <View style={styles.stepDotInner} />
                     ) : (
                       <Text style={[styles.stepNumber]}>2</Text>
@@ -805,6 +969,43 @@ export default function RegisterScreen() {
                     style={[
                       styles.stepLabel,
                       currentStep >= 2 && styles.stepLabelActive,
+                      currentStep > 2 && styles.stepLabelCompleted,
+                    ]}
+                  >
+                    Profile
+                  </Text>
+                </View>
+
+                {/* Line between Step 2 and 3 */}
+                <View style={styles.stepLine}>
+                  <Animated.View
+                    style={[
+                      styles.stepLineProgress,
+                      {
+                        width: currentStep >= 3 ? "100%" : "0%",
+                      },
+                    ]}
+                  />
+                </View>
+
+                {/* Step 3 */}
+                <View style={styles.stepContainer}>
+                  <View
+                    style={[
+                      styles.stepDot,
+                      currentStep >= 3 && styles.stepDotActive,
+                    ]}
+                  >
+                    {currentStep === 3 ? (
+                      <View style={styles.stepDotInner} />
+                    ) : (
+                      <Text style={[styles.stepNumber]}>3</Text>
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      styles.stepLabel,
+                      currentStep >= 3 && styles.stepLabelActive,
                     ]}
                   >
                     Security
@@ -884,8 +1085,145 @@ export default function RegisterScreen() {
                   </View>
                 </Animated.View>
 
-                {/* Step 2: Password and Confirm Password */}
+                {/* Step 2: Profile Details (New) */}
                 <Animated.View style={[styles.stepContent, step2AnimatedStyle]}>
+                  <View style={styles.step2Content}>
+                    <View style={styles.step2FormContainer}>
+                      <View style={styles.form}>
+                        {/* Gender and Date of Birth Row */}
+                        <View style={styles.selectRow}>
+                          {/* Gender Selection */}
+                          <View style={[styles.halfWidthInput]}>
+                            <Text style={styles.selectLabel}>Gender</Text>
+                            <View style={styles.selectContainer}>
+                              <CustomPicker
+                                items={[
+                                  { label: "Male", value: "male" },
+                                  { label: "Female", value: "female" },
+                                ]}
+                                selectedValue={formData.gender}
+                                placeholder="your gender"
+                                onValueChange={(value: string) =>
+                                  updateFormData("gender", value)
+                                }
+                              />
+                            </View>
+                          </View>
+
+                          <View style={styles.inputSpacer} />
+
+                          {/* Date of Birth */}
+                          <View style={[styles.halfWidthInput]}>
+                            <Text style={styles.selectLabel}>
+                              Date of Birth
+                            </Text>
+                            <TouchableOpacity
+                              style={styles.datePickerButton}
+                              onPress={() => setShowDatePicker(true)}
+                            >
+                              <Text style={styles.dateText}>
+                                {formatDate(formData.dateOfBirth)}
+                              </Text>
+                              <Ionicons
+                                name="calendar-outline"
+                                size={20}
+                                style={styles.calendarIcon}
+                              />
+                            </TouchableOpacity>
+                            {showDatePicker && (
+                              <DateTimePicker
+                                value={formData.dateOfBirth}
+                                mode="date"
+                                display="default"
+                                onChange={onDateChange}
+                                maximumDate={new Date()}
+                              />
+                            )}
+                          </View>
+                        </View>
+
+                        {/* Role and Language Row */}
+                        <View style={styles.selectRow}>
+                          {/* Role Selection */}
+                          <View style={[styles.halfWidthInput]}>
+                            <Text style={styles.selectLabel}>Role</Text>
+                            <View style={styles.selectContainer}>
+                              <CustomPicker
+                                items={[
+                                  { label: "Student", value: "student" },
+                                  { label: "Teacher", value: "teacher" },
+                                ]}
+                                selectedValue={formData.role}
+                                placeholder="your role"
+                                onValueChange={(value: string) =>
+                                  updateFormData("role", value)
+                                }
+                              />
+                            </View>
+                          </View>
+
+                          <View style={styles.inputSpacer} />
+
+                          {/* Language Selection */}
+                          <View style={[styles.halfWidthInput]}>
+                            <Text style={styles.selectLabel}>Language</Text>
+                            <View style={styles.selectContainer}>
+                              <CustomPicker
+                                items={[
+                                  { label: "Device Default", value: "Default" },
+                                  { label: "English", value: "English" },
+                                  { label: "French", value: "French" },
+                                  { label: "Spanish", value: "Spanish" },
+                                  { label: "Portuguese", value: "Portuguese" },
+                                ]}
+                                selectedValue={formData.preferredLanguage}
+                                placeholder="select language"
+                                onValueChange={(value: string) =>
+                                  updateFormData("preferredLanguage", value)
+                                }
+                              />
+                            </View>
+                          </View>
+                        </View>
+
+                        {stepError && currentStep === 2 && (
+                          <Text style={styles.errorText}>{stepError}</Text>
+                        )}
+                      </View>
+                    </View>
+
+                    <View style={styles.buttonRow}>
+                      <TouchableOpacity
+                        style={[
+                          styles.baseButton,
+                          styles.backButton,
+                          isLoading && styles.buttonDisabled,
+                        ]}
+                        onPress={handleBack}
+                        disabled={isLoading}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={styles.backButtonText}>Back</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={[
+                          styles.baseButton,
+                          styles.createButton,
+                          (isLoading || !isStep2Valid) && styles.buttonDisabled,
+                        ]}
+                        onPress={handleContinue}
+                        disabled={isLoading || !isStep2Valid}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={styles.createButtonText}>Continue</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </Animated.View>
+
+                {/* Step 3: Security (Previously Step 2) */}
+                <Animated.View style={[styles.stepContent, step3AnimatedStyle]}>
                   <View style={styles.step2Content}>
                     <View style={styles.step2FormContainer}>
                       <View style={styles.form}>
@@ -963,7 +1301,7 @@ export default function RegisterScreen() {
                           )}
                         </View>
 
-                        {stepError && currentStep === 2 && (
+                        {stepError && currentStep === 3 && (
                           <Text style={styles.errorText}>{stepError}</Text>
                         )}
                       </View>
@@ -987,11 +1325,11 @@ export default function RegisterScreen() {
                         style={[
                           styles.baseButton,
                           styles.createButton,
-                          (isLoading || !isStep2Valid || !passwordsMatch) &&
+                          (isLoading || !isStep3Valid || !passwordsMatch) &&
                             styles.buttonDisabled,
                         ]}
                         onPress={handleRegister}
-                        disabled={isLoading || !isStep2Valid || !passwordsMatch}
+                        disabled={isLoading || !isStep3Valid || !passwordsMatch}
                         activeOpacity={0.8}
                       >
                         {isLoading ? (
@@ -1036,11 +1374,19 @@ export default function RegisterScreen() {
       {/* Enhanced Loaders with better error messaging */}
       <Loader
         visible={isLoading}
-        text={currentStep === 1 ? "Verifying email..." : "Creating Account..."}
+        text={
+          currentStep === 1
+            ? "Verifying email..."
+            : currentStep === 2
+            ? "Processing information..."
+            : "Creating Account..."
+        }
         subtitle={
           currentStep === 1
             ? "Checking availability"
-            : "Setting up your profile"
+            : currentStep === 2
+            ? "Preparing your profile"
+            : "Setting up your account"
         }
         type="default"
       />
