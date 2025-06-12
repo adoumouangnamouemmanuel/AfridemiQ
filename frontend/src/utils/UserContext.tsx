@@ -277,7 +277,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
     };
      
-  }, [user, token, setupSessionMonitoring]); // Only depend on user and token existence
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, token, setupSessionMonitoring]); // Only depend on user and token existence
 
   const value: UserContextType = {
     user,
