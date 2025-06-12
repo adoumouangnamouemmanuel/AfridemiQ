@@ -102,6 +102,19 @@ const UserSchema = new Schema(
     avatar: {
       type: String,
     },
+    dateOfBirth: {
+      type: Date,
+      required: [true, "La date de naissance est requise"],
+      validate: {
+        validator: (v) => v <= new Date(),
+        message: "La date de naissance ne peut pas être dans le futur",
+      },
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female"],
+      required: [true, "Le genre est requis"],
+    },
     // Location and preferences
     country: {
       type: String,
@@ -204,6 +217,21 @@ const UserSchema = new Schema(
       leaderboardVisibility: { type: Boolean, default: true },
       allowFriendRequests: { type: Boolean, default: true },
       multilingualSupport: { type: [String], default: [] },
+      studyField: { type: String }, // e.g., "Science", "Arts"
+      targetUniversity: {
+        type: String,
+      },
+      studyHours: {
+        type: Number,
+        default: 0,
+      },
+      favoriteSubjects: {
+        type: [String],
+        default: [],
+      },
+      careerGoal: {
+        type: String, // e.g., "Engineer", "Doctor"
+      }
     },
     // Learning settings
     settings: {
@@ -228,6 +256,7 @@ const UserSchema = new Schema(
         lastStudyDate: { type: Date },
       },
       goalDate: { type: Date },
+      examYear: { type: String }, // e.g., "2024"
       totalQuizzes: { type: Number, default: 0 },
       averageScore: { type: Number, default: 0 },
       completedTopics: { type: [String], default: [] },
