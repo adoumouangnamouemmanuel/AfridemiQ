@@ -93,6 +93,11 @@ export interface UserPreferences {
   leaderboardVisibility: boolean;
   allowFriendRequests: boolean;
   multilingualSupport: string[];
+  studyField?: string;
+  targetUniversity?: string;
+  studyHours?: number;
+  favoriteSubjects?: string[];
+  careerGoal?: string;
 }
 
 /**
@@ -138,6 +143,7 @@ export interface UserProgress {
   weakSubjects: string[];
   badges: string[];
   achievements: string[];
+  examYear?: string;
   progressSummary?: ProgressSummary;
 }
 
@@ -174,6 +180,8 @@ export interface UserProfile {
   phoneNumber?: string;
   isPhoneVerified: boolean;
   avatar?: string;
+  dateOfBirth?: string | Date;
+  gender?: string;
   country?: string;
   timeZone?: string;
   preferredLanguage?: string;
@@ -311,6 +319,10 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
+  gender?: string;
+  dateOfBirth?: string | Date;
+  preferredLanguage?: string;
+  role?: string;
 }
 
 /**
