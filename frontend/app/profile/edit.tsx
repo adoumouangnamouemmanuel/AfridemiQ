@@ -185,7 +185,7 @@ export default function EditProfileScreen() {
   const sections = [
     { id: "personal", label: "Personal", icon: "person" },
     { id: "education", label: "Education", icon: "school" },
-    { id: "goals", label: "Goals", icon: "target" },
+    { id: "goals", label: "Goals", icon: "flag" },
   ];
 
   const SelectableField: React.FC<{
