@@ -1,40 +1,45 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiService, type AuthResponse } from "./api.service";
+/**
+ * @file Authentication Service
+ * @description Manages authentication state, token storage, and session management
+ * @module services/auth.service
+ */
 
-// User interface aligned with api.service.tsx
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  country: string;
-  selectedExam?: string;
-  goalDate?: Date;
-  xp: number;
-  level: number;
-  streak: number;
-  avatar?: string;
-  badges: string[];
-  completedTopics: string[];
-  weakSubjects: string[];
-  isPremium: boolean;
-  role: string;
-}
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { apiService } from "./api.service";
+import type { User, AuthResponse } from "../types/user/user.types";
 
 /**
- * Enhanced authentication service with comprehensive logging and reliability improvements.
+ * @class AuthService
+ * @description Enhanced authentication service with comprehensive logging and reliability improvements
  */
 class AuthService {
+  /**
+   * Maximum number of retry attempts for critical operations
+   * @private
+   * @readonly
+   */
   private readonly MAX_RETRY_ATTEMPTS = 3;
+
+  /**
+   * Storage keys for authentication data
+   * @private
+   * @readonly
+   */
   private readonly STORAGE_KEYS = {
     USER: "user",
     TOKEN: "token",
     REFRESH_TOKEN: "refreshToken",
     LAST_REFRESH: "lastTokenRefresh",
     SESSION_ID: "sessionId",
-  };
+  } as const;
 
   /**
-   * Stores authentication data with comprehensive logging.
+   * Stores authentication data with comprehensive logging
+   * @param user - User object to store
+   * @param token - Authentication token
+   * @param refreshToken - Refresh token (optional)
+   * @returns Promise that resolves when storage is complete
+   * @throws {Error} When unable to save authentication data
    */
   async storeAuthData(
     user: User,
@@ -76,7 +81,9 @@ class AuthService {
   }
 
   /**
-   * Clears authentication data with retry logic.
+   * Clears authentication data with retry logic
+   * @returns Promise that resolves when data is cleared
+   * @throws {Error} When unable to clear authentication data after max retries
    */
   async clearAuthData(): Promise<void> {
     let attempts = 0;
@@ -109,14 +116,15 @@ class AuthService {
           throw new Error("Unable to clear authentication data");
         }
 
-        // Wait before retry
+        // Wait before retry with exponential backoff
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempts));
       }
     }
   }
 
   /**
-   * Retrieves stored authentication data with validation.
+   * Retrieves stored authentication data with validation
+   * @returns Promise resolving to authentication data or null values if not found
    */
   async getAuthData(): Promise<{
     user: User | null;
@@ -163,7 +171,9 @@ class AuthService {
   }
 
   /**
-   * Transforms backend user data to frontend format.
+   * Transforms backend user data to frontend format with validation
+   * @param backendUser - User data from backend API
+   * @returns Transformed user object for frontend use
    */
   transformUserData(backendUser: AuthResponse["user"]): User {
     // TODO: Remove detailed logging before production
@@ -171,7 +181,7 @@ class AuthService {
     console.log("🔄 TRANSFORM: Backend user ID:", backendUser._id);
     console.log("🔄 TRANSFORM: Backend user email:", backendUser.email);
 
-    const transformedUser = {
+    const transformedUser: User = {
       id: backendUser._id,
       name: backendUser.name,
       email: backendUser.email,
@@ -188,7 +198,7 @@ class AuthService {
       completedTopics: backendUser.progress?.completedTopics ?? [],
       weakSubjects: backendUser.progress?.weakSubjects ?? [],
       isPremium: backendUser.isPremium ?? false,
-      role: backendUser.role ?? "user",
+      role: (backendUser.role as User["role"]) ?? "student",
     };
 
     // TODO: Remove detailed logging before production
@@ -197,7 +207,8 @@ class AuthService {
   }
 
   /**
-   * Restores user session with comprehensive validation and retry logic.
+   * Restores user session with comprehensive validation and retry logic
+   * @returns Promise resolving to session data or null values if restoration fails
    */
   async restoreSession(): Promise<{
     user: User | null;
@@ -305,7 +316,8 @@ class AuthService {
   }
 
   /**
-   * Checks if the user session is healthy.
+   * Checks if the user session is healthy
+   * @returns Promise resolving to boolean indicating session health
    */
   async isSessionHealthy(): Promise<boolean> {
     try {
@@ -327,15 +339,15 @@ class AuthService {
 
       if (!isValid) {
         // Try refresh before declaring unhealthy
-        //TODO: Remove detailed logging before production
+        // TODO: Remove detailed logging before production
         console.log("🔄 HEALTH: Token invalid, attempting refresh");
         const refreshed = await apiService.silentRefresh();
         if (refreshed) {
-          //TODO: Remove detailed logging before production
+          // TODO: Remove detailed logging before production
           console.log("✅ HEALTH: Refresh successful, session healthy");
           return true;
         }
-        //TODO: Remove detailed logging before production
+        // TODO: Remove detailed logging before production
         console.log("❌ HEALTH: Refresh failed, session unhealthy");
       }
 
@@ -348,7 +360,8 @@ class AuthService {
   }
 
   /**
-   * Forces a complete session refresh.
+   * Forces a complete session refresh
+   * @returns Promise resolving to boolean indicating refresh success
    */
   async forceSessionRefresh(): Promise<boolean> {
     try {
@@ -379,4 +392,3 @@ class AuthService {
 }
 
 export const authService = new AuthService();
-export type { User };
