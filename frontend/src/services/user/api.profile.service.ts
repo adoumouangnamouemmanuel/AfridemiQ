@@ -1,12 +1,22 @@
+/**
+ * Profile API Service for managing user profile-related operations with the backend.
+ * Provides methods for fetching, updating, and managing user profiles, preferences, and progress.
+ */
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_BASE_URL = "http://192.168.223.246:3000/api"; // Change to your backend URL
+// Constants
+/** Base URL for API requests */
+const API_BASE_URL = "http://192.168.223.246:3000/api";
 
+// Interfaces
+/** Generic API response structure */
 interface ApiResponse<T> {
   message: string;
   data: T;
 }
 
+/** User profile data structure */
 interface UserProfile {
   _id: string;
   name: string;
@@ -77,6 +87,7 @@ interface UserProfile {
   updatedAt: string;
 }
 
+/** Data structure for updating user profile */
 interface UpdateProfileData {
   name?: string;
   email?: string;
@@ -90,6 +101,7 @@ interface UpdateProfileData {
   avatar?: string;
 }
 
+/** Data structure for updating user preferences */
 interface UpdatePreferencesData {
   preferences: {
     notifications?: {
@@ -110,6 +122,7 @@ interface UpdatePreferencesData {
   };
 }
 
+/** Data structure for updating user progress */
 interface UpdateProgressData {
   selectedExam?: string;
   selectedSeries?: string;
@@ -130,8 +143,25 @@ interface UpdateProgressData {
   achievements?: string[];
 }
 
+/** Response structure for user search */
+interface SearchUsersResponse {
+  users: any[];
+  pagination: {
+    total: number;
+    page: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+}
+
+/**
+ * Service class for handling user profile API operations.
+ */
 class ProfileApiService {
-  // Private method to get stored token
+  /**
+   * Retrieves the stored authentication token from AsyncStorage.
+   * @returns {Promise<string | null>} The token or null if retrieval fails.
+   */
   private async getStoredToken(): Promise<string | null> {
     try {
       return await AsyncStorage.getItem("token");
@@ -141,7 +171,13 @@ class ProfileApiService {
     }
   }
 
-  // Private method to make authenticated requests
+  /**
+   * Makes an authenticated API request to the backend.
+   * @param endpoint - The API endpoint path (e.g., /users/profile).
+   * @param options - Fetch request options (method, headers, body, etc.).
+   * @returns {Promise<ApiResponse<T>>} The API response with typed data.
+   * @throws {Error} If the request fails or the response is not OK.
+   */
   private async makeRequest<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -177,13 +213,20 @@ class ProfileApiService {
     }
   }
 
-  // Get user profile
+  /**
+   * Fetches the user's profile data.
+   * @returns {Promise<UserProfile>} The user's profile.
+   */
   async getProfile(): Promise<UserProfile> {
     const response = await this.makeRequest<UserProfile>("/users/profile");
     return response.data;
   }
 
-  // Update user profile
+  /**
+   * Updates the user's profile with provided data.
+   * @param profileData - Data to update the profile.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   */
   async updateProfile(profileData: UpdateProfileData): Promise<UserProfile> {
     const response = await this.makeRequest<UserProfile>("/users/profile", {
       method: "PUT",
@@ -192,7 +235,11 @@ class ProfileApiService {
     return response.data;
   }
 
-  // Update user preferences
+  /**
+   * Updates the user's preferences.
+   * @param preferencesData - Preferences to update.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   */
   async updatePreferences(
     preferencesData: UpdatePreferencesData
   ): Promise<UserProfile> {
@@ -203,7 +250,12 @@ class ProfileApiService {
     return response.data;
   }
 
-  // Update specific preference type
+  /**
+   * Updates a specific preference type with a new value.
+   * @param type - The preference type to update.
+   * @param value - The new value for the preference.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   */
   async updatePreferenceType(type: string, value: any): Promise<UserProfile> {
     const response = await this.makeRequest<UserProfile>(
       `/users/preferences/${type}`,
@@ -215,7 +267,11 @@ class ProfileApiService {
     return response.data;
   }
 
-  // Update user progress
+  /**
+   * Updates the user's progress data.
+   * @param progressData - Progress data to update.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   */
   async updateProgress(progressData: UpdateProgressData): Promise<UserProfile> {
     const response = await this.makeRequest<UserProfile>("/users/progress", {
       method: "PUT",
@@ -224,7 +280,11 @@ class ProfileApiService {
     return response.data;
   }
 
-  // Update social profile
+  /**
+   * Updates the user's social profile.
+   * @param socialData - Social profile data to update.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   */
   async updateSocialProfile(socialData: {
     bio?: string;
     publicAchievements?: string[];
@@ -241,7 +301,10 @@ class ProfileApiService {
     return response.data;
   }
 
-  // Delete user account
+  /**
+   * Deletes the user's account.
+   * @returns {Promise<void>} Resolves when the account is deleted.
+   */
   async deleteAccount(): Promise<void> {
     await this.makeRequest("/users/profile", {
       method: "DELETE",
@@ -249,10 +312,13 @@ class ProfileApiService {
   }
 
   // TODO: Implement when friends system is ready
-  // Get user friends
+  /**
+   * Fetches the user's friends list (placeholder implementation).
+   * @returns {Promise<any[]>} Array of friend objects (dummy data).
+   */
   async getFriends(): Promise<any[]> {
     // TODO: Implement actual API call when friends endpoint is ready
-    // const response = await this.makeRequest<any[]>("/users/friends")
+    // const response = await this.makeRequest<any[]>('/users/friends')
     // return response.data
 
     // Dummy data for now
@@ -264,11 +330,16 @@ class ProfileApiService {
   }
 
   // TODO: Implement when friends system is ready
-  // Add friend
+  /**
+   * Adds a friend to the user's friend list (placeholder implementation).
+   * @param friendId - ID of the friend to add.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   * @throws {Error} Friends system not implemented yet.
+   */
   async addFriend(friendId: string): Promise<UserProfile> {
     // TODO: Implement actual API call when friends endpoint is ready
     // const response = await this.makeRequest<UserProfile>(`/users/friends/${friendId}`, {
-    //   method: "POST",
+    //   method: 'POST',
     // })
     // return response.data
 
@@ -276,11 +347,16 @@ class ProfileApiService {
   }
 
   // TODO: Implement when friends system is ready
-  // Remove friend
+  /**
+   * Removes a friend from the user's friend list (placeholder implementation).
+   * @param friendId - ID of the friend to remove.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   * @throws {Error} Friends system not implemented yet.
+   */
   async removeFriend(friendId: string): Promise<UserProfile> {
     // TODO: Implement actual API call when friends endpoint is ready
     // const response = await this.makeRequest<UserProfile>(`/users/friends/${friendId}`, {
-    //   method: "DELETE",
+    //   method: 'DELETE',
     // })
     // return response.data
 
@@ -288,20 +364,18 @@ class ProfileApiService {
   }
 
   // TODO: Implement when search system is ready
-  // Search users
+  /**
+   * Searches for users based on a query (placeholder implementation).
+   * @param query - Search query string.
+   * @param page - Page number for pagination (default: 1).
+   * @param limit - Number of results per page (default: 10).
+   * @returns {Promise<SearchUsersResponse>} Search results with pagination info (dummy data).
+   */
   async searchUsers(
     query: string,
     page = 1,
     limit = 10
-  ): Promise<{
-    users: any[];
-    pagination: {
-      total: number;
-      page: number;
-      totalPages: number;
-      hasMore: boolean;
-    };
-  }> {
+  ): Promise<SearchUsersResponse> {
     // TODO: Implement actual API call when search endpoint is ready
     // const response = await this.makeRequest<any>(`/users/search?search=${query}&page=${page}&limit=${limit}`)
     // return response.data
@@ -322,7 +396,10 @@ class ProfileApiService {
   }
 }
 
+// Singleton instance
 export const profileApiService = new ProfileApiService();
+
+// Type exports
 export type {
   UserProfile,
   UpdateProfileData,
