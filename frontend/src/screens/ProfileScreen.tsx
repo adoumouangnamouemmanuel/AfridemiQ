@@ -75,7 +75,7 @@ export default function ProfileScreen() {
   // Load profile data on component mount
   useEffect(() => {
     loadProfileData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Import apiService at the top of the file or dynamically here
@@ -125,6 +125,16 @@ export default function ProfileScreen() {
         if (refreshed) {
           // Retry loading profile after successful refresh
           try {
+            const isTokenValid = await apiService.checkTokenValidity();
+            if (!isTokenValid) {
+              console.log(
+                "🔄 PROFILE: Token invalid, refreshing before profile load"
+              );
+              const refreshed = await apiService.silentRefresh();
+              if (!refreshed) {
+                throw new Error("Session expired");
+              }
+            }
             const profile = await profileApiService.getProfile();
             setProfileData(profile);
             setIsRetrying(false);
@@ -191,11 +201,9 @@ export default function ProfileScreen() {
     try {
       // Import authService and apiService
       const { authService } = await import("../services/auth.service");
-      const { apiService } = await import("../services/api.service");
 
       // Clear all auth data
       await authService.clearAuthData();
-      await apiService.forceLogout();
 
       // Clear user context
       setUser(null);
