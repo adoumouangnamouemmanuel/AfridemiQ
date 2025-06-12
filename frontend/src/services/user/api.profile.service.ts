@@ -4,7 +4,7 @@
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
+import type {
   ApiResponse,
   UserProfile,
   UpdateProfileData,
@@ -180,7 +180,7 @@ class ProfileApiService {
    */
   async getFriends(): Promise<Friend[]> {
     // TODO: Implement actual API call when friends endpoint is ready
-    // const response = await this.makeRequest<Friend[]>('/users/friends')
+    // const response = await this.makeRequest<any[]>('/users/friends')
     // return response.data
 
     // Dummy data for now
