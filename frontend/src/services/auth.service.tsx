@@ -1,11 +1,38 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiService } from "./api.service";
+import { apiService, AuthResponse } from "./api.service";
 
-// Enhanced authentication service for managing auth state
+// User interface aligned with api.service.tsx
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  country: string;
+  selectedExam?: string;
+  goalDate?: Date;
+  xp: number;
+  level: number;
+  streak: number;
+  avatar?: string;
+  badges: string[];
+  completedTopics: string[];
+  weakSubjects: string[];
+  isPremium: boolean;
+  role: string;
+}
+
+/**
+ * Enhanced authentication service for managing auth state.
+ */
 class AuthService {
-  // Store authentication data
+  /**
+   * Stores authentication data in AsyncStorage.
+   * @param user - User data to store.
+   * @param token - Access token.
+   * @param refreshToken - Optional refresh token.
+   * @throws Error if storage fails.
+   */
   async storeAuthData(
-    user: any,
+    user: User,
     token: string,
     refreshToken?: string
   ): Promise<void> {
@@ -14,30 +41,35 @@ class AuthService {
         AsyncStorage.setItem("user", JSON.stringify(user)),
         AsyncStorage.setItem("token", token),
       ];
-
       if (refreshToken) {
         promises.push(AsyncStorage.setItem("refreshToken", refreshToken));
       }
-
       await Promise.all(promises);
     } catch (error) {
-      console.error("Error storing auth data:", error);
-      throw new Error("Failed to store authentication data");
+      console.error("Failed to store auth data:", error);
+      throw new Error("Unable to save authentication data");
     }
   }
 
-  // Clear all authentication data
+  /**
+   * Clears all authentication data from AsyncStorage.
+   * @throws Error if clearing fails.
+   */
   async clearAuthData(): Promise<void> {
     try {
       await AsyncStorage.multiRemove(["user", "token", "refreshToken"]);
     } catch (error) {
-      console.error("Error clearing auth data:", error);
+      console.error("Failed to clear auth data:", error);
+      throw new Error("Unable to clear authentication data");
     }
   }
 
-  // Get stored authentication data
+  /**
+   * Retrieves stored authentication data.
+   * @returns Object containing user, token, and refreshToken, or null if unavailable.
+   */
   async getAuthData(): Promise<{
-    user: any | null;
+    user: User | null;
     token: string | null;
     refreshToken: string | null;
   }> {
@@ -47,99 +79,74 @@ class AuthService {
         "token",
         "refreshToken",
       ]);
-
       return {
         user: userString[1] ? JSON.parse(userString[1]) : null,
         token: token[1],
         refreshToken: refreshToken[1],
       };
     } catch (error) {
-      console.error("Error getting auth data:", error);
+      console.error("Failed to get auth data:", error);
       return { user: null, token: null, refreshToken: null };
     }
   }
 
-  // Check if user is authenticated
-  async isAuthenticated(): Promise<boolean> {
-    const { token, refreshToken } = await this.getAuthData();
-    return !!(token && refreshToken);
-  }
-
-  // Logout user
-  async logout(): Promise<void> {
-    try {
-      // Call API logout
-      await apiService.logout();
-    } catch (error) {
-      console.error("API logout failed:", error);
-    } finally {
-      // Always clear local data
-      await this.clearAuthData();
-    }
-  }
-
-  // Transform backend user data to frontend format
-  transformUserData(backendUser: any): any {
+  /**
+   * Transforms backend user data to frontend format.
+   * @param backendUser - Raw user data from backend.
+   * @returns Transformed user object.
+   */
+  transformUserData(backendUser: AuthResponse["user"]): User {
     return {
       id: backendUser._id,
       name: backendUser.name,
       email: backendUser.email,
       country: backendUser.country,
-      selectedExam: backendUser.progress?.selectedExam || "",
+      selectedExam: backendUser.progress?.selectedExam ?? "",
       goalDate: backendUser.progress?.goalDate
         ? new Date(backendUser.progress.goalDate)
         : undefined,
-      xp: backendUser.progress?.xp || 0,
-      level: backendUser.progress?.level || 1,
-      streak: backendUser.progress?.streak?.current || 0,
+      xp: backendUser.progress?.xp ?? 0,
+      level: backendUser.progress?.level ?? 1,
+      streak: backendUser.progress?.streak?.current ?? 0,
       avatar: backendUser.avatar,
-      badges: backendUser.progress?.badges || [],
-      completedTopics: backendUser.progress?.completedTopics || [],
-      weakSubjects: backendUser.progress?.weakSubjects || [],
-      isPremium: backendUser.isPremium || false,
-      role: backendUser.role || "user",
+      badges: backendUser.progress?.badges ?? [],
+      completedTopics: backendUser.progress?.completedTopics ?? [],
+      weakSubjects: backendUser.progress?.weakSubjects ?? [],
+      isPremium: backendUser.isPremium ?? false,
+      role: backendUser.role ?? "user",
     };
   }
 
-  // Check and restore session with automatic refresh
+  /**
+   * Restores user session with token validation.
+   * @returns Auth data if session is valid, else null.
+   */
   async restoreSession(): Promise<{
-    user: any | null;
+    user: User | null;
     token: string | null;
     refreshToken: string | null;
   }> {
     try {
       const authData = await this.getAuthData();
-
-      if (authData.user && authData.token && authData.refreshToken) {
-        // Check if token is still valid
-        const isValid = await apiService.checkTokenValidity();
-
-        if (!isValid) {
-          // Try to refresh the token
-          const refreshed = await apiService.silentRefresh();
-
-          if (refreshed) {
-            // Get the new token
-            const newToken = await AsyncStorage.getItem("token");
-            return {
-              user: authData.user,
-              token: newToken,
-              refreshToken: authData.refreshToken,
-            };
-          } else {
-            // Refresh failed, but don't clear data yet
-            // Let the user continue and handle it gracefully
-            console.log("Token refresh failed, but keeping session");
-            return authData;
-          }
-        }
-
-        return authData;
+      if (!authData.user || !authData.token || !authData.refreshToken) {
+        return { user: null, token: null, refreshToken: null };
       }
 
-      return { user: null, token: null, refreshToken: null };
+      const isValid = await apiService.checkTokenValidity();
+      if (!isValid) {
+        const refreshed = await apiService.silentRefresh();
+        if (!refreshed) {
+          await this.clearAuthData();
+          return { user: null, token: null, refreshToken: null };
+        }
+        const newToken = await AsyncStorage.getItem("token");
+        return { ...authData, token: newToken };
+      }
+
+      return authData;
     } catch (error) {
       console.error("Session restoration failed:", error);
+      await this.clearAuthData();
       return { user: null, token: null, refreshToken: null };
     }
   }
