@@ -3,7 +3,7 @@
 import type React from "react";
 import { Alert, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { authService } from "../../services/auth.service";
+import { apiService } from "../../services/api.service";
 import { useUser } from "../../utils/UserContext";
 
 interface LogoutButtonProps {
@@ -33,7 +33,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
         onPress: async () => {
           try {
             // Call logout service
-            await authService.logout();
+            await apiService.logout();
 
             // Clear user context
             setUser(null);
