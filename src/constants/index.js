@@ -85,9 +85,9 @@ const SESSION_STATUSES = ["scheduled", "completed", "cancelled"];
  * @module constants/index
  */
 const USER_ROLES = ["student", "teacher", "admin"];
-const SUBSCRIPTION_TYPES = ["free", "premium"];
-const PAYMENT_STATUSES = ["active", "pending", "failed"];
-const ACCESS_LEVELS = ["basic", "premium"];
+const SUBSCRIPTION_TYPES = ["free", "premium", "pro"];
+const PAYMENT_STATUSES = ["active", "pending", "failed", "cancelled", "expired"];
+const ACCESS_LEVELS = ["basic", "premium", "unlimited"];
 const FONT_SIZES = ["small", "medium", "large"];
 const CONTENT_FORMATS = ["video", "text", "audio", "mixed"];
 const LEARNING_STYLES = ["visual", "auditory", "kinesthetic", "mixed"];
