@@ -8,7 +8,10 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { authService } from "../services/auth.service";
+import { apiService } from "../services/api.service";
 
+// User interface aligned with auth.service.tsx
 interface User {
   id: string;
   name: string;
@@ -23,8 +26,6 @@ interface User {
   badges: string[];
   completedTopics: string[];
   weakSubjects: string[];
-  subjects?: string[];
-  learningStyle?: string;
   isPremium: boolean;
   role: string;
 }
@@ -34,133 +35,102 @@ interface UserContextType {
   setUser: (user: User | null) => void;
   token: string | null;
   setToken: (token: string | null) => void;
-  handleTokenExpiration: () => void;
-  refreshUserSession: () => void;
-  gracefulLogout: () => void;
+  handleTokenExpiration: () => Promise<void>;
+  refreshUserSession: () => Promise<void>;
+  gracefulLogout: () => Promise<void>;
   isLoading: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+/**
+ * Provides user authentication state and methods.
+ * @param children - Child components.
+ */
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Refresh user session - memoized to prevent recreations
+  /**
+   * Refreshes user session by validating or refreshing token.
+   */
   const refreshUserSession = React.useCallback(async () => {
-    if (isRefreshing) return;
-
     try {
-      setIsRefreshing(true);
-      const { authService } = await import("../services/auth.service");
-      const { apiService } = await import("../services/api.service");
-
-      const authData = await authService.getAuthData();
-
-      if (authData.refreshToken) {
-        const response = await apiService.refreshToken({
-          refreshToken: authData.refreshToken,
-        });
-
-        // Update stored token
-        await AsyncStorage.setItem("token", response.token);
-        setToken(response.token);
-
-        console.log("Token refreshed successfully");
+      const isValid = await apiService.checkTokenValidity();
+      if (!isValid) {
+        const refreshed = await apiService.silentRefresh();
+        if (refreshed) {
+          const newToken = await AsyncStorage.getItem("token");
+          if (newToken && newToken !== token) {
+            setToken(newToken);
+          }
+        } else {
+          throw new Error("Token refresh failed");
+        }
       }
     } catch (error) {
       console.error("Failed to refresh session:", error);
-      // Don't log out user immediately, let them continue and handle on next API call
-    } finally {
-      setIsRefreshing(false);
+      throw new Error("Unable to refresh session");
     }
-  }, [isRefreshing]);
+  }, [token]);
 
-  // Load user data on app start - memoized and simplified
+  /**
+   * Loads user data on app start.
+   */
   const loadUserData = React.useCallback(async () => {
     try {
       setIsLoading(true);
-      const { authService } = await import("../services/auth.service");
-      const { apiService } = await import("../services/api.service");
-
-      const authData = await authService.getAuthData();
-
+      const authData = await authService.restoreSession();
       if (authData.user && authData.token) {
         setUser(authData.user);
         setToken(authData.token);
-
-        // Try to refresh token if it's close to expiring
-        try {
-          const isAuthenticated = await apiService.isAuthenticated();
-          if (!isAuthenticated) {
-            // Token might be expired, try to refresh
-            console.log("Token validation failed, attempting refresh...");
-            const refreshed = await apiService.silentRefresh();
-            if (refreshed) {
-              console.log("Token refreshed successfully on startup");
-            }
-          }
-        } catch (error) {
-          console.log(
-            "Token validation failed, but keeping user logged in:",
-            error
-          );
-          // Keep user logged in even if token validation fails
-          // The API service will handle refresh automatically on next request
-        }
       }
     } catch (error) {
       console.error("Error loading user data:", error);
     } finally {
       setIsLoading(false);
     }
-  }, []); // No dependencies to prevent infinite loop
+  }, []);
 
-  // Handle token expiration gracefully
+  /**
+   * Handles token expiration by attempting refresh.
+   */
   const handleTokenExpiration = React.useCallback(async () => {
     try {
-      console.log("Handling token expiration...");
-
-      // First try to refresh the token
       await refreshUserSession();
-
-      // If refresh fails, the user will be logged out
-      // but only after they try to make an authenticated request
     } catch (error) {
-      console.error("Error handling token expiration:", error);
-      // Only clear auth data if refresh completely fails
-      // and we're sure the user should be logged out
+      console.error("Token expiration handling failed:", error);
+      await gracefulLogout();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshUserSession]);
 
-  // Graceful logout that doesn't disrupt user experience
+  /**
+   * Performs a graceful logout.
+   */
   const gracefulLogout = React.useCallback(async () => {
     try {
-      const { authService } = await import("../services/auth.service");
-
       await authService.clearAuthData();
       setUser(null);
       setToken(null);
     } catch (error) {
-      console.error("Error during graceful logout:", error);
+      console.error("Graceful logout failed:", error);
+      throw new Error("Unable to logout");
     }
   }, []);
 
-  // Load user data on app start - only once
+  // Load user data on mount
   useEffect(() => {
     loadUserData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array to run only once
+  }, [loadUserData]);
 
-  // Set up periodic token refresh (every 50 minutes)
+  // Periodic token refresh (every 50 minutes) only when online
   useEffect(() => {
-    if (user && token) {
+    if (user && token && navigator.onLine) {
       const refreshInterval = setInterval(() => {
-        refreshUserSession();
+        refreshUserSession().catch(console.error);
       }, 50 * 60 * 1000); // 50 minutes
-
       return () => clearInterval(refreshInterval);
     }
   }, [user, token, refreshUserSession]);
@@ -179,6 +149,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }
 
+/**
+ * Hook to access user context.
+ * @returns User context data and methods.
+ * @throws Error if used outside UserProvider.
+ */
 export function useUser() {
   const context = useContext(UserContext);
   if (context === undefined) {
