@@ -30,27 +30,47 @@ const register = async (data) => {
 
 // Login user
 const login = async ({ email, password }) => {
-  // console.log("Login: Searching for email:", email);
+  // TODO: Remove detailed logging before production
+  console.log("🔐 LOGIN: Attempting login for email:", email);
+
   const user = await User.findOne({ email });
   if (!user) {
-    // console.log("Login: User not found");
+    // TODO: Remove detailed logging before production
+    console.log("❌ LOGIN: User not found for email:", email);
     throw new UnauthorizedError("Email ou mot de passe incorrect");
   }
-  // console.log("Login: Comparing passwords");
+
+  // TODO: Remove detailed logging before production
+  console.log("🔍 LOGIN: User found, comparing passwords");
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    // console.log("Login: Password mismatch");
+    // TODO: Remove detailed logging before production
+    console.log("❌ LOGIN: Password mismatch for email:", email);
     throw new UnauthorizedError("Email ou mot de passe incorrect");
   }
-  // console.log("Login: Updating user");
+
+  // TODO: Remove detailed logging before production
+  console.log("✅ LOGIN: Password match, updating user data");
+
   user.lastLogin = new Date();
   user.refreshToken = generateRefreshToken({
     userId: user._id,
     role: user.role,
   });
+
   await user.save();
-  // console.log("Login: Generating token");
+
   const token = generateToken({ userId: user._id, role: user.role });
+
+  // TODO: Remove detailed logging before production
+  console.log("✅ LOGIN: Login successful for user:", user._id);
+  console.log("✅ LOGIN: Generated token length:", token.length);
+  console.log(
+    "✅ LOGIN: Generated refresh token length:",
+    user.refreshToken.length
+  );
+
   return { user: user.toJSON(), token, refreshToken: user.refreshToken };
 };
 
@@ -112,7 +132,7 @@ const updateAllPreferences = async (userId, { preferences }) => {
   // Update preferences
   user.preferences = {
     ...user.preferences,
-    ...preferences
+    ...preferences,
   };
 
   // Save the user document
@@ -135,10 +155,10 @@ const updatePreferenceType = async (userId, type, { value }) => {
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 
   // Handle nested preferences (like notifications)
-  if (type === 'notifications') {
+  if (type === "notifications") {
     user.preferences.notifications = {
       ...user.preferences.notifications,
-      ...value
+      ...value,
     };
   } else {
     user.preferences[type] = value;
@@ -165,10 +185,10 @@ const updateMultiplePreferences = async (userId, { preferences }) => {
 
   // Update each specified preference type
   Object.entries(preferences).forEach(([type, value]) => {
-    if (type === 'notifications') {
+    if (type === "notifications") {
       user.preferences.notifications = {
         ...user.preferences.notifications,
-        ...value
+        ...value,
       };
     } else {
       user.preferences[type] = value;
@@ -206,19 +226,24 @@ const updateProgress = async (userId, progress) => {
 const addFriend = async (userId, friendId) => {
   try {
     // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(friendId)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(friendId)
+    ) {
       throw new BadRequestError("Format d'ID utilisateur invalide");
     }
 
     // Prevent self-friending
     if (userId === friendId) {
-      throw new BadRequestError("Vous ne pouvez pas vous ajouter vous-même comme ami");
+      throw new BadRequestError(
+        "Vous ne pouvez pas vous ajouter vous-même comme ami"
+      );
     }
 
     // Check if users exist
     const [user, friend] = await Promise.all([
       User.findById(userId),
-      User.findById(friendId)
+      User.findById(friendId),
     ]);
 
     if (!user || !friend) {
@@ -234,8 +259,13 @@ const addFriend = async (userId, friendId) => {
     }
 
     // Check if either user has blocked the other
-    if (user.blockedUsers.includes(friendId) || friend.blockedUsers.includes(userId)) {
-      throw new BadRequestError("Impossible d'ajouter cet utilisateur comme ami");
+    if (
+      user.blockedUsers.includes(friendId) ||
+      friend.blockedUsers.includes(userId)
+    ) {
+      throw new BadRequestError(
+        "Impossible d'ajouter cet utilisateur comme ami"
+      );
     }
 
     // Update both users' friend lists using atomic operations
@@ -249,7 +279,7 @@ const addFriend = async (userId, friendId) => {
         friendId,
         { $addToSet: { friends: userId } },
         { new: true }
-      )
+      ),
     ]);
 
     // Create notification for the friend
@@ -262,12 +292,12 @@ const addFriend = async (userId, friendId) => {
       actionUrl: `/profile/${userId}`,
       metadata: {
         requesterId: userId,
-        requesterName: user.name
-      }
+        requesterName: user.name,
+      },
     });
 
     logger.info(`L'utilisateur ${userId} a ajouté ${friendId} comme ami`);
-    
+
     // Return the updated user
     return await User.findById(userId);
   } catch (error) {
@@ -280,19 +310,24 @@ const addFriend = async (userId, friendId) => {
 const removeFriend = async (userId, friendId) => {
   try {
     // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(friendId)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(friendId)
+    ) {
       throw new BadRequestError("Format d'ID utilisateur invalide");
     }
 
     // Prevent self-friending
     if (userId === friendId) {
-      throw new BadRequestError("Vous ne pouvez pas vous retirer vous-même comme ami");
+      throw new BadRequestError(
+        "Vous ne pouvez pas vous retirer vous-même comme ami"
+      );
     }
 
     // Check if users exist
     const [user, friend] = await Promise.all([
       User.findById(userId),
-      User.findById(friendId)
+      User.findById(friendId),
     ]);
 
     if (!user) {
@@ -314,7 +349,7 @@ const removeFriend = async (userId, friendId) => {
         friendId,
         { $pull: { friends: userId } },
         { new: true }
-      )
+      ),
     ]);
 
     // Create notification for the removed friend
@@ -328,8 +363,8 @@ const removeFriend = async (userId, friendId) => {
         actionUrl: `/profile/${userId}`,
         metadata: {
           removedById: userId,
-          removedByName: user.name
-        }
+          removedByName: user.name,
+        },
       });
     }
 
@@ -380,18 +415,18 @@ const requestPhoneVerification = async (userId, phoneNumber) => {
 const updateSubscription = async (userId, subscriptionData) => {
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
-  
+
   // Update subscription data
-  user.subscription = { 
-    ...user.subscription, 
+  user.subscription = {
+    ...user.subscription,
     ...subscriptionData,
     // Update accessLevel based on subscription type
-    accessLevel: subscriptionData.type === "premium" ? "premium" : "basic"
+    accessLevel: subscriptionData.type === "premium" ? "premium" : "basic",
   };
-  
+
   // Update isPremium flag
   user.isPremium = subscriptionData.type === "premium";
-  
+
   await user.save();
   return user;
 };
@@ -464,14 +499,38 @@ const resetPassword = async (token, password) => {
 // Refresh token
 const refreshToken = async (refreshToken) => {
   try {
-    const payload = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    // TODO: Remove detailed logging before production
+    console.log("🔄 REFRESH: Starting token refresh process");
+    console.log("🔄 REFRESH: Refresh token length:", refreshToken.length);
+
+    const payload = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
+    );
+
+    // TODO: Remove detailed logging before production
+    console.log(
+      "🔍 REFRESH: Refresh token verified, finding user:",
+      payload.userId
+    );
+
     const user = await User.findById(payload.userId);
     if (!user || user.refreshToken !== refreshToken) {
+      // TODO: Remove detailed logging before production
+      console.log("❌ REFRESH: Invalid refresh token or user not found");
       throw new UnauthorizedError("Token de rafraîchissement invalide");
     }
+
     const newToken = generateToken({ userId: user._id, role: user.role });
+
+    // TODO: Remove detailed logging before production
+    console.log("✅ REFRESH: New token generated successfully");
+    console.log("✅ REFRESH: New token length:", newToken.length);
+
     return { token: newToken };
   } catch (error) {
+    // TODO: Remove detailed logging before production
+    console.error("❌ REFRESH: Token refresh failed:", error.message);
     throw new UnauthorizedError("Token de rafraîchissement invalide");
   }
 };
@@ -480,10 +539,10 @@ const refreshToken = async (refreshToken) => {
 const searchUsers = async (searchQuery, page = 1, limit = 10) => {
   try {
     const skip = (page - 1) * limit;
-    
+
     // Create a case-insensitive search regex
-    const searchRegex = new RegExp(searchQuery, 'i');
-    
+    const searchRegex = new RegExp(searchQuery, "i");
+
     // Search across multiple fields with partial matching
     const query = {
       $or: [
@@ -492,24 +551,26 @@ const searchUsers = async (searchQuery, page = 1, limit = 10) => {
         { country: searchRegex },
         { city: searchRegex },
         { school: searchRegex },
-        { grade: searchRegex }
-      ]
+        { grade: searchRegex },
+      ],
     };
 
     const [users, total] = await Promise.all([
       User.find(query)
-        .select('-password -refreshToken -verificationToken -resetPasswordToken')
+        .select(
+          "-password -refreshToken -verificationToken -resetPasswordToken"
+        )
         .skip(skip)
         .limit(limit)
         .sort({ name: 1 }),
-      User.countDocuments(query)
+      User.countDocuments(query),
     ]);
 
     return {
       users,
       total,
       page,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     };
   } catch (error) {
     throw new Error(`Error searching users: ${error.message}`);
@@ -541,7 +602,10 @@ const updateSocialProfile = async (
 const blockFriend = async (userId, friendId) => {
   try {
     // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(friendId)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(friendId)
+    ) {
       throw new BadRequestError("Format d'ID utilisateur invalide");
     }
 
@@ -584,8 +648,8 @@ const blockFriend = async (userId, friendId) => {
       actionUrl: `/profile/${userId}`,
       metadata: {
         blockedById: userId,
-        blockedByName: user.name
-      }
+        blockedByName: user.name,
+      },
     });
 
     logger.info(`L'utilisateur ${userId} a bloqué ${friendId}`);
@@ -600,7 +664,10 @@ const blockFriend = async (userId, friendId) => {
 const unblockFriend = async (userId, friendId) => {
   try {
     // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(friendId)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(friendId)
+    ) {
       throw new BadRequestError("Format d'ID utilisateur invalide");
     }
 
@@ -625,7 +692,7 @@ const unblockFriend = async (userId, friendId) => {
     if (!user.friends.includes(friendId)) {
       user.friends.push(friendId);
     }
-    
+
     // Only add to friend's list if not already there
     if (!friend.friends.includes(userId)) {
       friend.friends.push(userId);
@@ -644,8 +711,8 @@ const unblockFriend = async (userId, friendId) => {
       actionUrl: `/profile/${userId}`,
       metadata: {
         unblockedById: userId,
-        unblockedByName: user.name
-      }
+        unblockedByName: user.name,
+      },
     });
 
     logger.info(`L'utilisateur ${userId} a débloqué ${friendId}`);
