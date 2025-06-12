@@ -17,11 +17,24 @@ const register = async (req, res) => {
 
 // Login user
 const login = async (req, res) => {
-  const { user, token, refreshToken } = await userService.login(req.body);
-  res.status(StatusCodes.OK).json({
-    message: "Connexion réussie",
-    data: { user, token, refreshToken },
-  });
+  try {
+    // TODO: Remove detailed logging before production
+    console.log("🌐 CONTROLLER: Login request received for:", req.body.email);
+
+    const { user, token, refreshToken } = await userService.login(req.body);
+
+    // TODO: Remove detailed logging before production
+    console.log("✅ CONTROLLER: Login successful for user:", user._id);
+
+    res.status(StatusCodes.OK).json({
+      message: "Connexion réussie",
+      data: { user, token, refreshToken },
+    });
+  } catch (error) {
+    // TODO: Remove detailed logging before production
+    console.error("❌ CONTROLLER: Login failed:", error.message);
+    throw error;
+  }
 };
 
 // Get user profile
@@ -241,11 +254,24 @@ const resetPassword = async (req, res) => {
 
 // Refresh token
 const refreshToken = async (req, res) => {
-  const { token } = await userService.refreshToken(req.body.refreshToken);
-  res.status(StatusCodes.OK).json({
-    message: "Token rafraîchi avec succès",
-    data: { token },
-  });
+  try {
+    // TODO: Remove detailed logging before production
+    console.log("🔄 CONTROLLER: Token refresh request received");
+
+    const { token } = await userService.refreshToken(req.body.refreshToken);
+
+    // TODO: Remove detailed logging before production
+    console.log("✅ CONTROLLER: Token refresh successful");
+
+    res.status(StatusCodes.OK).json({
+      message: "Token rafraîchi avec succès",
+      data: { token },
+    });
+  } catch (error) {
+    // TODO: Remove detailed logging before production
+    console.error("❌ CONTROLLER: Token refresh failed:", error.message);
+    throw error;
+  }
 };
 
 // Search users
@@ -262,8 +288,8 @@ const searchUsers = async (req, res) => {
 
     const result = await userService.searchUsers(
       search,
-      parseInt(page),
-      parseInt(limit)
+      Number.parseInt(page),
+      Number.parseInt(limit)
     );
 
     res.json({
