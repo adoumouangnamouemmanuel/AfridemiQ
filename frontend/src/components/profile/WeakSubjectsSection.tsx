@@ -37,7 +37,7 @@ export const WeakSubjectsSection: React.FC<WeakSubjectsSectionProps> = ({
   const weakSubjects =
     user.progress.weakSubjects.length > 0
       ? user.progress.weakSubjects
-      : ["Physics", "Chemistry"]; // Dummy fallback
+      : []; // Dummy fallback
 
   const handlePracticeSubject = (subject: string) => {
     // TODO: Navigate to practice screen for specific subject
