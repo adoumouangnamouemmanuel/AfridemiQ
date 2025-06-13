@@ -339,8 +339,8 @@ export default function EditPersonalInfoScreen() {
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: isDark ? theme.colors.surface : theme.colors.background,
-      borderRadius: 16,
-      borderWidth: 2,
+      borderRadius: 50,
+      borderWidth: 1,
       borderColor:
         focusedField === "dateOfBirth" ? "#3B82F6" : theme.colors.border,
       paddingHorizontal: 16,
