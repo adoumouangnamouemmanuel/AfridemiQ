@@ -232,6 +232,128 @@ const updateMultiplePreferencesSchema = Joi.object({
   }).min(1).required()
 });
 
+// Schema for updating only the bio (part of socialProfile)
+const updateBioSchema = Joi.object({
+  bio: Joi.string().max(300).optional().messages({
+    "string.max": "La biographie ne doit pas dépasser 300 caractères",
+  }),
+}).min(1).messages({
+  "object.min": "Au moins un champ est requis pour mettre à jour la biographie",
+});
+
+// Schema for updating personal information
+const updatePersonalInfoSchema = Joi.object({
+  name: Joi.string().min(2).max(50).optional().messages({
+    "string.min": "Le nom doit contenir au moins 2 caractères",
+    "string.max": "Le nom ne doit pas dépasser 50 caractères",
+  }),
+  email: Joi.string().email().optional().messages({
+    "string.email": "Email invalide",
+  }),
+  phoneNumber: Joi.string()
+    .pattern(/^\+[1-9]\d{1,14}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Numéro de téléphone invalide (ex: +1234567890)",
+    }),
+  country: Joi.string().max(100).optional().messages({
+    "string.max": "Le pays ne doit pas dépasser 100 caractères",
+  }),
+  timeZone: Joi.string().max(100).optional().messages({
+    "string.max": "Le fuseau horaire ne doit pas dépasser 100 caractères",
+  }),
+  preferredLanguage: Joi.string().max(10).optional().messages({
+    "string.max": "La langue préférée ne doit pas dépasser 10 caractères",
+  }),
+  dateOfBirth: Joi.date().iso().optional().messages({
+    "date.base": "Date de naissance invalide",
+  }),
+  gender: Joi.string().valid("male", "female", "other").optional().messages({
+    "any.only": "Genre invalide (male, female, other)",
+  }),
+}).min(1).messages({
+  "object.min": "Au moins un champ est requis pour mettre à jour les informations personnelles",
+});
+
+
+// Schema for updating education information
+const updateEducationSchema = Joi.object({
+  schoolName: Joi.string().max(100).optional().messages({
+    "string.max": "Le nom de l'école ne doit pas dépasser 100 caractères",
+  }),
+  gradeLevel: Joi.string().max(50).optional().messages({
+    "string.max": "Le niveau scolaire ne doit pas dépasser 50 caractères",
+  }),
+  parentEmail: Joi.string().email().optional().messages({
+    "string.email": "Email du parent invalide",
+  }),
+  studyField: Joi.string().max(50).optional().messages({
+    "string.max": "Le domaine d'étude ne doit pas dépasser 50 caractères",
+  }),
+  studyHours: Joi.number().min(0).max(24).optional().messages({
+    "number.base": "Les heures d'étude quotidiennes doivent être un nombre",
+    "number.min":
+      "Les heures d'étude quotidiennes doivent être supérieures ou égales à 0",
+    "number.max": "Les heures d'étude quotidiennes ne doivent pas dépasser 24",
+  }),
+})
+  .min(1)
+  .messages({
+    "object.min":
+      "Au moins un champ est requis pour mettre à jour les informations éducatives",
+  });
+
+// Schema for updating exam preparation (progress-related fields)
+const updateExamPreparationSchema = Joi.object({
+  selectedExam: Joi.string().max(100).optional().messages({
+    "string.max": "L'examen sélectionné ne doit pas dépasser 100 caractères",
+  }),
+  examYear: Joi.number().integer().min(2020).max(2030).optional().messages({
+    "number.base": "L'année de l'examen doit être un nombre",
+    "number.integer": "L'année de l'examen doit être un entier",
+    "number.min": "L'année de l'examen doit être 2020 ou ultérieure",
+    "number.max": "L'année de l'examen ne peut pas dépasser 2030",
+  }),
+})
+  .min(1)
+  .messages({
+    "object.min":
+      "Au moins un champ est requis pour mettre à jour la préparation à l'examen",
+  });
+
+// Schema for updating a single preference field
+const updateSinglePreferenceSchema = Joi.object({
+  key: Joi.string()
+    .valid(
+      "notifications.general",
+      "notifications.dailyReminderTime",
+      "notifications.challengeNotifications",
+      "notifications.progressUpdates",
+      "darkMode",
+      "fontSize",
+      "preferredContentFormat",
+      "enableHints",
+      "autoPlayAudio",
+      "showStepSolutions",
+      "leaderboardVisibility",
+      "allowFriendRequests",
+      "studyField",
+      "targetUniversity",
+      "studyHours",
+      "careerGoal"
+    )
+    .required()
+    .messages({
+      "any.required": "La clé de préférence est requise",
+      "any.only": "Clé de préférence invalide",
+    }),
+  value: Joi.any().required().messages({
+    "any.required": "La valeur de préférence est requise",
+  }),
+}).messages({
+  "object.base": "Les données de préférence doivent être un objet valide",
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -249,5 +371,10 @@ module.exports = {
   updateSocialProfileSchema,
   updateAllPreferencesSchema,
   updatePreferenceTypeSchema,
-  updateMultiplePreferencesSchema
+  updateMultiplePreferencesSchema,
+  updateBioSchema,
+  updatePersonalInfoSchema,
+  updateEducationSchema,
+  updateExamPreparationSchema,
+  updateSinglePreferenceSchema,
 };
