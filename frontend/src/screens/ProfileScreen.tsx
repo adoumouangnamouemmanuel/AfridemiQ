@@ -191,10 +191,6 @@ export default function ProfileScreen() {
     router.push("/profile/edit");
   };
 
-  const handleBackPress = () => {
-    router.back();
-  };
-
   const handleForceLogout = async () => {
     try {
       // Import authService and apiService
@@ -235,22 +231,6 @@ export default function ProfileScreen() {
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: fadeIn.value,
   }));
-
-  const backButtonAnimatedStyle = useAnimatedStyle(() => {
-    const scale = interpolate(scrollY.value, [0, 100], [1, 1.1], "clamp");
-
-    const backgroundColor = interpolate(
-      scrollY.value,
-      [0, 100],
-      [0.2, 0.9],
-      "clamp"
-    );
-
-    return {
-      transform: [{ scale }],
-      backgroundColor: `rgba(255, 255, 255, ${backgroundColor})`,
-    };
-  });
 
   const headerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: headerOpacity.value,
@@ -318,31 +298,13 @@ export default function ProfileScreen() {
       flex: 1,
       backgroundColor: theme.colors.background,
     },
-    backButtonContainer: {
-      position: "absolute",
-      top: 50,
-      left: 20,
-      zIndex: 1000,
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      justifyContent: "center",
-      alignItems: "center",
-      elevation: 8,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-    },
-    backButtonIcon: {
-      marginLeft: -2,
-    },
     scrollContainer: {
       flex: 1,
     },
     headerContainer: {
       height: HEADER_HEIGHT,
       position: "relative",
+      marginTop: 0,
     },
     tabsContainer: {
       flexDirection: "row",
@@ -555,10 +517,10 @@ export default function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       <Animated.View style={[styles.container, containerAnimatedStyle]}>
-        {/* Enhanced Back Button */}
-        <Animated.View
+        {/* Remove the back button since we now have the tab header */}
+        {/* <Animated.View
           style={[styles.backButtonContainer, backButtonAnimatedStyle]}
         >
           <TouchableOpacity onPress={handleBackPress}>
@@ -569,14 +531,15 @@ export default function ProfileScreen() {
               style={styles.backButtonIcon}
             />
           </TouchableOpacity>
-        </Animated.View>
+        </Animated.View> */}
 
-        {/* Scrollable Content */}
+        {/* Scrollable Content - Add paddingTop to account for tab header */}
         <Animated.ScrollView
-          style={styles.scrollContainer}
+          style={[styles.scrollContainer, { paddingTop: 0 }]}
           onScroll={scrollHandler}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
+          contentInsetAdjustmentBehavior="automatic"
           refreshControl={
             <RefreshControl
               refreshing={isRefreshing}
