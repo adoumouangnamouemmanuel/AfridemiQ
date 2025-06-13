@@ -206,6 +206,7 @@ export interface UserProfile {
   onboardingStatusId?: string;
   createdAt: string | Date;
   updatedAt: string | Date;
+  bio: string;
 }
 
 /**
@@ -215,6 +216,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  bio?: string;
   country?: string;
   selectedExam?: string;
   goalDate?: Date;
@@ -274,6 +276,11 @@ export interface UpdateProfileData {
   gradeLevel?: string;
   parentEmail?: string;
   avatar?: string;
+  gender?: string;
+  dateOfBirth?: Date;
+  selectedExam?: string;
+  learningStyle?: string;
+  bio?: string;
 }
 
 /**
