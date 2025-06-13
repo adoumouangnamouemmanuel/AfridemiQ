@@ -1,5 +1,5 @@
-import EditProfileScreen from "./edit-profile";
+import ProfileScreen from "../../../src/screens/ProfileScreen"
 
-export default function EditProfile(){
-return <EditProfileScreen />
+export default function Profile() {
+  return <ProfileScreen />
 }
