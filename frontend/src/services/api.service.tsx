@@ -16,7 +16,7 @@ import type {
  * API base URL
  * @constant
  */
-const API_BASE_URL = "http://192.168.4.246:3000/api"; // Change to your backend URL
+const API_BASE_URL = "http://192.168.65.246:3000/api"; // Change to your backend URL
 
 /**
  * Request queue item
