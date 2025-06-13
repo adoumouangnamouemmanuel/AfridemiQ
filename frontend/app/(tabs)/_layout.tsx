@@ -76,7 +76,7 @@ export default function TabLayout() {
           },
         ]}
         onPress={onPress}
-        activeOpacity={0.7}
+        activeOpacity={1}
         delayPressIn={0}
         accessibilityState={accessibilityState}
         {...(Platform.OS === "android" && {
@@ -115,9 +115,9 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.border,
-          height: Platform.OS === "ios" ? 90 : 70 + insets.bottom,
-          paddingBottom: Platform.OS === "ios" ? 30 : 10,
-          paddingTop: 10,
+          height: Platform.OS === "ios" ? 90 : 60 + insets.bottom,
+          paddingBottom: Platform.OS === "ios" ? 40 : 30,
+          paddingTop: 0,
         },
         tabBarLabelStyle: {
           fontSize: 10,
