@@ -351,7 +351,6 @@ export default function ProfileScreen() {
     },
     content: {
       paddingHorizontal: 20,
-      paddingBottom: 100,
     },
     logoutContainer: {
       paddingVertical: 24,
