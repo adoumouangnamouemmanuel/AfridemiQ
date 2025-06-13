@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -42,7 +42,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   value,
   onChangeText,
   onChangeCountry,
-  placeholder = "Enter phone number",
+  placeholder = "Enter number",
   label = "Phone Number",
   error,
   theme,
@@ -59,6 +59,8 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   const [layout, setLayout] = useState<LayoutRectangle | null>(null);
   const [isFocused, setIsFocused] = useState(focused);
   const [searchQuery, setSearchQuery] = useState("");
+  // State for local number (without country code)
+  const [localNumber, setLocalNumber] = useState<string>("");
 
   const countryPickerRef = useRef<View>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -67,6 +69,19 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   // Get screen dimensions
   const windowHeight = Dimensions.get("window").height;
   const windowWidth = Dimensions.get("window").width;
+
+  // Update local number when value prop changes
+  useEffect(() => {
+    if (value && value.startsWith(selectedCountry.dial_code)) {
+      setLocalNumber(value.slice(selectedCountry.dial_code.length));
+    } else if (value && !value.startsWith(selectedCountry.dial_code)) {
+      // If value doesn't match current country code, assume it's a new local number
+      setLocalNumber(value);
+    } else {
+      setLocalNumber("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 
   const handleFocus = () => {
     setIsFocused(true);
@@ -78,9 +93,14 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     if (onBlur) onBlur();
   };
 
+  // Update when country is selected
   const handleCountrySelect = (country: CountryCode) => {
     setSelectedCountry(country);
     if (onChangeCountry) onChangeCountry(country);
+    // Combine local number with new country code immediately
+    onChangeText(
+      localNumber ? `${country.dial_code}${localNumber}` : country.dial_code
+    );
     hideModal();
   };
 
@@ -330,8 +350,11 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
             style={styles.input}
             placeholder={placeholder}
             placeholderTextColor={theme.colors.textSecondary}
-            value={value}
-            onChangeText={onChangeText}
+            value={localNumber}
+            onChangeText={(text) => {
+              setLocalNumber(text);
+              onChangeText(`${selectedCountry.dial_code}${text}`);
+            }}
             keyboardType="phone-pad"
             onFocus={handleFocus}
             onBlur={handleBlur}
