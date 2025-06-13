@@ -2,12 +2,7 @@
 
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import Animated, {
   useAnimatedStyle,
@@ -31,9 +26,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   isDark = false,
 }) => {
   const router = useRouter();
-  const [bio, ] = useState(
-    user.bio || "No bio available. Add one to tell others about yourself."
-  );
+  const [bio] = useState(user.socialProfile?.bio || ""); // Changed from user.bio to user.socialProfile.bio
 
   // Animation values
   const slideUp = useSharedValue(50);
@@ -63,7 +56,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     // Education
     educationLevel: user.gradeLevel || "Not specified",
     schoolName: user.schoolName || "Not specified",
-    studyField: user.preferences?.studyField || "Not specified",
+    studyField: user.preferences.studyField || "Not specified",
 
     // Exam Preparation
     targetExam: user.progress?.selectedExam || "Not selected",
