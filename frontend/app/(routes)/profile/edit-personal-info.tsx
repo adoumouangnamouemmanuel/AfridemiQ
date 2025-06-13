@@ -31,26 +31,23 @@ import { CustomInput } from "../../../src/components/common/CustomInputEdit";
 import { PhoneInput } from "../../../src/components/common/PhoneInput";
 import { SelectField } from "../../../src/components/profile/edit/SelectField";
 import { CustomAlert } from "../../../src/components/common/CustomAlert";
+import { profileApiService } from "../../../src/services/user/api.profile.service";
 import type {
   UserProfile,
-  UpdateProfileData,
+  UpdatePersonalInfoData,
 } from "../../../src/types/user/user.types";
 
-// Mock data for selectable options
-const COUNTRIES = [
-  { label: "Chad", value: "chad" },
-  { label: "Cameroon", value: "cameroon" },
-  { label: "Central African Republic", value: "car" },
-  { label: "Niger", value: "niger" },
-  { label: "Nigeria", value: "nigeria" },
-  { label: "Sudan", value: "sudan" },
-  { label: "Congo", value: "congo" },
-  { label: "Gabon", value: "gabon" },
+// Static options for country and gender (TODO: Fetch from backend or config)
+const COUNTRY_OPTIONS = [
+  { label: "Chad", value: "Chad" },
+  { label: "Cameroon", value: "Cameroon" },
+  { label: "Nigeria", value: "Nigeria" },
 ];
 
-const GENDERS = [
+const GENDER_OPTIONS = [
   { label: "Male", value: "male" },
   { label: "Female", value: "female" },
+  { label: "Other", value: "other" },
 ];
 
 export default function EditPersonalInfoScreen() {
@@ -66,6 +63,7 @@ export default function EditPersonalInfoScreen() {
     message: "",
   });
 
+  // Form data for user input
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -79,129 +77,56 @@ export default function EditPersonalInfoScreen() {
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Animation values
+  // Animation values for UI transitions
   const fadeIn = useSharedValue(0);
   const slideUp = useSharedValue(50);
 
+  // Initialize animations on mount
   useEffect(() => {
     fadeIn.value = withDelay(100, withSpring(1));
     slideUp.value = withDelay(200, withSpring(0, { damping: 20 }));
   }, [fadeIn, slideUp]);
 
+  // Fetch user profile from backend on mount
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
-        // In a real app, you would fetch the full profile from an API
-        // const response = await profileApiService.getFullProfile();
-        // setProfile(response.data);
+        // Fetch user profile using API service
+        const profileData = await profileApiService.getProfile();
+        setProfile(profileData);
 
-        // For now, we'll simulate a profile based on the user data
-        if (user) {
-          // This is a mock profile - in a real app, you'd fetch this from your API
-          const mockProfile: UserProfile = {
-            _id: user.id,
-            name: user.name,
-            email: user.email,
-            phoneNumber: "",
-            isPhoneVerified: false,
-            avatar: user.avatar,
-            country: user.country || "",
-            role: user.role,
-            isPremium: user.isPremium,
-            bio: "",
-            dateOfBirth: "",
-            gender: "",
-            timeZone: "",
-            preferredLanguage: "",
-            schoolName: "",
-            gradeLevel: "",
-            subscription: {
-              type: "free",
-              startDate: new Date().toISOString(),
-              paymentStatus: "active",
-              features: [],
-              accessLevel: "basic",
-            },
-            preferences: {
-              notifications: {
-                general: true,
-                challengeNotifications: true,
-                progressUpdates: true,
-              },
-              darkMode: isDark,
-              fontSize: "medium",
-              preferredContentFormat: "mixed",
-              enableHints: true,
-              autoPlayAudio: false,
-              showStepSolutions: true,
-              leaderboardVisibility: true,
-              allowFriendRequests: true,
-              multilingualSupport: ["en"],
-            },
-            settings: {
-              learningStyle: "mixed",
-            },
-            progress: {
-              selectedExam: user.selectedExam,
-              xp: user.xp,
-              level: user.level,
-              streak: {
-                current: user.streak,
-                longest: user.streak,
-              },
-              totalQuizzes: 0,
-              averageScore: 0,
-              completedTopics: user.completedTopics,
-              weakSubjects: user.weakSubjects,
-              badges: user.badges,
-              achievements: [],
-            },
-            socialProfile: {
-              publicAchievements: [],
-              visibility: "public",
-              socialLinks: [],
-            },
-            analyticsId: "",
-            notes: [],
-            hintsUsed: [],
-            bookmarks: [],
-            friends: [],
-            blockedUsers: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
+        // Initialize form data with fetched profile
+        setFormData({
+          name: profileData.name || "",
+          email: profileData.email || "",
+          phoneNumber: profileData.phoneNumber || "",
+          country: profileData.country || "",
+          dateOfBirth: profileData.dateOfBirth
+            ? new Date(profileData.dateOfBirth).toLocaleDateString()
+            : "",
+          gender: profileData.gender || "",
+        });
 
-          setProfile(mockProfile);
-
-          // Initialize form data
-          setFormData({
-            name: mockProfile.name,
-            email: mockProfile.email,
-            phoneNumber: mockProfile.phoneNumber || "",
-            country: mockProfile.country || "",
-            dateOfBirth: mockProfile.dateOfBirth
-              ? new Date(mockProfile.dateOfBirth).toLocaleDateString()
-              : "",
-            gender: mockProfile.gender || "",
-          });
-
-          // Set date of birth if available
-          if (mockProfile.dateOfBirth) {
-            setDateOfBirth(new Date(mockProfile.dateOfBirth));
-          }
+        // Set date of birth if available
+        if (profileData.dateOfBirth) {
+          setDateOfBirth(new Date(profileData.dateOfBirth));
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch profile:", error);
-        showAlert("error", "Failed to load profile data");
+        showAlert(
+          "error",
+          error.message || "Failed to load profile data. Please try again."
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProfile();
-  }, [user, isDark]);
+  }, [user]);
 
+  // Animated styles for container and content
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: fadeIn.value,
   }));
@@ -211,14 +136,17 @@ export default function EditPersonalInfoScreen() {
     opacity: fadeIn.value,
   }));
 
+  // Navigate back to previous screen
   const handleGoBack = () => {
     router.back();
   };
 
+  // Update form data for a specific field
   const updateFormData = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Show alert with specified type and message
   const showAlert = (
     type: "success" | "error" | "warning" | "info",
     message: string
@@ -230,10 +158,12 @@ export default function EditPersonalInfoScreen() {
     });
   };
 
+  // Hide alert
   const hideAlert = () => {
     setAlert((prev) => ({ ...prev, visible: false }));
   };
 
+  // Handle date picker changes
   const handleDateChange = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || dateOfBirth;
     setShowDatePicker(Platform.OS === "ios");
@@ -244,37 +174,65 @@ export default function EditPersonalInfoScreen() {
     }
   };
 
+  // Validate form inputs client-side
+  const validateForm = (): { isValid: boolean; error?: string } => {
+    if (!formData.name.trim()) {
+      return { isValid: false, error: "Full name is required." };
+    }
+    if (!formData.email.trim()) {
+      return { isValid: false, error: "Email address is required." };
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return { isValid: false, error: "Invalid email format." };
+    }
+    if (formData.phoneNumber && !/^\+\d{1,14}$/.test(formData.phoneNumber)) {
+      return {
+        isValid: false,
+        error: "Phone number must start with + and contain 1-14 digits.",
+      };
+    }
+    return { isValid: true };
+  };
+
+  // Save changes to user profile via backend
   const handleSave = async () => {
     if (!user || !profile) return;
 
+    // Client-side validation
+    const validation = validateForm();
+    if (!validation.isValid) {
+      showAlert("error", validation.error!);
+      return;
+    }
+
     setIsSaving(true);
     try {
-      // Prepare update data
-      const updateData: UpdateProfileData = {
+      // Prepare update data for backend
+      const updateData: UpdatePersonalInfoData = {
         name: formData.name,
         email: formData.email,
-        phoneNumber: formData.phoneNumber,
-        country: formData.country,
-        gender: formData.gender,
-        dateOfBirth: dateOfBirth ? dateOfBirth : undefined,
+        phoneNumber: formData.phoneNumber || undefined,
+        country: formData.country || undefined,
+        gender: formData.gender || undefined,
+        dateOfBirth: dateOfBirth || undefined,
       };
 
-      // TODO: Implement API call to update user profile
-      // const response = await profileApiService.updateProfile(updateData);
+      // Update profile via API
+      const updatedProfile = await profileApiService.updatePersonalInfo(
+        updateData
+      );
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Update user context with new data
+      setUser({
+        ...user,
+        name: updatedProfile.name,
+        email: updatedProfile.email,
+        country: updatedProfile.country || user.country,
+        goalDate: user.goalDate || new Date(), // Preserve existing goalDate
+      });
 
-      // Update user context with basic info
-      if (user) {
-        setUser({
-          ...user,
-          name: formData.name,
-          email: formData.email,
-          country: formData.country,
-          goalDate: user?.goalDate || new Date,
-        });
-      }
+      // Update local profile state
+      setProfile(updatedProfile);
 
       showAlert("success", "Personal information updated successfully!");
 
@@ -282,20 +240,37 @@ export default function EditPersonalInfoScreen() {
       setTimeout(() => {
         router.back();
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update personal information:", error);
-      showAlert(
-        "error",
-        "Failed to update personal information. Please try again."
-      );
+      let errorMessage =
+        "Failed to update personal information. Please try again.";
+
+      // Handle specific backend errors
+      if (
+        error.message.includes("already used") ||
+        error.message.includes("déjà utilisé")
+      ) {
+        errorMessage = "This email is already in use.";
+      } else if (
+        error.message.includes("invalid") ||
+        error.message.includes("invalide")
+      ) {
+        errorMessage = "Invalid input data. Please check your entries.";
+      } else if (error.message.includes("network")) {
+        errorMessage = "Network error. Please check your connection.";
+      }
+
+      showAlert("error", errorMessage);
     } finally {
       setIsSaving(false);
     }
   };
 
+  // Check if form is valid for save button
   const isFormValid =
     formData.name.trim() !== "" && formData.email.trim() !== "";
 
+  // Styles (unchanged from original)
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -456,23 +431,9 @@ export default function EditPersonalInfoScreen() {
       marginLeft: 8,
       fontFamily: "Inter-Bold",
     },
-    todoNote: {
-      backgroundColor: theme.colors.warning + "15",
-      borderRadius: 12,
-      padding: 12,
-      marginTop: 16,
-      marginBottom: 24,
-      borderWidth: 1,
-      borderColor: theme.colors.warning + "30",
-    },
-    todoText: {
-      fontSize: 12,
-      color: theme.colors.warning,
-      fontFamily: "Inter-Medium",
-      textAlign: "center",
-    },
   });
 
+  // Show loading state while fetching profile
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -524,7 +485,9 @@ export default function EditPersonalInfoScreen() {
                     label="Full Name"
                     placeholder="Enter your full name"
                     value={formData.name}
-                    onChangeText={(text: string) => updateFormData("name", text)}
+                    onChangeText={(text: string) =>
+                      updateFormData("name", text)
+                    }
                     autoCapitalize="words"
                     focused={focusedField === "name"}
                     onFocus={() => setFocusedField("name")}
@@ -538,7 +501,9 @@ export default function EditPersonalInfoScreen() {
                     label="Email Address"
                     placeholder="Enter your email address"
                     value={formData.email}
-                    onChangeText={(text: string) => updateFormData("email", text)}
+                    onChangeText={(text: string) =>
+                      updateFormData("email", text)
+                    }
                     keyboardType="email-address"
                     autoCapitalize="none"
                     focused={focusedField === "email"}
@@ -571,7 +536,7 @@ export default function EditPersonalInfoScreen() {
                     icon="location"
                     label="Country"
                     value={formData.country}
-                    options={COUNTRIES}
+                    options={COUNTRY_OPTIONS}
                     onSelect={(value) => updateFormData("country", value)}
                     placeholder="Select your country"
                     theme={theme}
@@ -621,20 +586,13 @@ export default function EditPersonalInfoScreen() {
                     icon="person"
                     label="Gender"
                     value={formData.gender}
-                    options={GENDERS}
+                    options={GENDER_OPTIONS}
                     onSelect={(value) => updateFormData("gender", value)}
                     placeholder="Select your gender"
                     theme={theme}
                     isDark={isDark}
                   />
                 </View>
-              </View>
-
-              <View style={styles.todoNote}>
-                <Text style={styles.todoText}>
-                  🚧 TODO: Implement phone number validation and backend
-                  integration for updating personal information.
-                </Text>
               </View>
             </Animated.View>
           </ScrollView>
