@@ -25,6 +25,11 @@ const {
   updateAllPreferencesSchema,
   updatePreferenceTypeSchema,
   updateMultiplePreferencesSchema,
+  updateBioSchema,
+  updatePersonalInfoSchema,
+  updateEducationSchema,
+  updateExamPreparationSchema,
+  updateSinglePreferenceSchema,
 } = require("../../schemas/user/user.schema");
 
 // Apply rate limiting to all routes
@@ -142,6 +147,48 @@ router.patch(
   "/preferences",
   validateMiddleware(updateMultiplePreferencesSchema),
   userController.updateMultiplePreferences
+);
+
+
+// New routes for modular profile updates
+// Update bio
+router.put(
+  "/profile/bio",
+  authMiddleware,
+  validateMiddleware(updateBioSchema),
+  userController.updateBio
+);
+
+// Update personal information
+router.put(
+  "/profile/personal-info",
+  authMiddleware,
+  validateMiddleware(updatePersonalInfoSchema),
+  userController.updatePersonalInfo
+);
+
+// Update education information
+router.put(
+  "/profile/education",
+  authMiddleware,
+  validateMiddleware(updateEducationSchema),
+  userController.updateEducation
+);
+
+// Update exam preparation
+router.put(
+  "/profile/exam-preparation",
+  authMiddleware,
+  validateMiddleware(updateExamPreparationSchema),
+  userController.updateExamPreparation
+);
+
+// Update a single preference
+router.patch(
+  "/preferences/single",
+  authMiddleware,
+  validateMiddleware(updateSinglePreferenceSchema),
+  userController.updateSinglePreference
 );
 
 // Admin routes
