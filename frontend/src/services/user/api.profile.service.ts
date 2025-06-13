@@ -17,7 +17,7 @@ import type {
 
 // Constants
 /** Base URL for API requests */
-const API_BASE_URL = "http://192.168.4.246:3000/api";
+const API_BASE_URL = "http://192.168.65.246:3000/api";
 
 /**
  * Service class for handling user profile API operations.
