@@ -25,12 +25,13 @@ import { useTheme } from "../../../src/utils/ThemeContext";
 import { CustomInput } from "../../../src/components/common/CustomInputEdit";
 import { SelectField } from "../../../src/components/profile/edit/SelectField";
 import { CustomAlert } from "../../../src/components/common/CustomAlert";
+import { profileApiService } from "../../../src/services/user/api.profile.service";
 import type {
   UserProfile,
-  UpdateProfileData,
+  UpdateEducationData,
 } from "../../../src/types/user/user.types";
 
-// Mock data for selectable options
+// Selectable options for grade level
 const GRADE_LEVELS = [
   { label: "Primary School", value: "primary" },
   { label: "Middle School", value: "middle" },
@@ -56,6 +57,8 @@ export default function EditEducationScreen() {
   const [formData, setFormData] = useState({
     schoolName: "",
     gradeLevel: "",
+    studyField: "",
+    studyHours: "",
   });
 
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -69,108 +72,34 @@ export default function EditEducationScreen() {
     slideUp.value = withDelay(200, withSpring(0, { damping: 20 }));
   }, [fadeIn, slideUp]);
 
+  // Fetch user profile from backend
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
-        // In a real app, you would fetch the full profile from an API
-        // const response = await profileApiService.getFullProfile();
-        // setProfile(response.data);
-
-        // For now, we'll simulate a profile based on the user data
-        if (user) {
-          // This is a mock profile - in a real app, you'd fetch this from your API
-          const mockProfile: UserProfile = {
-            _id: user.id,
-            name: user.name,
-            email: user.email,
-            phoneNumber: "",
-            isPhoneVerified: false,
-            avatar: user.avatar,
-            country: user.country || "",
-            role: user.role,
-            isPremium: user.isPremium,
-            bio: "",
-            dateOfBirth: "",
-            gender: "",
-            timeZone: "",
-            preferredLanguage: "",
-            schoolName: "",
-            gradeLevel: "",
-            subscription: {
-              type: "free",
-              startDate: new Date().toISOString(),
-              paymentStatus: "active",
-              features: [],
-              accessLevel: "basic",
-            },
-            preferences: {
-              notifications: {
-                general: true,
-                challengeNotifications: true,
-                progressUpdates: true,
-              },
-              darkMode: isDark,
-              fontSize: "medium",
-              preferredContentFormat: "mixed",
-              enableHints: true,
-              autoPlayAudio: false,
-              showStepSolutions: true,
-              leaderboardVisibility: true,
-              allowFriendRequests: true,
-              multilingualSupport: ["en"],
-            },
-            settings: {
-              learningStyle: "mixed",
-            },
-            progress: {
-              selectedExam: user.selectedExam,
-              xp: user.xp,
-              level: user.level,
-              streak: {
-                current: user.streak,
-                longest: user.streak,
-              },
-              totalQuizzes: 0,
-              averageScore: 0,
-              completedTopics: user.completedTopics,
-              weakSubjects: user.weakSubjects,
-              badges: user.badges,
-              achievements: [],
-            },
-            socialProfile: {
-              publicAchievements: [],
-              visibility: "public",
-              socialLinks: [],
-            },
-            analyticsId: "",
-            notes: [],
-            hintsUsed: [],
-            bookmarks: [],
-            friends: [],
-            blockedUsers: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-
-          setProfile(mockProfile);
-
-          // Initialize form data
-          setFormData({
-            schoolName: mockProfile.schoolName || "",
-            gradeLevel: mockProfile.gradeLevel || "",
-          });
-        }
-      } catch (error) {
+        const profileData = await profileApiService.getProfile();
+        setProfile(profileData);
+        setFormData({
+          schoolName: profileData.schoolName || "",
+          gradeLevel: profileData.gradeLevel || "",
+          studyField: profileData.preferences.studyField || "",
+          studyHours: profileData.preferences.studyHours?.toString() || "",
+        });
+      } catch (error: any) {
         console.error("Failed to fetch profile:", error);
-        showAlert("error", "Failed to load profile data");
+        showAlert(
+          "error",
+          error.message || "Failed to load profile data. Please try again."
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProfile();
-  }, [user, isDark]);
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
 
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: fadeIn.value,
@@ -204,35 +133,97 @@ export default function EditEducationScreen() {
     setAlert((prev) => ({ ...prev, visible: false }));
   };
 
+  // Client-side validation
+  const validateForm = (): { isValid: boolean; error?: string } => {
+    if (formData.schoolName.length > 100) {
+      return {
+        isValid: false,
+        error: "School name must be 100 characters or less.",
+      };
+    }
+    if (
+      formData.gradeLevel &&
+      !GRADE_LEVELS.some((option) => option.value === formData.gradeLevel)
+    ) {
+      return {
+        isValid: false,
+        error: "Please select a valid grade level.",
+      };
+    }
+    if (formData.studyField.length > 50) {
+      return {
+        isValid: false,
+        error: "Study field must be 50 characters or less.",
+      };
+    }
+    if (formData.studyHours) {
+      const hours = parseFloat(formData.studyHours);
+      if (isNaN(hours) || hours < 0 || hours > 24) {
+        return {
+          isValid: false,
+          error: "Daily study hours must be a number between 0 and 24.",
+        };
+      }
+    }
+    return { isValid: true };
+  };
+
+  // Save education information to backend
   const handleSave = async () => {
     if (!user || !profile) return;
 
+    const validation = validateForm();
+    if (!validation.isValid) {
+      showAlert("error", validation.error!);
+      return;
+    }
+
     setIsSaving(true);
     try {
-      // Prepare update data
-      const updateData: UpdateProfileData = {
-        schoolName: formData.schoolName,
-        gradeLevel: formData.gradeLevel,
+      const updateData: UpdateEducationData = {
+        schoolName: formData.schoolName.trim() || undefined,
+        gradeLevel: formData.gradeLevel || undefined,
+        studyField: formData.studyField.trim() || undefined,
+        studyHours: formData.studyHours
+          ? parseFloat(formData.studyHours)
+          : undefined,
       };
 
-      // TODO: Implement API call to update user profile
-      // const response = await profileApiService.updateProfile(updateData);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const updatedProfile = await profileApiService.updateEducation(
+        updateData
+      );
+      setProfile(updatedProfile);
 
       showAlert("success", "Education information updated successfully!");
-
-      // Navigate back after a short delay
       setTimeout(() => {
         router.back();
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update education information:", error);
-      showAlert(
-        "error",
-        "Failed to update education information. Please try again."
-      );
+      let errorMessage =
+        "Failed to update education information. Please try again.";
+
+      if (
+        error.message.includes("invalid") ||
+        error.message.includes("invalide")
+      ) {
+        errorMessage = "Invalid input format. Please check your entries.";
+      } else if (
+        error.message.includes("length") ||
+        error.message.includes("longueur")
+      ) {
+        errorMessage = "Input exceeds maximum length.";
+      } else if (
+        error.message.includes("number") ||
+        error.message.includes("nombre")
+      ) {
+        errorMessage =
+          "Daily study hours must be a valid number between 0 and 24.";
+      } else if (error.message.includes("network")) {
+        errorMessage = "Network error. Please check your connection.";
+      }
+
+      showAlert("error", errorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -421,12 +412,42 @@ export default function EditEducationScreen() {
                     isDark={isDark}
                   />
                 </View>
+
+                <View style={styles.inputContainer}>
+                  <CustomInput
+                    icon="book"
+                    label="Study Field"
+                    placeholder="Enter your study field (e.g., Computer Science)"
+                    value={formData.studyField}
+                    onChangeText={(text) => updateFormData("studyField", text)}
+                    autoCapitalize="words"
+                    focused={focusedField === "studyField"}
+                    onFocus={() => setFocusedField("studyField")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <CustomInput
+                    icon="time"
+                    label="Daily Study Hours"
+                    placeholder="Enter hours (e.g., 2.5)"
+                    value={formData.studyHours}
+                    onChangeText={(text) =>
+                      updateFormData("studyHours", text)
+                    }
+                    keyboardType="numeric"
+                    focused={focusedField === "studyHours"}
+                    onFocus={() => setFocusedField("studyHours")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </View>
               </View>
 
               <View style={styles.todoNote}>
                 <Text style={styles.todoText}>
-                  🚧 TODO: Implement backend integration for updating education
-                  information.
+                  Note: Ensure backend schema supports schoolName, gradeLevel,
+                  studyField, and studyHours fields.
                 </Text>
               </View>
             </Animated.View>
