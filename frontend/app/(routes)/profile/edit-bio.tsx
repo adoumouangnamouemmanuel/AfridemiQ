@@ -24,9 +24,10 @@ import Animated, {
 import { useUser } from "../../../src/utils/UserContext";
 import { useTheme } from "../../../src/utils/ThemeContext";
 import { CustomAlert } from "../../../src/components/common/CustomAlert";
+import { profileApiService } from "../../../src/services/user/api.profile.service";
 import type {
   UserProfile,
-  UpdateProfileData,
+  UpdateBioData,
 } from "../../../src/types/user/user.types";
 
 export default function EditBioScreen() {
@@ -46,116 +47,42 @@ export default function EditBioScreen() {
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 300;
 
-  // Animation values
+  // Animation values for UI transitions
   const fadeIn = useSharedValue(0);
   const slideUp = useSharedValue(50);
 
+  // Initialize animations on mount
   useEffect(() => {
     fadeIn.value = withDelay(100, withSpring(1));
     slideUp.value = withDelay(200, withSpring(0, { damping: 20 }));
   }, [fadeIn, slideUp]);
 
+  // Fetch user profile from backend on mount
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
-        // In a real app, you would fetch the full profile from an API
-        // const response = await profileApiService.getFullProfile();
-        // setProfile(response.data);
+        const profileData = await profileApiService.getProfile();
+        setProfile(profileData);
 
-        // For now, we'll simulate a profile based on the user data
-        if (user) {
-          // This is a mock profile - in a real app, you'd fetch this from your API
-          const mockProfile: UserProfile = {
-            _id: user.id,
-            name: user.name,
-            email: user.email,
-            phoneNumber: "",
-            isPhoneVerified: false,
-            avatar: user.avatar,
-            country: user.country || "",
-            role: user.role,
-            isPremium: user.isPremium,
-            bio: user.bio || "",
-            dateOfBirth: "",
-            gender: "",
-            timeZone: "",
-            preferredLanguage: "",
-            schoolName: "",
-            gradeLevel: "",
-            subscription: {
-              type: "free",
-              startDate: new Date().toISOString(),
-              paymentStatus: "active",
-              features: [],
-              accessLevel: "basic",
-            },
-            preferences: {
-              notifications: {
-                general: true,
-                challengeNotifications: true,
-                progressUpdates: true,
-              },
-              darkMode: isDark,
-              fontSize: "medium",
-              preferredContentFormat: "mixed",
-              enableHints: true,
-              autoPlayAudio: false,
-              showStepSolutions: true,
-              leaderboardVisibility: true,
-              allowFriendRequests: true,
-              multilingualSupport: ["en"],
-            },
-            settings: {
-              learningStyle: "mixed",
-            },
-            progress: {
-              selectedExam: user.selectedExam,
-              xp: user.xp,
-              level: user.level,
-              streak: {
-                current: user.streak,
-                longest: user.streak,
-              },
-              totalQuizzes: 0,
-              averageScore: 0,
-              completedTopics: user.completedTopics,
-              weakSubjects: user.weakSubjects,
-              badges: user.badges,
-              achievements: [],
-            },
-            socialProfile: {
-              publicAchievements: [],
-              visibility: "public",
-              socialLinks: [],
-            },
-            analyticsId: "",
-            notes: [],
-            hintsUsed: [],
-            bookmarks: [],
-            friends: [],
-            blockedUsers: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-
-          setProfile(mockProfile);
-
-          // Initialize bio
-          setBio(mockProfile.bio || "");
-          setCharCount(mockProfile.bio?.length || 0);
-        }
-      } catch (error) {
+        // Initialize bio and character count from socialProfile.bio
+        setBio(profileData.socialProfile?.bio || "");
+        setCharCount(profileData.socialProfile?.bio?.length || 0);
+      } catch (error: any) {
         console.error("Failed to fetch profile:", error);
-        showAlert("error", "Failed to load profile data");
+        showAlert(
+          "error",
+          error.message || "Failed to load profile data. Please try again."
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProfile();
-  }, [user, isDark]);
+  }, [user]);
 
+  // Animated styles for container and content
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: fadeIn.value,
   }));
@@ -165,10 +92,12 @@ export default function EditBioScreen() {
     opacity: fadeIn.value,
   }));
 
+  // Navigate back to previous screen
   const handleGoBack = () => {
     router.back();
   };
 
+  // Update bio and character count
   const handleBioChange = (text: string) => {
     if (text.length <= MAX_CHARS) {
       setBio(text);
@@ -176,6 +105,7 @@ export default function EditBioScreen() {
     }
   };
 
+  // Show alert with specified type and message
   const showAlert = (
     type: "success" | "error" | "warning" | "info",
     message: string
@@ -187,35 +117,64 @@ export default function EditBioScreen() {
     });
   };
 
+  // Hide alert
   const hideAlert = () => {
     setAlert((prev) => ({ ...prev, visible: false }));
   };
 
+  // Validate bio input client-side
+  const validateBio = (): { isValid: boolean; error?: string } => {
+    if (bio.trim().length > MAX_CHARS) {
+      return {
+        isValid: false,
+        error: `Bio must be ${MAX_CHARS} characters or less.`,
+      };
+    }
+    return { isValid: true };
+  };
+
+  // Save bio changes to backend
   const handleSave = async () => {
     if (!user || !profile) return;
 
+    const validation = validateBio();
+    if (!validation.isValid) {
+      showAlert("error", validation.error!);
+      return;
+    }
+
     setIsSaving(true);
     try {
-      // Prepare update data
-      const updateData: UpdateProfileData = {
-        bio,
+      const updateData: UpdateBioData = {
+        bio: bio.trim() || undefined,
       };
 
-      // TODO: Implement API call to update user profile
-      // const response = await profileApiService.updateProfile(updateData);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const updatedProfile = await profileApiService.updateBio(updateData);
+      setProfile(updatedProfile);
 
       showAlert("success", "Bio updated successfully!");
-
-      // Navigate back after a short delay
       setTimeout(() => {
         router.back();
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update bio:", error);
-      showAlert("error", "Failed to update bio. Please try again.");
+      let errorMessage = "Failed to update bio. Please try again.";
+
+      if (
+        error.message.includes("invalid") ||
+        error.message.includes("invalide")
+      ) {
+        errorMessage = "Invalid bio format. Please check your input.";
+      } else if (
+        error.message.includes("length") ||
+        error.message.includes("longueur")
+      ) {
+        errorMessage = `Bio must be ${MAX_CHARS} characters or less.`;
+      } else if (error.message.includes("network")) {
+        errorMessage = "Network error. Please check your connection.";
+      }
+
+      showAlert("error", errorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -336,21 +295,6 @@ export default function EditBioScreen() {
       fontWeight: "700",
       marginLeft: 8,
       fontFamily: "Inter-Bold",
-    },
-    todoNote: {
-      backgroundColor: theme.colors.warning + "15",
-      borderRadius: 12,
-      padding: 12,
-      marginTop: 16,
-      marginBottom: 24,
-      borderWidth: 1,
-      borderColor: theme.colors.warning + "30",
-    },
-    todoText: {
-      fontSize: 12,
-      color: theme.colors.warning,
-      fontFamily: "Inter-Medium",
-      textAlign: "center",
     },
     bioHint: {
       fontSize: 14,
@@ -499,13 +443,6 @@ export default function EditBioScreen() {
                     </Text>
                   </View>
                 </View>
-              </View>
-
-              <View style={styles.todoNote}>
-                <Text style={styles.todoText}>
-                  🚧 TODO: Implement backend integration for updating bio
-                  information.
-                </Text>
               </View>
             </Animated.View>
           </ScrollView>
