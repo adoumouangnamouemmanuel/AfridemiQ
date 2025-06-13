@@ -16,8 +16,6 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
-  withSpring,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../utils/ThemeContext";
@@ -27,15 +25,16 @@ import { useUser } from "../utils/UserContext";
 import { LogoutButton } from "../components/auth/Logout";
 import { AchievementsSection } from "../components/profile/AchievementsSection";
 import { ProfileHeader } from "../components/profile/ProfileHeader";
+import { ProfileScreenSkeleton } from "../components/profile/ProfileScreenSkeleton";
 import { ProgressSection } from "../components/profile/ProgressSection";
 import { SettingsSection } from "../components/profile/SettingsSection";
 import { StatsGrid } from "../components/profile/StatsGrid";
 import { WeakSubjectsSection } from "../components/profile/WeakSubjectsSection";
+import { AboutSection } from "../components/profile/AboutSection";
 
 // Import API service
 import { profileApiService } from "../services/user/api.profile.service";
 import type { UserProfile } from "../types/user/user.types";
-import { AboutSection } from "../components/profile/AboutSection";
 
 const HEADER_HEIGHT = 320;
 
@@ -67,7 +66,7 @@ export default function ProfileScreen() {
 
   // Initialize animations
   useEffect(() => {
-    fadeIn.value = withDelay(100, withSpring(1));
+    fadeIn.value = 1;
   }, [fadeIn]);
 
   // Load profile data on component mount
@@ -372,18 +371,6 @@ export default function ProfileScreen() {
       fontWeight: "600",
       fontFamily: "Inter-SemiBold",
     },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: theme.colors.background,
-    },
-    loadingText: {
-      color: theme.colors.textSecondary,
-      fontSize: 16,
-      marginTop: 16,
-      fontFamily: "Inter-SemiBold",
-    },
     errorContainer: {
       flex: 1,
       justifyContent: "center",
@@ -426,20 +413,7 @@ export default function ProfileScreen() {
 
   // Loading state
   if (isLoading || isRetrying) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Ionicons
-            name="person-circle"
-            size={64}
-            color={theme.colors.textSecondary}
-          />
-          <Text style={styles.loadingText}>
-            {isRetrying ? "Refreshing session..." : "Loading your profile..."}
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <ProfileScreenSkeleton theme={theme} isDark={isDark} />;
   }
 
   // Error state - no user data
@@ -518,23 +492,9 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       <Animated.View style={[styles.container, containerAnimatedStyle]}>
-        {/* Remove the back button since we now have the tab header */}
-        {/* <Animated.View
-          style={[styles.backButtonContainer, backButtonAnimatedStyle]}
-        >
-          <TouchableOpacity onPress={handleBackPress}>
-            <Ionicons
-              name="arrow-back"
-              size={24}
-              color="#3B82F6"
-              style={styles.backButtonIcon}
-            />
-          </TouchableOpacity>
-        </Animated.View> */}
-
-        {/* Scrollable Content - Add paddingTop to account for tab header */}
+        {/* Scrollable Content */}
         <Animated.ScrollView
-          style={[styles.scrollContainer, { paddingTop: 0 }]}
+          style={styles.scrollContainer}
           onScroll={scrollHandler}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
@@ -552,6 +512,8 @@ export default function ProfileScreen() {
               user={profileData}
               onUpgradeToPremium={handleUpgradeToPremium}
               onEditProfile={handleEditProfile}
+              theme={theme}
+              isDark={isDark}
             />
           </Animated.View>
 
