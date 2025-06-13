@@ -362,6 +362,134 @@ const unblockFriend = async (req, res) => {
   }
 };
 
+
+// Updates the user's bio
+// @route PUT /api/users/profile/bio
+// @access Private
+async function updateBio(req, res, next) {
+  try {
+    const userId = req.user.userId;
+    const bioData = req.body;
+
+    logger.info(`Updating bio for user ${userId}`);
+    // TODO: Remove console.log before production
+    console.log(`CONTROLLER: Updating bio for user ${userId}`);
+
+    const updatedUser = await userService.updateBio(userId, bioData);
+
+    res.status(StatusCodes.OK).json({
+      message: "Biographie mise à jour avec succès",
+      data: updatedUser,
+    });
+  } catch (error) {
+    logger.error(`Error updating bio: ${error.message}`);
+    next(error);
+  }
+}
+
+
+// Updates the user's personal information
+// @route PUT /api/users/profile/personal-info
+// @access Private
+async function updatePersonalInfo(req, res, next) {
+  try {
+    const userId = req.user.userId;
+    const personalInfoData = req.body;
+
+    logger.info(`Updating personal info for user ${userId}`);
+    // TODO: Remove console.log before production
+    console.log(`CONTROLLER: Updating personal info for user ${userId}`);
+
+    const updatedUser = await userService.updatePersonalInfo(userId, personalInfoData);
+
+    res.status(StatusCodes.OK).json({
+      message: "Informations personnelles mises à jour avec succès",
+      data: updatedUser,
+    });
+  } catch (error) {
+    logger.error(`Error updating personal info: ${error.message}`);
+    next(error);
+  }
+}
+
+
+
+// Updates the user's education information
+// @route PUT /api/users/profile/education
+// @access Private
+async function updateEducation(req, res, next) {
+  try {
+    const userId = req.user.userId;
+    const educationData = req.body;
+
+    logger.info(`Updating education info for user ${userId}`);
+    // TODO: Remove console.log before production
+    console.log(`CONTROLLER: Updating education info for user ${userId}`);
+
+    const updatedUser = await userService.updateEducation(userId, educationData);
+
+    res.status(StatusCodes.OK).json({
+      message: "Informations éducatives mises à jour avec succès",
+      data: updatedUser,
+    });
+  } catch (error) {
+    logger.error(`Error updating education info: ${error.message}`);
+    next(error);
+  }
+}
+
+
+
+// Updates the user's exam preparation information
+// @route PUT /api/users/profile/exam-preparation
+// @access Private
+async function updateExamPreparation(req, res, next) {
+  try {
+    const userId = req.user.userId;
+    const examPrepData = req.body;
+
+    logger.info(`Updating exam preparation for user ${userId}`);
+    // TODO: Remove console.log before production
+    console.log(`CONTROLLER: Updating exam preparation for user ${userId}`);
+
+    const updatedUser = await userService.updateExamPreparation(userId, examPrepData);
+
+    res.status(StatusCodes.OK).json({
+      message: "Préparation à l'examen mise à jour avec succès",
+      data: updatedUser,
+    });
+  } catch (error) {
+    logger.error(`Error updating exam preparation: ${error.message}`);
+    next(error);
+  }
+}
+
+
+
+// Updates a single user preference
+// @route PATCH /api/users/preferences/single
+// @access Private
+async function updateSinglePreference(req, res, next) {
+  try {
+    const userId = req.user.userId;
+    const { key, value } = req.body;
+
+    logger.info(`Updating preference ${key} for user ${userId}`);
+    // TODO: Remove console.log before production
+    console.log(`CONTROLLER: Updating preference ${key} for user ${userId}`);
+
+    const updatedUser = await userService.updateSinglePreference(userId, key, value);
+
+    res.status(StatusCodes.OK).json({
+      message: "Préférence mise à jour avec succès",
+      data: updatedUser,
+    });
+  } catch (error) {
+    logger.error(`Error updating preference: ${error.message}`);
+    next(error);
+  }
+}
+
 module.exports = {
   register,
   login,
@@ -387,4 +515,9 @@ module.exports = {
   updateSocialProfile,
   blockFriend,
   unblockFriend,
+  updateBio,
+  updatePersonalInfo,
+  updateEducation,
+  updateExamPreparation,
+  updateSinglePreference,
 };
