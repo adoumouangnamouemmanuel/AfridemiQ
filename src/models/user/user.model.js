@@ -115,6 +115,7 @@ const UserSchema = new Schema(
       enum: ["male", "female"],
       required: [true, "Le genre est requis"],
     },
+    bio: {type: String},
     // Location and preferences
     country: {
       type: String,
