@@ -100,8 +100,8 @@ const StatCard: React.FC<StatCardProps> = ({
 
 export const StatsGrid: React.FC<StatsGridProps> = ({ user, theme }) => {
   // TODO: Replace with actual API data when analytics endpoint is ready
-  const studyTimeHours = 45; // Dummy data
-  const averageScore = Math.round(user.progress.averageScore || 78); // Use actual data or fallback
+  const studyTimeHours = user.preferences.studyHours; // Dummy data
+  const averageScore = Math.round(user.progress.averageScore); // Use actual data or fallback
 
   const styles = StyleSheet.create({
     container: {
