@@ -424,7 +424,7 @@ export default function LeaderboardScreen() {
   const remainingPlayers = filteredLeaderboard.slice(3);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Leaderboard</Text>
         <Text style={styles.subtitle}>
