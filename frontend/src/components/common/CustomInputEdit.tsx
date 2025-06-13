@@ -72,7 +72,7 @@ export const CustomInput: React.FC<CustomInputProps> = ({
       alignItems: "center",
       backgroundColor: isDark ? theme.colors.surface : theme.colors.background,
       borderRadius: 16,
-      borderWidth: 2,
+      borderWidth: 1,
       borderColor: isFocused
         ? "#3B82F6"
         : error
