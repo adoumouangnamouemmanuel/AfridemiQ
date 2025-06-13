@@ -258,7 +258,7 @@ export default function StudyScreen() {
   })?.length;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Study</Text>
         <Text style={styles.subtitle}>
@@ -351,15 +351,15 @@ export default function StudyScreen() {
               </View>
               <Text style={styles.emptyStateText}>No subjects found</Text>
               <Text style={styles.emptyStateSubtext}>
-                Try adjusting your search or filters to find what you're looking for.
+                Try adjusting your search or filters to find what you're looking
+                for.
               </Text>
             </View>
           </AnimatedCard>
         ) : (
           filteredSubjects.map((subject, index) => {
-            const { progress, totalTopics, completedTopics } = getSubjectProgress(
-              subject.id
-            );
+            const { progress, totalTopics, completedTopics } =
+              getSubjectProgress(subject.id);
             return (
               <AnimatedCard key={subject.id} delay={200 + index * 100}>
                 <SubjectProgressCard
