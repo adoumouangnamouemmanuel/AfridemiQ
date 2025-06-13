@@ -723,6 +723,184 @@ const unblockFriend = async (userId, friendId) => {
   }
 };
 
+
+
+// Updates only the user's bio (part of socialProfile)
+// @param {string} userId - ID of the user
+// @param {object} bioData - Data containing the bio field
+// @returns {object} Updated user object with sensitive fields excluded
+async function updateBio(userId, bioData) {
+  // TODO: Remove console.log before production
+  console.log(`Updating bio for user ${userId}`);
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new NotFoundError("Utilisateur non trouvé");
+  }
+
+  // Update bio using $set to target specific field
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: { "socialProfile.bio": bioData.bio } },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken -phoneVerificationToken -resetPasswordToken");
+
+  if (!updatedUser) {
+    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
+  }
+
+  return updatedUser;
+}
+
+
+
+// Updates personal information fields
+// @param {string} userId - ID of the user
+// @param {object} personalInfoData - Data containing personal info fields
+// @returns {object} Updated user object with sensitive fields excluded
+async function updatePersonalInfo(userId, personalInfoData) {
+  // TODO: Remove console.log before production
+  console.log(`Updating personal info for user ${userId}`);
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new NotFoundError("Utilisateur non trouvé");
+  }
+
+  // Map input fields to MongoDB fields using $set
+  const updateFields = {};
+  for (const [key, value] of Object.entries(personalInfoData)) {
+    updateFields[key] = value;
+  }
+
+  // Check for email uniqueness if email is being updated
+  if (personalInfoData.email && personalInfoData.email !== user.email) {
+    const existingUser = await User.findOne({ email: personalInfoData.email });
+    if (existingUser) {
+      throw new BadRequestError("Cet email est déjà utilisé");
+    }
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: updateFields },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken -phoneVerificationToken -resetPasswordToken");
+
+  if (!updatedUser) {
+    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
+  }
+
+  return updatedUser;
+}
+
+
+// Updates education information fields
+// @param {string} userId - ID of the user
+// @param {object} educationData - Data containing education fields
+// @returns {object} Updated user object with sensitive fields excluded
+// user.service.js (updated updateEducation)
+async function updateEducation(userId, educationData) {
+  console.log(`Updating education for user ${userId}`, educationData);
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new NotFoundError("Utilisateur non trouvé");
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: {
+        schoolName: educationData.schoolName,
+        gradeLevel: educationData.gradeLevel,
+        "preferences.studyField": educationData.studyField, // ✅ Correct path
+        "preferences.studyHours": educationData.studyHours, // ✅ Correct path
+      },
+    },
+    { new: true, runValidators: true }
+  ).select(
+    "-password -refreshToken -phoneVerificationToken -resetPasswordToken"
+  );
+
+  if (!updatedUser) {
+    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
+  }
+
+  console.log(`Updated education for user ${userId}`, {
+    schoolName: updatedUser.schoolName,
+    gradeLevel: updatedUser.gradeLevel,
+    "preferences.studyField": educationData.studyField, // ✅ Correct path
+    "preferences.studyHours": educationData.studyHours, // ✅ Correct path
+  });
+
+  return updatedUser;
+}
+
+// Updates exam preparation fields (progress-related)
+// @param {string} userId - ID of the user
+// @param {object} examPrepData - Data containing exam preparation fields
+// @returns {object} Updated user object with sensitive fields excluded
+async function updateExamPreparation(userId, examPrepData) {
+  // TODO: Remove console.log before production
+  console.log(`Updating exam preparation for user ${userId}`);
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new NotFoundError("Utilisateur non trouvé");
+  }
+
+  // Map input fields to MongoDB fields using $set
+  const updateFields = {};
+  for (const [key, value] of Object.entries(examPrepData)) {
+    updateFields[`progress.${key}`] = value;
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: updateFields },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken -phoneVerificationToken -resetPasswordToken");
+
+  if (!updatedUser) {
+    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
+  }
+
+  return updatedUser;
+}
+
+
+
+// Updates a single preference field using dot notation
+// @param {string} userId - ID of the user
+// @param {string} key - Preference key (e.g., notifications.general)
+// @param {any} value - New value for the preference
+// @returns {object} Updated user object with sensitive fields excluded
+async function updateSinglePreference(userId, key, value) {
+  // TODO: Remove console.log before production
+  console.log(`Updating preference ${key} for user ${userId}`);
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new NotFoundError("Utilisateur non trouvé");
+  }
+
+  // Construct update object for the specific preference
+  const updateFields = { [`preferences.${key}`]: value };
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: updateFields },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken -phoneVerificationToken -resetPasswordToken");
+
+  if (!updatedUser) {
+    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
+  }
+
+  return updatedUser;
+}
+
 module.exports = {
   register,
   login,
@@ -748,4 +926,9 @@ module.exports = {
   refreshToken,
   searchUsers,
   updateSocialProfile,
+  updateBio,
+  updatePersonalInfo,
+  updateEducation,
+  updateExamPreparation,
+  updateSinglePreference,
 };
