@@ -13,6 +13,11 @@ import type {
   SearchUsersResponse,
   UpdateSocialProfileData,
   Friend,
+  UpdateBioData,
+  UpdatePersonalInfoData,
+  UpdateEducationData,
+  UpdateExamPreparationData,
+  UpdateSinglePreferenceData,
 } from "../../types/user/user.types";
 
 // Constants
@@ -255,6 +260,96 @@ class ProfileApiService {
         hasMore: false,
       },
     };
+  }
+
+  /**
+   * Updates the user's bio.
+   * @param bioData - Data containing the bio field.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   * @throws {Error} If the request fails or the response is not OK.
+   */
+  async updateBio(bioData: UpdateBioData): Promise<UserProfile> {
+    const response = await this.makeRequest<UserProfile>("/users/profile/bio", {
+      method: "PUT",
+      body: JSON.stringify(bioData),
+    });
+    return response.data;
+  }
+
+  /**
+   * Updates the user's personal information.
+   * @param personalInfoData - Data containing personal info fields.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   * @throws {Error} If the request fails or the response is not OK.
+   */
+  async updatePersonalInfo(
+    personalInfoData: UpdatePersonalInfoData
+  ): Promise<UserProfile> {
+    const response = await this.makeRequest<UserProfile>(
+      "/users/profile/personal-info",
+      {
+        method: "PUT",
+        body: JSON.stringify(personalInfoData),
+      }
+    );
+    return response.data;
+  }
+
+  /**
+   * Updates the user's education information.
+   * @param educationData - Data containing education fields.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   * @throws {Error} If the request fails or the response is not OK.
+   */
+  async updateEducation(
+    educationData: UpdateEducationData
+  ): Promise<UserProfile> {
+    const response = await this.makeRequest<UserProfile>(
+      "/users/profile/education",
+      {
+        method: "PUT",
+        body: JSON.stringify(educationData),
+      }
+    );
+    return response.data;
+  }
+
+  /**
+   * Updates the user's exam preparation information.
+   * @param examPrepData - Data containing exam preparation fields.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   * @throws {Error} If the request fails or the response is not OK.
+   */
+  async updateExamPreparation(
+    examPrepData: UpdateExamPreparationData
+  ): Promise<UserProfile> {
+    const response = await this.makeRequest<UserProfile>(
+      "/users/profile/exam-preparation",
+      {
+        method: "PUT",
+        body: JSON.stringify(examPrepData),
+      }
+    );
+    return response.data;
+  }
+
+  /**
+   * Updates a single user preference.
+   * @param preferenceData - Data containing the preference key and value.
+   * @returns {Promise<UserProfile>} Updated user profile.
+   * @throws {Error} If the request fails or the response is not OK.
+   */
+  async updateSinglePreference(
+    preferenceData: UpdateSinglePreferenceData
+  ): Promise<UserProfile> {
+    const response = await this.makeRequest<UserProfile>(
+      "/users/preferences/single",
+      {
+        method: "PATCH",
+        body: JSON.stringify(preferenceData),
+      }
+    );
+    return response.data;
   }
 }
 
