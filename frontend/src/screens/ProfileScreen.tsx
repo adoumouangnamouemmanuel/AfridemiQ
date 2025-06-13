@@ -187,7 +187,7 @@ export default function ProfileScreen() {
   };
 
   const handleEditProfile = () => {
-    router.push("/profile/edit");
+    router.push("/(routes)/profile/edit-profile");
   };
 
   const handleForceLogout = async () => {
@@ -420,7 +420,7 @@ export default function ProfileScreen() {
   if (!contextUser || !profileData) {
     if (hasTokenError) {
       return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} >
           <View style={styles.errorContainer}>
             <Ionicons
               name="refresh-circle"
