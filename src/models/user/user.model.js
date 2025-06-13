@@ -115,8 +115,6 @@ const UserSchema = new Schema(
       enum: ["male", "female"],
       required: [true, "Le genre est requis"],
     },
-    bio: {type: String},
-    // Location and preferences
     country: {
       type: String,
     },
@@ -232,7 +230,7 @@ const UserSchema = new Schema(
       },
       careerGoal: {
         type: String, // e.g., "Engineer", "Doctor"
-      }
+      },
     },
     // Learning settings
     settings: {
@@ -257,7 +255,17 @@ const UserSchema = new Schema(
         lastStudyDate: { type: Date },
       },
       goalDate: { type: Date },
-      examYear: { type: String }, // e.g., "2024"
+      examYear: {
+        type: Number,
+        validate: {
+          validator: function (v) {
+            return v ? /^[0-9]{4}$/.test(v.toString()) : true;
+          },
+          message: "L'année de l'examen doit être au format YYYY",
+        },
+        min: [2020, "L'année de l'examen doit être 2020 ou ultérieure"],
+        max: [2030, "L'année de l'examen ne peut pas dépasser 2030"],
+      },
       totalQuizzes: { type: Number, default: 0 },
       averageScore: { type: Number, default: 0 },
       completedTopics: { type: [String], default: [] },
