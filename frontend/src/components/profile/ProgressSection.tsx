@@ -35,8 +35,8 @@ export const ProgressSection: React.FC<ProgressSectionProps> = ({
 
   // TODO: Replace with actual API data when detailed analytics endpoint is ready
   const progressData = {
-    totalQuizzes: user.progress.totalQuizzes || 45,
-    averageScore: Math.round(user.progress.averageScore || 78),
+    totalQuizzes: user.progress.totalQuizzes,
+    averageScore: Math.round(user.progress.averageScore),
     subjectsMastered: Math.min(user.progress.completedTopics.length, 8), // Assuming 8 total subjects
     totalSubjects: 8,
     weeklyGoal: 5, // Dummy data
