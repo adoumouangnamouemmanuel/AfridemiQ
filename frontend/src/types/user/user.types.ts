@@ -394,3 +394,38 @@ export interface Friend {
   level: number;
   xp: number;
 }
+
+
+// New TypeScript interfaces for modular update payloads
+export interface UpdateBioData {
+  bio?: string;
+}
+
+export interface UpdatePersonalInfoData {
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  country?: string;
+  timeZone?: string;
+  preferredLanguage?: string;
+  dateOfBirth?: Date;
+  gender?: string;
+}
+
+export interface UpdateEducationData {
+  schoolName?: string;
+  gradeLevel?: string;
+  parentEmail?: string;
+  studyField?: string;
+  studyHours?: number;
+}
+
+export interface UpdateExamPreparationData {
+  selectedExam?: string;
+  examYear?: number;
+}
+
+export interface UpdateSinglePreferenceData {
+  key: string;
+  value: any;
+}
