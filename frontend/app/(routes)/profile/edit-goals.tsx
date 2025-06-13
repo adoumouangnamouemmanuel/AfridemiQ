@@ -23,13 +23,16 @@ import Animated, {
 import { useUser } from "../../../src/utils/UserContext";
 import { useTheme } from "../../../src/utils/ThemeContext";
 import { SelectField } from "../../../src/components/profile/edit/SelectField";
+import { CustomInput } from "../../../src/components/common/CustomInputEdit";
 import { CustomAlert } from "../../../src/components/common/CustomAlert";
+import { profileApiService } from "../../../src/services/user/api.profile.service";
 import type {
   UserProfile,
-  UpdateProfileData,
+  UpdateExamPreparationData,
 } from "../../../src/types/user/user.types";
 
-// Mock data for selectable options
+// Commented out LEARNING_STYLES for potential future use
+/*
 const LEARNING_STYLES = [
   { label: "Visual", value: "visual" },
   { label: "Auditory", value: "auditory" },
@@ -37,7 +40,9 @@ const LEARNING_STYLES = [
   { label: "Kinesthetic", value: "kinesthetic" },
   { label: "Mixed", value: "mixed" },
 ];
+*/
 
+// Define selectable options for target exams
 const EXAMS = [
   { label: "GCE O Level", value: "gce_o" },
   { label: "GCE A Level", value: "gce_a" },
@@ -48,152 +53,93 @@ const EXAMS = [
 ];
 
 export default function EditGoalsScreen() {
+  // Initialize router for navigation
   const router = useRouter();
-  const { user, setUser } = useUser();
+  // Get user context
+  const { user } = useUser();
+  // Get theme and dark mode status
   const { theme, isDark } = useTheme();
+  // State for storing user profile data
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
+  // State for loading indicator
   const [isLoading, setIsLoading] = React.useState(true);
+  // State for saving indicator
   const [isSaving, setIsSaving] = React.useState(false);
+  // State for alert configuration
   const [alert, setAlert] = useState({
     visible: false,
     type: "success" as "success" | "error" | "warning" | "info",
     message: "",
   });
+  // State for tracking focused input field
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  // State for form data
   const [formData, setFormData] = useState({
     selectedExam: "",
-    learningStyle: "",
+    examYear: "",
   });
 
-  // Animation values
+  // Animation values for UI transitions
   const fadeIn = useSharedValue(0);
   const slideUp = useSharedValue(50);
 
+  // Initialize animations on component mount
   useEffect(() => {
     fadeIn.value = withDelay(100, withSpring(1));
     slideUp.value = withDelay(200, withSpring(0, { damping: 20 }));
   }, [fadeIn, slideUp]);
 
+  // Fetch user profile from backend on mount
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
-        // In a real app, you would fetch the full profile from an API
-        // const response = await profileApiService.getFullProfile();
-        // setProfile(response.data);
-
-        // For now, we'll simulate a profile based on the user data
         if (user) {
-          // This is a mock profile - in a real app, you'd fetch this from your API
-          const mockProfile: UserProfile = {
-            _id: user.id,
-            name: user.name,
-            email: user.email,
-            phoneNumber: "",
-            isPhoneVerified: false,
-            avatar: user.avatar,
-            country: user.country || "",
-            role: user.role,
-            isPremium: user.isPremium,
-            bio: "",
-            dateOfBirth: "",
-            gender: "",
-            timeZone: "",
-            preferredLanguage: "",
-            schoolName: "",
-            gradeLevel: "",
-            subscription: {
-              type: "free",
-              startDate: new Date().toISOString(),
-              paymentStatus: "active",
-              features: [],
-              accessLevel: "basic",
-            },
-            preferences: {
-              notifications: {
-                general: true,
-                challengeNotifications: true,
-                progressUpdates: true,
-              },
-              darkMode: isDark,
-              fontSize: "medium",
-              preferredContentFormat: "mixed",
-              enableHints: true,
-              autoPlayAudio: false,
-              showStepSolutions: true,
-              leaderboardVisibility: true,
-              allowFriendRequests: true,
-              multilingualSupport: ["en"],
-            },
-            settings: {
-              learningStyle: "mixed",
-            },
-            progress: {
-              selectedExam: user.selectedExam || "",
-              xp: user.xp,
-              level: user.level,
-              streak: {
-                current: user.streak,
-                longest: user.streak,
-              },
-              totalQuizzes: 0,
-              averageScore: 0,
-              completedTopics: user.completedTopics,
-              weakSubjects: user.weakSubjects,
-              badges: user.badges,
-              achievements: [],
-            },
-            socialProfile: {
-              publicAchievements: [],
-              visibility: "public",
-              socialLinks: [],
-            },
-            analyticsId: "",
-            notes: [],
-            hintsUsed: [],
-            bookmarks: [],
-            friends: [],
-            blockedUsers: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-
-          setProfile(mockProfile);
-
-          // Initialize form data
+          const profileData = await profileApiService.getProfile();
+          setProfile(profileData);
+          // Initialize form data from fetched profile
           setFormData({
-            selectedExam: mockProfile.progress.selectedExam || "",
-            learningStyle: mockProfile.settings.learningStyle || "",
+            selectedExam: profileData.progress?.selectedExam || "",
+            examYear: profileData.progress?.examYear?.toString() || "",
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch profile:", error);
-        showAlert("error", "Failed to load profile data");
+        showAlert(
+          "error",
+          error.message || "Failed to load profile data. Please try again."
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProfile();
-  }, [user, isDark]);
+  }, [user]);
 
+  // Animated style for container
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: fadeIn.value,
   }));
 
+  // Animated style for content
   const contentAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: slideUp.value }],
     opacity: fadeIn.value,
   }));
 
+  // Navigate back to previous screen
   const handleGoBack = () => {
     router.back();
   };
 
+  // Update form data state
   const updateFormData = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Show alert with specified type and message
   const showAlert = (
     type: "success" | "error" | "warning" | "info",
     message: string
@@ -205,47 +151,87 @@ export default function EditGoalsScreen() {
     });
   };
 
+  // Hide alert
   const hideAlert = () => {
     setAlert((prev) => ({ ...prev, visible: false }));
   };
 
+  // Validate form inputs client-side
+  const validateForm = (): { isValid: boolean; error?: string } => {
+    if (
+      formData.selectedExam &&
+      !EXAMS.some((exam) => exam.value === formData.selectedExam)
+    ) {
+      return {
+        isValid: false,
+        error: "Please select a valid target exam.",
+      };
+    }
+    if (formData.examYear) {
+      const year = parseInt(formData.examYear, 10);
+      if (
+        isNaN(year) ||
+        formData.examYear.length !== 4 ||
+        year < 2020 ||
+        year > 2030
+      ) {
+        return {
+          isValid: false,
+          error: "Exam year must be a valid year (YYYY) between 2020 and 2030.",
+        };
+      }
+    }
+    return { isValid: true };
+  };
+
+  // Save goals and preferences to backend
   const handleSave = async () => {
     if (!user || !profile) return;
+
+    const validation = validateForm();
+    if (!validation.isValid) {
+      showAlert("error", validation.error!);
+      return;
+    }
 
     setIsSaving(true);
     try {
       // Prepare update data
-      const updateData: UpdateProfileData = {
-        selectedExam: formData.selectedExam,
-        learningStyle: formData.learningStyle,
+      const updateData: UpdateExamPreparationData = {
+        selectedExam: formData.selectedExam || undefined,
+        examYear: formData.examYear
+          ? parseInt(formData.examYear, 10)
+          : undefined,
       };
 
-      // TODO: Implement API call to update user profile
-      // const response = await profileApiService.updateProfile(updateData);
+      // Call API to update exam preparation data
+      const updatedProfile = await profileApiService.updateExamPreparation(
+        updateData
+      );
+      setProfile(updatedProfile);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Update user context with basic info
-      if (user) {
-        setUser({
-          ...user,
-          selectedExam: formData.selectedExam,
-        });
-      }
-
-      showAlert("success", "Goals and preferences updated successfully!");
-
-      // Navigate back after a short delay
+      showAlert("success", "Goals updated successfully!");
       setTimeout(() => {
         router.back();
       }, 2000);
-    } catch (error) {
-      console.error("Failed to update goals and preferences:", error);
-      showAlert(
-        "error",
-        "Failed to update goals and preferences. Please try again."
-      );
+    } catch (error: any) {
+      console.error("Failed to update goals:", error);
+      let errorMessage = "Failed to update goals. Please try again.";
+
+      // Parse specific backend error messages
+      if (
+        error.message.includes("invalid") ||
+        error.message.includes("invalide") ||
+        error.message.includes("format YYYY")
+      ) {
+        errorMessage = "Exam year must be in YYYY format (e.g., 2025).";
+      } else if (error.message.includes("exam")) {
+        errorMessage = "Invalid target exam selected.";
+      } else if (error.message.includes("network")) {
+        errorMessage = "Network error. Please check your connection.";
+      }
+
+      showAlert("error", errorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -420,29 +406,45 @@ export default function EditGoalsScreen() {
                     isDark={isDark}
                   />
                 </View>
+
+                <View style={styles.inputContainer}>
+                  <CustomInput
+                    icon="calendar"
+                    label="Exam Year"
+                    placeholder="Enter exam year (e.g., 2025)"
+                    value={formData.examYear}
+                    onChangeText={(text) => updateFormData("examYear", text)}
+                    keyboardType="numeric"
+                    focused={focusedField === "examYear"}
+                    onFocus={() => setFocusedField("examYear")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </View>
               </View>
 
+              {/* Commented out learning style section for potential future use */}
+              {/*
               <View style={styles.card}>
                 <Text style={styles.sectionTitle}>Learning Preferences</Text>
-
                 <View style={styles.inputContainer}>
                   <SelectField
                     icon="book"
                     label="Learning Style"
-                    value={formData.learningStyle}
+                    value={formData.examYear}
                     options={LEARNING_STYLES}
-                    onSelect={(value) => updateFormData("learningStyle", value)}
+                    onSelect={(value) => updateFormData("examYear", value)}
                     placeholder="Select your preferred learning style"
                     theme={theme}
                     isDark={isDark}
                   />
                 </View>
               </View>
+              */}
 
               <View style={styles.todoNote}>
                 <Text style={styles.todoText}>
-                  🚧 TODO: Implement backend integration for updating goals and
-                  learning preferences.
+                  Note: Ensure backend schema supports selectedExam and examYear
+                  fields.
                 </Text>
               </View>
             </Animated.View>
