@@ -20,6 +20,7 @@ import {
   profileApiService,
   type UserProfile,
 } from "../../services/user/api.profile.service";
+import { router } from "expo-router";
 
 interface SettingsSectionProps {
   user: UserProfile;
@@ -310,7 +311,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           subtitle="Update your personal information"
           theme={theme}
           onPress={() =>
-            Alert.alert("Edit Profile", "Profile editing coming soon!")
+            router.push("/(routes)/profile/edit-profile")
           }
         />
         <SettingItem
