@@ -36,6 +36,8 @@ import type {
   UserProfile,
   UpdatePersonalInfoData,
 } from "../../../src/types/user/user.types";
+import { Footer } from "../../../src/components/profile/edit/Footer";
+import { useCommonStyles } from "../../../src/styles/commonEditStyle";
 
 // Static options for country and gender (TODO: Fetch from backend or config)
 const COUNTRY_OPTIONS = [
@@ -54,6 +56,7 @@ export default function EditPersonalInfoScreen() {
   const router = useRouter();
   const { user, setUser } = useUser();
   const { theme, isDark } = useTheme();
+  const commonStyles = useCommonStyles();
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -265,44 +268,8 @@ export default function EditPersonalInfoScreen() {
       setIsSaving(false);
     }
   };
-
-  // Check if form is valid for save button
-  const isFormValid =
-    formData.name.trim() !== "" && formData.email.trim() !== "";
-
   // Styles (unchanged from original)
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: 20,
-      paddingTop: 20,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: theme.colors.text,
-      marginBottom: 16,
-      marginTop: 8,
-      fontFamily: "Inter-Bold",
-    },
-    inputContainer: {
-      marginBottom: 16,
-    },
-    card: {
-      backgroundColor: isDark ? "#1F2937" : theme.colors.surface,
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.2 : 0.1,
-      shadowRadius: 4,
-      elevation: 3,
-    },
     label: {
       fontSize: 14,
       fontWeight: "600",
@@ -368,75 +335,12 @@ export default function EditPersonalInfoScreen() {
     confirmButton: {
       backgroundColor: "#3B82F6",
     },
-    footer: {
-      flexDirection: "row",
-      paddingHorizontal: 20,
-      paddingVertical: 16,
-      paddingBottom: Platform.OS === "ios" ? 32 : 16,
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border,
-      backgroundColor: isDark ? "#1F2937" : theme.colors.surface,
-      gap: 12,
-    },
-    button: {
-      flex: 1,
-      borderRadius: 16,
-      paddingVertical: 16,
-      alignItems: "center",
-      justifyContent: "center",
-      elevation: 2,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-    cancelFooterButton: {
-      backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    saveButton: {
-      backgroundColor: "#3B82F6",
-      elevation: 4,
-      shadowColor: "#3B82F6",
-      shadowOpacity: 0.2,
-    },
-    saveButtonDisabled: {
-      backgroundColor: theme.colors.border,
-      elevation: 1,
-    },
-    buttonText: {
-      fontSize: 16,
-      fontWeight: "700",
-      fontFamily: "Inter-Bold",
-    },
-    cancelButtonText: {
-      color: theme.colors.text,
-    },
-    saveButtonText: {
-      color: "white",
-    },
-    saveButtonTextDisabled: {
-      color: theme.colors.textSecondary,
-    },
-    loadingContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    loadingText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "700",
-      marginLeft: 8,
-      fontFamily: "Inter-Bold",
-    },
   });
 
   // Show loading state while fetching profile
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={commonStyles.container}>
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
@@ -450,8 +354,8 @@ export default function EditPersonalInfoScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
-      <Animated.View style={[styles.container, containerAnimatedStyle]}>
+    <SafeAreaView style={commonStyles.container} edges={["bottom"]}>
+      <Animated.View style={[commonStyles.container, containerAnimatedStyle]}>
         {alert.visible && (
           <CustomAlert
             visible={alert.visible}
@@ -468,7 +372,7 @@ export default function EditPersonalInfoScreen() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <ScrollView
-            style={styles.content}
+            style={commonStyles.content}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
           >
@@ -476,10 +380,10 @@ export default function EditPersonalInfoScreen() {
               style={contentAnimatedStyle}
               entering={FadeIn.delay(300).duration(500)}
             >
-              <View style={styles.card}>
-                <Text style={styles.sectionTitle}>Basic Information</Text>
+              <View style={commonStyles.card}>
+                <Text style={commonStyles.sectionTitle}>Basic Information</Text>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <CustomInput
                     icon="person"
                     label="Full Name"
@@ -495,7 +399,7 @@ export default function EditPersonalInfoScreen() {
                   />
                 </View>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <CustomInput
                     icon="mail"
                     label="Email Address"
@@ -512,7 +416,7 @@ export default function EditPersonalInfoScreen() {
                   />
                 </View>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <PhoneInput
                     value={formData.phoneNumber}
                     onChangeText={(text) => updateFormData("phoneNumber", text)}
@@ -526,12 +430,12 @@ export default function EditPersonalInfoScreen() {
                 </View>
               </View>
 
-              <View style={styles.card}>
-                <Text style={styles.sectionTitle}>
+              <View style={commonStyles.card}>
+                <Text style={commonStyles.sectionTitle}>
                   Location & Personal Details
                 </Text>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <SelectField
                     icon="location"
                     label="Country"
@@ -544,7 +448,7 @@ export default function EditPersonalInfoScreen() {
                   />
                 </View>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <Text style={styles.label}>Date of Birth</Text>
                   <TouchableOpacity
                     style={styles.datePickerButton}
@@ -581,7 +485,7 @@ export default function EditPersonalInfoScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <SelectField
                     icon="person"
                     label="Gender"
@@ -597,45 +501,12 @@ export default function EditPersonalInfoScreen() {
             </Animated.View>
           </ScrollView>
 
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelFooterButton]}
-              onPress={handleGoBack}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.buttonText, styles.cancelButtonText]}>
-                Cancel
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.saveButton,
-                (!isFormValid || isSaving) && styles.saveButtonDisabled,
-              ]}
-              onPress={handleSave}
-              disabled={!isFormValid || isSaving}
-              activeOpacity={0.8}
-            >
-              {isSaving ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="small" color="white" />
-                  <Text style={styles.loadingText}>Saving...</Text>
-                </View>
-              ) : (
-                <Text
-                  style={[
-                    styles.buttonText,
-                    styles.saveButtonText,
-                    (!isFormValid || isSaving) && styles.saveButtonTextDisabled,
-                  ]}
-                >
-                  Save Changes
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
+          <Footer
+            onCancel={handleGoBack}
+            onSave={handleSave}
+            isSaving={isSaving}
+            loadingText="Saving..."
+          />
         </KeyboardAvoidingView>
 
         {/* Date Picker Modal for Android */}
@@ -685,7 +556,12 @@ export default function EditPersonalInfoScreen() {
                     style={[styles.modalButton, styles.cancelButton]}
                     onPress={() => setShowDatePicker(false)}
                   >
-                    <Text style={[styles.buttonText, styles.cancelButtonText]}>
+                    <Text
+                      style={[
+                        commonStyles.buttonText,
+                        commonStyles.cancelButtonText,
+                      ]}
+                    >
                       Cancel
                     </Text>
                   </TouchableOpacity>
@@ -693,7 +569,9 @@ export default function EditPersonalInfoScreen() {
                     style={[styles.modalButton, styles.confirmButton]}
                     onPress={() => setShowDatePicker(false)}
                   >
-                    <Text style={[styles.buttonText, styles.confirmButton]}>
+                    <Text
+                      style={[commonStyles.buttonText, styles.confirmButton]}
+                    >
                       Confirm
                     </Text>
                   </TouchableOpacity>
