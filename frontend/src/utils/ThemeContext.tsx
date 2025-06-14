@@ -163,7 +163,7 @@ const lightTheme: Theme = {
   },
   typography: {
     h1: {
-      fontSize: 30,
+      fontSize: 26,
       fontWeight: "700",
       lineHeight: 40,
       fontFamily: "Poppins-Bold",
@@ -212,15 +212,15 @@ const lightTheme: Theme = {
     },
     button: {
       fontSize: 16,
-      fontWeight: "700",
+      fontWeight: "600",
       lineHeight: 20,
-      fontFamily: "Inter-Bold",
+      fontFamily: "Inter-semiBold",
     },
     buttonSmall: {
       fontSize: 14,
-      fontWeight: "700",
+      fontWeight: "600",
       lineHeight: 18,
-      fontFamily: "Inter-Bold",
+      fontFamily: "Inter-semiBold",
     },
     label: {
       fontSize: 14,
