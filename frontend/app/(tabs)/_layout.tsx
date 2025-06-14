@@ -21,7 +21,7 @@ export default function TabLayout() {
   // Custom header left button
   const HeaderLeftButton = () => (
     <TouchableOpacity
-      onPress={() => router.push("/(tabs)/home")}
+      onPress={() => router.back()}
       style={[styles.headerBackButton, { marginLeft: 10 }]}
       activeOpacity={1}
       delayPressIn={0}
