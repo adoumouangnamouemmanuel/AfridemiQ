@@ -146,9 +146,10 @@ export default function EditProfileScreen() {
     opacity: fadeIn.value,
   }));
 
-  const handleGoBack = () => {
-    router.back();
-  };
+  // TODO: Uncomment when back button is needed
+  // const handleGoBack = () => {
+  //   router.back();
+  // };
 
   const navigateToSection = (section: string) => {
     router.push(`/profile/${section}`);
@@ -509,8 +510,8 @@ export default function EditProfileScreen() {
             </Animated.View>
           ))}
         </ScrollView>
-
-        <View style={styles.footer}>
+{/* 
+        <View style={styles.footer}> //TODO: Uncomment when back button is needed
           <TouchableOpacity
             style={styles.backButton}
             onPress={handleGoBack}
@@ -523,7 +524,7 @@ export default function EditProfileScreen() {
             />
             <Text style={styles.backButtonText}>Back to Profile</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </Animated.View>
     </SafeAreaView>
   );
