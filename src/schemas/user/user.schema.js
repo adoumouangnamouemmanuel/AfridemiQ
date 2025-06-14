@@ -184,32 +184,39 @@ const updateAllPreferencesSchema = Joi.object({
       general: Joi.boolean(),
       dailyReminderTime: Joi.string(),
       challengeNotifications: Joi.boolean(),
-      progressUpdates: Joi.boolean()
+      progressUpdates: Joi.boolean(),
     }),
     darkMode: Joi.boolean(),
-    fontSize: Joi.string().valid('small', 'medium', 'large'),
-    preferredContentFormat: Joi.string().valid('video', 'text', 'audio', 'mixed'),
+    fontSize: Joi.string().valid("small", "medium", "large"),
+    preferredContentFormat: Joi.string().valid(
+      "video",
+      "text",
+      "audio",
+      "mixed"
+    ),
     enableHints: Joi.boolean(),
     autoPlayAudio: Joi.boolean(),
     showStepSolutions: Joi.boolean(),
     leaderboardVisibility: Joi.boolean(),
     allowFriendRequests: Joi.boolean(),
-    multilingualSupport: Joi.array().items(Joi.string())
-  }).required()
+    multilingualSupport: Joi.array().items(Joi.string()),
+  }).required(),
 });
 
 const updatePreferenceTypeSchema = Joi.object({
-  value: Joi.alternatives().try(
-    Joi.boolean(),
-    Joi.string(),
-    Joi.array().items(Joi.string()),
-    Joi.object({
-      general: Joi.boolean(),
-      dailyReminderTime: Joi.string(),
-      challengeNotifications: Joi.boolean(),
-      progressUpdates: Joi.boolean()
-    })
-  ).required()
+  value: Joi.alternatives()
+    .try(
+      Joi.boolean(),
+      Joi.string(),
+      Joi.array().items(Joi.string()),
+      Joi.object({
+        general: Joi.boolean(),
+        dailyReminderTime: Joi.string(),
+        challengeNotifications: Joi.boolean(),
+        progressUpdates: Joi.boolean(),
+      })
+    )
+    .required(),
 });
 
 const updateMultiplePreferencesSchema = Joi.object({
@@ -218,18 +225,25 @@ const updateMultiplePreferencesSchema = Joi.object({
       general: Joi.boolean(),
       dailyReminderTime: Joi.string(),
       challengeNotifications: Joi.boolean(),
-      progressUpdates: Joi.boolean()
+      progressUpdates: Joi.boolean(),
     }),
     darkMode: Joi.boolean(),
-    fontSize: Joi.string().valid('small', 'medium', 'large'),
-    preferredContentFormat: Joi.string().valid('video', 'text', 'audio', 'mixed'),
+    fontSize: Joi.string().valid("small", "medium", "large"),
+    preferredContentFormat: Joi.string().valid(
+      "video",
+      "text",
+      "audio",
+      "mixed"
+    ),
     enableHints: Joi.boolean(),
     autoPlayAudio: Joi.boolean(),
     showStepSolutions: Joi.boolean(),
     leaderboardVisibility: Joi.boolean(),
     allowFriendRequests: Joi.boolean(),
-    multilingualSupport: Joi.array().items(Joi.string())
-  }).min(1).required()
+    multilingualSupport: Joi.array().items(Joi.string()),
+  })
+    .min(1)
+    .required(),
 });
 
 // Schema for updating only the bio (part of socialProfile)
@@ -237,9 +251,12 @@ const updateBioSchema = Joi.object({
   bio: Joi.string().max(300).optional().messages({
     "string.max": "La biographie ne doit pas dépasser 300 caractères",
   }),
-}).min(1).messages({
-  "object.min": "Au moins un champ est requis pour mettre à jour la biographie",
-});
+})
+  .min(1)
+  .messages({
+    "object.min":
+      "Au moins un champ est requis pour mettre à jour la biographie",
+  });
 
 // Schema for updating personal information
 const updatePersonalInfoSchema = Joi.object({
@@ -271,10 +288,12 @@ const updatePersonalInfoSchema = Joi.object({
   gender: Joi.string().valid("male", "female", "other").optional().messages({
     "any.only": "Genre invalide (male, female, other)",
   }),
-}).min(1).messages({
-  "object.min": "Au moins un champ est requis pour mettre à jour les informations personnelles",
-});
-
+})
+  .min(1)
+  .messages({
+    "object.min":
+      "Au moins un champ est requis pour mettre à jour les informations personnelles",
+  });
 
 // Schema for updating education information
 const updateEducationSchema = Joi.object({
@@ -321,39 +340,6 @@ const updateExamPreparationSchema = Joi.object({
       "Au moins un champ est requis pour mettre à jour la préparation à l'examen",
   });
 
-// Schema for updating a single preference field
-const updateSinglePreferenceSchema = Joi.object({
-  key: Joi.string()
-    .valid(
-      "notifications.general",
-      "notifications.dailyReminderTime",
-      "notifications.challengeNotifications",
-      "notifications.progressUpdates",
-      "darkMode",
-      "fontSize",
-      "preferredContentFormat",
-      "enableHints",
-      "autoPlayAudio",
-      "showStepSolutions",
-      "leaderboardVisibility",
-      "allowFriendRequests",
-      "studyField",
-      "targetUniversity",
-      "studyHours",
-      "careerGoal"
-    )
-    .required()
-    .messages({
-      "any.required": "La clé de préférence est requise",
-      "any.only": "Clé de préférence invalide",
-    }),
-  value: Joi.any().required().messages({
-    "any.required": "La valeur de préférence est requise",
-  }),
-}).messages({
-  "object.base": "Les données de préférence doivent être un objet valide",
-});
-
 module.exports = {
   registerSchema,
   loginSchema,
@@ -376,5 +362,4 @@ module.exports = {
   updatePersonalInfoSchema,
   updateEducationSchema,
   updateExamPreparationSchema,
-  updateSinglePreferenceSchema,
 };
