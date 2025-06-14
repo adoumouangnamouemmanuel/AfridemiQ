@@ -1,16 +1,12 @@
 "use client";
 
 import { Ionicons } from "@expo/vector-icons";
+import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { Tabs, useRouter } from "expo-router";
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { Platform, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../../src/utils/ThemeContext";
-import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
+import { useUser } from "../../src/utils/UserContext";
 
 // Interface for CustomTabBarButton props, matching expo-router's tabBarButton
 interface CustomTabBarButtonProps extends BottomTabBarButtonProps {
@@ -41,7 +37,11 @@ export default function TabLayout() {
   );
 
   // Custom header title component
-  const HeaderTitle = () => <Text style={styles.headerTitle}>Profile</Text>;
+  const HeaderTitle = () => {
+    const { user } = useUser();
+
+    return <Text style={styles.headerTitle}>{user?.name || "Profile"}</Text>;
+  };
 
   // Custom tab bar button with rectangular ripple and no delay
   const CustomTabBarButton = ({
@@ -101,6 +101,8 @@ export default function TabLayout() {
     headerTitle: {
       fontFamily: "Inter-Bold",
       fontSize: 20,
+      // align items: "center",
+      textAlign: "center",
       color: theme.colors.text,
     },
   });
@@ -175,6 +177,7 @@ export default function TabLayout() {
           headerStyle: {
             backgroundColor: theme.colors.background,
             elevation: 1,
+            // align items: "center",
             shadowOpacity: 0,
             borderBottomWidth: 0,
           },
