@@ -244,7 +244,7 @@ export default function ProfileScreen() {
       },
     ],
   }));
-
+  
   // Render content based on selected tab
   const renderContent = () => {
     if (!profileData) return null;
@@ -268,6 +268,10 @@ export default function ProfileScreen() {
         );
       case "achievements":
         return <AchievementsSection user={profileData} theme={theme} />;
+      case "goals":
+        // Navigate to edit-goals route instead of rendering directly
+        router.push("/(routes)/profile/edit-goals");
+        return null;
       case "settings":
         return (
           <>
@@ -420,7 +424,7 @@ export default function ProfileScreen() {
   if (!contextUser || !profileData) {
     if (hasTokenError) {
       return (
-        <SafeAreaView style={styles.container} >
+        <SafeAreaView style={styles.container}>
           <View style={styles.errorContainer}>
             <Ionicons
               name="refresh-circle"
