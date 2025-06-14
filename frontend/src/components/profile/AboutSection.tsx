@@ -132,10 +132,10 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     },
     editButtonText: {
       color: theme.colors.primary,
-      fontSize: theme.typography.body.fontSize,
-      fontWeight: "600",
+      fontSize: theme.typography.button.fontSize,
+      fontWeight: theme.typography.button.fontWeight, 
       marginLeft: 6,
-      fontFamily: "Inter-SemiBold",
+      fontFamily: theme.typography.button.fontFamily,
     },
     bioContent: {
       padding: 0,
@@ -174,12 +174,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     infoLabel: {
       fontSize: theme.typography.caption.fontSize + 3,
       color: theme.colors.textSecondary,
-      fontFamily: "Inter-Medium",
+      fontFamily: theme.typography.caption.fontFamily,
       marginBottom: theme.spacing.xs,
     },
     infoValue: {
       fontSize: theme.typography.body.fontSize,
-      fontWeight: "600",
+      fontWeight: theme.typography.body.fontWeight,
       color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
     },
@@ -192,9 +192,9 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       borderColor: theme.colors.warning + "30",
     },
     todoText: {
-      fontSize: theme.typography.caption.fontSize + 3,
+      fontSize: theme.typography.caption.fontSize,
       color: theme.colors.warning,
-      fontFamily: "Inter-Medium",
+      fontFamily: theme.typography.caption.fontFamily,
       textAlign: "center",
       lineHeight: theme.spacing.lg - 4,
     },
