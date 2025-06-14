@@ -190,10 +190,10 @@ const lightTheme: Theme = {
       fontSize: 16,
       fontWeight: "600",
       lineHeight: 24,
-      fontFamily: "Poppins-SemiBold",
+      fontFamily: "Poppins-Bold",
     },
     h6: {
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: "600",
       lineHeight: 22,
       fontFamily: "Poppins-SemiBold",
