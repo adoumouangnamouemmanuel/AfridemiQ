@@ -4,8 +4,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  StyleSheet,
-  TouchableOpacity,
   Platform,
   KeyboardAvoidingView,
   ActivityIndicator,
@@ -22,6 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useUser } from "../../../src/utils/UserContext";
 import { useTheme } from "../../../src/utils/ThemeContext";
+import { useCommonStyles } from "../../../src/styles/commonEditStyle";
 import { CustomInput } from "../../../src/components/common/CustomInputEdit";
 import { SelectField } from "../../../src/components/profile/edit/SelectField";
 import { CustomAlert } from "../../../src/components/common/CustomAlert";
@@ -30,6 +29,7 @@ import type {
   UserProfile,
   UpdateEducationData,
 } from "../../../src/types/user/user.types";
+import { Footer } from "../../../src/components/profile/edit/Footer";
 
 // Selectable options for grade level
 const GRADE_LEVELS = [
@@ -45,6 +45,7 @@ export default function EditEducationScreen() {
   const router = useRouter();
   const { user } = useUser();
   const { theme, isDark } = useTheme();
+  const commonStyles = useCommonStyles();
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -229,121 +230,9 @@ export default function EditEducationScreen() {
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: 20,
-      paddingTop: 20,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: theme.colors.text,
-      marginBottom: 16,
-      marginTop: 8,
-      fontFamily: "Inter-Bold",
-    },
-    inputContainer: {
-      marginBottom: 16,
-    },
-    card: {
-      backgroundColor: isDark ? "#1F2937" : theme.colors.surface,
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.2 : 0.1,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    footer: {
-      flexDirection: "row",
-      paddingHorizontal: 20,
-      paddingVertical: 16,
-      paddingBottom: Platform.OS === "ios" ? 32 : 16,
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border,
-      backgroundColor: isDark ? "#1F2937" : theme.colors.surface,
-      gap: 12,
-    },
-    button: {
-      flex: 1,
-      borderRadius: 16,
-      paddingVertical: 16,
-      alignItems: "center",
-      justifyContent: "center",
-      elevation: 2,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-    cancelButton: {
-      backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    saveButton: {
-      backgroundColor: "#3B82F6",
-      elevation: 4,
-      shadowColor: "#3B82F6",
-      shadowOpacity: 0.2,
-    },
-    saveButtonDisabled: {
-      backgroundColor: theme.colors.border,
-      elevation: 1,
-    },
-    buttonText: {
-      fontSize: 16,
-      fontWeight: "700",
-      fontFamily: "Inter-Bold",
-    },
-    cancelButtonText: {
-      color: theme.colors.text,
-    },
-    saveButtonText: {
-      color: "white",
-    },
-    saveButtonTextDisabled: {
-      color: theme.colors.textSecondary,
-    },
-    loadingContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    loadingText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "700",
-      marginLeft: 8,
-      fontFamily: "Inter-Bold",
-    },
-    todoNote: {
-      backgroundColor: theme.colors.warning + "15",
-      borderRadius: 12,
-      padding: 12,
-      marginTop: 16,
-      marginBottom: 24,
-      borderWidth: 1,
-      borderColor: theme.colors.warning + "30",
-    },
-    todoText: {
-      fontSize: 12,
-      color: theme.colors.warning,
-      fontFamily: "Inter-Medium",
-      textAlign: "center",
-    },
-  });
-
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={commonStyles.container}>
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
@@ -357,8 +246,8 @@ export default function EditEducationScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
-      <Animated.View style={[styles.container, containerAnimatedStyle]}>
+    <SafeAreaView style={commonStyles.container} edges={["bottom"]}>
+      <Animated.View style={[commonStyles.container, containerAnimatedStyle]}>
         {alert.visible && (
           <CustomAlert
             visible={alert.visible}
@@ -375,7 +264,7 @@ export default function EditEducationScreen() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <ScrollView
-            style={styles.content}
+            style={commonStyles.content}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
           >
@@ -383,10 +272,12 @@ export default function EditEducationScreen() {
               style={contentAnimatedStyle}
               entering={FadeIn.delay(300).duration(500)}
             >
-              <View style={styles.card}>
-                <Text style={styles.sectionTitle}>Education Information</Text>
+              <View style={commonStyles.card}>
+                <Text style={commonStyles.sectionTitle}>
+                  Education Information
+                </Text>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <CustomInput
                     icon="school"
                     label="School Name"
@@ -400,7 +291,7 @@ export default function EditEducationScreen() {
                   />
                 </View>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <SelectField
                     icon="school"
                     label="Grade Level"
@@ -413,7 +304,7 @@ export default function EditEducationScreen() {
                   />
                 </View>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <CustomInput
                     icon="book"
                     label="Study Field"
@@ -427,15 +318,13 @@ export default function EditEducationScreen() {
                   />
                 </View>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <CustomInput
                     icon="time"
                     label="Daily Study Hours"
                     placeholder="Enter hours (e.g., 2.5)"
                     value={formData.studyHours}
-                    onChangeText={(text) =>
-                      updateFormData("studyHours", text)
-                    }
+                    onChangeText={(text) => updateFormData("studyHours", text)}
                     keyboardType="numeric"
                     focused={focusedField === "studyHours"}
                     onFocus={() => setFocusedField("studyHours")}
@@ -444,8 +333,8 @@ export default function EditEducationScreen() {
                 </View>
               </View>
 
-              <View style={styles.todoNote}>
-                <Text style={styles.todoText}>
+              <View style={commonStyles.todoNote}>
+                <Text style={commonStyles.todoText}>
                   Note: Ensure backend schema supports schoolName, gradeLevel,
                   studyField, and studyHours fields.
                 </Text>
@@ -453,45 +342,12 @@ export default function EditEducationScreen() {
             </Animated.View>
           </ScrollView>
 
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
-              onPress={handleGoBack}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.buttonText, styles.cancelButtonText]}>
-                Cancel
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.saveButton,
-                isSaving && styles.saveButtonDisabled,
-              ]}
-              onPress={handleSave}
-              disabled={isSaving}
-              activeOpacity={0.8}
-            >
-              {isSaving ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="small" color="white" />
-                  <Text style={styles.loadingText}>Saving...</Text>
-                </View>
-              ) : (
-                <Text
-                  style={[
-                    styles.buttonText,
-                    styles.saveButtonText,
-                    isSaving && styles.saveButtonTextDisabled,
-                  ]}
-                >
-                  Save Changes
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
+ <Footer
+            onCancel={handleGoBack}
+            onSave={handleSave}
+            isSaving={isSaving}
+            loadingText="Saving..."
+          />
         </KeyboardAvoidingView>
       </Animated.View>
     </SafeAreaView>
