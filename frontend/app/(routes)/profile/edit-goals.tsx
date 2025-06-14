@@ -119,11 +119,6 @@ export default function EditGoalsScreen() {
     fetchProfile();
   }, [user]);
 
-  // Animated style for container
-  const containerAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: fadeIn.value,
-  }));
-
   // Animated style for content
   const contentAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: slideUp.value }],
@@ -255,7 +250,7 @@ export default function EditGoalsScreen() {
 
   return (
     <SafeAreaView style={commonStyles.container} edges={["bottom"]}>
-      <Animated.View style={[commonStyles.container, containerAnimatedStyle]}>
+      <Animated.View style={[commonStyles.container]}>
         {alert.visible && (
           <CustomAlert
             visible={alert.visible}
