@@ -89,11 +89,6 @@ export default function EditBioScreen() {
     opacity: fadeIn.value,
   }));
 
-  const contentAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: slideUp.value }],
-    opacity: fadeIn.value,
-  }));
-
   // Navigate back to previous screen
   const handleGoBack = () => {
     router.back();
@@ -220,6 +215,7 @@ export default function EditBioScreen() {
       borderRadius: 12,
       padding: 16,
       marginTop: 20,
+      marginBottom: 20,
       borderWidth: 1,
       borderColor: "rgba(59, 130, 246, 0.3)",
     },
@@ -292,8 +288,7 @@ export default function EditBioScreen() {
             contentContainerStyle={{ paddingBottom: 20 }}
           >
             <Animated.View
-              style={contentAnimatedStyle}
-              entering={FadeIn.delay(300).duration(500)}
+              entering={FadeIn.delay(50).duration(60)}
             >
               <View style={commonStyles.card}>
                 <Text style={commonStyles.sectionTitle}>About Me</Text>
