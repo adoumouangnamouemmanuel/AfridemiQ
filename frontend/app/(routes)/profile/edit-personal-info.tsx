@@ -49,7 +49,6 @@ const COUNTRY_OPTIONS = [
 const GENDER_OPTIONS = [
   { label: "Male", value: "male" },
   { label: "Female", value: "female" },
-  { label: "Other", value: "other" },
 ];
 
 export default function EditPersonalInfoScreen() {
@@ -376,128 +375,131 @@ export default function EditPersonalInfoScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
           >
-            <Animated.View
-              style={contentAnimatedStyle}
-              entering={FadeIn.delay(300).duration(500)}
-            >
-              <View style={commonStyles.card}>
-                <Text style={commonStyles.sectionTitle}>Basic Information</Text>
+            <Animated.View style={contentAnimatedStyle}>
+              <Animated.View entering={FadeIn.delay(50).duration(60)}>
+                <View style={commonStyles.card}>
+                  <Text style={commonStyles.sectionTitle}>
+                    Basic Information
+                  </Text>
 
-                <View style={commonStyles.inputContainer}>
-                  <CustomInput
-                    icon="person"
-                    label="Full Name"
-                    placeholder="Enter your full name"
-                    value={formData.name}
-                    onChangeText={(text: string) =>
-                      updateFormData("name", text)
-                    }
-                    autoCapitalize="words"
-                    focused={focusedField === "name"}
-                    onFocus={() => setFocusedField("name")}
-                    onBlur={() => setFocusedField(null)}
-                  />
-                </View>
-
-                <View style={commonStyles.inputContainer}>
-                  <CustomInput
-                    icon="mail"
-                    label="Email Address"
-                    placeholder="Enter your email address"
-                    value={formData.email}
-                    onChangeText={(text: string) =>
-                      updateFormData("email", text)
-                    }
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    focused={focusedField === "email"}
-                    onFocus={() => setFocusedField("email")}
-                    onBlur={() => setFocusedField(null)}
-                  />
-                </View>
-
-                <View style={commonStyles.inputContainer}>
-                  <PhoneInput
-                    value={formData.phoneNumber}
-                    onChangeText={(text) => updateFormData("phoneNumber", text)}
-                    placeholder="Enter your phone number"
-                    theme={theme}
-                    isDark={isDark}
-                    focused={focusedField === "phoneNumber"}
-                    onFocus={() => setFocusedField("phoneNumber")}
-                    onBlur={() => setFocusedField(null)}
-                  />
-                </View>
-              </View>
-
-              <View style={commonStyles.card}>
-                <Text style={commonStyles.sectionTitle}>
-                  Location & Personal Details
-                </Text>
-
-                <View style={commonStyles.inputContainer}>
-                  <SelectField
-                    icon="location"
-                    label="Country"
-                    value={formData.country}
-                    options={COUNTRY_OPTIONS}
-                    onSelect={(value) => updateFormData("country", value)}
-                    placeholder="Select your country"
-                    theme={theme}
-                    isDark={isDark}
-                  />
-                </View>
-
-                <View style={commonStyles.inputContainer}>
-                  <Text style={styles.label}>Date of Birth</Text>
-                  <TouchableOpacity
-                    style={styles.datePickerButton}
-                    onPress={() => {
-                      setFocusedField("dateOfBirth");
-                      setShowDatePicker(true);
-                    }}
-                  >
-                    <Ionicons
-                      name="calendar"
-                      size={20}
-                      color={
-                        focusedField === "dateOfBirth"
-                          ? "#3B82F6"
-                          : theme.colors.textSecondary
+                  <View style={commonStyles.inputContainer}>
+                    <CustomInput
+                      icon="person"
+                      label="Full Name"
+                      placeholder="Enter your full name"
+                      value={formData.name}
+                      onChangeText={(text: string) =>
+                        updateFormData("name", text)
                       }
-                      style={styles.datePickerIcon}
+                      autoCapitalize="words"
+                      focused={focusedField === "name"}
+                      onFocus={() => setFocusedField("name")}
+                      onBlur={() => setFocusedField(null)}
                     />
-                    <Text
-                      style={[
-                        styles.datePickerText,
-                        !dateOfBirth && styles.datePickerPlaceholder,
-                      ]}
-                    >
-                      {dateOfBirth
-                        ? dateOfBirth.toLocaleDateString()
-                        : "Select date of birth"}
-                    </Text>
-                    <Ionicons
-                      name="chevron-down"
-                      size={16}
-                      color={theme.colors.textSecondary}
+                  </View>
+
+                  <View style={commonStyles.inputContainer}>
+                    <CustomInput
+                      icon="mail"
+                      label="Email Address"
+                      placeholder="Enter your email address"
+                      value={formData.email}
+                      onChangeText={(text: string) =>
+                        updateFormData("email", text)
+                      }
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      focused={focusedField === "email"}
+                      onFocus={() => setFocusedField("email")}
+                      onBlur={() => setFocusedField(null)}
                     />
-                  </TouchableOpacity>
+                  </View>
+
+                  <View style={commonStyles.inputContainer}>
+                    <PhoneInput
+                      value={formData.phoneNumber}
+                      onChangeText={(text) =>
+                        updateFormData("phoneNumber", text)
+                      }
+                      placeholder="Enter your phone number"
+                      theme={theme}
+                      isDark={isDark}
+                      focused={focusedField === "phoneNumber"}
+                      onFocus={() => setFocusedField("phoneNumber")}
+                      onBlur={() => setFocusedField(null)}
+                    />
+                  </View>
                 </View>
 
-                <View style={commonStyles.inputContainer}>
-                  <SelectField
-                    icon="person"
-                    label="Gender"
-                    value={formData.gender}
-                    options={GENDER_OPTIONS}
-                    onSelect={(value) => updateFormData("gender", value)}
-                    placeholder="Select your gender"
-                    theme={theme}
-                    isDark={isDark}
-                  />
+                <View style={commonStyles.card}>
+                  <Text style={commonStyles.sectionTitle}>
+                    Location & Personal Details
+                  </Text>
+
+                  <View style={commonStyles.inputContainer}>
+                    <SelectField
+                      icon="location"
+                      label="Country"
+                      value={formData.country}
+                      options={COUNTRY_OPTIONS}
+                      onSelect={(value) => updateFormData("country", value)}
+                      placeholder="Select your country"
+                      theme={theme}
+                      isDark={isDark}
+                    />
+                  </View>
+
+                  <View style={commonStyles.inputContainer}>
+                    <Text style={styles.label}>Date of Birth</Text>
+                    <TouchableOpacity
+                      style={styles.datePickerButton}
+                      onPress={() => {
+                        setFocusedField("dateOfBirth");
+                        setShowDatePicker(true);
+                      }}
+                    >
+                      <Ionicons
+                        name="calendar"
+                        size={20}
+                        color={
+                          focusedField === "dateOfBirth"
+                            ? "#3B82F6"
+                            : theme.colors.textSecondary
+                        }
+                        style={styles.datePickerIcon}
+                      />
+                      <Text
+                        style={[
+                          styles.datePickerText,
+                          !dateOfBirth && styles.datePickerPlaceholder,
+                        ]}
+                      >
+                        {dateOfBirth
+                          ? dateOfBirth.toLocaleDateString()
+                          : "Select date of birth"}
+                      </Text>
+                      <Ionicons
+                        name="chevron-down"
+                        size={16}
+                        color={theme.colors.textSecondary}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={commonStyles.inputContainer}>
+                    <SelectField
+                      icon="person"
+                      label="Gender"
+                      value={formData.gender}
+                      options={GENDER_OPTIONS}
+                      onSelect={(value) => updateFormData("gender", value)}
+                      placeholder="Select your gender"
+                      theme={theme}
+                      isDark={isDark}
+                    />
+                  </View>
                 </View>
-              </View>
+              </Animated.View>
             </Animated.View>
           </ScrollView>
 
