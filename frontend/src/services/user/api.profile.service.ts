@@ -6,18 +6,18 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type {
   ApiResponse,
-  UserProfile,
-  UpdateProfileData,
-  UpdatePreferencesData,
-  UpdateProgressData,
-  SearchUsersResponse,
-  UpdateSocialProfileData,
   Friend,
+  SearchUsersResponse,
   UpdateBioData,
-  UpdatePersonalInfoData,
   UpdateEducationData,
   UpdateExamPreparationData,
+  UpdatePersonalInfoData,
+  UpdatePreferencesData,
+  UpdateProfileData,
+  UpdateProgressData,
   UpdateSinglePreferenceData,
+  UpdateSocialProfileData,
+  UserProfile,
 } from "../../types/user/user.types";
 
 // Constants
@@ -334,7 +334,7 @@ class ProfileApiService {
   }
 
   /**
-   * Updates a single user preference.
+   * Updates a single user preference using URL parameters.
    * @param preferenceData - Data containing the preference key and value.
    * @returns {Promise<UserProfile>} Updated user profile.
    * @throws {Error} If the request fails or the response is not OK.
@@ -342,14 +342,31 @@ class ProfileApiService {
   async updateSinglePreference(
     preferenceData: UpdateSinglePreferenceData
   ): Promise<UserProfile> {
-    const response = await this.makeRequest<UserProfile>(
-      "/users/preferences/single",
-      {
+    console.log("🚀 API_SERVICE: Updating single preference with URL params");
+    console.log("🚀 API_SERVICE: Preference data:", preferenceData);
+    console.log("🚀 API_SERVICE: Key:", preferenceData.key);
+    console.log("🚀 API_SERVICE: Value:", preferenceData.value);
+
+    try {
+      // Encode the value to handle special characters
+      const encodedValue = encodeURIComponent(preferenceData.value.toString());
+      const endpoint = `/users/preference/${preferenceData.key}/${encodedValue}`;
+
+      console.log("🚀 API_SERVICE: Endpoint:", endpoint);
+
+      const response = await this.makeRequest<UserProfile>(endpoint, {
         method: "PATCH",
-        body: JSON.stringify(preferenceData),
-      }
-    );
-    return response.data;
+      });
+
+      console.log("✅ API_SERVICE: Single preference updated successfully");
+      return response.data;
+    } catch (error) {
+      console.error(
+        "❌ API_SERVICE: Failed to update single preference:",
+        error
+      );
+      throw error;
+    }
   }
 }
 
@@ -358,8 +375,8 @@ export const profileApiService = new ProfileApiService();
 
 // Type exports
 export type {
-  UserProfile,
-  UpdateProfileData,
   UpdatePreferencesData,
+  UpdateProfileData,
   UpdateProgressData,
+  UserProfile,
 };
