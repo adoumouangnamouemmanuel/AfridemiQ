@@ -1,35 +1,35 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Platform,
-  KeyboardAvoidingView,
-  ActivityIndicator,
-  ScrollView,
-} from "react-native";
+import { Footer } from "../../../src/components/profile/edit/Footer";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
+  FadeIn,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withSpring,
-  FadeIn,
 } from "react-native-reanimated";
-import { useUser } from "../../../src/utils/UserContext";
-import { useTheme } from "../../../src/utils/ThemeContext";
-import { SelectField } from "../../../src/components/profile/edit/SelectField";
-import { CustomInput } from "../../../src/components/common/CustomInputEdit";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { CustomAlert } from "../../../src/components/common/CustomAlert";
+import { CustomInput } from "../../../src/components/common/CustomInputEdit";
+import { SelectField } from "../../../src/components/profile/edit/SelectField";
 import { profileApiService } from "../../../src/services/user/api.profile.service";
+import { useCommonStyles } from "../../../src/styles/commonEditStyle";
 import type {
-  UserProfile,
   UpdateExamPreparationData,
+  UserProfile,
 } from "../../../src/types/user/user.types";
+import { useTheme } from "../../../src/utils/ThemeContext";
+import { useUser } from "../../../src/utils/UserContext";
 
 // Commented out LEARNING_STYLES for potential future use
 /*
@@ -59,6 +59,7 @@ export default function EditGoalsScreen() {
   const { user } = useUser();
   // Get theme and dark mode status
   const { theme, isDark } = useTheme();
+  const commonStyles = useCommonStyles();
   // State for storing user profile data
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
   // State for loading indicator
@@ -237,121 +238,9 @@ export default function EditGoalsScreen() {
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: 20,
-      paddingTop: 20,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: theme.colors.text,
-      marginBottom: 16,
-      marginTop: 8,
-      fontFamily: "Inter-Bold",
-    },
-    inputContainer: {
-      marginBottom: 16,
-    },
-    card: {
-      backgroundColor: isDark ? "#1F2937" : theme.colors.surface,
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.2 : 0.1,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    footer: {
-      flexDirection: "row",
-      paddingHorizontal: 20,
-      paddingVertical: 16,
-      paddingBottom: Platform.OS === "ios" ? 32 : 16,
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border,
-      backgroundColor: isDark ? "#1F2937" : theme.colors.surface,
-      gap: 12,
-    },
-    button: {
-      flex: 1,
-      borderRadius: 16,
-      paddingVertical: 16,
-      alignItems: "center",
-      justifyContent: "center",
-      elevation: 2,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-    cancelButton: {
-      backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    saveButton: {
-      backgroundColor: "#3B82F6",
-      elevation: 4,
-      shadowColor: "#3B82F6",
-      shadowOpacity: 0.2,
-    },
-    saveButtonDisabled: {
-      backgroundColor: theme.colors.border,
-      elevation: 1,
-    },
-    buttonText: {
-      fontSize: 16,
-      fontWeight: "700",
-      fontFamily: "Inter-Bold",
-    },
-    cancelButtonText: {
-      color: theme.colors.text,
-    },
-    saveButtonText: {
-      color: "white",
-    },
-    saveButtonTextDisabled: {
-      color: theme.colors.textSecondary,
-    },
-    loadingContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    loadingText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "700",
-      marginLeft: 8,
-      fontFamily: "Inter-Bold",
-    },
-    todoNote: {
-      backgroundColor: theme.colors.warning + "15",
-      borderRadius: 12,
-      padding: 12,
-      marginTop: 16,
-      marginBottom: 24,
-      borderWidth: 1,
-      borderColor: theme.colors.warning + "30",
-    },
-    todoText: {
-      fontSize: 12,
-      color: theme.colors.warning,
-      fontFamily: "Inter-Medium",
-      textAlign: "center",
-    },
-  });
-
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={commonStyles.container}>
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
@@ -365,8 +254,8 @@ export default function EditGoalsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
-      <Animated.View style={[styles.container, containerAnimatedStyle]}>
+    <SafeAreaView style={commonStyles.container} edges={["bottom"]}>
+      <Animated.View style={[commonStyles.container, containerAnimatedStyle]}>
         {alert.visible && (
           <CustomAlert
             visible={alert.visible}
@@ -383,7 +272,7 @@ export default function EditGoalsScreen() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <ScrollView
-            style={styles.content}
+            style={commonStyles.content}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
           >
@@ -391,10 +280,10 @@ export default function EditGoalsScreen() {
               style={contentAnimatedStyle}
               entering={FadeIn.delay(300).duration(500)}
             >
-              <View style={styles.card}>
-                <Text style={styles.sectionTitle}>Exam Preparation</Text>
+              <View style={commonStyles.card}>
+                <Text style={commonStyles.sectionTitle}>Exam Preparation</Text>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <SelectField
                     icon="school"
                     label="Target Exam"
@@ -407,7 +296,7 @@ export default function EditGoalsScreen() {
                   />
                 </View>
 
-                <View style={styles.inputContainer}>
+                <View style={commonStyles.inputContainer}>
                   <CustomInput
                     icon="calendar"
                     label="Exam Year"
@@ -441,8 +330,8 @@ export default function EditGoalsScreen() {
               </View>
               */}
 
-              <View style={styles.todoNote}>
-                <Text style={styles.todoText}>
+              <View style={commonStyles.todoNote}>
+                <Text style={commonStyles.todoText}>
                   Note: Ensure backend schema supports selectedExam and examYear
                   fields.
                 </Text>
@@ -450,45 +339,12 @@ export default function EditGoalsScreen() {
             </Animated.View>
           </ScrollView>
 
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
-              onPress={handleGoBack}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.buttonText, styles.cancelButtonText]}>
-                Cancel
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.saveButton,
-                isSaving && styles.saveButtonDisabled,
-              ]}
-              onPress={handleSave}
-              disabled={isSaving}
-              activeOpacity={0.8}
-            >
-              {isSaving ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="small" color="white" />
-                  <Text style={styles.loadingText}>Saving...</Text>
-                </View>
-              ) : (
-                <Text
-                  style={[
-                    styles.buttonText,
-                    styles.saveButtonText,
-                    isSaving && styles.saveButtonTextDisabled,
-                  ]}
-                >
-                  Save Changes
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
+          <Footer
+            onCancel={handleGoBack}
+            onSave={handleSave}
+            isSaving={isSaving}
+            loadingText="Saving..."
+          />
         </KeyboardAvoidingView>
       </Animated.View>
     </SafeAreaView>
