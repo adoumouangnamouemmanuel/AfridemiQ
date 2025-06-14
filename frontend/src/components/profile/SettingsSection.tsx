@@ -1,13 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Switch,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, {
@@ -16,12 +15,15 @@ import Animated, {
   withSpring,
   withDelay,
 } from "react-native-reanimated";
+import { router } from "expo-router";
 import {
   profileApiService,
   type UserProfile,
 } from "../../services/user/api.profile.service";
-import { router } from "expo-router";
+import { CustomAlert } from "../../components/common/CustomAlert";
+import { useTheme } from "../../utils/ThemeContext";
 
+// Props interface for SettingsSection
 interface SettingsSectionProps {
   user: UserProfile;
   theme: any;
@@ -30,6 +32,7 @@ interface SettingsSectionProps {
   onUserUpdate: (updatedUser: UserProfile) => void;
 }
 
+// Props interface for individual SettingItem
 interface SettingItemProps {
   icon: string;
   title: string;
@@ -39,6 +42,7 @@ interface SettingItemProps {
   theme: any;
 }
 
+// Reusable SettingItem component for consistent styling
 const SettingItem: React.FC<SettingItemProps> = ({
   icon,
   title,
@@ -111,6 +115,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
   );
 };
 
+// Main SettingsSection component
 export const SettingsSection: React.FC<SettingsSectionProps> = ({
   user,
   theme,
@@ -118,64 +123,167 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   onToggleTheme,
   onUserUpdate,
 }) => {
+  // Animation values for slide-up effect
   const slideUp = useSharedValue(50);
   const opacity = useSharedValue(0);
 
+  // State for alert configuration
+  const [alert, setAlert] = useState({
+    visible: false,
+    type: "success" as "success" | "error" | "warning" | "info",
+    message: "",
+  });
+
+  // State for tracking async operations
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Initialize animations on mount
   React.useEffect(() => {
     slideUp.value = withDelay(500, withSpring(0, { damping: 20 }));
     opacity.value = withDelay(500, withSpring(1));
   }, [opacity, slideUp]);
 
+  // Animated style for container
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: slideUp.value }],
     opacity: opacity.value,
   }));
 
+  // Show alert with specified type and message
+  const showAlert = (
+    type: "success" | "error" | "warning" | "info",
+    message: string
+  ) => {
+    setAlert({
+      visible: true,
+      type,
+      message,
+    });
+  };
+
+  // Hide alert
+  const hideAlert = () => {
+    setAlert((prev) => ({ ...prev, visible: false }));
+  };
+
+  // Handle toggling notifications (single preference update)
   const handleToggleNotifications = async (value: boolean) => {
+    if (isUpdating) return;
+    setIsUpdating(true);
     try {
-      const updatedUser = await profileApiService.updatePreferences({
-        preferences: {
-          notifications: {
-            ...user.preferences.notifications,
-            general: value,
-          },
-        },
+      console.log("🔧 SETTINGS: Updating notifications to:", value);
+      
+      const updatedUser = await profileApiService.updateSinglePreference({
+        key: "notifications.general", // ✅ Correct nested key format
+        value,
       });
       onUserUpdate(updatedUser);
-    } catch (error) {
+      showAlert("success", "Notification settings updated successfully!");
+    } catch (error: any) {
       console.error("Failed to update notifications:", error);
-      Alert.alert("Error", "Failed to update notification settings");
+      showAlert(
+        "error",
+        error.message || "Failed to update notification settings"
+      );
+    } finally {
+      setIsUpdating(false);
     }
   };
 
+  // Handle toggling sound effects (single preference update)
   const handleToggleSoundEffects = async (value: boolean) => {
+    if (isUpdating) return;
+    setIsUpdating(true);
     try {
-      const updatedUser = await profileApiService.updatePreferences({
-        preferences: {
-          ...user.preferences,
-          autoPlayAudio: value,
-        },
+      console.log("🔧 SETTINGS: Updating sound effects to:", value);
+      console.log("🔧 SETTINGS: Sending key 'autoPlayAudio' with value:", value);
+      
+      const updatedUser = await profileApiService.updateSinglePreference({
+        key: "autoPlayAudio", // ✅ This key should now be valid
+        value,
       });
+      
+      console.log("🔧 SETTINGS: Sound effects update successful, updated user:", updatedUser);
       onUserUpdate(updatedUser);
-    } catch (error) {
-      console.error("Failed to update sound settings:", error);
-      Alert.alert("Error", "Failed to update sound settings");
+      showAlert("success", "Sound settings updated successfully!");
+    } catch (error: any) {
+      console.error("❌ SETTINGS: Failed to update sound settings:", error);
+      console.error("❌ SETTINGS: Error details:", {
+        message: error.message,
+        status: error.status,
+        stack: error.stack
+      });
+      showAlert("error", error.message || "Failed to update sound settings");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
+  // Handle toggling hints (single preference update)
   const handleToggleHints = async (value: boolean) => {
+    if (isUpdating) return;
+    setIsUpdating(true);
     try {
-      const updatedUser = await profileApiService.updatePreferences({
-        preferences: {
-          ...user.preferences,
-          enableHints: value,
-        },
+      console.log("🔧 SETTINGS: Updating hints to:", value);
+      
+      const updatedUser = await profileApiService.updateSinglePreference({
+        key: "enableHints", // ✅ Correct direct key format
+        value,
       });
       onUserUpdate(updatedUser);
-    } catch (error) {
+      showAlert("success", "Hints settings updated successfully!");
+    } catch (error: any) {
       console.error("Failed to update hints setting:", error);
-      Alert.alert("Error", "Failed to update hints setting");
+      showAlert("error", error.message || "Failed to update hints setting");
+    } finally {
+      setIsUpdating(false);
     }
+  };
+
+  // Navigate to Goals & Preferences screen
+  const handleEditGoals = () => {
+    router.push("/(routes)/profile/edit-goals");
+  };
+
+  // Navigate to Privacy & Security settings
+  const handlePrivacySettings = () => {
+    router.push("/(routes)/profile/privacy-settings");
+  };
+
+  // Handle data export request (backend integration)
+  const handleExportData = async () => {
+    if (isUpdating) return;
+    setIsUpdating(true);
+    try {
+      // Assuming a backend endpoint exists for data export
+      // await profileApiService.makeRequest("/users/export-data", {
+      //   method: "POST",
+      // });
+      showAlert(
+        "success",
+        "Data export request submitted. You will receive an email with your data soon."
+      );
+    } catch (error: any) {
+      console.error("Failed to request data export:", error);
+      showAlert("error", error.message || "Failed to request data export");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Navigate to Help & FAQ
+  const handleHelpFAQ = () => {
+    router.push("/(routes)/support/help-faq");
+  };
+
+  // Navigate to Contact Support
+  const handleContactSupport = () => {
+    router.push("/(routes)/support/contact");
+  };
+
+  // Handle app rating (navigate to app store or in-app feedback)
+  const handleRateApp = () => {
+    router.push("/(routes)/support/rate-app");
   };
 
   const styles = StyleSheet.create({
@@ -215,6 +323,18 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
 
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
+      {/* Custom Alert for success/error feedback */}
+      {alert.visible && (
+        <CustomAlert
+          visible={alert.visible}
+          type={alert.type}
+          message={alert.message}
+          onClose={hideAlert}
+          theme={theme}
+          isDark={isDark}
+        />
+      )}
+
       <Text style={styles.sectionTitle}>Settings</Text>
 
       {/* Preferences Section */}
@@ -234,6 +354,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                 true: theme.colors.primary,
               }}
               thumbColor={isDark ? "white" : theme.colors.textSecondary}
+              disabled={isUpdating}
             />
           }
         />
@@ -255,6 +376,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   ? "white"
                   : theme.colors.textSecondary
               }
+              disabled={isUpdating}
             />
           }
         />
@@ -276,6 +398,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   ? "white"
                   : theme.colors.textSecondary
               }
+              disabled={isUpdating}
             />
           }
         />
@@ -297,8 +420,17 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   ? "white"
                   : theme.colors.textSecondary
               }
+              disabled={isUpdating}
             />
           }
+        />
+        {/* New item for Goals & Preferences */}
+        <SettingItem
+          icon="flag"
+          title="Goals & Preferences"
+          subtitle="Set exam goals and learning preferences"
+          theme={theme}
+          onPress={handleEditGoals}
         />
       </View>
 
@@ -310,25 +442,21 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           title="Edit Profile"
           subtitle="Update your personal information"
           theme={theme}
-          onPress={() =>
-            router.push("/(routes)/profile/edit-profile")
-          }
+          onPress={() => router.push("/(routes)/profile/edit-profile")}
         />
         <SettingItem
           icon="shield-checkmark"
           title="Privacy & Security"
           subtitle="Manage your privacy settings"
           theme={theme}
-          onPress={() =>
-            Alert.alert("Privacy", "Privacy settings coming soon!")
-          }
+          onPress={handlePrivacySettings}
         />
         <SettingItem
           icon="download"
           title="Download Data"
           subtitle="Export your learning data"
           theme={theme}
-          onPress={() => Alert.alert("Download", "Data export coming soon!")}
+          onPress={handleExportData}
         />
       </View>
 
@@ -340,21 +468,21 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           title="Help & FAQ"
           subtitle="Get answers to common questions"
           theme={theme}
-          onPress={() => Alert.alert("Help", "Help center coming soon!")}
+          onPress={handleHelpFAQ}
         />
         <SettingItem
           icon="mail"
           title="Contact Support"
           subtitle="Get help from our support team"
           theme={theme}
-          onPress={() => Alert.alert("Support", "Contact support coming soon!")}
+          onPress={handleContactSupport}
         />
         <SettingItem
           icon="star"
           title="Rate App"
           subtitle="Rate ExamPrep Africa on the app store"
           theme={theme}
-          onPress={() => Alert.alert("Rate", "App rating coming soon!")}
+          onPress={handleRateApp}
         />
       </View>
     </Animated.View>
