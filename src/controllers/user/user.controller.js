@@ -362,7 +362,6 @@ const unblockFriend = async (req, res) => {
   }
 };
 
-
 // Updates the user's bio
 // @route PUT /api/users/profile/bio
 // @access Private
@@ -387,7 +386,6 @@ async function updateBio(req, res, next) {
   }
 }
 
-
 // Updates the user's personal information
 // @route PUT /api/users/profile/personal-info
 // @access Private
@@ -400,7 +398,10 @@ async function updatePersonalInfo(req, res, next) {
     // TODO: Remove console.log before production
     console.log(`CONTROLLER: Updating personal info for user ${userId}`);
 
-    const updatedUser = await userService.updatePersonalInfo(userId, personalInfoData);
+    const updatedUser = await userService.updatePersonalInfo(
+      userId,
+      personalInfoData
+    );
 
     res.status(StatusCodes.OK).json({
       message: "Informations personnelles mises à jour avec succès",
@@ -411,8 +412,6 @@ async function updatePersonalInfo(req, res, next) {
     next(error);
   }
 }
-
-
 
 // Updates the user's education information
 // @route PUT /api/users/profile/education
@@ -426,7 +425,10 @@ async function updateEducation(req, res, next) {
     // TODO: Remove console.log before production
     console.log(`CONTROLLER: Updating education info for user ${userId}`);
 
-    const updatedUser = await userService.updateEducation(userId, educationData);
+    const updatedUser = await userService.updateEducation(
+      userId,
+      educationData
+    );
 
     res.status(StatusCodes.OK).json({
       message: "Informations éducatives mises à jour avec succès",
@@ -437,8 +439,6 @@ async function updateEducation(req, res, next) {
     next(error);
   }
 }
-
-
 
 // Updates the user's exam preparation information
 // @route PUT /api/users/profile/exam-preparation
@@ -452,7 +452,10 @@ async function updateExamPreparation(req, res, next) {
     // TODO: Remove console.log before production
     console.log(`CONTROLLER: Updating exam preparation for user ${userId}`);
 
-    const updatedUser = await userService.updateExamPreparation(userId, examPrepData);
+    const updatedUser = await userService.updateExamPreparation(
+      userId,
+      examPrepData
+    );
 
     res.status(StatusCodes.OK).json({
       message: "Préparation à l'examen mise à jour avec succès",
@@ -464,27 +467,54 @@ async function updateExamPreparation(req, res, next) {
   }
 }
 
-
-
-// Updates a single user preference
-// @route PATCH /api/users/preferences/single
+// Updates a single user preference using URL parameters
+// @route PATCH /api/users/preferences/:key/:value
 // @access Private
+// Validation is handled by middleware with updateSinglePreferenceSchema
 async function updateSinglePreference(req, res, next) {
   try {
     const userId = req.user.userId;
-    const { key, value } = req.body;
+    const { key, value } = req.params;
 
-    logger.info(`Updating preference ${key} for user ${userId}`);
-    // TODO: Remove console.log before production
-    console.log(`CONTROLLER: Updating preference ${key} for user ${userId}`);
+    console.log(
+      `🎯 CONTROLLER: User ${userId} updating preference "${key}" to: ${value}`
+    );
 
-    const updatedUser = await userService.updateSinglePreference(userId, key, value);
+    // Convert string value to appropriate type
+    let convertedValue;
+    if (value === "true") {
+      convertedValue = true;
+    } else if (value === "false") {
+      convertedValue = false;
+    } else if (!isNaN(value) && value !== "") {
+      convertedValue = Number(value);
+    } else {
+      convertedValue = decodeURIComponent(value);
+    }
+
+    console.log(
+      `🎯 CONTROLLER: Converted value:`,
+      convertedValue,
+      typeof convertedValue
+    );
+
+    // Call service (validation already done by middleware)
+    const updatedUser = await userService.updateSinglePreference(
+      userId,
+      key.trim(),
+      convertedValue
+    );
+
+    console.log(
+      `✅ CONTROLLER: Preference update successful for user ${userId}`
+    );
 
     res.status(StatusCodes.OK).json({
       message: "Préférence mise à jour avec succès",
       data: updatedUser,
     });
   } catch (error) {
+    console.error(`❌ CONTROLLER: Error in updateSinglePreference:`, error);
     logger.error(`Error updating preference: ${error.message}`);
     next(error);
   }
@@ -519,5 +549,5 @@ module.exports = {
   updatePersonalInfo,
   updateEducation,
   updateExamPreparation,
-  updateSinglePreference,
+  updateSinglePreference, // ✅ Only this method, updatePreferenceByParams removed
 };
