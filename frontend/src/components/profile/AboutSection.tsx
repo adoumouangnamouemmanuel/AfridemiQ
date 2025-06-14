@@ -1,15 +1,15 @@
 "use client";
 
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useRouter } from "expo-router";
 import Animated, {
+  FadeIn,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withSpring,
-  FadeIn,
 } from "react-native-reanimated";
 import type { UserProfile } from "../../types/user/user.types";
 
@@ -85,20 +85,20 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
   const styles = StyleSheet.create({
     container: {
-      marginBottom: 24,
+      marginBottom: theme.spacing.xl,
     },
     sectionTitle: {
-      fontSize: 28,
-      fontWeight: "700",
+      fontSize: theme.typography.h1.fontSize,
+      fontWeight: theme.typography.h1.fontWeight,
       color: theme.colors.text,
-      marginBottom: 20,
-      fontFamily: "Inter-Bold",
+      marginBottom: theme.spacing.lg,
+      fontFamily: theme.typography.h1.fontFamily,
       letterSpacing: -0.5,
     },
     card: {
       backgroundColor: theme.colors.surface,
-      borderRadius: 24,
-      padding: 24,
+      borderRadius: theme.borderRadius.xl,
+      padding: theme.spacing.lg,
       borderWidth: 1,
       borderColor: theme.colors.border,
       shadowColor: isDark ? "#000" : "#000",
@@ -106,33 +106,33 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       shadowOpacity: isDark ? 0.25 : 0.1,
       shadowRadius: 12,
       elevation: 5,
-      marginBottom: 20,
+      marginBottom: theme.spacing.lg,
     },
     sectionHeader: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: 20,
+      marginBottom: theme.spacing.lg,
     },
     sectionSubtitle: {
-      fontSize: 20,
-      fontWeight: "700",
+      fontSize: theme.typography.h2.fontSize,
+      fontWeight: theme.typography.h2.fontWeight,
       color: theme.colors.text,
-      fontFamily: "Inter-Bold",
+      fontFamily: theme.typography.h2.fontFamily,
     },
     editButton: {
       backgroundColor: theme.colors.primary + "20",
-      borderRadius: 16,
-      paddingHorizontal: 14,
-      paddingVertical: 8,
+      borderRadius: theme.borderRadius.lg,
+      paddingHorizontal: theme.spacing.sm + 6,
+      paddingVertical: theme.spacing.xs + 4,
       flexDirection: "row",
       alignItems: "center",
       borderWidth: 1,
-      borderColor: "rgba(59, 130, 246, 0.3)",
+      borderColor: theme.colors.border,
     },
     editButtonText: {
-      color: blueColor,
-      fontSize: 14,
+      color: theme.colors.primary,
+      fontSize: theme.typography.body.fontSize,
       fontWeight: "600",
       marginLeft: 6,
       fontFamily: "Inter-SemiBold",
@@ -141,18 +141,18 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       padding: 0,
     },
     bioText: {
-      fontSize: 16,
-      lineHeight: 24,
+      fontSize: theme.typography.body.fontSize,
+      lineHeight: theme.typography.body.lineHeight,
       color: theme.colors.text,
-      fontFamily: "Inter-Regular",
+      fontFamily: theme.typography.body.fontFamily,
     },
     infoSection: {
-      marginBottom: 8,
+      marginBottom: theme.spacing.xs + 4,
     },
     infoRow: {
       flexDirection: "row",
       alignItems: "center",
-      paddingVertical: 14,
+      paddingVertical: theme.spacing.sm + 6,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.border,
     },
@@ -166,37 +166,37 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       backgroundColor: theme.colors.primary + "20",
       justifyContent: "center",
       alignItems: "center",
-      marginRight: 16,
+      marginRight: theme.spacing.md,
     },
     infoContent: {
       flex: 1,
     },
     infoLabel: {
-      fontSize: 13,
+      fontSize: theme.typography.caption.fontSize + 3,
       color: theme.colors.textSecondary,
       fontFamily: "Inter-Medium",
-      marginBottom: 4,
+      marginBottom: theme.spacing.xs,
     },
     infoValue: {
-      fontSize: 16,
+      fontSize: theme.typography.body.fontSize,
       fontWeight: "600",
       color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
     },
     todoNote: {
       backgroundColor: theme.colors.warning + "15",
-      borderRadius: 16,
-      padding: 16,
-      marginTop: 8,
+      borderRadius: theme.borderRadius.lg,
+      padding: theme.spacing.md,
+      marginTop: theme.spacing.xs + 4,
       borderWidth: 1,
       borderColor: theme.colors.warning + "30",
     },
     todoText: {
-      fontSize: 13,
+      fontSize: theme.typography.caption.fontSize + 3,
       color: theme.colors.warning,
       fontFamily: "Inter-Medium",
       textAlign: "center",
-      lineHeight: 20,
+      lineHeight: theme.spacing.lg - 4,
     },
   });
 
