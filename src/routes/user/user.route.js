@@ -8,6 +8,9 @@ const {
   authLimiter,
   apiLimiter,
 } = require("../../middlewares/rate.limit.middleware");
+const validateKeyValueMiddleware = require("../../middlewares/validateKeyValue.middleware");
+
+// Import schemas (removed updateSinglePreferenceSchema)
 const {
   registerSchema,
   loginSchema,
@@ -29,7 +32,7 @@ const {
   updatePersonalInfoSchema,
   updateEducationSchema,
   updateExamPreparationSchema,
-  updateSinglePreferenceSchema,
+  // updateSinglePreferenceSchema, // ❌ REMOVED - no longer needed
 } = require("../../schemas/user/user.schema");
 
 // Apply rate limiting to all routes
@@ -149,7 +152,6 @@ router.patch(
   userController.updateMultiplePreferences
 );
 
-
 // New routes for modular profile updates
 // Update bio
 router.put(
@@ -183,11 +185,33 @@ router.put(
   userController.updateExamPreparation
 );
 
-// Update a single preference
+// Define allowed preference keys
+const ALLOWED_PREFERENCE_KEYS = [
+  "notifications.general",
+  "notifications.dailyReminderTime",
+  "notifications.challengeNotifications",
+  "notifications.progressUpdates",
+  "darkMode",
+  "fontSize",
+  "preferredContentFormat",
+  "enableHints",
+  "autoPlayAudio",
+  "showStepSolutions",
+  "leaderboardVisibility",
+  "allowFriendRequests",
+  "multilingualSupport",
+  "studyField",
+  "targetUniversity",
+  "studyHours",
+  "favoriteSubjects",
+  "careerGoal",
+];
+
+// Update a single preference using URL parameters with custom key-value validation
 router.patch(
-  "/preferences/single",
+  "/preference/:key/:value",
   authMiddleware,
-  validateMiddleware(updateSinglePreferenceSchema),
+  validateKeyValueMiddleware(ALLOWED_PREFERENCE_KEYS), // ✅ Uses custom middleware instead of Joi
   userController.updateSinglePreference
 );
 
