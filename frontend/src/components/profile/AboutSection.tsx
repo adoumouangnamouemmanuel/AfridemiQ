@@ -121,9 +121,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       fontFamily: "Inter-Bold",
     },
     editButton: {
-      backgroundColor: isDark
-        ? "rgba(59, 130, 246, 0.2)"
-        : "rgba(59, 130, 246, 0.1)",
+      backgroundColor: theme.colors.primary + "20",
       borderRadius: 16,
       paddingHorizontal: 14,
       paddingVertical: 8,
@@ -148,59 +146,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       color: theme.colors.text,
       fontFamily: "Inter-Regular",
     },
-    bioInput: {
-      fontSize: 16,
-      lineHeight: 24,
-      color: theme.colors.text,
-      fontFamily: "Inter-Regular",
-      backgroundColor: theme.colors.background,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      borderRadius: 16,
-      padding: 16,
-      minHeight: 120,
-      textAlignVertical: "top",
-    },
-    bioActions: {
-      flexDirection: "row",
-      justifyContent: "flex-end",
-      marginTop: 16,
-      gap: 12,
-    },
-    cancelButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: theme.colors.surfaceVariant,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    cancelButtonText: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: theme.colors.text,
-      marginLeft: 6,
-      fontFamily: "Inter-SemiBold",
-    },
-    saveButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: blueColor,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: "rgba(59, 130, 246, 0.3)",
-    },
-    saveButtonText: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: "white",
-      marginLeft: 6,
-      fontFamily: "Inter-SemiBold",
-    },
     infoSection: {
       marginBottom: 8,
     },
@@ -209,9 +154,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       alignItems: "center",
       paddingVertical: 14,
       borderBottomWidth: 1,
-      borderBottomColor: isDark
-        ? "rgba(255, 255, 255, 0.1)"
-        : "rgba(0, 0, 0, 0.05)",
+      borderBottomColor: theme.colors.border,
     },
     lastRow: {
       borderBottomWidth: 0,
@@ -220,9 +163,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: isDark
-        ? "rgba(59, 130, 246, 0.2)"
-        : "rgba(59, 130, 246, 0.1)",
+      backgroundColor: theme.colors.primary + "20",
       justifyContent: "center",
       alignItems: "center",
       marginRight: 16,
@@ -241,9 +182,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       fontWeight: "600",
       color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
-    },
-    divider: {
-      height: 16,
     },
     todoNote: {
       backgroundColor: theme.colors.warning + "15",
