@@ -1,27 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Switch,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withDelay,
+  withSpring,
 } from "react-native-reanimated";
-import { router } from "expo-router";
+import { CustomAlert } from "../../components/common/CustomAlert";
 import {
   profileApiService,
   type UserProfile,
 } from "../../services/user/api.profile.service";
-import { CustomAlert } from "../../components/common/CustomAlert";
-import { useTheme } from "../../utils/ThemeContext";
 
 // Props interface for SettingsSection
 interface SettingsSectionProps {
@@ -56,7 +49,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      paddingVertical: 16,
+      paddingVertical: theme.spacing.md,
       paddingHorizontal: 20,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.border,
@@ -69,7 +62,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
     iconContainer: {
       width: 44,
       height: 44,
-      borderRadius: 22,
+      borderRadius: theme.borderRadius.xl,
       backgroundColor: theme.colors.primary + "20",
       justifyContent: "center",
       alignItems: "center",
@@ -79,16 +72,16 @@ const SettingItem: React.FC<SettingItemProps> = ({
       flex: 1,
     },
     title: {
-      fontSize: 16,
-      fontWeight: "600",
+      fontSize: theme.typography.h5.fontSize,
+      fontWeight: theme.typography.h5.fontWeight,
       color: theme.colors.text,
-      fontFamily: "Inter-SemiBold",
+      fontFamily: theme.typography.h5.fontFamily,
     },
     subtitle: {
-      fontSize: 13,
+      fontSize: theme.typography.h6.fontSize,
       color: theme.colors.textSecondary,
       marginTop: 2,
-      fontFamily: "Inter-Medium",
+      fontFamily: theme.typography.h6.fontFamily,
     },
   });
 
@@ -172,7 +165,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
     setIsUpdating(true);
     try {
       console.log("🔧 SETTINGS: Updating notifications to:", value);
-      
+
       const updatedUser = await profileApiService.updateSinglePreference({
         key: "notifications.general", // ✅ Correct nested key format
         value,
@@ -196,22 +189,25 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
     setIsUpdating(true);
     try {
       console.log("🔧 SETTINGS: Updating sound effects to:", value);
-      console.log("🔧 SETTINGS: Sending key 'autoPlayAudio' with value:", value);
-      
+      console.log(
+        "🔧 SETTINGS: Sending key 'autoPlayAudio' with value:",
+        value
+      );
+
       const updatedUser = await profileApiService.updateSinglePreference({
         key: "autoPlayAudio", // ✅ This key should now be valid
         value,
       });
-      
-      console.log("🔧 SETTINGS: Sound effects update successful, updated user:", updatedUser);
+
       onUserUpdate(updatedUser);
       showAlert("success", "Sound settings updated successfully!");
     } catch (error: any) {
+      // TODO: to be removed once backend is fixed
       console.error("❌ SETTINGS: Failed to update sound settings:", error);
       console.error("❌ SETTINGS: Error details:", {
         message: error.message,
         status: error.status,
-        stack: error.stack
+        stack: error.stack,
       });
       showAlert("error", error.message || "Failed to update sound settings");
     } finally {
@@ -225,7 +221,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
     setIsUpdating(true);
     try {
       console.log("🔧 SETTINGS: Updating hints to:", value);
-      
+
       const updatedUser = await profileApiService.updateSinglePreference({
         key: "enableHints", // ✅ Correct direct key format
         value,
@@ -288,36 +284,36 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
 
   const styles = StyleSheet.create({
     container: {
-      marginBottom: 24,
+      marginBottom: theme.spacing?.large || 24,
     },
     sectionTitle: {
-      fontSize: 22,
-      fontWeight: "700",
+      fontSize: theme.typography?.fontSize?.xlarge || 22,
+      fontWeight: theme.typography?.fontWeight?.bold || "700",
       color: theme.colors.text,
-      marginBottom: 16,
-      fontFamily: "Inter-Bold",
+      marginBottom: theme.spacing?.medium || 16,
+      fontFamily: theme.typography?.fontFamily?.bold || "Inter-Bold",
     },
     section: {
       backgroundColor: theme.colors.surface,
-      borderRadius: 20,
-      marginBottom: 20,
+      borderRadius: theme.borderRadius?.large || 20,
+      marginBottom: theme.spacing?.large || 20,
       borderWidth: 1,
       borderColor: theme.colors.border,
       overflow: "hidden",
-      elevation: 4,
-      shadowColor: "#000",
+      elevation: theme.shadows?.elevation || 4,
+      shadowColor: theme.colors.shadow || "#000",
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
+      shadowOpacity: theme.shadows?.opacity || 0.1,
+      shadowRadius: theme.shadows?.radius || 8,
     },
     sectionHeader: {
-      fontSize: 18,
-      fontWeight: "600",
+      fontSize: theme.typography?.fontSize?.large || 18,
+      fontWeight: theme.typography?.fontWeight?.semiBold || "600",
       color: theme.colors.text,
-      paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 12,
-      fontFamily: "Inter-SemiBold",
+      paddingHorizontal: theme.spacing?.large || 20,
+      paddingTop: theme.spacing?.large || 20,
+      paddingBottom: theme.spacing?.small || 12,
+      fontFamily: theme.typography?.fontFamily?.semiBold || "Inter-SemiBold",
     },
   });
 
