@@ -203,26 +203,26 @@ export default function EditBioScreen() {
       color: theme.colors.warning,
     },
     bioHint: {
-      fontSize: 14,
+      fontSize: theme.typography.bodySmall.fontSize,
       color: theme.colors.textSecondary,
       marginBottom: 16,
-      fontFamily: "Inter-Regular",
+      fontFamily: theme.typography.bodySmall.fontFamily,
     },
     bioTips: {
       backgroundColor: isDark
         ? "rgba(59, 130, 246, 0.2)"
         : "rgba(59, 130, 246, 0.1)",
-      borderRadius: 12,
-      padding: 16,
-      marginTop: 20,
-      marginBottom: 20,
+      borderRadius: theme.borderRadius.md,
+      padding: theme.spacing.md,
+      marginTop: theme.spacing.md,
+      marginBottom: theme.spacing.md,
       borderWidth: 1,
       borderColor: "rgba(59, 130, 246, 0.3)",
     },
     bioTipsTitle: {
-      fontSize: 16,
+      fontSize: theme.typography.h5.fontSize,
       fontWeight: "700",
-      color: "#3B82F6",
+      color: theme.colors.primary,
       marginBottom: 8,
       fontFamily: "Inter-Bold",
     },
@@ -235,17 +235,17 @@ export default function EditBioScreen() {
       marginBottom: 6,
     },
     bioTipsBullet: {
-      color: "#3B82F6",
+      color: theme.colors.primary,
       fontSize: 16,
       marginRight: 8,
       lineHeight: 22,
     },
     bioTipsText: {
-      fontSize: 14,
+      fontSize: theme.typography.bodySmall.fontSize,
       color: isDark ? theme.colors.text : theme.colors.textSecondary,
-      fontFamily: "Inter-Regular",
+      fontFamily: theme.typography.bodySmall.fontFamily,
       flex: 1,
-      lineHeight: 20,
+      lineHeight: theme.typography.bodySmall.lineHeight,
     },
   });
 
