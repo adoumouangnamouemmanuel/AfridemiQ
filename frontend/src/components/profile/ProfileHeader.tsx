@@ -104,10 +104,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       .slice(0, 2);
   };
 
+  // TODO: Look into using a more dynamic background color based on theme
   // Get background color based on theme
-  const getBackgroundColor = () => {
-    return isDark ? "#1E3A8A" : "#3B82F6";
-  };
+  // const getBackgroundColor = () => {
+  //   return isDark ? "#1E3A8A" : "#3B82F6";
+  // };
 
   const styles = StyleSheet.create({
     container: {
@@ -124,7 +125,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     backgroundWrapper: {
       borderRadius: 28,
       overflow: "hidden",
-      backgroundColor: getBackgroundColor(),
+      backgroundColor: theme.colors.secondary,
     },
     contentContainer: {
       padding: 24,
@@ -169,7 +170,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       shadowColor: "#3B82F6",
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: isDark ? 0.7 : 0.5,
-      shadowRadius: 10,
+      shadowRadius: 3,
       elevation: 10,
     },
     avatarInnerRing: {
@@ -270,9 +271,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     verificationBadge: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark
-        ? "rgba(16, 185, 129, 0.3)"
-        : "rgba(16, 185, 129, 0.25)",
       paddingHorizontal: 10,
       paddingVertical: 5,
       borderRadius: 12,
@@ -280,8 +278,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       alignSelf: "flex-start",
       borderWidth: 1,
       borderColor: isDark
-        ? "rgba(16, 185, 129, 0.5)"
-        : "rgba(16, 185, 129, 0.4)",
+        ? "rgba(119, 212, 238, 0.5)"
+        : "rgba(163, 191, 112, 0.4)",
     },
     verificationText: {
       color: isDark ? "#34D399" : "#10B981",
@@ -455,7 +453,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             </Animated.View>
 
             <View style={styles.profileInfo}>
-              <Text style={styles.userName}>{user.name}</Text>
+              <Text style={styles.userName}>
+                {user.name}{"  "}
+                {user.isPhoneVerified && (
+                    <Ionicons
+                      name="shield-checkmark"
+                      size={16}
+                      color={isDark ? "#34D399" : "#10B981"}
+                    />
+                )}
+              </Text>
               <View style={styles.userDetailsRow}>
                 <Text style={styles.userDetails}>
                   {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
@@ -475,7 +482,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <Text style={styles.countryText}>{user.country}</Text>
               </View>
 
-              {user.isPhoneVerified && (
+              {/* {user.isPhoneVerified && ( //TODO: Reconsider verification badge position
                 <View style={styles.verificationBadge}>
                   <Ionicons
                     name="shield-checkmark"
@@ -484,7 +491,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   />
                   <Text style={styles.verificationText}>Verified Account</Text>
                 </View>
-              )}
+              )} */}
             </View>
           </View>
 
