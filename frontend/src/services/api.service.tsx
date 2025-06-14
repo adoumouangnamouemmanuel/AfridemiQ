@@ -12,11 +12,12 @@ import type {
   RefreshTokenData,
 } from "../types/user/user.types";
 
+import { API_BASE_URL } from "../constants/url";
+
 /**
  * API base URL
  * @constant
  */
-const API_BASE_URL = "http://192.168.65.246:3000/api"; // Change to your backend URL
 
 /**
  * Request queue item
