@@ -102,10 +102,6 @@ export default function EditEducationScreen() {
     }
   }, [user]);
 
-  const containerAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: fadeIn.value,
-  }));
-
   const contentAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: slideUp.value }],
     opacity: fadeIn.value,
@@ -247,7 +243,7 @@ export default function EditEducationScreen() {
 
   return (
     <SafeAreaView style={commonStyles.container} edges={["bottom"]}>
-      <Animated.View style={[commonStyles.container, containerAnimatedStyle]}>
+      <Animated.View style={[commonStyles.container]}>
         {alert.visible && (
           <CustomAlert
             visible={alert.visible}
