@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const { User } = require("../../models/user/user.model"); // Corrected path
+const { User } = require("../../models/user/user.model");
 const {
   generateToken,
   generateRefreshToken,
@@ -723,8 +723,6 @@ const unblockFriend = async (userId, friendId) => {
   }
 };
 
-
-
 // Updates only the user's bio (part of socialProfile)
 // @param {string} userId - ID of the user
 // @param {object} bioData - Data containing the bio field
@@ -743,7 +741,9 @@ async function updateBio(userId, bioData) {
     userId,
     { $set: { "socialProfile.bio": bioData.bio } },
     { new: true, runValidators: true }
-  ).select("-password -refreshToken -phoneVerificationToken -resetPasswordToken");
+  ).select(
+    "-password -refreshToken -phoneVerificationToken -resetPasswordToken"
+  );
 
   if (!updatedUser) {
     throw new NotFoundError("Utilisateur non trouvé après mise à jour");
@@ -751,8 +751,6 @@ async function updateBio(userId, bioData) {
 
   return updatedUser;
 }
-
-
 
 // Updates personal information fields
 // @param {string} userId - ID of the user
@@ -785,7 +783,9 @@ async function updatePersonalInfo(userId, personalInfoData) {
     userId,
     { $set: updateFields },
     { new: true, runValidators: true }
-  ).select("-password -refreshToken -phoneVerificationToken -resetPasswordToken");
+  ).select(
+    "-password -refreshToken -phoneVerificationToken -resetPasswordToken"
+  );
 
   if (!updatedUser) {
     throw new NotFoundError("Utilisateur non trouvé après mise à jour");
@@ -793,7 +793,6 @@ async function updatePersonalInfo(userId, personalInfoData) {
 
   return updatedUser;
 }
-
 
 // Updates education information fields
 // @param {string} userId - ID of the user
@@ -860,7 +859,9 @@ async function updateExamPreparation(userId, examPrepData) {
     userId,
     { $set: updateFields },
     { new: true, runValidators: true }
-  ).select("-password -refreshToken -phoneVerificationToken -resetPasswordToken");
+  ).select(
+    "-password -refreshToken -phoneVerificationToken -resetPasswordToken"
+  );
 
   if (!updatedUser) {
     throw new NotFoundError("Utilisateur non trouvé après mise à jour");
@@ -869,36 +870,89 @@ async function updateExamPreparation(userId, examPrepData) {
   return updatedUser;
 }
 
-
-
-// Updates a single preference field using dot notation
+// COMPLETELY NEW APPROACH: Updates a single preference using direct MongoDB operations
 // @param {string} userId - ID of the user
-// @param {string} key - Preference key (e.g., notifications.general)
+// @param {string} key - Preference key (e.g., notifications.general, autoPlayAudio)
 // @param {any} value - New value for the preference
 // @returns {object} Updated user object with sensitive fields excluded
 async function updateSinglePreference(userId, key, value) {
-  // TODO: Remove console.log before production
-  console.log(`Updating preference ${key} for user ${userId}`);
+  console.log(
+    `🔧 SERVICE: Starting single preference update for user ${userId}`
+  );
+  console.log(`🔧 SERVICE: Key: "${key}", Value:`, value, `(${typeof value})`);
 
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new NotFoundError("Utilisateur non trouvé");
+  try {
+    // Find user first
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new NotFoundError("Utilisateur non trouvé");
+    }
+
+    console.log(
+      `🔧 SERVICE: User found, current preferences:`,
+      JSON.stringify(user.preferences, null, 2)
+    );
+
+    // Build the update object based on key type
+    let updateObject = {};
+
+    if (key.includes(".")) {
+      // Handle nested keys like "notifications.general"
+      const dotNotationKey = `preferences.${key}`;
+      updateObject[dotNotationKey] = value;
+      console.log(
+        `🔧 SERVICE: Using dot notation update for nested key: ${dotNotationKey}`
+      );
+    } else {
+      // Handle direct keys like "autoPlayAudio"
+      const directKey = `preferences.${key}`;
+      updateObject[directKey] = value;
+      console.log(`🔧 SERVICE: Using direct update for key: ${directKey}`);
+    }
+
+    console.log(
+      `🔧 SERVICE: Update object:`,
+      JSON.stringify(updateObject, null, 2)
+    );
+
+    // Use findByIdAndUpdate with $set operator
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateObject },
+      {
+        new: true,
+        runValidators: true,
+        // Ensure we get the updated document
+        returnDocument: "after",
+      }
+    ).select(
+      "-password -refreshToken -phoneVerificationToken -resetPasswordToken"
+    );
+
+    if (!updatedUser) {
+      throw new NotFoundError("Utilisateur non trouvé après mise à jour");
+    }
+
+    console.log(`✅ SERVICE: Preference update successful`);
+    console.log(
+      `✅ SERVICE: Updated preferences:`,
+      JSON.stringify(updatedUser.preferences, null, 2)
+    );
+
+    return updatedUser;
+  } catch (error) {
+    console.error(`❌ SERVICE: Error in updateSinglePreference:`, error);
+
+    // Re-throw known errors
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+
+    // Wrap unknown errors
+    throw new BadRequestError(
+      `Erreur lors de la mise à jour de la préférence: ${error.message}`
+    );
   }
-
-  // Construct update object for the specific preference
-  const updateFields = { [`preferences.${key}`]: value };
-
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { $set: updateFields },
-    { new: true, runValidators: true }
-  ).select("-password -refreshToken -phoneVerificationToken -resetPasswordToken");
-
-  if (!updatedUser) {
-    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
-  }
-
-  return updatedUser;
 }
 
 module.exports = {
