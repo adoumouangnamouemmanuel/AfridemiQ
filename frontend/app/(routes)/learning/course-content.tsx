@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { useTheme } from "../../../src/utils/ThemeContext";
 
 // Dynamic course content based on topicId
 const COURSE_CONTENT_BY_TOPIC = {
@@ -160,7 +161,8 @@ const COURSE_CONTENT_BY_TOPIC = {
       {
         id: "module_2",
         title: "Newton's Laws of Motion",
-        description: "Understand forces, mass, acceleration, and Newton's three laws",
+        description:
+          "Understand forces, mass, acceleration, and Newton's three laws",
         order: 2,
         series: "D",
         lessons: ["lesson_physics_003"],
@@ -182,7 +184,8 @@ const COURSE_CONTENT_BY_TOPIC = {
       {
         id: "module_3",
         title: "Work, Energy, and Power",
-        description: "Explore kinetic energy, potential energy, and conservation laws",
+        description:
+          "Explore kinetic energy, potential energy, and conservation laws",
         order: 3,
         series: "D",
         lessons: [],
@@ -423,11 +426,15 @@ const COURSE_CONTENT_BY_TOPIC = {
 export default function CourseContentScreen() {
   const router = useRouter();
   const { topicId, topicName } = useLocalSearchParams();
-  const [expandedModule, setExpandedModule] = useState<string | null>("module_1");
+  const [expandedModule, setExpandedModule] = useState<string | null>(
+    "module_1"
+  );
+  const { theme } = useTheme();
 
   // Get course content based on topicId
   const courseContent = useMemo(() => {
-    const content = COURSE_CONTENT_BY_TOPIC[topicId as keyof typeof COURSE_CONTENT_BY_TOPIC];
+    const content =
+      COURSE_CONTENT_BY_TOPIC[topicId as keyof typeof COURSE_CONTENT_BY_TOPIC];
     if (!content) {
       console.warn(`No course content found for topicId: ${topicId}`);
       // Return a default "coming soon" structure
@@ -516,7 +523,11 @@ export default function CourseContentScreen() {
                   {module.title}
                 </Text>
                 {module.isLocked && (
-                  <Ionicons name="lock-closed" size={16} color="#9CA3AF" />
+                  <Ionicons
+                    name="lock-closed"
+                    size={16}
+                    color={theme.colors.textSecondary}
+                  />
                 )}
               </View>
               <Text
@@ -531,19 +542,31 @@ export default function CourseContentScreen() {
               {!module.isLocked && (
                 <View style={styles.moduleStats}>
                   <View style={styles.stat}>
-                    <Ionicons name="time" size={14} color="#6B7280" />
+                    <Ionicons
+                      name="time"
+                      size={14}
+                      color={theme.colors.textSecondary}
+                    />
                     <Text style={styles.statText}>
                       {module.estimatedDuration} min
                     </Text>
                   </View>
                   <View style={styles.stat}>
-                    <Ionicons name="book" size={14} color="#6B7280" />
+                    <Ionicons
+                      name="book"
+                      size={14}
+                      color={theme.colors.textSecondary}
+                    />
                     <Text style={styles.statText}>
                       {module.lessons?.length || 0} Lessons
                     </Text>
                   </View>
                   <View style={styles.stat}>
-                    <Ionicons name="create" size={14} color="#6B7280" />
+                    <Ionicons
+                      name="create"
+                      size={14}
+                      color={theme.colors.textSecondary}
+                    />
                     <Text style={styles.statText}>
                       {module.exerciseIds?.length || 0} Exercises
                     </Text>
@@ -563,7 +586,7 @@ export default function CourseContentScreen() {
                   <Ionicons
                     name={isExpanded ? "chevron-up" : "chevron-down"}
                     size={20}
-                    color="#6B7280"
+                    color={theme.colors.textSecondary}
                   />
                 </>
               )}
@@ -585,7 +608,7 @@ export default function CourseContentScreen() {
                         <Ionicons
                           name="play-circle"
                           size={20}
-                          color="#3B82F6"
+                          color={theme.colors.primary}
                         />
                       </View>
                       <View style={styles.lessonInfo}>
@@ -600,7 +623,7 @@ export default function CourseContentScreen() {
                       <Ionicons
                         name="chevron-forward"
                         size={16}
-                        color="#9CA3AF"
+                        color={theme.colors.textSecondary}
                       />
                     </TouchableOpacity>
                   ))}
@@ -610,30 +633,36 @@ export default function CourseContentScreen() {
               {(module.exerciseIds?.length || 0) > 0 && (
                 <View style={styles.exercisesSection}>
                   <Text style={styles.sectionTitle}>Practice Exercises</Text>
-                  {module.exerciseIds.map((exerciseId: string, index: number) => (
-                    <TouchableOpacity
-                      key={exerciseId}
-                      style={styles.exerciseItem}
-                      onPress={() => handleExercisePress(exerciseId)}
-                    >
-                      <View style={styles.exerciseIcon}>
-                        <Ionicons name="create" size={18} color="#10B981" />
-                      </View>
-                      <View style={styles.exerciseInfo}>
-                        <Text style={styles.exerciseTitle}>
-                          Exercise {index + 1}
-                        </Text>
-                        <Text style={styles.exerciseDifficulty}>
-                          Medium • 10 questions
-                        </Text>
-                      </View>
-                      <Ionicons
-                        name="chevron-forward"
-                        size={16}
-                        color="#9CA3AF"
-                      />
-                    </TouchableOpacity>
-                  ))}
+                  {module.exerciseIds.map(
+                    (exerciseId: string, index: number) => (
+                      <TouchableOpacity
+                        key={exerciseId}
+                        style={styles.exerciseItem}
+                        onPress={() => handleExercisePress(exerciseId)}
+                      >
+                        <View style={styles.exerciseIcon}>
+                          <Ionicons
+                            name="create"
+                            size={18}
+                            color={theme.colors.success}
+                          />
+                        </View>
+                        <View style={styles.exerciseInfo}>
+                          <Text style={styles.exerciseTitle}>
+                            Exercise {index + 1}
+                          </Text>
+                          <Text style={styles.exerciseDifficulty}>
+                            Medium • 10 questions
+                          </Text>
+                        </View>
+                        <Ionicons
+                          name="chevron-forward"
+                          size={16}
+                          color={theme.colors.textSecondary}
+                        />
+                      </TouchableOpacity>
+                    )
+                  )}
                 </View>
               )}
             </View>
@@ -642,11 +671,13 @@ export default function CourseContentScreen() {
           {module.isLocked && (
             <View style={styles.unlockRequirements}>
               <Text style={styles.unlockTitle}>Unlock Requirements:</Text>
-              {module.unlockConditions?.requiredModules?.map((reqModule: string) => (
-                <Text key={reqModule} style={styles.unlockText}>
-                  • Complete {reqModule}
-                </Text>
-              ))}
+              {module.unlockConditions?.requiredModules?.map(
+                (reqModule: string) => (
+                  <Text key={reqModule} style={styles.unlockText}>
+                    • Complete {reqModule}
+                  </Text>
+                )
+              )}
               {(module.unlockConditions?.minimumScore || 0) > 0 && (
                 <Text style={styles.unlockText}>
                   • Score at least {module.unlockConditions.minimumScore}%
@@ -661,7 +692,8 @@ export default function CourseContentScreen() {
 
   // Helper functions to get dynamic content
   const getSubjectName = (topicId: string) => {
-    if (topicId.includes("algebra") || topicId.includes("geometry")) return "Math";
+    if (topicId.includes("algebra") || topicId.includes("geometry"))
+      return "Math";
     if (topicId.includes("mechanics") || topicId.includes("thermodynamics"))
       return "Physics";
     if (topicId.includes("atomic")) return "Chemistry";
@@ -689,14 +721,14 @@ export default function CourseContentScreen() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: "#F8FAFC",
+      backgroundColor: theme.colors.background,
     },
     header: {
       paddingHorizontal: 20,
       paddingVertical: 16,
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderBottomWidth: 1,
-      borderBottomColor: "#E2E8F0",
+      borderBottomColor: theme.colors.border,
     },
     headerTop: {
       flexDirection: "row",
@@ -706,7 +738,7 @@ export default function CourseContentScreen() {
       marginRight: 16,
       padding: 8,
       borderRadius: 8,
-      backgroundColor: "#F1F5F9",
+      backgroundColor: theme.colors.surface,
     },
     headerContent: {
       flex: 1,
@@ -714,17 +746,17 @@ export default function CourseContentScreen() {
     title: {
       fontSize: 20,
       fontWeight: "800",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-ExtraBold",
     },
     subtitle: {
       fontSize: 14,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       marginTop: 2,
     },
     courseInfo: {
-      backgroundColor: "#fff",
+      backgroundColor: theme.colors.surface,
       borderRadius: 12,
       padding: 20,
       marginHorizontal: 20,
@@ -733,13 +765,13 @@ export default function CourseContentScreen() {
     courseTitle: {
       fontSize: 16,
       fontWeight: "600",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
       marginBottom: 8,
     },
     courseDescription: {
       fontSize: 14,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       lineHeight: 20,
       marginBottom: 12,
@@ -754,12 +786,12 @@ export default function CourseContentScreen() {
     courseStatValue: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-Bold",
     },
     courseStatLabel: {
       fontSize: 12,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       marginTop: 2,
     },
@@ -770,13 +802,13 @@ export default function CourseContentScreen() {
     },
     quickAction: {
       flex: 1,
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderRadius: 12,
       padding: 16,
       alignItems: "center",
       borderWidth: 1,
-      borderColor: "#E2E8F0",
-      shadowColor: "#000",
+      borderColor: theme.colors.border,
+      shadowColor: theme.colors.text,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05,
       shadowRadius: 4,
@@ -787,7 +819,7 @@ export default function CourseContentScreen() {
     },
     quickActionText: {
       fontSize: 12,
-      color: "#374151",
+      color: theme.colors.text,
       fontWeight: "600",
       fontFamily: "Inter-SemiBold",
       textAlign: "center",
@@ -804,23 +836,23 @@ export default function CourseContentScreen() {
     sectionTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-Bold",
     },
     moduleCard: {
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderRadius: 16,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: "#E2E8F0",
-      shadowColor: "#000",
+      borderColor: theme.colors.border,
+      shadowColor: theme.colors.text,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 8,
       elevation: 3,
     },
     lockedCard: {
-      backgroundColor: "#F8FAFC",
+      backgroundColor: theme.colors.background,
       opacity: 0.7,
     },
     moduleHeader: {
@@ -841,18 +873,18 @@ export default function CourseContentScreen() {
     moduleName: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-Bold",
     },
     moduleDescription: {
       fontSize: 14,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       lineHeight: 20,
       marginBottom: 12,
     },
     lockedText: {
-      color: "#9CA3AF",
+      color: theme.colors.textSecondary,
     },
     moduleStats: {
       flexDirection: "row",
@@ -865,7 +897,7 @@ export default function CourseContentScreen() {
     },
     statText: {
       fontSize: 12,
-      color: "#6B7280",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
     },
     moduleRight: {
@@ -876,19 +908,19 @@ export default function CourseContentScreen() {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: "#E0F2FE",
+      backgroundColor: theme.colors.surface,
       justifyContent: "center",
       alignItems: "center",
     },
     progressText: {
       fontSize: 12,
       fontWeight: "600",
-      color: "#0369A1",
+      color: theme.colors.primary,
       fontFamily: "Inter-SemiBold",
     },
     moduleContent: {
       borderTopWidth: 1,
-      borderTopColor: "#E2E8F0",
+      borderTopColor: theme.colors.border,
       paddingHorizontal: 20,
       paddingBottom: 20,
     },
@@ -900,7 +932,7 @@ export default function CourseContentScreen() {
       alignItems: "center",
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderBottomColor: "#F1F5F9",
+      borderBottomColor: theme.colors.border,
     },
     lessonIcon: {
       marginRight: 12,
@@ -911,12 +943,12 @@ export default function CourseContentScreen() {
     lessonTitle: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
     },
     lessonDuration: {
       fontSize: 12,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       marginTop: 2,
     },
@@ -928,7 +960,7 @@ export default function CourseContentScreen() {
       alignItems: "center",
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderBottomColor: "#F1F5F9",
+      borderBottomColor: theme.colors.border,
     },
     exerciseIcon: {
       marginRight: 12,
@@ -939,17 +971,17 @@ export default function CourseContentScreen() {
     exerciseTitle: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
     },
     exerciseDifficulty: {
       fontSize: 12,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       marginTop: 2,
     },
     unlockRequirements: {
-      backgroundColor: "#FEF3C7",
+      backgroundColor: theme.colors.warning,
       margin: 20,
       marginTop: 0,
       padding: 16,
@@ -958,25 +990,25 @@ export default function CourseContentScreen() {
     unlockTitle: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#92400E",
+      color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
       marginBottom: 8,
     },
     unlockText: {
       fontSize: 12,
-      color: "#92400E",
+      color: theme.colors.text,
       fontFamily: "Inter-Regular",
       marginBottom: 4,
     },
     prerequisitesSection: {
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderRadius: 16,
       padding: 20,
       marginHorizontal: 20,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: "#E2E8F0",
-      shadowColor: "#000",
+      borderColor: theme.colors.border,
+      shadowColor: theme.colors.text,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 8,
@@ -985,7 +1017,7 @@ export default function CourseContentScreen() {
     prerequisitesTitle: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-Bold",
       marginBottom: 12,
     },
@@ -999,7 +1031,7 @@ export default function CourseContentScreen() {
     },
     prerequisiteText: {
       fontSize: 14,
-      color: "#374151",
+      color: theme.colors.text,
       fontFamily: "Inter-Regular",
     },
     scrollContent: {
@@ -1015,14 +1047,14 @@ export default function CourseContentScreen() {
     emptyTitle: {
       fontSize: 20,
       fontWeight: "600",
-      color: "#374151",
+      color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
       marginTop: 16,
       marginBottom: 8,
     },
     emptySubtitle: {
       fontSize: 14,
-      color: "#6B7280",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       textAlign: "center",
       lineHeight: 20,
@@ -1037,7 +1069,11 @@ export default function CourseContentScreen() {
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={20} color="#64748B" />
+            <Ionicons
+              name="arrow-back"
+              size={20}
+              color={theme.colors.textSecondary}
+            />
           </TouchableOpacity>
           <View style={styles.headerContent}>
             <Text style={styles.title}>{topicName}</Text>
@@ -1082,7 +1118,7 @@ export default function CourseContentScreen() {
             <Ionicons
               name="document-text"
               size={24}
-              color="#10B981"
+              color={theme.colors.success}
               style={styles.quickActionIcon}
             />
             <Text style={styles.quickActionText}>My Notes</Text>
@@ -1094,7 +1130,7 @@ export default function CourseContentScreen() {
             <Ionicons
               name="library"
               size={24}
-              color="#F59E0B"
+              color={theme.colors.warning}
               style={styles.quickActionIcon}
             />
             <Text style={styles.quickActionText}>Resources</Text>
@@ -1106,7 +1142,7 @@ export default function CourseContentScreen() {
             <Ionicons
               name="bookmark"
               size={24}
-              color="#3B82F6"
+              color={theme.colors.primary}
               style={styles.quickActionIcon}
             />
             <Text style={styles.quickActionText}>Bookmarks</Text>
@@ -1128,7 +1164,11 @@ export default function CourseContentScreen() {
             />
           ) : (
             <View style={styles.emptyState}>
-              <Ionicons name="construct" size={64} color="#9CA3AF" />
+              <Ionicons
+                name="construct"
+                size={64}
+                color={theme.colors.textSecondary}
+              />
               <Text style={styles.emptyTitle}>Course Coming Soon</Text>
               <Text style={styles.emptySubtitle}>
                 Course content for {topicName} is being prepared and will be
