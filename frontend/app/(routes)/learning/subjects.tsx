@@ -71,7 +71,7 @@ const SUBJECTS = [
     },
     isActive: true,
     isPremium: false,
-    hasTopics: false, // Only Math has topics for now
+    hasTopics: true, // Only Math has topics for now
   },
   {
     _id: "chemistry_001",
@@ -98,7 +98,7 @@ const SUBJECTS = [
     },
     isActive: true,
     isPremium: false,
-    hasTopics: false,
+    hasTopics: true,
   },
   {
     _id: "biology_001",
@@ -125,7 +125,7 @@ const SUBJECTS = [
     },
     isActive: true,
     isPremium: false,
-    hasTopics: false,
+    hasTopics: true,
   },
 ];
 
