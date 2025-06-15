@@ -13,147 +13,306 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeIn } from "react-native-reanimated";
 
-// Mock topics data based on topic.model (only Math topics)
-const MATH_TOPICS = [
-  {
-    _id: "topic_algebra",
-    name: "Algebra Fundamentals",
-    subjectId: "math_001",
-    series: ["D"],
-    description: "Master algebraic expressions, equations, and inequalities",
-    difficulty: "intermediate",
-    estimatedTime: 180, // minutes
-    estimatedCompletionDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    relatedTopics: ["Linear Equations", "Quadratic Functions"],
-    hasPractice: true,
-    hasNote: true,
-    hasStudyMaterial: true,
-    prerequisites: ["Basic Mathematics"],
-    learningObjectives: [
-      "Solve linear and quadratic equations",
-      "Simplify algebraic expressions",
-      "Graph linear functions",
-    ],
-    estimatedTimeToMaster: 300,
-    resourceIds: ["res_001", "res_002"],
-    assessmentCriteria: {
-      minimumScore: 75,
-      requiredPracticeQuestions: 50,
-      masteryThreshold: 85,
+// Mock topics data for ALL subjects (not just Math)
+const ALL_TOPICS = {
+  math_001: [
+    {
+      _id: "topic_algebra",
+      name: "Algebra Fundamentals",
+      subjectId: "math_001",
+      series: ["D"],
+      description: "Master algebraic expressions, equations, and inequalities",
+      difficulty: "intermediate",
+      estimatedTime: 180, // minutes
+      estimatedCompletionDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      relatedTopics: ["Linear Equations", "Quadratic Functions"],
+      hasPractice: true,
+      hasNote: true,
+      hasStudyMaterial: true,
+      prerequisites: ["Basic Mathematics"],
+      learningObjectives: [
+        "Solve linear and quadratic equations",
+        "Simplify algebraic expressions",
+        "Graph linear functions",
+      ],
+      estimatedTimeToMaster: 300,
+      resourceIds: ["res_001", "res_002"],
+      assessmentCriteria: {
+        minimumScore: 75,
+        requiredPracticeQuestions: 50,
+        masteryThreshold: 85,
+      },
+      progress: 65,
+      isUnlocked: true,
+      hasLessons: true,
     },
-    progress: 65,
-    isUnlocked: true,
-    hasLessons: true,
-  },
-  {
-    _id: "topic_geometry",
-    name: "Geometry Basics",
-    subjectId: "math_001",
-    series: ["D"],
-    description: "Explore shapes, angles, and geometric relationships",
-    difficulty: "beginner",
-    estimatedTime: 150,
-    estimatedCompletionDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
-    relatedTopics: ["Trigonometry", "Area and Volume"],
-    hasPractice: true,
-    hasNote: false,
-    hasStudyMaterial: true,
-    prerequisites: [],
-    learningObjectives: [
-      "Identify geometric shapes",
-      "Calculate angles and areas",
-      "Apply geometric theorems",
-    ],
-    estimatedTimeToMaster: 240,
-    resourceIds: ["res_003"],
-    assessmentCriteria: {
-      minimumScore: 70,
-      requiredPracticeQuestions: 40,
-      masteryThreshold: 80,
+    {
+      _id: "topic_geometry",
+      name: "Geometry Basics",
+      subjectId: "math_001",
+      series: ["D"],
+      description: "Explore shapes, angles, and geometric relationships",
+      difficulty: "beginner",
+      estimatedTime: 150,
+      estimatedCompletionDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+      relatedTopics: ["Trigonometry", "Area and Volume"],
+      hasPractice: true,
+      hasNote: false,
+      hasStudyMaterial: true,
+      prerequisites: [],
+      learningObjectives: [
+        "Identify geometric shapes",
+        "Calculate angles and areas",
+        "Apply geometric theorems",
+      ],
+      estimatedTimeToMaster: 240,
+      resourceIds: ["res_003"],
+      assessmentCriteria: {
+        minimumScore: 70,
+        requiredPracticeQuestions: 40,
+        masteryThreshold: 80,
+      },
+      progress: 30,
+      isUnlocked: true,
+      hasLessons: false,
     },
-    progress: 30,
-    isUnlocked: true,
-    hasLessons: false,
-  },
-  {
-    _id: "topic_calculus",
-    name: "Introduction to Calculus",
-    subjectId: "math_001",
-    series: ["D"],
-    description: "Derivatives, integrals, and limits fundamentals",
-    difficulty: "advanced",
-    estimatedTime: 240,
-    estimatedCompletionDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-    relatedTopics: ["Advanced Functions", "Applications"],
-    hasPractice: true,
-    hasNote: true,
-    hasStudyMaterial: true,
-    prerequisites: ["Algebra Fundamentals", "Functions"],
-    learningObjectives: [
-      "Understand limits and continuity",
-      "Calculate derivatives",
-      "Solve basic integrals",
-    ],
-    estimatedTimeToMaster: 400,
-    resourceIds: ["res_004", "res_005"],
-    assessmentCriteria: {
-      minimumScore: 80,
-      requiredPracticeQuestions: 60,
-      masteryThreshold: 90,
+    {
+      _id: "topic_calculus",
+      name: "Introduction to Calculus",
+      subjectId: "math_001",
+      series: ["D"],
+      description: "Derivatives, integrals, and limits fundamentals",
+      difficulty: "advanced",
+      estimatedTime: 240,
+      estimatedCompletionDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      relatedTopics: ["Advanced Functions", "Applications"],
+      hasPractice: true,
+      hasNote: true,
+      hasStudyMaterial: true,
+      prerequisites: ["Algebra Fundamentals", "Functions"],
+      learningObjectives: [
+        "Understand limits and continuity",
+        "Calculate derivatives",
+        "Solve basic integrals",
+      ],
+      estimatedTimeToMaster: 400,
+      resourceIds: ["res_004", "res_005"],
+      assessmentCriteria: {
+        minimumScore: 80,
+        requiredPracticeQuestions: 60,
+        masteryThreshold: 90,
+      },
+      progress: 0,
+      isUnlocked: false,
+      hasLessons: false,
     },
-    progress: 0,
-    isUnlocked: false,
-    hasLessons: false,
-  },
-  {
-    _id: "topic_statistics",
-    name: "Statistics & Probability",
-    subjectId: "math_001",
-    series: ["D"],
-    description: "Data analysis, probability distributions, and inference",
-    difficulty: "intermediate",
-    estimatedTime: 200,
-    estimatedCompletionDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
-    relatedTopics: ["Data Visualization", "Hypothesis Testing"],
-    hasPractice: true,
-    hasNote: false,
-    hasStudyMaterial: true,
-    prerequisites: ["Basic Mathematics"],
-    learningObjectives: [
-      "Calculate probability",
-      "Analyze data sets",
-      "Interpret statistical results",
-    ],
-    estimatedTimeToMaster: 320,
-    resourceIds: ["res_006"],
-    assessmentCriteria: {
-      minimumScore: 75,
-      requiredPracticeQuestions: 45,
-      masteryThreshold: 85,
+    {
+      _id: "topic_statistics",
+      name: "Statistics & Probability",
+      subjectId: "math_001",
+      series: ["D"],
+      description: "Data analysis, probability distributions, and inference",
+      difficulty: "intermediate",
+      estimatedTime: 200,
+      estimatedCompletionDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
+      relatedTopics: ["Data Visualization", "Hypothesis Testing"],
+      hasPractice: true,
+      hasNote: false,
+      hasStudyMaterial: true,
+      prerequisites: ["Basic Mathematics"],
+      learningObjectives: [
+        "Calculate probability",
+        "Analyze data sets",
+        "Interpret statistical results",
+      ],
+      estimatedTimeToMaster: 320,
+      resourceIds: ["res_006"],
+      assessmentCriteria: {
+        minimumScore: 75,
+        requiredPracticeQuestions: 45,
+        masteryThreshold: 85,
+      },
+      progress: 15,
+      isUnlocked: true,
+      hasLessons: false,
     },
-    progress: 15,
-    isUnlocked: true,
-    hasLessons: false,
-  },
-];
+  ],
+  physics_001: [
+    {
+      _id: "topic_mechanics",
+      name: "Classical Mechanics",
+      subjectId: "physics_001",
+      series: ["D"],
+      description: "Study motion, forces, and energy in physical systems",
+      difficulty: "intermediate",
+      estimatedTime: 200,
+      estimatedCompletionDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
+      relatedTopics: ["Thermodynamics", "Waves"],
+      hasPractice: true,
+      hasNote: true,
+      hasStudyMaterial: true,
+      prerequisites: ["Basic Mathematics"],
+      learningObjectives: [
+        "Analyze motion using kinematics",
+        "Apply Newton's laws of motion",
+        "Calculate work and energy",
+      ],
+      estimatedTimeToMaster: 350,
+      resourceIds: ["res_phys_001", "res_phys_002"],
+      assessmentCriteria: {
+        minimumScore: 75,
+        requiredPracticeQuestions: 45,
+        masteryThreshold: 85,
+      },
+      progress: 40,
+      isUnlocked: true,
+      hasLessons: true,
+    },
+    {
+      _id: "topic_thermodynamics",
+      name: "Thermodynamics",
+      subjectId: "physics_001",
+      series: ["D"],
+      description: "Heat, temperature, and energy transfer principles",
+      difficulty: "advanced",
+      estimatedTime: 180,
+      estimatedCompletionDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
+      relatedTopics: ["Statistical Mechanics", "Heat Engines"],
+      hasPractice: true,
+      hasNote: false,
+      hasStudyMaterial: true,
+      prerequisites: ["Classical Mechanics"],
+      learningObjectives: [
+        "Understand heat and temperature",
+        "Apply thermodynamic laws",
+        "Analyze heat engines and cycles",
+      ],
+      estimatedTimeToMaster: 300,
+      resourceIds: ["res_phys_003"],
+      assessmentCriteria: {
+        minimumScore: 80,
+        requiredPracticeQuestions: 50,
+        masteryThreshold: 90,
+      },
+      progress: 0,
+      isUnlocked: false,
+      hasLessons: false,
+    },
+    {
+      _id: "topic_waves",
+      name: "Waves and Oscillations",
+      subjectId: "physics_001",
+      series: ["D"],
+      description: "Wave properties, sound, and electromagnetic radiation",
+      difficulty: "intermediate",
+      estimatedTime: 160,
+      estimatedCompletionDate: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000),
+      relatedTopics: ["Optics", "Quantum Physics"],
+      hasPractice: true,
+      hasNote: true,
+      hasStudyMaterial: true,
+      prerequisites: ["Basic Mathematics"],
+      learningObjectives: [
+        "Describe wave properties",
+        "Analyze sound and light waves",
+        "Apply wave interference principles",
+      ],
+      estimatedTimeToMaster: 280,
+      resourceIds: ["res_phys_004"],
+      assessmentCriteria: {
+        minimumScore: 75,
+        requiredPracticeQuestions: 40,
+        masteryThreshold: 85,
+      },
+      progress: 25,
+      isUnlocked: true,
+      hasLessons: false,
+    },
+  ],
+  chemistry_001: [
+    {
+      _id: "topic_atomic_structure",
+      name: "Atomic Structure",
+      subjectId: "chemistry_001",
+      series: ["D"],
+      description: "Atoms, electrons, and the periodic table",
+      difficulty: "beginner",
+      estimatedTime: 140,
+      estimatedCompletionDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
+      relatedTopics: ["Chemical Bonding", "Periodic Trends"],
+      hasPractice: true,
+      hasNote: true,
+      hasStudyMaterial: true,
+      prerequisites: [],
+      learningObjectives: [
+        "Describe atomic structure",
+        "Explain electron configuration",
+        "Use the periodic table effectively",
+      ],
+      estimatedTimeToMaster: 250,
+      resourceIds: ["res_chem_001"],
+      assessmentCriteria: {
+        minimumScore: 70,
+        requiredPracticeQuestions: 35,
+        masteryThreshold: 80,
+      },
+      progress: 60,
+      isUnlocked: true,
+      hasLessons: true,
+    },
+  ],
+  biology_001: [
+    {
+      _id: "topic_cell_biology",
+      name: "Cell Biology",
+      subjectId: "biology_001",
+      series: ["D"],
+      description: "Cell structure, function, and processes",
+      difficulty: "beginner",
+      estimatedTime: 160,
+      estimatedCompletionDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      relatedTopics: ["Genetics", "Metabolism"],
+      hasPractice: true,
+      hasNote: true,
+      hasStudyMaterial: true,
+      prerequisites: [],
+      learningObjectives: [
+        "Identify cell organelles",
+        "Explain cellular processes",
+        "Compare plant and animal cells",
+      ],
+      estimatedTimeToMaster: 280,
+      resourceIds: ["res_bio_001"],
+      assessmentCriteria: {
+        minimumScore: 70,
+        requiredPracticeQuestions: 40,
+        masteryThreshold: 80,
+      },
+      progress: 35,
+      isUnlocked: true,
+      hasLessons: false,
+    },
+  ],
+};
 
 export default function TopicsScreen() {
   const router = useRouter();
   const { subjectId, subjectName } = useLocalSearchParams();
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
 
-  // TODO: Connect to backend API
-  // TODO: Add actual navigation hooks
-  // TODO: Integrate with state management
+  // Get topics for the specific subject
+  const subjectTopics = useMemo(() => {
+    return ALL_TOPICS[subjectId as keyof typeof ALL_TOPICS] || [];
+  }, [subjectId]);
 
   const filteredTopics = useMemo(() => {
-    if (selectedDifficulty === "all") return MATH_TOPICS;
-    return MATH_TOPICS.filter(
-      (topic) => topic.difficulty === selectedDifficulty
+    if (selectedDifficulty === "all") return subjectTopics;
+    return subjectTopics.filter(
+      (topic: (typeof ALL_TOPICS)[keyof typeof ALL_TOPICS][0]) => topic.difficulty === selectedDifficulty
     );
-  }, [selectedDifficulty]);
+  }, [subjectTopics, selectedDifficulty]);
 
-  const handleTopicPress = (topic: (typeof MATH_TOPICS)[0]) => {
+  const handleTopicPress = (topic: (typeof ALL_TOPICS)[keyof typeof ALL_TOPICS][0]) => {
     if (!topic.isUnlocked) {
       console.log("Topic is locked");
       return;
@@ -185,7 +344,7 @@ export default function TopicsScreen() {
   const renderTopicCard = ({
     item: topic,
   }: {
-    item: (typeof MATH_TOPICS)[0];
+    item: (typeof ALL_TOPICS)[keyof typeof ALL_TOPICS][0];
   }) => {
     return (
       <Animated.View entering={FadeIn.duration(300)}>
@@ -390,13 +549,14 @@ export default function TopicsScreen() {
     },
     content: {
       flex: 1,
-      padding: 20,
+      padding: 0,
     },
     topicCard: {
       backgroundColor: "white",
       borderRadius: 16,
       padding: 20,
-      marginBottom: 16,
+      marginHorizontal: 20,
+      marginVertical: 8,
       borderWidth: 1,
       borderColor: "#E2E8F0",
       shadowColor: "#000",
@@ -549,6 +709,27 @@ export default function TopicsScreen() {
       color: "#6B7280",
       fontFamily: "Inter-Regular",
     },
+    emptyState: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 40,
+    },
+    emptyTitle: {
+      fontSize: 20,
+      fontWeight: "600",
+      color: "#374151",
+      fontFamily: "Inter-SemiBold",
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    emptySubtitle: {
+      fontSize: 14,
+      color: "#6B7280",
+      fontFamily: "Inter-Regular",
+      textAlign: "center",
+      lineHeight: 20,
+    },
   });
 
   return (
@@ -569,39 +750,52 @@ export default function TopicsScreen() {
           </View>
         </View>
 
-        <View style={styles.filterRow}>
-          {["all", "beginner", "intermediate", "advanced"].map((difficulty) => (
-            <TouchableOpacity
-              key={difficulty}
-              style={[
-                styles.filterChip,
-                selectedDifficulty === difficulty && styles.activeFilterChip,
-              ]}
-              onPress={() => setSelectedDifficulty(difficulty)}
-            >
-              <Text
+        {/* Only show filters if there are topics */}
+        {subjectTopics.length > 0 && (
+          <View style={styles.filterRow}>
+            {["all", "beginner", "intermediate", "advanced"].map((difficulty) => (
+              <TouchableOpacity
+                key={difficulty}
                 style={[
-                  styles.filterText,
-                  selectedDifficulty === difficulty && styles.activeFilterText,
+                  styles.filterChip,
+                  selectedDifficulty === difficulty && styles.activeFilterChip,
                 ]}
+                onPress={() => setSelectedDifficulty(difficulty)}
               >
-                {difficulty === "all"
-                  ? "All"
-                  : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+                <Text
+                  style={[
+                    styles.filterText,
+                    selectedDifficulty === difficulty && styles.activeFilterText,
+                  ]}
+                >
+                  {difficulty === "all"
+                    ? "All"
+                    : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
 
       <View style={styles.content}>
-        <FlatList
-          data={filteredTopics}
-          renderItem={renderTopicCard}
-          keyExtractor={(item) => item._id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
+        {filteredTopics.length > 0 ? (
+          <FlatList
+            data={filteredTopics}
+            renderItem={renderTopicCard}
+            keyExtractor={(item) => item._id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        ) : (
+          <View style={styles.emptyState}>
+            <Ionicons name="book-outline" size={64} color="#9CA3AF" />
+            <Text style={styles.emptyTitle}>No Topics Available</Text>
+            <Text style={styles.emptySubtitle}>
+              Topics for {subjectName} are coming soon!
+            </Text>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
