@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { useTheme } from "../../../src/utils/ThemeContext";
 
 // Mock topics data for ALL subjects (not just Math)
 const ALL_TOPICS = {
@@ -299,6 +300,7 @@ export default function TopicsScreen() {
   const router = useRouter();
   const { subjectId, subjectName } = useLocalSearchParams();
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
+  const { theme } = useTheme();
 
   // Get topics for the specific subject
   const subjectTopics = useMemo(() => {
@@ -308,11 +310,14 @@ export default function TopicsScreen() {
   const filteredTopics = useMemo(() => {
     if (selectedDifficulty === "all") return subjectTopics;
     return subjectTopics.filter(
-      (topic: (typeof ALL_TOPICS)[keyof typeof ALL_TOPICS][0]) => topic.difficulty === selectedDifficulty
+      (topic: (typeof ALL_TOPICS)[keyof typeof ALL_TOPICS][0]) =>
+        topic.difficulty === selectedDifficulty
     );
   }, [subjectTopics, selectedDifficulty]);
 
-  const handleTopicPress = (topic: (typeof ALL_TOPICS)[keyof typeof ALL_TOPICS][0]) => {
+  const handleTopicPress = (
+    topic: (typeof ALL_TOPICS)[keyof typeof ALL_TOPICS][0]
+  ) => {
     if (!topic.isUnlocked) {
       console.log("Topic is locked");
       return;
@@ -331,13 +336,13 @@ export default function TopicsScreen() {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner":
-        return "#10B981";
+        return theme.colors.success;
       case "intermediate":
-        return "#F59E0B";
+        return theme.colors.warning;
       case "advanced":
-        return "#EF4444";
+        return theme.colors.error;
       default:
-        return "#6B7280";
+        return theme.colors.textSecondary;
     }
   };
 
@@ -408,13 +413,21 @@ export default function TopicsScreen() {
 
               <View style={styles.statsRow}>
                 <View style={styles.stat}>
-                  <Ionicons name="time" size={16} color="#6B7280" />
+                  <Ionicons
+                    name="time"
+                    size={16}
+                    color={theme.colors.textSecondary}
+                  />
                   <Text style={styles.statText}>
                     {Math.round(topic.estimatedTime / 60)}h
                   </Text>
                 </View>
                 <View style={styles.stat}>
-                  <Ionicons name="library" size={16} color="#6B7280" />
+                  <Ionicons
+                    name="library"
+                    size={16}
+                    color={theme.colors.textSecondary}
+                  />
                   <Text style={styles.statText}>
                     {topic.resourceIds.length} Resources
                   </Text>
@@ -430,19 +443,31 @@ export default function TopicsScreen() {
               <View style={styles.featuresRow}>
                 {topic.hasPractice && (
                   <View style={styles.feature}>
-                    <Ionicons name="create" size={14} color="#3B82F6" />
+                    <Ionicons
+                      name="create"
+                      size={14}
+                      color={theme.colors.primary}
+                    />
                     <Text style={styles.featureText}>Practice</Text>
                   </View>
                 )}
                 {topic.hasNote && (
                   <View style={styles.feature}>
-                    <Ionicons name="document-text" size={14} color="#10B981" />
+                    <Ionicons
+                      name="document-text"
+                      size={14}
+                      color={theme.colors.success}
+                    />
                     <Text style={styles.featureText}>Notes</Text>
                   </View>
                 )}
                 {topic.hasStudyMaterial && (
                   <View style={styles.feature}>
-                    <Ionicons name="book" size={14} color="#F59E0B" />
+                    <Ionicons
+                      name="book"
+                      size={14}
+                      color={theme.colors.warning}
+                    />
                     <Text style={styles.featureText}>Materials</Text>
                   </View>
                 )}
@@ -472,7 +497,11 @@ export default function TopicsScreen() {
 
             {topic.prerequisites.length > 0 && (
               <View style={styles.prerequisitesBadge}>
-                <Ionicons name="link" size={12} color="#6B7280" />
+                <Ionicons
+                  name="link"
+                  size={12}
+                  color={theme.colors.textSecondary}
+                />
                 <Text style={styles.prerequisitesText}>
                   {topic.prerequisites.length} Prerequisites
                 </Text>
@@ -487,14 +516,14 @@ export default function TopicsScreen() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: "#F8FAFC",
+      backgroundColor: theme.colors.background,
     },
     header: {
       paddingHorizontal: 20,
       paddingVertical: 16,
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderBottomWidth: 1,
-      borderBottomColor: "#E2E8F0",
+      borderBottomColor: theme.colors.border,
     },
     headerTop: {
       flexDirection: "row",
@@ -505,7 +534,7 @@ export default function TopicsScreen() {
       marginRight: 16,
       padding: 8,
       borderRadius: 8,
-      backgroundColor: "#F1F5F9",
+      backgroundColor: theme.colors.surface,
     },
     headerContent: {
       flex: 1,
@@ -513,12 +542,12 @@ export default function TopicsScreen() {
     title: {
       fontSize: 24,
       fontWeight: "800",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-ExtraBold",
     },
     subtitle: {
       fontSize: 14,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       marginTop: 2,
     },
@@ -530,9 +559,9 @@ export default function TopicsScreen() {
       paddingHorizontal: 16,
       paddingVertical: 8,
       borderRadius: 20,
-      backgroundColor: "#F1F5F9",
+      backgroundColor: theme.colors.surface,
       borderWidth: 1,
-      borderColor: "#E2E8F0",
+      borderColor: theme.colors.border,
     },
     activeFilterChip: {
       backgroundColor: "#3B82F6",
@@ -540,7 +569,7 @@ export default function TopicsScreen() {
     },
     filterText: {
       fontSize: 14,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontWeight: "500",
       fontFamily: "Inter-Medium",
     },
@@ -552,21 +581,21 @@ export default function TopicsScreen() {
       padding: 0,
     },
     topicCard: {
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderRadius: 16,
       padding: 20,
       marginHorizontal: 20,
       marginVertical: 8,
       borderWidth: 1,
-      borderColor: "#E2E8F0",
-      shadowColor: "#000",
+      borderColor: theme.colors.border,
+      shadowColor: theme.colors.text,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 8,
       elevation: 3,
     },
     lockedCard: {
-      backgroundColor: "#F8FAFC",
+      backgroundColor: theme.colors.background,
       opacity: 0.7,
     },
     cardHeader: {
@@ -582,35 +611,35 @@ export default function TopicsScreen() {
     topicName: {
       fontSize: 18,
       fontWeight: "700",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-Bold",
       marginBottom: 4,
     },
     topicDescription: {
       fontSize: 14,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       lineHeight: 20,
     },
     lockedText: {
-      color: "#9CA3AF",
+      color: theme.colors.textSecondary,
     },
     headerRight: {
       alignItems: "flex-end",
     },
     lockIcon: {
       padding: 8,
-      backgroundColor: "#F1F5F9",
+      backgroundColor: theme.colors.surface,
       borderRadius: 8,
     },
     availableBadge: {
-      backgroundColor: "#10B981",
+      backgroundColor: theme.colors.success,
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 16,
     },
     availableText: {
-      color: "white",
+      color: theme.colors.background,
       fontSize: 12,
       fontWeight: "600",
       fontFamily: "Inter-SemiBold",
@@ -626,24 +655,24 @@ export default function TopicsScreen() {
     },
     progressLabel: {
       fontSize: 14,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Medium",
     },
     progressPercentage: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#3B82F6",
+      color: theme.colors.primary,
       fontFamily: "Inter-SemiBold",
     },
     progressBar: {
       height: 8,
-      backgroundColor: "#E2E8F0",
+      backgroundColor: theme.colors.border,
       borderRadius: 4,
       overflow: "hidden",
     },
     progressFill: {
       height: "100%",
-      backgroundColor: "#3B82F6",
+      backgroundColor: theme.colors.primary,
       borderRadius: 4,
     },
     statsRow: {
@@ -658,7 +687,7 @@ export default function TopicsScreen() {
     },
     statText: {
       fontSize: 12,
-      color: "#6B7280",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
     },
     featuresRow: {
@@ -670,14 +699,14 @@ export default function TopicsScreen() {
       flexDirection: "row",
       alignItems: "center",
       gap: 4,
-      backgroundColor: "#F8FAFC",
+      backgroundColor: theme.colors.background,
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderRadius: 8,
     },
     featureText: {
       fontSize: 12,
-      color: "#374151",
+      color: theme.colors.text,
       fontFamily: "Inter-Medium",
     },
     cardFooter: {
@@ -699,14 +728,14 @@ export default function TopicsScreen() {
       flexDirection: "row",
       alignItems: "center",
       gap: 4,
-      backgroundColor: "#F1F5F9",
+      backgroundColor: theme.colors.surface,
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderRadius: 8,
     },
     prerequisitesText: {
       fontSize: 11,
-      color: "#6B7280",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
     },
     emptyState: {
@@ -718,14 +747,14 @@ export default function TopicsScreen() {
     emptyTitle: {
       fontSize: 20,
       fontWeight: "600",
-      color: "#374151",
+      color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
       marginTop: 16,
       marginBottom: 8,
     },
     emptySubtitle: {
       fontSize: 14,
-      color: "#6B7280",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       textAlign: "center",
       lineHeight: 20,
@@ -733,14 +762,21 @@ export default function TopicsScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right", "bottom"]}>
+    <SafeAreaView
+      style={styles.container}
+      edges={["top", "left", "right", "bottom"]}
+    >
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={20} color="#64748B" />
+            <Ionicons
+              name="arrow-back"
+              size={20}
+              color={theme.colors.textSecondary}
+            />
           </TouchableOpacity>
           <View style={styles.headerContent}>
             <Text style={styles.title}>{subjectName} Topics</Text>
@@ -753,27 +789,32 @@ export default function TopicsScreen() {
         {/* Only show filters if there are topics */}
         {subjectTopics.length > 0 && (
           <View style={styles.filterRow}>
-            {["all", "beginner", "intermediate", "advanced"].map((difficulty) => (
-              <TouchableOpacity
-                key={difficulty}
-                style={[
-                  styles.filterChip,
-                  selectedDifficulty === difficulty && styles.activeFilterChip,
-                ]}
-                onPress={() => setSelectedDifficulty(difficulty)}
-              >
-                <Text
+            {["all", "beginner", "intermediate", "advanced"].map(
+              (difficulty) => (
+                <TouchableOpacity
+                  key={difficulty}
                   style={[
-                    styles.filterText,
-                    selectedDifficulty === difficulty && styles.activeFilterText,
+                    styles.filterChip,
+                    selectedDifficulty === difficulty &&
+                      styles.activeFilterChip,
                   ]}
+                  onPress={() => setSelectedDifficulty(difficulty)}
                 >
-                  {difficulty === "all"
-                    ? "All"
-                    : difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.filterText,
+                      selectedDifficulty === difficulty &&
+                        styles.activeFilterText,
+                    ]}
+                  >
+                    {difficulty === "all"
+                      ? "All"
+                      : difficulty.charAt(0).toUpperCase() +
+                        difficulty.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              )
+            )}
           </View>
         )}
       </View>
@@ -789,7 +830,11 @@ export default function TopicsScreen() {
           />
         ) : (
           <View style={styles.emptyState}>
-            <Ionicons name="book-outline" size={64} color="#9CA3AF" />
+            <Ionicons
+              name="book-outline"
+              size={64}
+              color={theme.colors.textSecondary}
+            />
             <Text style={styles.emptyTitle}>No Topics Available</Text>
             <Text style={styles.emptySubtitle}>
               Topics for {subjectName} are coming soon!
