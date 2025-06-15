@@ -33,7 +33,7 @@ const COURSE_CONTENT = {
         "Learn to work with variables, coefficients, and simple expressions",
       order: 1,
       series: "D",
-      lessons: ["lesson_001"], // Only 1 lesson as requested
+      lessons: ["lesson_001", "lesson_002", "lesson_003"], // Only 1 lesson as requested
       exerciseIds: ["exercise_001", "exercise_002"],
       assessment: null,
       progressTracking: {
