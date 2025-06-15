@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import Animated, { FadeIn, SlideInRight } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "../../../../src/utils/ThemeContext";
 
 // Dynamic lesson content based on lessonId
 const LESSON_CONTENT_BY_ID = {
@@ -269,10 +270,12 @@ const LESSON_CONTENT_BY_ID = {
 export default function BaseLessonScreen() {
   const router = useRouter();
   const { lessonId, moduleId } = useLocalSearchParams();
+  const { theme } = useTheme();
 
   // Get lesson content based on lessonId
   const lessonContent = useMemo(() => {
-    const content = LESSON_CONTENT_BY_ID[lessonId as keyof typeof LESSON_CONTENT_BY_ID];
+    const content =
+      LESSON_CONTENT_BY_ID[lessonId as keyof typeof LESSON_CONTENT_BY_ID];
     if (!content) {
       console.warn(`No lesson content found for lessonId: ${lessonId}`);
       // Return a default "coming soon" structure
@@ -366,12 +369,16 @@ export default function BaseLessonScreen() {
           >
             <View style={styles.overviewCard}>
               <LinearGradient
-                colors={["#667eea", "#764ba2"]}
+                colors={[theme.colors.primary, theme.colors.primary + "80"]}
                 style={styles.overviewGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Ionicons name="book-outline" size={32} color="white" />
+                <Ionicons
+                  name="book-outline"
+                  size={32}
+                  color={theme.colors.background}
+                />
                 <Text style={styles.overviewTitle}>Lesson Overview</Text>
               </LinearGradient>
               <View style={styles.overviewContent}>
@@ -379,7 +386,11 @@ export default function BaseLessonScreen() {
 
                 <View style={styles.lessonMeta}>
                   <View style={styles.metaItem}>
-                    <Ionicons name="time-outline" size={16} color="#6B7280" />
+                    <Ionicons
+                      name="time-outline"
+                      size={16}
+                      color={theme.colors.textSecondary}
+                    />
                     <Text style={styles.metaText}>
                       {lessonContent.duration} minutes
                     </Text>
@@ -388,14 +399,18 @@ export default function BaseLessonScreen() {
                     <Ionicons
                       name="trending-up-outline"
                       size={16}
-                      color="#6B7280"
+                      color={theme.colors.textSecondary}
                     />
                     <Text style={styles.metaText}>
                       {lessonContent.difficultyLevel}
                     </Text>
                   </View>
                   <View style={styles.metaItem}>
-                    <Ionicons name="people-outline" size={16} color="#6B7280" />
+                    <Ionicons
+                      name="people-outline"
+                      size={16}
+                      color={theme.colors.textSecondary}
+                    />
                     <Text style={styles.metaText}>
                       {lessonContent.interactivityLevel} interaction
                     </Text>
@@ -425,7 +440,11 @@ export default function BaseLessonScreen() {
           >
             <View style={styles.prerequisitesCard}>
               <View style={styles.cardHeader}>
-                <Ionicons name="library-outline" size={24} color="#F59E0B" />
+                <Ionicons
+                  name="library-outline"
+                  size={24}
+                  color={theme.colors.warning}
+                />
                 <Text style={styles.cardTitle}>Prerequisites</Text>
               </View>
               <Text style={styles.cardSubtitle}>
@@ -433,14 +452,20 @@ export default function BaseLessonScreen() {
               </Text>
 
               {lessonContent.prerequisites.length > 0 ? (
-                lessonContent.prerequisites.map((prereq: string, index: number) => (
-                  <View key={index} style={styles.prerequisiteItem}>
-                    <View style={styles.prerequisiteIcon}>
-                      <Ionicons name="checkmark" size={16} color="#10B981" />
+                lessonContent.prerequisites.map(
+                  (prereq: string, index: number) => (
+                    <View key={index} style={styles.prerequisiteItem}>
+                      <View style={styles.prerequisiteIcon}>
+                        <Ionicons
+                          name="checkmark"
+                          size={16}
+                          color={theme.colors.success}
+                        />
+                      </View>
+                      <Text style={styles.prerequisiteText}>{prereq}</Text>
                     </View>
-                    <Text style={styles.prerequisiteText}>{prereq}</Text>
-                  </View>
-                ))
+                  )
+                )
               ) : (
                 <Text style={styles.prerequisiteText}>
                   No specific prerequisites required for this lesson.
@@ -469,21 +494,29 @@ export default function BaseLessonScreen() {
           >
             <View style={styles.objectivesCard}>
               <View style={styles.cardHeader}>
-                <Ionicons name="flag-outline" size={24} color="#3B82F6" />
+                <Ionicons
+                  name="flag-outline"
+                  size={24}
+                  color={theme.colors.primary}
+                />
                 <Text style={styles.cardTitle}>Learning Objectives</Text>
               </View>
               <Text style={styles.cardSubtitle}>
                 By the end of this lesson, you will be able to:
               </Text>
 
-              {lessonContent.objectives.map((objective: string, index: number) => (
-                <View key={index} style={styles.objectiveItem}>
-                  <View style={styles.objectiveNumber}>
-                    <Text style={styles.objectiveNumberText}>{index + 1}</Text>
+              {lessonContent.objectives.map(
+                (objective: string, index: number) => (
+                  <View key={index} style={styles.objectiveItem}>
+                    <View style={styles.objectiveNumber}>
+                      <Text style={styles.objectiveNumberText}>
+                        {index + 1}
+                      </Text>
+                    </View>
+                    <Text style={styles.objectiveText}>{objective}</Text>
                   </View>
-                  <Text style={styles.objectiveText}>{objective}</Text>
-                </View>
-              ))}
+                )
+              )}
             </View>
 
             <TouchableOpacity
@@ -507,7 +540,11 @@ export default function BaseLessonScreen() {
           >
             <View style={styles.keypointsCard}>
               <View style={styles.cardHeader}>
-                <Ionicons name="key-outline" size={24} color="#10B981" />
+                <Ionicons
+                  name="key-outline"
+                  size={24}
+                  color={theme.colors.success}
+                />
                 <Text style={styles.cardTitle}>Key Points</Text>
               </View>
               <Text style={styles.cardSubtitle}>
@@ -517,10 +554,14 @@ export default function BaseLessonScreen() {
               {lessonContent.keyPoints.map((point: string, index: number) => (
                 <View key={index} style={styles.keypointItem}>
                   <LinearGradient
-                    colors={["#10B981", "#059669"]}
+                    colors={[theme.colors.success, theme.colors.success + "80"]}
                     style={styles.keypointIcon}
                   >
-                    <Ionicons name="bulb" size={16} color="white" />
+                    <Ionicons
+                      name="bulb"
+                      size={16}
+                      color={theme.colors.background}
+                    />
                   </LinearGradient>
                   <Text style={styles.keypointText}>{point}</Text>
                 </View>
@@ -548,14 +589,14 @@ export default function BaseLessonScreen() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: "#F8FAFC",
+      backgroundColor: theme.colors.background,
     },
     header: {
       paddingHorizontal: 20,
       paddingVertical: 16,
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderBottomWidth: 1,
-      borderBottomColor: "#E2E8F0",
+      borderBottomColor: theme.colors.border,
     },
     headerTop: {
       flexDirection: "row",
@@ -565,7 +606,7 @@ export default function BaseLessonScreen() {
       marginRight: 16,
       padding: 8,
       borderRadius: 12,
-      backgroundColor: "#F1F5F9",
+      backgroundColor: theme.colors.surface,
     },
     headerContent: {
       flex: 1,
@@ -573,23 +614,23 @@ export default function BaseLessonScreen() {
     title: {
       fontSize: 20,
       fontWeight: "800",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-ExtraBold",
     },
     subtitle: {
       fontSize: 14,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       marginTop: 2,
     },
     progressContainer: {
-      backgroundColor: "#fff",
+      backgroundColor: theme.colors.surface,
       borderRadius: 16,
       padding: 16,
       marginVertical: 16,
       marginHorizontal: 20,
       borderWidth: 1,
-      borderColor: "#E2E8F0",
+      borderColor: theme.colors.border,
     },
     progressHeader: {
       flexDirection: "row",
@@ -600,39 +641,39 @@ export default function BaseLessonScreen() {
     progressTitle: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#374151",
+      color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
     },
     progressPercentage: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#3B82F6",
+      color: theme.colors.primary,
       fontFamily: "Inter-Bold",
     },
     progressBar: {
       height: 8,
-      backgroundColor: "#E5E7EB",
+      backgroundColor: theme.colors.border,
       borderRadius: 4,
       overflow: "hidden",
       marginBottom: 8,
     },
     progressFill: {
       height: "100%",
-      backgroundColor: "#3B82F6",
+      backgroundColor: theme.colors.primary,
       borderRadius: 4,
     },
     progressText: {
       fontSize: 12,
-      color: "#6B7280",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
     },
     videoSection: {
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderRadius: 20,
       padding: 20,
       borderWidth: 1,
-      borderColor: "#E2E8F0",
-      shadowColor: "#000",
+      borderColor: theme.colors.border,
+      shadowColor: theme.colors.text,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.08,
       shadowRadius: 12,
@@ -648,7 +689,7 @@ export default function BaseLessonScreen() {
       width: 48,
       height: 48,
       borderRadius: 24,
-      backgroundColor: "#FEE2E2",
+      backgroundColor: theme.colors.error + "20",
       justifyContent: "center",
       alignItems: "center",
       marginRight: 16,
@@ -659,19 +700,19 @@ export default function BaseLessonScreen() {
     videoTitle: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-Bold",
     },
     videoDuration: {
       fontSize: 12,
-      color: "#6B7280",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       marginTop: 2,
     },
     watchButton: {
       borderRadius: 16,
       overflow: "hidden",
-      shadowColor: "#EF4444",
+      shadowColor: theme.colors.error,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 8,
@@ -686,16 +727,16 @@ export default function BaseLessonScreen() {
       gap: 8,
     },
     watchButtonText: {
-      color: "white",
+      color: theme.colors.background,
       fontSize: 14,
       fontWeight: "600",
       fontFamily: "Inter-SemiBold",
     },
     tabsContainer: {
       flexDirection: "row",
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderBottomWidth: 1,
-      borderBottomColor: "#E2E8F0",
+      borderBottomColor: theme.colors.border,
       marginHorizontal: 20,
       borderRadius: 12,
     },
@@ -707,16 +748,16 @@ export default function BaseLessonScreen() {
       marginHorizontal: 2,
     },
     activeTab: {
-      backgroundColor: "#3B82F6",
+      backgroundColor: theme.colors.primary,
     },
     tabText: {
       fontSize: 12,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontWeight: "600",
       fontFamily: "Inter-SemiBold",
     },
     activeTabText: {
-      color: "white",
+      color: theme.colors.background,
     },
     content: {
       flex: 1,
@@ -728,11 +769,11 @@ export default function BaseLessonScreen() {
       marginBottom: 24,
     },
     overviewCard: {
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderRadius: 20,
       overflow: "hidden",
       marginBottom: 20,
-      shadowColor: "#000",
+      shadowColor: theme.colors.text,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.08,
       shadowRadius: 12,
@@ -746,7 +787,7 @@ export default function BaseLessonScreen() {
     overviewTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: "white",
+      color: theme.colors.background,
       fontFamily: "Inter-Bold",
     },
     overviewContent: {
@@ -754,7 +795,7 @@ export default function BaseLessonScreen() {
     },
     contentText: {
       fontSize: 16,
-      color: "#374151",
+      color: theme.colors.text,
       fontFamily: "Inter-Regular",
       lineHeight: 24,
       marginBottom: 20,
@@ -762,7 +803,7 @@ export default function BaseLessonScreen() {
     lessonMeta: {
       flexDirection: "row",
       justifyContent: "space-between",
-      backgroundColor: "#F8FAFC",
+      backgroundColor: theme.colors.background,
       borderRadius: 12,
       padding: 16,
     },
@@ -772,43 +813,43 @@ export default function BaseLessonScreen() {
     },
     metaText: {
       fontSize: 12,
-      color: "#6B7280",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Medium",
     },
     prerequisitesCard: {
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderRadius: 20,
       padding: 20,
       marginBottom: 20,
       borderWidth: 1,
-      borderColor: "#FEF3C7",
-      shadowColor: "#F59E0B",
+      borderColor: theme.colors.warning + "20",
+      shadowColor: theme.colors.warning,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.1,
       shadowRadius: 12,
       elevation: 6,
     },
     objectivesCard: {
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderRadius: 20,
       padding: 20,
       marginBottom: 20,
       borderWidth: 1,
-      borderColor: "#DBEAFE",
-      shadowColor: "#3B82F6",
+      borderColor: theme.colors.primary + "20",
+      shadowColor: theme.colors.primary,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.1,
       shadowRadius: 12,
       elevation: 6,
     },
     keypointsCard: {
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderRadius: 20,
       padding: 20,
       marginBottom: 20,
       borderWidth: 1,
-      borderColor: "#D1FAE5",
-      shadowColor: "#10B981",
+      borderColor: theme.colors.success + "20",
+      shadowColor: theme.colors.success,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.1,
       shadowRadius: 12,
@@ -823,12 +864,12 @@ export default function BaseLessonScreen() {
     cardTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-Bold",
     },
     cardSubtitle: {
       fontSize: 14,
-      color: "#6B7280",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       marginBottom: 20,
       lineHeight: 20,
@@ -843,14 +884,14 @@ export default function BaseLessonScreen() {
       width: 24,
       height: 24,
       borderRadius: 12,
-      backgroundColor: "#D1FAE5",
+      backgroundColor: theme.colors.success + "20",
       justifyContent: "center",
       alignItems: "center",
     },
     prerequisiteText: {
       flex: 1,
       fontSize: 15,
-      color: "#374151",
+      color: theme.colors.text,
       fontFamily: "Inter-Regular",
       lineHeight: 22,
     },
@@ -864,20 +905,20 @@ export default function BaseLessonScreen() {
       width: 28,
       height: 28,
       borderRadius: 14,
-      backgroundColor: "#3B82F6",
+      backgroundColor: theme.colors.primary,
       justifyContent: "center",
       alignItems: "center",
     },
     objectiveNumberText: {
       fontSize: 14,
       fontWeight: "700",
-      color: "white",
+      color: theme.colors.background,
       fontFamily: "Inter-Bold",
     },
     objectiveText: {
       flex: 1,
       fontSize: 15,
-      color: "#374151",
+      color: theme.colors.text,
       fontFamily: "Inter-Regular",
       lineHeight: 22,
     },
@@ -897,33 +938,33 @@ export default function BaseLessonScreen() {
     keypointText: {
       flex: 1,
       fontSize: 15,
-      color: "#374151",
+      color: theme.colors.text,
       fontFamily: "Inter-Regular",
       lineHeight: 22,
     },
     completeButton: {
-      backgroundColor: "#F1F5F9",
+      backgroundColor: theme.colors.surface,
       borderRadius: 12,
       paddingVertical: 12,
       paddingHorizontal: 20,
       alignItems: "center",
       borderWidth: 1,
-      borderColor: "#E2E8F0",
+      borderColor: theme.colors.border,
     },
     completeButtonText: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#374151",
+      color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
     },
     resourcesSection: {
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderRadius: 20,
       padding: 20,
       marginBottom: 20,
       borderWidth: 1,
-      borderColor: "#E2E8F0",
-      shadowColor: "#000",
+      borderColor: theme.colors.border,
+      shadowColor: theme.colors.text,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 8,
@@ -932,7 +973,7 @@ export default function BaseLessonScreen() {
     sectionTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-Bold",
       marginBottom: 16,
     },
@@ -941,7 +982,7 @@ export default function BaseLessonScreen() {
       alignItems: "center",
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderBottomColor: "#F1F5F9",
+      borderBottomColor: theme.colors.border,
     },
     resourceIcon: {
       marginRight: 12,
@@ -952,19 +993,19 @@ export default function BaseLessonScreen() {
     resourceTitle: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-SemiBold",
     },
     resourceType: {
       fontSize: 12,
-      color: "#64748B",
+      color: theme.colors.textSecondary,
       fontFamily: "Inter-Regular",
       marginTop: 2,
     },
     startButton: {
       borderRadius: 20,
       overflow: "hidden",
-      shadowColor: "#000",
+      shadowColor: theme.colors.primary,
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: 0.15,
       shadowRadius: 16,
@@ -982,7 +1023,7 @@ export default function BaseLessonScreen() {
     startButtonText: {
       fontSize: 16,
       fontWeight: "700",
-      color: "white",
+      color: theme.colors.background,
       fontFamily: "Inter-Bold",
     },
   });
@@ -995,7 +1036,11 @@ export default function BaseLessonScreen() {
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={20} color="#64748B" />
+            <Ionicons
+              name="arrow-back"
+              size={20}
+              color={theme.colors.textSecondary}
+            />
           </TouchableOpacity>
           <View style={styles.headerContent}>
             <Text style={styles.title}>{lessonContent.title}</Text>
@@ -1013,7 +1058,7 @@ export default function BaseLessonScreen() {
           <View style={styles.videoSection}>
             <View style={styles.videoHeader}>
               <View style={styles.videoIcon}>
-                <Ionicons name="play" size={24} color="#EF4444" />
+                <Ionicons name="play" size={24} color={theme.colors.error} />
               </View>
               <View style={styles.videoInfo}>
                 <Text style={styles.videoTitle}>Watch Video Lesson</Text>
@@ -1025,10 +1070,14 @@ export default function BaseLessonScreen() {
               onPress={handleWatchVideo}
             >
               <LinearGradient
-                colors={["#EF4444", "#DC2626"]}
+                colors={[theme.colors.error, theme.colors.error + "80"]}
                 style={styles.watchButtonGradient}
               >
-                <Ionicons name="play" size={16} color="white" />
+                <Ionicons
+                  name="play"
+                  size={16}
+                  color={theme.colors.background}
+                />
                 <Text style={styles.watchButtonText}>Watch Now</Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -1068,25 +1117,35 @@ export default function BaseLessonScreen() {
           <View style={styles.resourcesSection}>
             <Text style={styles.sectionTitle}>Study Resources</Text>
             {lessonContent.resourceIds.length > 0 ? (
-              lessonContent.resourceIds.map((resourceId: string, index: number) => (
-                <TouchableOpacity
-                  key={resourceId}
-                  style={styles.resourceItem}
-                  onPress={() => handleResourcePress(resourceId)}
-                >
-                  <Ionicons
-                    name="document-text"
-                    size={20}
-                    color="#F59E0B"
-                    style={styles.resourceIcon}
-                  />
-                  <View style={styles.resourceInfo}>
-                    <Text style={styles.resourceTitle}>Resource {index + 1}</Text>
-                    <Text style={styles.resourceType}>Study Material • PDF</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-                </TouchableOpacity>
-              ))
+              lessonContent.resourceIds.map(
+                (resourceId: string, index: number) => (
+                  <TouchableOpacity
+                    key={resourceId}
+                    style={styles.resourceItem}
+                    onPress={() => handleResourcePress(resourceId)}
+                  >
+                    <Ionicons
+                      name="document-text"
+                      size={20}
+                      color={theme.colors.warning}
+                      style={styles.resourceIcon}
+                    />
+                    <View style={styles.resourceInfo}>
+                      <Text style={styles.resourceTitle}>
+                        Resource {index + 1}
+                      </Text>
+                      <Text style={styles.resourceType}>
+                        Study Material • PDF
+                      </Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={theme.colors.textSecondary}
+                    />
+                  </TouchableOpacity>
+                )
+              )
             ) : (
               <Text style={styles.prerequisiteText}>
                 No additional resources available for this lesson.
@@ -1102,10 +1161,10 @@ export default function BaseLessonScreen() {
           onPress={handleStartMathLesson}
         >
           <LinearGradient
-            colors={["#3B82F6", "#1D4ED8"]}
+            colors={[theme.colors.primary, theme.colors.primary + "80"]}
             style={styles.startButtonGradient}
           >
-            <Ionicons name="school" size={20} color="white" />
+            <Ionicons name="school" size={20} color={theme.colors.background} />
             <Text style={styles.startButtonText}>Start Interactive Lesson</Text>
           </LinearGradient>
         </TouchableOpacity>
