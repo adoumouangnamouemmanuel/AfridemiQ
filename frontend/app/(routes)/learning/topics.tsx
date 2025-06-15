@@ -290,7 +290,7 @@ const ALL_TOPICS = {
       },
       progress: 35,
       isUnlocked: true,
-      hasLessons: false,
+      hasLessons: true,
     },
   ],
 };
