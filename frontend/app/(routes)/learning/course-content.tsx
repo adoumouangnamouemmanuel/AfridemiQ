@@ -1030,7 +1030,7 @@ export default function CourseContentScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <TouchableOpacity
