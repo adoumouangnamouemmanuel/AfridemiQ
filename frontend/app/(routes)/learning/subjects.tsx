@@ -14,6 +14,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { useTheme } from "../../../src/utils/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -133,6 +134,7 @@ export default function SubjectsScreen() {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
+  const { theme } = useTheme();
 
   // TODO: Connect to backend API
   // TODO: Add actual navigation hooks
@@ -241,14 +243,14 @@ export default function SubjectsScreen() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: "#F8FAFC",
+      backgroundColor: theme.colors.background,
     },
     header: {
       paddingHorizontal: 20,
       paddingVertical: 16,
-      backgroundColor: "white",
+      backgroundColor: theme.colors.surface,
       borderBottomWidth: 1,
-      borderBottomColor: "#E2E8F0",
+      borderBottomColor: theme.colors.border,
     },
     headerTop: {
       flexDirection: "row",
@@ -263,12 +265,12 @@ export default function SubjectsScreen() {
     title: {
       fontSize: 28,
       fontWeight: "800",
-      color: "#1E293B",
+      color: theme.colors.text,
       fontFamily: "Inter-ExtraBold",
     },
     viewToggle: {
       flexDirection: "row",
-      backgroundColor: "#F1F5F9",
+      backgroundColor: theme.colors.surface,
       borderRadius: 8,
       padding: 2,
     },
@@ -278,8 +280,8 @@ export default function SubjectsScreen() {
       borderRadius: 6,
     },
     activeViewButton: {
-      backgroundColor: "white",
-      shadowColor: "#000",
+      backgroundColor: theme.colors.background,
+      shadowColor: theme.colors.text,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.1,
       shadowRadius: 2,
@@ -293,9 +295,9 @@ export default function SubjectsScreen() {
       paddingHorizontal: 16,
       paddingVertical: 8,
       borderRadius: 20,
-      backgroundColor: "#F1F5F9",
+      backgroundColor: theme.colors.surface,
       borderWidth: 1,
-      borderColor: "#E2E8F0",
+      borderColor: theme.colors.border,
     },
     activeFilterChip: {
       backgroundColor: "#3B82F6",
@@ -319,7 +321,7 @@ export default function SubjectsScreen() {
       marginBottom: 16,
       borderRadius: 24,
       overflow: "hidden",
-      shadowColor: "#000",
+      shadowColor: theme.colors.text,
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.15,
       shadowRadius: 20,
@@ -416,7 +418,7 @@ export default function SubjectsScreen() {
       fontFamily: "Inter-SemiBold",
     },
     availableBadge: {
-      backgroundColor: "#10B981",
+      backgroundColor: theme.colors.success,
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 16,
@@ -435,12 +437,12 @@ export default function SubjectsScreen() {
     curriculumButton: {
       padding: 8,
       borderRadius: 8,
-      backgroundColor: "#EBF8FF",
+      backgroundColor: theme.colors.surface,
     },
     toolsButton: {
       padding: 8,
       borderRadius: 8,
-      backgroundColor: "#ECFDF5",
+      backgroundColor: theme.colors.surface,
     },
   });
 
@@ -452,7 +454,7 @@ export default function SubjectsScreen() {
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={20} color="#64748B" />
+            <Ionicons name="arrow-back" size={20} color={theme.colors.textSecondary} />
           </TouchableOpacity>
           <Text style={styles.title}>Subjects</Text>
           <View style={styles.headerActions}>
@@ -460,7 +462,7 @@ export default function SubjectsScreen() {
               style={styles.curriculumButton}
               onPress={() => router.push("/(routes)/learning/curriculum")}
             >
-              <Ionicons name="calendar" size={18} color="#3B82F6" />
+              <Ionicons name="calendar" size={18} color={theme.colors.primary} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.toolsButton}
@@ -468,7 +470,7 @@ export default function SubjectsScreen() {
                 router.push("/(routes)/learning/interactive-tools")
               }
             >
-              <Ionicons name="construct" size={18} color="#10B981" />
+              <Ionicons name="construct" size={18} color={theme.colors.success} />
             </TouchableOpacity>
             <View style={styles.viewToggle}>
               <TouchableOpacity
@@ -481,7 +483,7 @@ export default function SubjectsScreen() {
                 <Ionicons
                   name="grid"
                   size={18}
-                  color={viewMode === "grid" ? "#3B82F6" : "#64748B"}
+                  color={viewMode === "grid" ? theme.colors.primary : theme.colors.textSecondary}
                 />
               </TouchableOpacity>
               <TouchableOpacity
@@ -494,7 +496,7 @@ export default function SubjectsScreen() {
                 <Ionicons
                   name="list"
                   size={18}
-                  color={viewMode === "list" ? "#3B82F6" : "#64748B"}
+                  color={viewMode === "list" ? theme.colors.primary : theme.colors.textSecondary}
                 />
               </TouchableOpacity>
             </View>
