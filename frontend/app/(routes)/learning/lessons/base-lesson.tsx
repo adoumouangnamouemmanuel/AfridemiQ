@@ -723,6 +723,7 @@ export default function BaseLessonScreen() {
       shadowOpacity: 0.15,
       shadowRadius: 16,
       elevation: 12,
+      margin: 20
     },
     startButtonGradient: {
       paddingVertical: 18,
@@ -839,23 +840,20 @@ export default function BaseLessonScreen() {
               </TouchableOpacity>
             ))}
           </View>
-
-          <TouchableOpacity
-            style={styles.startButton}
-            onPress={handleStartMathLesson}
-          >
-            <LinearGradient
-              colors={["#3B82F6", "#1D4ED8"]}
-              style={styles.startButtonGradient}
-            >
-              <Ionicons name="school" size={20} color="white" />
-              <Text style={styles.startButtonText}>
-                Start Interactive Lesson
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
         </View>
       </ScrollView>
+      <TouchableOpacity
+        style={styles.startButton}
+        onPress={handleStartMathLesson}
+      >
+        <LinearGradient
+          colors={["#3B82F6", "#1D4ED8"]}
+          style={styles.startButtonGradient}
+        >
+          <Ionicons name="school" size={20} color="white" />
+          <Text style={styles.startButtonText}>Start Interactive Lesson</Text>
+        </LinearGradient>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
