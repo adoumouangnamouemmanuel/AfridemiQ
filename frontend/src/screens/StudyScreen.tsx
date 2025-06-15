@@ -1,118 +1,145 @@
 "use client";
 
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
   View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Dimensions,
+  StyleSheet,
 } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSpring,
-} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import SubjectProgressCard from "../components/SubjectProgressCard";
-import subjectsData from "../data/subjects.json";
-import topicsData from "../data/topics.json";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, { FadeIn, SlideInUp } from "react-native-reanimated";
 import { useTheme } from "../utils/ThemeContext";
-import { useUser } from "../utils/UserContext";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+// Quick link cards data
+const QUICK_LINKS = [
+  {
+    id: "subjects",
+    title: "Subjects",
+    subtitle: "12 subjects",
+    icon: "library",
+    color: "#667eea",
+    gradient: ["#667eea", "#764ba2"],
+    route: "/(routes)/learning/subjects",
+  },
+  {
+    id: "notes",
+    title: "Notes",
+    subtitle: "45 notes",
+    icon: "document-text",
+    color: "#4ECDC4",
+    gradient: ["#4ECDC4", "#44A08D"],
+    route: "/(routes)/learning/notes",
+  },
+  {
+    id: "videos",
+    title: "Videos",
+    subtitle: "28 videos",
+    icon: "play-circle",
+    color: "#FF6B6B",
+    gradient: ["#FF6B6B", "#FF8E53"],
+    route: "/(routes)/learning/videos",
+  },
+  {
+    id: "past-papers",
+    title: "Past Papers",
+    subtitle: "15 papers",
+    icon: "document",
+    color: "#45B7D1",
+    gradient: ["#45B7D1", "#96C93D"],
+    route: "/(routes)/learning/past-papers",
+  },
+  {
+    id: "resources",
+    title: "Resources",
+    subtitle: "32 resources",
+    icon: "folder",
+    color: "#96CEB4",
+    gradient: ["#96CEB4", "#FFECD2"],
+    route: "/(routes)/learning/resources",
+  },
+  {
+    id: "bookmarks",
+    title: "Bookmarks",
+    subtitle: "8 saved",
+    icon: "bookmark",
+    color: "#FECA57",
+    gradient: ["#FECA57", "#FF9FF3"],
+    route: "/(routes)/learning/bookmarks",
+  },
+  {
+    id: "curriculum",
+    title: "Curriculum",
+    subtitle: "View syllabus",
+    icon: "school",
+    color: "#A8E6CF",
+    gradient: ["#A8E6CF", "#88D8C0"],
+    route: "/(routes)/learning/curriculum",
+  },
+  {
+    id: "tools",
+    title: "Tools",
+    subtitle: "Interactive",
+    icon: "construct",
+    color: "#FFB6C1",
+    gradient: ["#FFB6C1", "#FFA07A"],
+    route: "/(routes)/learning/interactive-tools",
+  },
+];
+
+// Recent activity data
+const RECENT_ACTIVITIES = [
+  {
+    id: "1",
+    type: "lesson",
+    title: "Quadratic Equations",
+    subject: "Mathematics",
+    time: "2 hours ago",
+    icon: "calculator",
+    color: "#667eea",
+  },
+  {
+    id: "2",
+    type: "note",
+    title: "Physics Laws Summary",
+    subject: "Physics",
+    time: "5 hours ago",
+    icon: "document-text",
+    color: "#4ECDC4",
+  },
+  {
+    id: "3",
+    type: "video",
+    title: "Cell Division Process",
+    subject: "Biology",
+    time: "1 day ago",
+    icon: "play-circle",
+    color: "#FF6B6B",
+  },
+];
 
 export default function StudyScreen() {
-  const { theme } = useTheme();
-  const { user } = useUser();
+  const { theme, isDark } = useTheme();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("all");
 
-  const filters = [
-    { id: "all", label: "All Subjects", icon: "apps" },
-    { id: "in_progress", label: "In Progress", icon: "play-circle" },
-    { id: "completed", label: "Completed", icon: "checkmark-circle" },
-    { id: "not_started", label: "Not Started", icon: "ellipse-outline" },
-  ];
-
-  const getSubjectProgress = (subjectId: string) => {
-    const subjectTopics = topicsData.filter(
-      (topic) => topic.subjectId === subjectId
-    );
-    const completedTopics = subjectTopics.filter((topic) => topic.completed);
-    const totalTopics = subjectTopics?.length;
-    const progress =
-      totalTopics > 0 ? (completedTopics?.length / totalTopics) * 100 : 0;
-
-    return {
-      progress,
-      totalTopics,
-      completedTopics: completedTopics?.length,
-    };
+  const handleQuickLinkPress = (route: string) => {
+    // TODO: Connect to actual navigation
+    router.push(route as any);
   };
 
-  const getFilteredSubjects = () => {
-    let filtered = subjectsData.filter((subject) => {
-      // Filter by search query
-      if (
-        searchQuery &&
-        !subject.name.toLowerCase().includes(searchQuery.toLowerCase())
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-
-    // Filter by progress status
-    if (selectedFilter !== "all") {
-      filtered = filtered.filter((subject) => {
-        const { progress } = getSubjectProgress(subject.id);
-
-        switch (selectedFilter) {
-          case "completed":
-            return progress === 100;
-          case "in_progress":
-            return progress > 0 && progress < 100;
-          case "not_started":
-            return progress === 0;
-          default:
-            return true;
-        }
-      });
-    }
-
-    return filtered;
-  };
-
-  const handleSubjectPress = (subjectId: string) => {
-    router.push(`/(routes)/subject/${subjectId}`);
-  };
-
-  const AnimatedCard = ({
-    children,
-    delay = 0,
-  }: {
-    children: React.ReactNode;
-    delay?: number;
-  }) => {
-    const translateY = useSharedValue(50);
-    const opacity = useSharedValue(0);
-
-    React.useEffect(() => {
-      translateY.value = withDelay(delay, withSpring(0));
-      opacity.value = withDelay(delay, withSpring(1));
-    }, [delay, opacity, translateY]);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-      transform: [{ translateY: translateY.value }],
-      opacity: opacity.value,
-    }));
-
-    return <Animated.View style={animatedStyle}>{children}</Animated.View>;
+  const handleActivityPress = (activity: any) => {
+    // TODO: Navigate to specific activity
+    router.push(
+      `/activity/${activity.type}/${activity.id}` as any);
   };
 
   const styles = StyleSheet.create({
@@ -120,259 +147,510 @@ export default function StudyScreen() {
       flex: 1,
       backgroundColor: theme.colors.background,
     },
+    // Fixed Header
     header: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.lg,
+      backgroundColor: theme.colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+      paddingHorizontal: 24,
+      paddingVertical: 10,
     },
-    title: {
-      fontSize: 28,
-      fontWeight: "bold",
+    headerTop: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 10,
+    },
+    headerLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    backButton: {
+      marginRight: 16,
+      width: 40,
+      height: 40,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    headerTextContainer: {
+      flex: 1,
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontWeight: "800",
       color: theme.colors.text,
-      marginBottom: theme.spacing.sm,
+      fontFamily: "Inter-ExtraBold",
     },
-    subtitle: {
-      fontSize: 16,
+    headerSubtitle: {
+      fontSize: 14,
       color: theme.colors.textSecondary,
-      marginBottom: theme.spacing.lg,
+      marginTop: 4,
+      fontFamily: "Inter-Medium",
     },
+    headerActions: {
+      flexDirection: "row",
+      gap: 12,
+    },
+    headerActionButton: {
+      width: 40,
+      height: 40,
+      backgroundColor: theme.colors.primary + "20",
+      borderRadius: 20,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    // Search Bar
     searchContainer: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.md,
-      paddingHorizontal: theme.spacing.md,
-      marginBottom: theme.spacing.lg,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    searchIcon: {
-      marginRight: theme.spacing.sm,
+      backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+      borderRadius: 50,
+      paddingHorizontal: 16,
+      paddingVertical: 2,
+      marginBottom: 10,
     },
     searchInput: {
       flex: 1,
+      marginLeft: 12,
+      color: theme.colors.text,
       fontSize: 16,
-      color: theme.colors.text,
-      paddingVertical: theme.spacing.md,
+      fontFamily: "Inter-Regular",
     },
-    filtersContainer: {
-      marginBottom: theme.spacing.lg,
+    clearButton: {
+      padding: 4,
     },
-    filtersScroll: {
-      paddingHorizontal: theme.spacing.lg,
-    },
-    filterButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.lg,
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: theme.spacing.sm,
-      marginRight: theme.spacing.sm,
-      borderWidth: 2,
-      borderColor: theme.colors.border,
-    },
-    filterButtonActive: {
-      backgroundColor: theme.colors.primary,
-      borderColor: theme.colors.primary,
-    },
-    filterIcon: {
-      marginRight: theme.spacing.xs,
-    },
-    filterText: {
-      fontSize: 14,
-      fontWeight: "500",
-      color: theme.colors.text,
-    },
-    filterTextActive: {
-      color: "white",
-    },
-    content: {
+    // Scrollable Content
+    scrollContent: {
       flex: 1,
-      paddingHorizontal: theme.spacing.lg,
     },
-    statsContainer: {
+    contentContainer: {
+      paddingBottom: 20,
+    },
+    section: {
+      marginHorizontal: 24,
+      marginTop: 24,
+    },
+    // Quick Stats
+    statsCard: {
+      borderRadius: 16,
+      padding: 24,
+      marginBottom: 8,
+    },
+    statsTitle: {
+      color: "white",
+      fontSize: 18,
+      fontWeight: "600",
+      marginBottom: 16,
+      fontFamily: "Inter-SemiBold",
+    },
+    statsRow: {
       flexDirection: "row",
       justifyContent: "space-between",
-      marginBottom: theme.spacing.lg,
     },
-    statCard: {
-      flex: 1,
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.md,
-      padding: theme.spacing.md,
-      marginHorizontal: theme.spacing.xs,
+    statItem: {
       alignItems: "center",
-      borderWidth: 1,
-      borderColor: theme.colors.border,
     },
     statValue: {
-      fontSize: 20,
-      fontWeight: "bold",
-      color: theme.colors.text,
+      color: "white",
+      fontSize: 24,
+      fontWeight: "700",
+      fontFamily: "Inter-Bold",
     },
     statLabel: {
+      color: "rgba(255,255,255,0.8)",
       fontSize: 12,
-      color: theme.colors.textSecondary,
+      fontFamily: "Inter-Regular",
       marginTop: 4,
-      textAlign: "center",
+    },
+    // Section Headers
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 16,
     },
     sectionTitle: {
       fontSize: 20,
-      fontWeight: "600",
+      fontWeight: "700",
       color: theme.colors.text,
-      marginBottom: theme.spacing.md,
+      fontFamily: "Inter-Bold",
     },
-    emptyState: {
+    viewAllButton: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
+    },
+    viewAllText: {
+      color: "white",
+      fontSize: 12,
+      fontWeight: "600",
+      fontFamily: "Inter-SemiBold",
+    },
+    // Quick Links Grid
+    quickLinksGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+    },
+    quickLinkCard: {
+      width: (SCREEN_WIDTH - 60) / 2,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 16,
+      minHeight: 120,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: isDark ? 0.3 : 0.1,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    quickLinkIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 12,
       alignItems: "center",
-      paddingVertical: theme.spacing.xxl,
+      justifyContent: "center",
+      marginBottom: 12,
     },
-    emptyStateIcon: {
-      marginBottom: theme.spacing.md,
+    quickLinkTitle: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "600",
+      marginBottom: 4,
+      fontFamily: "Inter-SemiBold",
     },
-    emptyStateText: {
+    quickLinkSubtitle: {
+      color: theme.colors.textSecondary,
+      fontSize: 14,
+      fontFamily: "Inter-Regular",
+    },
+    // Recent Activity
+    activityCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      overflow: "hidden",
+    },
+    activityItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 16,
+    },
+    activityItemBorder: {
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    activityIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 16,
+    },
+    activityContent: {
+      flex: 1,
+    },
+    activityTitle: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "600",
+      marginBottom: 4,
+      fontFamily: "Inter-SemiBold",
+    },
+    activitySubtitle: {
+      color: theme.colors.textSecondary,
+      fontSize: 14,
+      fontFamily: "Inter-Regular",
+    },
+    // Study Streak
+    streakCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 16,
+      padding: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    streakHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 16,
+    },
+    streakTitle: {
       fontSize: 18,
       fontWeight: "600",
       color: theme.colors.text,
-      marginBottom: theme.spacing.sm,
+      fontFamily: "Inter-SemiBold",
     },
-    emptyStateSubtext: {
+    streakBadge: {
+      backgroundColor: "#FFF3CD",
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 20,
+    },
+    streakBadgeText: {
+      color: "#856404",
       fontSize: 14,
+      fontWeight: "600",
+      fontFamily: "Inter-SemiBold",
+    },
+    streakDays: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 16,
+    },
+    streakDay: {
+      alignItems: "center",
+    },
+    streakDayCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 8,
+    },
+    streakDayActive: {
+      backgroundColor: "#10B981",
+    },
+    streakDayInactive: {
+      backgroundColor: theme.colors.border,
+    },
+    streakDayText: {
+      fontSize: 12,
+      fontWeight: "600",
+      fontFamily: "Inter-SemiBold",
+    },
+    streakDayTextActive: {
+      color: "white",
+    },
+    streakDayTextInactive: {
       color: theme.colors.textSecondary,
+    },
+    streakMessage: {
+      color: theme.colors.textSecondary,
+      fontSize: 14,
       textAlign: "center",
-      lineHeight: 20,
+      fontFamily: "Inter-Regular",
     },
   });
 
-  const filteredSubjects = getFilteredSubjects();
-
-  // Calculate overall stats
-  const totalSubjects = subjectsData.filter((s) =>
-    user?.selectedExam ? s.examIds.includes(user.selectedExam) : true
-  )?.length;
-  const completedSubjects = filteredSubjects.filter(
-    (s) => getSubjectProgress(s.id).progress === 100
-  )?.length;
-  const inProgressSubjects = filteredSubjects.filter((s) => {
-    const progress = getSubjectProgress(s.id).progress;
-    return progress > 0 && progress < 100;
-  })?.length;
-
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      {/* Fixed Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Study</Text>
-        <Text style={styles.subtitle}>
-          Master your subjects and prepare for success
-        </Text>
+        <View style={styles.headerTop}>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>Study Hub</Text>
+            <Text style={styles.headerSubtitle}>Your learning dashboard</Text>
+          </View>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.headerActionButton}>
+              <Ionicons
+                name="notifications-outline"
+                size={20}
+                color={theme.colors.primary}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.headerActionButton}>
+              <Ionicons
+                name="person-outline"
+                size={20}
+                color={theme.colors.primary}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
 
+        {/* Search Bar */}
         <View style={styles.searchContainer}>
           <Ionicons
             name="search"
             size={20}
             color={theme.colors.textSecondary}
-            style={styles.searchIcon}
           />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search subjects..."
+            placeholder="Search subjects, notes, videos..."
             placeholderTextColor={theme.colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filtersContainer}
-          contentContainerStyle={styles.filtersScroll}
-        >
-          {filters.map((filter) => (
+          {searchQuery.length > 0 && (
             <TouchableOpacity
-              key={filter.id}
-              style={[
-                styles.filterButton,
-                selectedFilter === filter.id && styles.filterButtonActive,
-              ]}
-              onPress={() => setSelectedFilter(filter.id)}
+              style={styles.clearButton}
+              onPress={() => setSearchQuery("")}
             >
               <Ionicons
-                name={filter.icon as any}
-                size={16}
-                color={
-                  selectedFilter === filter.id
-                    ? "white"
-                    : theme.colors.textSecondary
-                }
-                style={styles.filterIcon}
+                name="close-circle"
+                size={20}
+                color={theme.colors.textSecondary}
               />
-              <Text
-                style={[
-                  styles.filterText,
-                  selectedFilter === filter.id && styles.filterTextActive,
-                ]}
-              >
-                {filter.label}
-              </Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+          )}
+        </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <AnimatedCard delay={100}>
-          <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{totalSubjects}</Text>
-              <Text style={styles.statLabel}>Total Subjects</Text>
+      {/* Scrollable Content */}
+      <ScrollView
+        style={styles.scrollContent}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Quick Stats */}
+        <Animated.View entering={FadeIn.delay(100)} style={styles.section}>
+          <LinearGradient
+            colors={["#667eea", "#764ba2"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.statsCard}
+          >
+            <Text style={styles.statsTitle}>Today&apos;s Progress</Text>
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>4</Text>
+                <Text style={styles.statLabel}>Lessons</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>2h</Text>
+                <Text style={styles.statLabel}>Study Time</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>85%</Text>
+                <Text style={styles.statLabel}>Avg Score</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>12</Text>
+                <Text style={styles.statLabel}>Streak</Text>
+              </View>
             </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{completedSubjects}</Text>
-              <Text style={styles.statLabel}>Completed</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{inProgressSubjects}</Text>
-              <Text style={styles.statLabel}>In Progress</Text>
-            </View>
+          </LinearGradient>
+        </Animated.View>
+
+        {/* Quick Links Grid */}
+        <Animated.View entering={FadeIn.delay(200)} style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Quick Access</Text>
           </View>
-        </AnimatedCard>
+          <View style={styles.quickLinksGrid}>
+            {QUICK_LINKS.map((link, index) => (
+              <Animated.View
+                key={link.id}
+                entering={SlideInUp.delay(300 + index * 50)}
+              >
+                <TouchableOpacity
+                  style={styles.quickLinkCard}
+                  onPress={() => handleQuickLinkPress(link.route)}
+                >
+                  <LinearGradient
+                    colors={link.gradient as [string, string]}
+                    style={styles.quickLinkIcon}
+                  >
+                    <Ionicons name={link.icon as any} size={24} color="white" />
+                  </LinearGradient>
+                  <Text style={styles.quickLinkTitle}>{link.title}</Text>
+                  <Text style={styles.quickLinkSubtitle}>{link.subtitle}</Text>
+                </TouchableOpacity>
+              </Animated.View>
+            ))}
+          </View>
+        </Animated.View>
 
-        <Text style={styles.sectionTitle}>Your Subjects</Text>
+        {/* Recent Activity */}
+        <Animated.View entering={FadeIn.delay(400)} style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recent Activity</Text>
+            <TouchableOpacity style={styles.viewAllButton} onPress={() => router.push("/(routes)/learning/recent-activities")}>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
 
-        {filteredSubjects?.length === 0 ? (
-          <AnimatedCard delay={200}>
-            <View style={styles.emptyState}>
-              <View style={styles.emptyStateIcon}>
+          <View style={styles.activityCard}>
+            {RECENT_ACTIVITIES.map((activity, index) => (
+              <TouchableOpacity
+                key={activity.id}
+                style={[
+                  styles.activityItem,
+                  index !== RECENT_ACTIVITIES.length - 1 &&
+                    styles.activityItemBorder,
+                ]}
+                onPress={() => handleActivityPress(activity)}
+              >
+                <View
+                  style={[
+                    styles.activityIcon,
+                    { backgroundColor: activity.color + "20" },
+                  ]}
+                >
+                  <Ionicons
+                    name={activity.icon as any}
+                    size={20}
+                    color={activity.color}
+                  />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={styles.activityTitle}>{activity.title}</Text>
+                  <Text style={styles.activitySubtitle}>
+                    {activity.subject} • {activity.time}
+                  </Text>
+                </View>
                 <Ionicons
-                  name="search-outline"
-                  size={48}
+                  name="chevron-forward"
+                  size={20}
                   color={theme.colors.textSecondary}
                 />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Animated.View>
+
+        {/* Study Streak */}
+        <Animated.View entering={FadeIn.delay(500)} style={styles.section}>
+          <View style={styles.streakCard}>
+            <View style={styles.streakHeader}>
+              <Text style={styles.streakTitle}>Study Streak</Text>
+              <View style={styles.streakBadge}>
+                <Text style={styles.streakBadgeText}>🔥 12 days</Text>
               </View>
-              <Text style={styles.emptyStateText}>No subjects found</Text>
-              <Text style={styles.emptyStateSubtext}>
-                Try adjusting your search or filters to find what you're looking
-                for.
-              </Text>
             </View>
-          </AnimatedCard>
-        ) : (
-          filteredSubjects.map((subject, index) => {
-            const { progress, totalTopics, completedTopics } =
-              getSubjectProgress(subject.id);
-            return (
-              <AnimatedCard key={subject.id} delay={200 + index * 100}>
-                <SubjectProgressCard
-                  subject={subject}
-                  progress={progress}
-                  totalTopics={totalTopics}
-                  completedTopics={completedTopics}
-                  onPress={() => handleSubjectPress(subject.id)}
-                />
-              </AnimatedCard>
-            );
-          })
-        )}
+
+            <View style={styles.streakDays}>
+              {["MO", "TU", "WE", "TH", "FR", "SA", "SU"].map((day, index) => (
+                <View key={day} style={styles.streakDay}>
+                  <View
+                    style={[
+                      styles.streakDayCircle,
+                      index < 5
+                        ? styles.streakDayActive
+                        : styles.streakDayInactive,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.streakDayText,
+                        index < 5
+                          ? styles.streakDayTextActive
+                          : styles.streakDayTextInactive,
+                      ]}
+                    >
+                      {day}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+
+            <Text style={styles.streakMessage}>
+              Keep it up! You&apos;re doing great this week.
+            </Text>
+          </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
