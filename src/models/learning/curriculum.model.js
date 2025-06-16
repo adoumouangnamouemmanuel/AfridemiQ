@@ -299,6 +299,27 @@ CurriculumSchema.virtual("completionStatus").get(function () {
  */
 CurriculumSchema.pre("save", async function (next) {
   try {
+    // Validate subjects
+    if (this.subjects?.length > 0) {
+      // Add check for circular references
+      const uniqueSubjects = [
+        ...new Set(this.subjects.map((id) => id.toString())),
+      ];
+      if (uniqueSubjects.length !== this.subjects.length) {
+        return next(new Error("Duplicate subjects are not allowed"));
+      }
+
+      const validSubjects = await model("Subject").find({
+        _id: { $in: uniqueSubjects },
+        isActive: true,
+      });
+      if (validSubjects.length !== uniqueSubjects.length) {
+        return next(
+          new Error("Certains subjectIds ne sont pas valides ou inactifs")
+        );
+      }
+    }
+    
     // Validate academic year dates
     if (this.academicYear?.startDate >= this.academicYear?.endDate) {
       return next(new Error("La date de début doit être antérieure à la date de fin"));
