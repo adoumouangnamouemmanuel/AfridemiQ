@@ -41,7 +41,7 @@ import { useCommonStyles } from "../../../src/styles/commonEditStyle";
 
 // Static options for country and gender (TODO: Fetch from backend or config)
 const COUNTRY_OPTIONS = [
-  { label: "Chad", value: "Chad" },
+  { label: "Tchad", value: "Tchad" },
   { label: "Cameroon", value: "Cameroon" },
   { label: "Nigeria", value: "Nigeria" },
 ];
