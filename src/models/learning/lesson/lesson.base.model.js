@@ -28,6 +28,61 @@ const FeedbackSchema = new Schema({
   },
 });
 
+// Lesson Tracking Subschema for aggregate statistics
+const LessonTrackingSchema = new Schema({
+  totalAttempts: {
+    type: Number,
+    default: 0,
+    min: [0, "Total attempts cannot be negative"],
+  },
+  totalCompletions: {
+    type: Number,
+    default: 0,
+    min: [0, "Total completions cannot be negative"],
+  },
+  averageCompletionTime: {
+    type: Number,
+    default: 0,
+    min: [0, "Average completion time cannot be negative"],
+  },
+  completionRate: {
+    type: Number,
+    default: 0,
+    min: [0, "Completion rate cannot be negative"],
+    max: [100, "Completion rate cannot exceed 100"],
+  },
+  averageScore: {
+    type: Number,
+    default: 0,
+    min: [0, "Average score cannot be negative"],
+    max: [100, "Average score cannot exceed 100"],
+  },
+  totalStudyTime: {
+    type: Number,
+    default: 0,
+    min: [0, "Total study time cannot be negative"],
+  },
+  lastUpdated: {
+    type: Date,
+    default: Date.now,
+  },
+  completedBy: [{ 
+    type: Schema.Types.ObjectId, 
+    ref: "User" 
+  }],
+  difficultyRating: {
+    type: Number,
+    default: 0,
+    min: [0, "Difficulty rating cannot be negative"],
+    max: [10, "Difficulty rating cannot exceed 10"],
+  },
+  averageHintsUsed: {
+    type: Number,
+    default: 0,
+    min: [0, "Average hints used cannot be negative"],
+  },
+});
+
 // Lesson Base Schema
 const LessonBaseSchema = new Schema(
   {
@@ -92,6 +147,11 @@ const LessonBaseSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    // Lesson tracking for aggregate statistics
+    progressTracking: {
+      type: LessonTrackingSchema,
+      default: () => ({}),
+    },
     feedback: [FeedbackSchema],
     metadata: {
       createdBy: {
@@ -117,6 +177,112 @@ const LessonBaseSchema = new Schema(
 LessonBaseSchema.index({ topicId: 1 });
 LessonBaseSchema.index({ resourceIds: 1 });
 LessonBaseSchema.index({ exerciseIds: 1 });
+LessonBaseSchema.index({ "progressTracking.completionRate": -1 });
+LessonBaseSchema.index({ "progressTracking.averageScore": -1 });
+LessonBaseSchema.index({ "progressTracking.completedBy": 1 });
+
+// Instance methods for tracking updates
+LessonBaseSchema.methods.updateProgressTracking = async function(userProgress) {
+  try {
+    const tracking = this.progressTracking;
+    
+    // Update completion tracking
+    if (userProgress.isCompleted && !tracking.completedBy.includes(userProgress.userId)) {
+      tracking.completedBy.push(userProgress.userId);
+      tracking.totalCompletions += 1;
+    }
+    
+    // Update attempts
+    if (userProgress.isNewAttempt) {
+      tracking.totalAttempts += 1;
+    }
+    
+    // Recalculate averages based on all user progress for this lesson
+    const UserProgress = mongoose.model('UserProgress');
+    const allProgress = await UserProgress.find({
+      'lessonProgress.lessonId': this._id,
+      'lessonProgress.status': { $in: ['completed', 'mastered'] }
+    });
+    
+    if (allProgress.length > 0) {
+      const lessonProgressData = allProgress.flatMap(up => 
+        up.lessonProgress.filter(lp => 
+          lp.lessonId.toString() === this._id.toString() && 
+          (lp.status === 'completed' || lp.status === 'mastered')
+        )
+      );
+      
+      if (lessonProgressData.length > 0) {
+        // Calculate average score
+        const validScores = lessonProgressData.filter(lp => lp.score !== undefined);
+        if (validScores.length > 0) {
+          tracking.averageScore = Math.round(
+            validScores.reduce((sum, lp) => sum + lp.score, 0) / validScores.length
+          );
+        }
+        
+        // Calculate average completion time
+        const validTimes = lessonProgressData.filter(lp => lp.timeSpent > 0);
+        if (validTimes.length > 0) {
+          tracking.averageCompletionTime = Math.round(
+            validTimes.reduce((sum, lp) => sum + lp.timeSpent, 0) / validTimes.length
+          );
+        }
+        
+        // Calculate total study time
+        tracking.totalStudyTime = lessonProgressData.reduce((sum, lp) => sum + (lp.timeSpent || 0), 0);
+        
+        // Calculate average hints used
+        const validHints = lessonProgressData.filter(lp => lp.hintsUsed !== undefined);
+        if (validHints.length > 0) {
+          tracking.averageHintsUsed = Math.round(
+            (validHints.reduce((sum, lp) => sum + lp.hintsUsed, 0) / validHints.length) * 10
+          ) / 10; // Round to 1 decimal place
+        }
+      }
+    }
+    
+    // Calculate completion rate
+    tracking.completionRate = tracking.totalAttempts > 0 
+      ? Math.round((tracking.totalCompletions / tracking.totalAttempts) * 100)
+      : 0;
+    
+    tracking.lastUpdated = new Date();
+    
+    return this.save();
+  } catch (error) {
+    console.error('Error updating lesson progress tracking:', error);
+    throw error;
+  }
+};
+
+LessonBaseSchema.methods.addUserCompletion = function(userId) {
+  if (!this.progressTracking.completedBy.includes(userId)) {
+    this.progressTracking.completedBy.push(userId);
+    this.progressTracking.totalCompletions += 1;
+    this.progressTracking.lastUpdated = new Date();
+    
+    // Recalculate completion rate
+    if (this.progressTracking.totalAttempts > 0) {
+      this.progressTracking.completionRate = Math.round(
+        (this.progressTracking.totalCompletions / this.progressTracking.totalAttempts) * 100
+      );
+    }
+  }
+  return this;
+};
+
+LessonBaseSchema.methods.incrementAttempts = function() {
+  this.progressTracking.totalAttempts += 1;
+  this.progressTracking.lastUpdated = new Date();
+  
+  // Recalculate completion rate
+  this.progressTracking.completionRate = Math.round(
+    (this.progressTracking.totalCompletions / this.progressTracking.totalAttempts) * 100
+  );
+  
+  return this;
+};
 
 // Pre-save hook for validation
 LessonBaseSchema.pre("save", async function (next) {
@@ -168,6 +334,29 @@ LessonBaseSchema.virtual("completionStatus").get(function () {
   if (completion >= 100) return "completed";
   if (completion > 0) return "in_progress";
   return "not_started";
+});
+
+// Virtual for difficulty assessment
+LessonBaseSchema.virtual("difficultyAssessment").get(function () {
+  const tracking = this.progressTracking;
+  if (!tracking || tracking.totalCompletions < 5) return "insufficient_data";
+  
+  if (tracking.completionRate >= 80 && tracking.averageScore >= 75) return "easy";
+  if (tracking.completionRate >= 60 && tracking.averageScore >= 60) return "moderate";
+  if (tracking.completionRate >= 40 && tracking.averageScore >= 45) return "challenging";
+  return "difficult";
+});
+
+// Virtual for popularity score
+LessonBaseSchema.virtual("popularityScore").get(function () {
+  const tracking = this.progressTracking;
+  if (!tracking) return 0;
+  
+  const completionWeight = tracking.totalCompletions * 2;
+  const ratingWeight = tracking.averageScore / 10;
+  const engagementWeight = tracking.totalStudyTime / 3600; // hours
+  
+  return Math.round((completionWeight + ratingWeight + engagementWeight) * 10) / 10;
 });
 
 module.exports = {
