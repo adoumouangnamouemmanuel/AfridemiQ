@@ -13,6 +13,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useTheme } from "../../../src/utils/ThemeContext";
+import { useTopicsBySubject } from "../../../src/hooks/useTopic";
 
 // Mock topics data for ALL subjects (not just Math)
 const ALL_TOPICS = {
@@ -302,217 +303,7 @@ export default function TopicsScreen() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const { theme } = useTheme();
 
-  // Get topics for the specific subject
-  const subjectTopics = useMemo(() => {
-    return ALL_TOPICS[subjectId as keyof typeof ALL_TOPICS] || [];
-  }, [subjectId]);
-
-  const filteredTopics = useMemo(() => {
-    if (selectedDifficulty === "all") return subjectTopics;
-    return subjectTopics.filter(
-      (topic: (typeof ALL_TOPICS)[keyof typeof ALL_TOPICS][0]) =>
-        topic.difficulty === selectedDifficulty
-    );
-  }, [subjectTopics, selectedDifficulty]);
-
-  const handleTopicPress = (
-    topic: (typeof ALL_TOPICS)[keyof typeof ALL_TOPICS][0]
-  ) => {
-    if (!topic.isUnlocked) {
-      console.log("Topic is locked");
-      return;
-    }
-
-    if (topic.hasLessons) {
-      router.push(
-        `/(routes)/learning/course-content?topicId=${topic._id}&topicName=${topic.name}`
-      );
-    } else {
-      // TODO: Navigate to topic overview or coming soon screen
-      console.log(`${topic.name} lessons coming soon`);
-    }
-  };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "beginner":
-        return theme.colors.success;
-      case "intermediate":
-        return theme.colors.warning;
-      case "advanced":
-        return theme.colors.error;
-      default:
-        return theme.colors.textSecondary;
-    }
-  };
-
-  const renderTopicCard = ({
-    item: topic,
-  }: {
-    item: (typeof ALL_TOPICS)[keyof typeof ALL_TOPICS][0];
-  }) => {
-    return (
-      <Animated.View entering={FadeIn.duration(300)}>
-        <TouchableOpacity
-          style={[styles.topicCard, !topic.isUnlocked && styles.lockedCard]}
-          onPress={() => handleTopicPress(topic)}
-          activeOpacity={topic.isUnlocked ? 0.8 : 1}
-        >
-          <View style={styles.cardHeader}>
-            <View style={styles.topicInfo}>
-              <Text
-                style={[
-                  styles.topicName,
-                  !topic.isUnlocked && styles.lockedText,
-                ]}
-              >
-                {topic.name}
-              </Text>
-              <Text
-                style={[
-                  styles.topicDescription,
-                  !topic.isUnlocked && styles.lockedText,
-                ]}
-              >
-                {topic.description}
-              </Text>
-            </View>
-
-            <View style={styles.headerRight}>
-              {!topic.isUnlocked && (
-                <View style={styles.lockIcon}>
-                  <Ionicons name="lock-closed" size={20} color="#9CA3AF" />
-                </View>
-              )}
-              {topic.hasLessons && topic.isUnlocked && (
-                <View style={styles.availableBadge}>
-                  <Text style={styles.availableText}>Available</Text>
-                </View>
-              )}
-            </View>
-          </View>
-
-          {topic.isUnlocked && (
-            <>
-              <View style={styles.progressSection}>
-                <View style={styles.progressHeader}>
-                  <Text style={styles.progressLabel}>Progress</Text>
-                  <Text style={styles.progressPercentage}>
-                    {topic.progress}%
-                  </Text>
-                </View>
-                <View style={styles.progressBar}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      { width: `${topic.progress}%` },
-                    ]}
-                  />
-                </View>
-              </View>
-
-              <View style={styles.statsRow}>
-                <View style={styles.stat}>
-                  <Ionicons
-                    name="time"
-                    size={16}
-                    color={theme.colors.textSecondary}
-                  />
-                  <Text style={styles.statText}>
-                    {Math.round(topic.estimatedTime / 60)}h
-                  </Text>
-                </View>
-                <View style={styles.stat}>
-                  <Ionicons
-                    name="library"
-                    size={16}
-                    color={theme.colors.textSecondary}
-                  />
-                  <Text style={styles.statText}>
-                    {topic.resourceIds.length} Resources
-                  </Text>
-                </View>
-                <View style={styles.stat}>
-                  <Ionicons name="checkmark-circle" size={16} color="#6B7280" />
-                  <Text style={styles.statText}>
-                    {topic.learningObjectives.length} Goals
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.featuresRow}>
-                {topic.hasPractice && (
-                  <View style={styles.feature}>
-                    <Ionicons
-                      name="create"
-                      size={14}
-                      color={theme.colors.primary}
-                    />
-                    <Text style={styles.featureText}>Practice</Text>
-                  </View>
-                )}
-                {topic.hasNote && (
-                  <View style={styles.feature}>
-                    <Ionicons
-                      name="document-text"
-                      size={14}
-                      color={theme.colors.success}
-                    />
-                    <Text style={styles.featureText}>Notes</Text>
-                  </View>
-                )}
-                {topic.hasStudyMaterial && (
-                  <View style={styles.feature}>
-                    <Ionicons
-                      name="book"
-                      size={14}
-                      color={theme.colors.warning}
-                    />
-                    <Text style={styles.featureText}>Materials</Text>
-                  </View>
-                )}
-              </View>
-            </>
-          )}
-
-          <View style={styles.cardFooter}>
-            <View
-              style={[
-                styles.difficultyBadge,
-                {
-                  backgroundColor: getDifficultyColor(topic.difficulty) + "20",
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.difficultyText,
-                  { color: getDifficultyColor(topic.difficulty) },
-                ]}
-              >
-                {topic.difficulty.charAt(0).toUpperCase() +
-                  topic.difficulty.slice(1)}
-              </Text>
-            </View>
-
-            {topic.prerequisites.length > 0 && (
-              <View style={styles.prerequisitesBadge}>
-                <Ionicons
-                  name="link"
-                  size={12}
-                  color={theme.colors.textSecondary}
-                />
-                <Text style={styles.prerequisitesText}>
-                  {topic.prerequisites.length} Prerequisites
-                </Text>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  };
-
+  // Define styles early with theme context
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -759,13 +550,394 @@ export default function TopicsScreen() {
       textAlign: "center",
       lineHeight: 20,
     },
+    // Loading styles
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 40,
+      backgroundColor: theme.colors.background,
+    },
+    loadingContent: {
+      alignItems: "center",
+      width: "100%",
+    },
+    loadingIconContainer: {
+      marginBottom: 30,
+      padding: 20,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 50,
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    loadingTitle: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: theme.colors.text,
+      fontFamily: "Inter-Bold",
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    loadingSubtitle: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+      fontFamily: "Inter-Regular",
+      textAlign: "center",
+      marginBottom: 40,
+    },
+    loadingDotsContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 8,
+    },
+    loadingDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: theme.colors.primary,
+    },
   });
 
+  // Memoize the options to prevent unnecessary re-renders
+  const topicOptions = useMemo(() => ({
+    difficulty: selectedDifficulty === "all" ? undefined : (selectedDifficulty as any),
+    sortBy: "name" as const,
+    sortOrder: "asc" as const,
+  }), [selectedDifficulty]);
+
+  // Backend integration - use memoized options
+  const {
+    topics: backendTopics,
+    isLoading,
+    error,
+  } = useTopicsBySubject(subjectId as string, topicOptions);
+
+  // Memoize the data processing to prevent unnecessary re-calculations
+  const { topicsData, isBackendData } = useMemo(() => {
+    if (backendTopics && backendTopics.length > 0 && !isLoading && !error) {
+      // Use backend data - transform to match frontend interface
+      const transformedTopics = backendTopics.map((topic) => ({
+        _id: topic._id,
+        name: topic.name,
+        subjectId: topic.subjectId,
+        series: topic.series || ["D"],
+        description: topic.description,
+        difficulty: topic.difficulty,
+        estimatedTime: topic.estimatedTime,
+        estimatedCompletionDate: topic.estimatedCompletionDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        relatedTopics: topic.relatedTopics || [],
+        hasPractice: topic.hasPractice,
+        hasNote: topic.hasNote,
+        hasStudyMaterial: topic.hasStudyMaterial,
+        prerequisites: topic.prerequisites || [],
+        learningObjectives: topic.learningObjectives || [],
+        estimatedTimeToMaster: topic.estimatedTimeToMaster,
+        resourceIds: topic.resourceIds || [],
+        assessmentCriteria: topic.assessmentCriteria || {
+          minimumScore: 70,
+          requiredPracticeQuestions: 30,
+          masteryThreshold: 80,
+        },
+        // Add frontend-specific properties
+        progress: Math.floor(Math.random() * 80) + 10, // Mock progress
+        isUnlocked: true, // All backend topics are unlocked
+        hasLessons: topic.hasStudyMaterial || topic.hasNote, // Has lessons if has materials or notes
+      }));
+
+      return {
+        topicsData: transformedTopics,
+        isBackendData: true,
+      };
+    } else {
+      // Use mock data - get topics for the specific subject
+      const mockTopics = ALL_TOPICS[subjectId as keyof typeof ALL_TOPICS] || [];
+      return {
+        topicsData: mockTopics,
+        isBackendData: false,
+      };
+    }
+  }, [backendTopics, isLoading, error, subjectId]);
+
+  // Log for debugging - exactly like curriculum pattern
+  console.log(
+    "📚 TopicsScreen - Using data source:",
+    isBackendData ? "Backend" : "Mock"
+  );
+  console.log("📚 TopicsScreen - Loading:", isLoading);
+  console.log("📚 TopicsScreen - Error:", error);
+  console.log("📚 TopicsScreen - Subject ID:", subjectId);
+  console.log("📚 TopicsScreen - Found topics:", topicsData.length);
+
+  // Memoize filtered topics to prevent unnecessary re-calculations
+  const filteredTopics = useMemo(() => {
+    if (selectedDifficulty === "all") return topicsData;
+    return topicsData.filter(
+      (topic) => topic.difficulty === selectedDifficulty
+    );
+  }, [topicsData, selectedDifficulty]);
+
+  const handleTopicPress = (topic: any) => {
+    if (!topic.isUnlocked) {
+      console.log("Topic is locked");
+      return;
+    }
+
+    if (topic.hasLessons) {
+      router.push(
+        `/(routes)/learning/course-content?topicId=${topic._id}&topicName=${topic.name}`
+      );
+    } else {
+      // TODO: Navigate to topic overview or coming soon screen
+      console.log(`${topic.name} lessons coming soon`);
+    }
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case "beginner":
+        return theme.colors.success;
+      case "intermediate":
+        return theme.colors.warning;
+      case "advanced":
+        return theme.colors.error;
+      default:
+        return theme.colors.textSecondary;
+    }
+  };
+
+  const renderTopicCard = ({ item: topic }: { item: any }) => {
+    return (
+      <Animated.View entering={FadeIn.duration(300)}>
+        <TouchableOpacity
+          style={[styles.topicCard, !topic.isUnlocked && styles.lockedCard]}
+          onPress={() => handleTopicPress(topic)}
+          activeOpacity={topic.isUnlocked ? 0.8 : 1}
+        >
+          <View style={styles.cardHeader}>
+            <View style={styles.topicInfo}>
+              <Text
+                style={[
+                  styles.topicName,
+                  !topic.isUnlocked && styles.lockedText,
+                ]}
+              >
+                {topic.name}
+              </Text>
+              <Text
+                style={[
+                  styles.topicDescription,
+                  !topic.isUnlocked && styles.lockedText,
+                ]}
+              >
+                {topic.description}
+              </Text>
+            </View>
+
+            <View style={styles.headerRight}>
+              {!topic.isUnlocked && (
+                <View style={styles.lockIcon}>
+                  <Ionicons name="lock-closed" size={20} color="#9CA3AF" />
+                </View>
+              )}
+              {topic.hasLessons && topic.isUnlocked && (
+                <View style={styles.availableBadge}>
+                  <Text style={styles.availableText}>Available</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {topic.isUnlocked && (
+            <>
+              <View style={styles.progressSection}>
+                <View style={styles.progressHeader}>
+                  <Text style={styles.progressLabel}>Progress</Text>
+                  <Text style={styles.progressPercentage}>
+                    {topic.progress}%
+                  </Text>
+                </View>
+                <View style={styles.progressBar}>
+                  <View
+                    style={[
+                      styles.progressFill,
+                      { width: `${topic.progress}%` },
+                    ]}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.statsRow}>
+                <View style={styles.stat}>
+                  <Ionicons
+                    name="time"
+                    size={16}
+                    color={theme.colors.textSecondary}
+                  />
+                  <Text style={styles.statText}>
+                    {Math.round(topic.estimatedTime / 60)}h
+                  </Text>
+                </View>
+                <View style={styles.stat}>
+                  <Ionicons
+                    name="library"
+                    size={16}
+                    color={theme.colors.textSecondary}
+                  />
+                  <Text style={styles.statText}>
+                    {topic.resourceIds.length} Resources
+                  </Text>
+                </View>
+                <View style={styles.stat}>
+                  <Ionicons name="checkmark-circle" size={16} color="#6B7280" />
+                  <Text style={styles.statText}>
+                    {topic.learningObjectives.length} Goals
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.featuresRow}>
+                {topic.hasPractice && (
+                  <View style={styles.feature}>
+                    <Ionicons
+                      name="create"
+                      size={14}
+                      color={theme.colors.primary}
+                    />
+                    <Text style={styles.featureText}>Practice</Text>
+                  </View>
+                )}
+                {topic.hasNote && (
+                  <View style={styles.feature}>
+                    <Ionicons
+                      name="document-text"
+                      size={14}
+                      color={theme.colors.success}
+                    />
+                    <Text style={styles.featureText}>Notes</Text>
+                  </View>
+                )}
+                {topic.hasStudyMaterial && (
+                  <View style={styles.feature}>
+                    <Ionicons
+                      name="book"
+                      size={14}
+                      color={theme.colors.warning}
+                    />
+                    <Text style={styles.featureText}>Materials</Text>
+                  </View>
+                )}
+              </View>
+            </>
+          )}
+
+          <View style={styles.cardFooter}>
+            <View
+              style={[
+                styles.difficultyBadge,
+                {
+                  backgroundColor: getDifficultyColor(topic.difficulty) + "20",
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.difficultyText,
+                  { color: getDifficultyColor(topic.difficulty) },
+                ]}
+              >
+                {topic.difficulty.charAt(0).toUpperCase() +
+                  topic.difficulty.slice(1)}
+              </Text>
+            </View>
+
+            {topic.prerequisites.length > 0 && (
+              <View style={styles.prerequisitesBadge}>
+                <Ionicons
+                  name="link"
+                  size={12}
+                  color={theme.colors.textSecondary}
+                />
+                <Text style={styles.prerequisitesText}>
+                  {topic.prerequisites.length} Prerequisites
+                </Text>
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
+  // Loading Component - now defined after styles
+  const TopicsLoader = () => {
+    return (
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <TouchableOpacity style={styles.backButton}>
+              <Ionicons name="arrow-back" size={20} color="#64748B" />
+            </TouchableOpacity>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>{subjectName} Topics</Text>
+              <Text style={styles.subtitle}>Loading...</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Loading Content */}
+        <View style={styles.loadingContainer}>
+          <Animated.View
+            entering={FadeIn.duration(500)}
+            style={styles.loadingContent}
+          >
+            <Animated.View
+              entering={FadeIn.delay(200).duration(600)}
+              style={styles.loadingIconContainer}
+            >
+              <Ionicons name="book" size={48} color={theme.colors.primary} />
+            </Animated.View>
+
+            <Animated.View entering={FadeIn.delay(400).duration(600)}>
+              <Text style={styles.loadingTitle}>Loading Topics</Text>
+              <Text style={styles.loadingSubtitle}>
+                Fetching {subjectName} content...
+              </Text>
+            </Animated.View>
+
+            <Animated.View
+              entering={FadeIn.delay(600).duration(600)}
+              style={styles.loadingDotsContainer}
+            >
+              {[1, 2, 3].map((dot) => (
+                <Animated.View
+                  key={dot}
+                  style={styles.loadingDot}
+                  entering={FadeIn.delay(1200 + dot * 100).duration(400)}
+                />
+              ))}
+            </Animated.View>
+          </Animated.View>
+        </View>
+      </SafeAreaView>
+    );
+  };
+
+  // UPDATE: Filter logic to use the unified data source - removed duplicate declaration
+  // filteredTopics is already defined above
+
+  // Show loading state early return
+  if (isLoading) {
+    return <TopicsLoader />;
+  }
+
   return (
-    <SafeAreaView
-      style={styles.container}
-      edges={["top", "left", "right", "bottom"]}
-    >
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <TouchableOpacity
@@ -781,13 +953,14 @@ export default function TopicsScreen() {
           <View style={styles.headerContent}>
             <Text style={styles.title}>{subjectName} Topics</Text>
             <Text style={styles.subtitle}>
-              {filteredTopics.length} topics available
+              {/* UPDATE: Show data source indicator like curriculum */}
+              {filteredTopics.length} topics available {isBackendData ? "🌐" : "📱"}
             </Text>
           </View>
         </View>
 
         {/* Only show filters if there are topics */}
-        {subjectTopics.length > 0 && (
+        {topicsData.length > 0 && (
           <View style={styles.filterRow}>
             {["all", "beginner", "intermediate", "advanced"].map(
               (difficulty) => (
@@ -835,9 +1008,16 @@ export default function TopicsScreen() {
               size={64}
               color={theme.colors.textSecondary}
             />
-            <Text style={styles.emptyTitle}>No Topics Available</Text>
+            <Text style={styles.emptyTitle}>
+              {isLoading ? "Loading Topics..." : "No Topics Available"}
+            </Text>
             <Text style={styles.emptySubtitle}>
-              Topics for {subjectName} are coming soon!
+              {error 
+                ? `Error: ${error}`
+                : isLoading 
+                ? "Please wait while we fetch the topics..."
+                : `Topics for ${subjectName} are coming soon!`
+              }
             </Text>
           </View>
         )}
