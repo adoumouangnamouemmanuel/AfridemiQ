@@ -215,11 +215,11 @@ export default function SubjectsScreen() {
     },
     content: {
       flex: 1,
-      padding: 20,
+      padding: 0,
     },
     subjectCard: {
       width: (SCREEN_WIDTH - 60) / 2,
-      marginBottom: 16,
+      margin: 16,
       borderRadius: 24,
       overflow: "hidden",
       shadowColor: theme.colors.text,
@@ -673,7 +673,7 @@ export default function SubjectsScreen() {
 
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <TouchableOpacity
