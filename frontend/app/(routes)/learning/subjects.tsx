@@ -15,6 +15,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useTheme } from "../../../src/utils/ThemeContext";
+// ADD: Import the subject hooks - exactly like curriculum and topic integration
+import { useSubjectsBySeries } from "../../../src/hooks/useSubject";
+// import { useUser } from "../../../src/utils/UserContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -72,7 +75,7 @@ const SUBJECTS = [
     },
     isActive: true,
     isPremium: false,
-    hasTopics: true, // Only Math has topics for now
+    hasTopics: true,
   },
   {
     _id: "chemistry_001",
@@ -135,110 +138,8 @@ export default function SubjectsScreen() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const { theme } = useTheme();
-
-  // TODO: Connect to backend API
-  // TODO: Add actual navigation hooks
-  // TODO: Integrate with state management
-
-  const filteredSubjects = useMemo(() => {
-    if (selectedDifficulty === "all") return SUBJECTS;
-    return SUBJECTS.filter(
-      (subject) => subject.difficulty === selectedDifficulty
-    );
-  }, [selectedDifficulty]);
-
-  const handleSubjectPress = (subject: (typeof SUBJECTS)[0]) => {
-    if (subject.hasTopics) {
-      router.push(
-        `/(routes)/learning/topics?subjectId=${subject._id}&subjectName=${subject.name}`
-      );
-    } else {
-      // TODO: Navigate to subject overview or coming soon screen
-      console.log(`${subject.name} topics coming soon`);
-    }
-  };
-
-  const renderSubjectCard = ({
-    item: subject,
-  }: {
-    item: (typeof SUBJECTS)[0];
-  }) => {
-    const cardWidth =
-      viewMode === "grid" ? (SCREEN_WIDTH - 60) / 2 : SCREEN_WIDTH - 40;
-
-    return (
-      <Animated.View entering={FadeIn.duration(300)}>
-        <TouchableOpacity
-          style={[
-            styles.subjectCard,
-            { width: cardWidth },
-            viewMode === "list" && styles.listCard,
-          ]}
-          onPress={() => handleSubjectPress(subject)}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={[subject.color, subject.color + "80"]}
-            style={styles.cardGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <View style={styles.cardHeader}>
-              <View style={styles.iconContainer}>
-                <Ionicons name={subject.icon as any} size={32} color="white" />
-              </View>
-              <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={14} color="#FFD700" />
-                <Text style={styles.ratingText}>{subject.rating.average}</Text>
-              </View>
-            </View>
-
-            <View style={styles.cardContent}>
-              <Text style={styles.subjectName}>{subject.name}</Text>
-              <Text style={styles.subjectDescription}>
-                {subject.description}
-              </Text>
-
-              <View style={styles.statsRow}>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>
-                    {subject.estimatedHours}h
-                  </Text>
-                  <Text style={styles.statLabel}>Duration</Text>
-                </View>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>
-                    {subject.statistics.totalQuestions}
-                  </Text>
-                  <Text style={styles.statLabel}>Questions</Text>
-                </View>
-                <View style={styles.stat}>
-                  <Text style={styles.statValue}>
-                    {Math.round(subject.statistics.completionRate * 100)}%
-                  </Text>
-                  <Text style={styles.statLabel}>Complete</Text>
-                </View>
-              </View>
-
-              <View style={styles.cardFooter}>
-                <View style={styles.difficultyBadge}>
-                  <Text style={styles.difficultyText}>
-                    {subject.difficulty.charAt(0).toUpperCase() +
-                      subject.difficulty.slice(1)}
-                  </Text>
-                </View>
-                {subject.hasTopics && (
-                  <View style={styles.availableBadge}>
-                    <Text style={styles.availableText}>Available</Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  };
+  //TODO: ADD: Get user for series determination will add series later
+  // const { user } = useUser();
 
   const styles = StyleSheet.create({
     container: {
@@ -444,7 +345,332 @@ export default function SubjectsScreen() {
       borderRadius: 8,
       backgroundColor: theme.colors.surface,
     },
+
+    // ADD: Loading styles - same as curriculum and topic pattern
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 40,
+      backgroundColor: theme.colors.background,
+    },
+    loadingContent: {
+      alignItems: "center",
+      width: "100%",
+    },
+    loadingIconContainer: {
+      marginBottom: 30,
+    },
+    loadingIconGradient: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#667eea",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    loadingTitle: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: theme.colors.text,
+      fontFamily: "Inter-Bold",
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    loadingSubtitle: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+      fontFamily: "Inter-Regular",
+      textAlign: "center",
+      marginBottom: 40,
+    },
+    loadingDotsContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 8,
+    },
+    loadingDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: theme.colors.primary,
+    },
+    emptyState: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 40,
+    },
+    emptyTitle: {
+      fontSize: 20,
+      fontWeight: "600",
+      color: theme.colors.text,
+      fontFamily: "Inter-SemiBold",
+      textAlign: "center",
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    emptySubtitle: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+      fontFamily: "Inter-Regular",
+      textAlign: "center",
+      lineHeight: 24,
+    },
   });
+
+  // ADD: Backend integration - exactly like curriculum pattern
+  // Determine series from user (default to 'D')
+  const series =  "D";
+
+  // Memoize the options to prevent unnecessary re-renders
+  const subjectOptions = useMemo(
+    () => ({
+      difficulty: selectedDifficulty === "all" ? undefined : (selectedDifficulty as any),
+      sortBy: "name" as const,
+      sortOrder: "asc" as const,
+      isActive: true,
+    }),
+    [selectedDifficulty]
+  );
+
+  // Fetch subjects from backend using the hook
+  const {
+    subjects: backendSubjects,
+    isLoading,
+    error,
+  } = useSubjectsBySeries(series, subjectOptions);
+
+  // ADD: Determine data source and subjects to use - exactly like curriculum pattern
+  const { subjectsData, isBackendData } = useMemo(() => {
+    if (backendSubjects && backendSubjects.length > 0 && !isLoading && !error) {
+      // Use backend data - transform to match frontend interface
+      const transformedSubjects = backendSubjects.map((subject, index) => ({
+        _id: subject._id,
+        name: subject.name,
+        slug: subject.slug || subject.name.toLowerCase(),
+        icon: subject.icon || "book",
+        color: subject.color || ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FECA57", "#6C5CE7"][index % 6],
+        description: subject.description,
+        longDescription: subject.longDescription || subject.description,
+        category: subject.category || "science",
+        difficulty: subject.difficulty || "moyen",
+        series: subject.series || ["D"],
+        estimatedHours: subject.estimatedHours || 100,
+        popularity: subject.popularity || Math.floor(Math.random() * 50) + 50,
+        rating: subject.rating || { average: Math.floor(Math.random() * 20 + 30) / 10, count: Math.floor(Math.random() * 1000) + 100 },
+        statistics: subject.statistics || {
+          totalStudents: Math.floor(Math.random() * 10000) + 5000,
+          totalExams: Math.floor(Math.random() * 30) + 20,
+          averageScore: Math.floor(Math.random() * 20) + 70,
+          completionRate: Math.floor(Math.random() * 30 + 60) / 100,
+          totalQuestions: Math.floor(Math.random() * 1000) + 1000,
+          totalResources: Math.floor(Math.random() * 100) + 50,
+        },
+        isActive: subject.isActive !== false,
+        isPremium: subject.isPremium || false,
+        hasTopics: true, // All backend subjects have topics
+      }));
+
+      return {
+        subjectsData: transformedSubjects,
+        isBackendData: true,
+      };
+    } else {
+      // Use mock data
+      return {
+        subjectsData: SUBJECTS,
+        isBackendData: false,
+      };
+    }
+  }, [backendSubjects, isLoading, error]);
+
+  // ADD: Log for debugging - exactly like curriculum pattern
+  console.log(
+    "📚 SubjectsScreen - Using data source:",
+    isBackendData ? "Backend" : "Mock"
+  );
+  console.log("📚 SubjectsScreen - Loading:", isLoading);
+  console.log("📚 SubjectsScreen - Error:", error);
+  console.log("📚 SubjectsScreen - Series:", series);
+  console.log("📚 SubjectsScreen - Found subjects:", subjectsData.length);
+
+  // UPDATE: Filter logic to use the unified data source
+  const filteredSubjects = useMemo(() => {
+    if (selectedDifficulty === "all") return subjectsData;
+    return subjectsData.filter(
+      (subject) => subject.difficulty === selectedDifficulty
+    );
+  }, [subjectsData, selectedDifficulty]);
+
+  const handleSubjectPress = (subject: (typeof subjectsData)[0]) => {
+    if (subject.hasTopics) {
+      router.push(
+        `/(routes)/learning/topics?subjectId=${subject._id}&subjectName=${subject.name}`
+      );
+    } else {
+      // TODO: Navigate to subject overview or coming soon screen
+      console.log(`${subject.name} topics coming soon`);
+    }
+  };
+
+  const renderSubjectCard = ({
+    item: subject,
+  }: {
+    item: (typeof subjectsData)[0];
+  }) => {
+    const cardWidth =
+      viewMode === "grid" ? (SCREEN_WIDTH - 60) / 2 : SCREEN_WIDTH - 40;
+
+    return (
+      <Animated.View entering={FadeIn.duration(300)}>
+        <TouchableOpacity
+          style={[
+            styles.subjectCard,
+            { width: cardWidth },
+            viewMode === "list" && styles.listCard,
+          ]}
+          onPress={() => handleSubjectPress(subject)}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={[subject.color, subject.color + "80"]}
+            style={styles.cardGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <View style={styles.cardHeader}>
+              <View style={styles.iconContainer}>
+                <Ionicons name={subject.icon as any} size={32} color="white" />
+              </View>
+              <View style={styles.ratingContainer}>
+                <Ionicons name="star" size={14} color="#FFD700" />
+                <Text style={styles.ratingText}>{subject.rating.average}</Text>
+              </View>
+            </View>
+
+            <View style={styles.cardContent}>
+              <Text style={styles.subjectName}>{subject.name}</Text>
+              <Text style={styles.subjectDescription}>
+                {subject.description}
+              </Text>
+
+              <View style={styles.statsRow}>
+                <View style={styles.stat}>
+                  <Text style={styles.statValue}>
+                    {subject.estimatedHours}h
+                  </Text>
+                  <Text style={styles.statLabel}>Duration</Text>
+                </View>
+                <View style={styles.stat}>
+                  <Text style={styles.statValue}>
+                    {subject.statistics.totalQuestions}
+                  </Text>
+                  <Text style={styles.statLabel}>Questions</Text>
+                </View>
+                <View style={styles.stat}>
+                  <Text style={styles.statValue}>
+                    {Math.round(subject.statistics.completionRate * 100)}%
+                  </Text>
+                  <Text style={styles.statLabel}>Complete</Text>
+                </View>
+              </View>
+
+              <View style={styles.cardFooter}>
+                <View style={styles.difficultyBadge}>
+                  <Text style={styles.difficultyText}>
+                    {subject.difficulty.charAt(0).toUpperCase() +
+                      subject.difficulty.slice(1)}
+                  </Text>
+                </View>
+                {subject.hasTopics && (
+                  <View style={styles.availableBadge}>
+                    <Text style={styles.availableText}>Available</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
+  // ADD: Loading Component - exactly like curriculum and topic pattern
+  const SubjectsLoader = () => {
+    return (
+      <SafeAreaView style={styles.container} edges={["top"]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <TouchableOpacity style={styles.backButton}>
+              <Ionicons name="arrow-back" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+            <Text style={styles.title}>Subjects</Text>
+            <View style={styles.headerActions}>
+              <View style={styles.viewToggle}>
+                <View style={[styles.viewButton, styles.activeViewButton]}>
+                  <Ionicons name="grid" size={18} color={theme.colors.primary} />
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Loading Content */}
+        <View style={styles.loadingContainer}>
+          <Animated.View
+            entering={FadeIn.duration(500)}
+            style={styles.loadingContent}
+          >
+            <Animated.View
+              entering={FadeIn.delay(200).duration(600)}
+              style={styles.loadingIconContainer}
+            >
+              <LinearGradient
+                colors={["#667eea", "#764ba2"]}
+                style={styles.loadingIconGradient}
+              >
+                <Ionicons name="library" size={48} color="white" />
+              </LinearGradient>
+            </Animated.View>
+
+            <Animated.View entering={FadeIn.delay(400).duration(600)}>
+              <Text style={styles.loadingTitle}>Loading Subjects</Text>
+              <Text style={styles.loadingSubtitle}>
+                Fetching your series {series} subjects...
+              </Text>
+            </Animated.View>
+
+            <Animated.View
+              entering={FadeIn.delay(600).duration(600)}
+              style={styles.loadingDotsContainer}
+            >
+              {[1, 2, 3].map((dot) => (
+                <Animated.View
+                  key={dot}
+                  style={styles.loadingDot}
+                  entering={FadeIn.delay(1200 + dot * 100).duration(400)}
+                />
+              ))}
+            </Animated.View>
+          </Animated.View>
+        </View>
+      </SafeAreaView>
+    );
+  };
+
+  // ADD: Show loading state - exactly like curriculum and topic pattern
+  if (isLoading) {
+    return <SubjectsLoader />;
+  }
+
+
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -529,20 +755,41 @@ export default function SubjectsScreen() {
       </View>
 
       <View style={styles.content}>
-        <FlatList
-          data={filteredSubjects}
-          renderItem={renderSubjectCard}
-          keyExtractor={(item) => item._id}
-          numColumns={viewMode === "grid" ? 2 : 1}
-          key={viewMode}
-          columnWrapperStyle={
-            viewMode === "grid"
-              ? { justifyContent: "space-between" }
-              : undefined
-          }
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
+        {filteredSubjects.length > 0 ? (
+          <FlatList
+            data={filteredSubjects}
+            renderItem={renderSubjectCard}
+            keyExtractor={(item) => item._id}
+            numColumns={viewMode === "grid" ? 2 : 1}
+            key={viewMode}
+            columnWrapperStyle={
+              viewMode === "grid"
+                ? { justifyContent: "space-between" }
+                : undefined
+            }
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        ) : (
+          <View style={styles.emptyState}>
+            <Ionicons
+              name="school-outline"
+              size={64}
+              color={theme.colors.textSecondary}
+            />
+            <Text style={styles.emptyTitle}>
+              {isLoading ? "Loading Subjects..." : "No Subjects Available"}
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              {error 
+                ? `Error: ${error}`
+                : isLoading 
+                ? "Please wait while we fetch the subjects..."
+                : `Subjects for series ${series} are coming soon! {isBackendData ? "🌐" : "📱"}`
+              }
+            </Text>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
