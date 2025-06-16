@@ -71,14 +71,12 @@ const getCurricula = async (query) => {
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
     const skip = (page - 1) * limit;
+
+    // FIXED: Removed the problematic topics populate
     const curricula = await Curriculum.find(filter)
       .populate({
         path: "subjects",
         select: "name category difficulty estimatedHours",
-        populate: {
-          path: "topics",
-          select: "name description difficulty learningObjectives",
-        },
       })
       .populate("createdBy", "name email")
       .sort(sort)
@@ -104,14 +102,11 @@ const getCurricula = async (query) => {
 
 const getCurriculumById = async (curriculumId) => {
   try {
+    // FIXED: Removed the problematic topics populate
     const curriculum = await Curriculum.findById(curriculumId)
       .populate({
         path: "subjects",
         select: "name category difficulty estimatedHours",
-        populate: {
-          path: "topics",
-          select: "name description difficulty learningObjectives",
-        },
       })
       .populate("createdBy", "name email");
 
@@ -259,6 +254,12 @@ const addSubjectToCurriculum = async (curriculumId, { subjectId }) => {
       }
     );
 
+    // FIXED: Removed the problematic topics populate
+    await curriculum.populate({
+      path: "subjects",
+      select: "name category difficulty estimatedHours",
+    });
+
     return curriculum;
   } catch (error) {
     if (error.name === "CastError") {
@@ -297,6 +298,12 @@ const removeSubjectFromCurriculum = async (curriculumId, subjectId) => {
       }
     );
 
+    // FIXED: Removed the problematic topics populate
+    await curriculum.populate({
+      path: "subjects",
+      select: "name category difficulty estimatedHours",
+    });
+
     return curriculum;
   } catch (error) {
     if (error.name === "CastError") {
@@ -312,19 +319,32 @@ const removeSubjectFromCurriculum = async (curriculumId, subjectId) => {
 
 const getCurriculaByCountry = async (country) => {
   try {
+    console.log(`🔍 Service - Starting getCurriculaByCountry for: ${country}`);
+
+    // Use find with populate instead of aggregation
     const curricula = await Curriculum.find({
       country: { $regex: country, $options: "i" },
       isActive: true,
     })
       .populate({
         path: "subjects",
-        select: "name category",
-        populate: {
-          path: "topics",
-          select: "name description difficulty",
-        },
+        select:
+          "name description category difficulty series educationLevel icon color statistics",
       })
-      .sort({ educationLevel: 1, "academicYear.startDate": -1 });
+      .lean();
+
+    console.log(
+      `🔍 Service - Found ${curricula.length} curricula with populated subjects`
+    );
+
+    if (curricula.length > 0) {
+      console.log(`🔍 Service - Sample curriculum with subjects:`, {
+        id: curricula[0]._id,
+        country: curricula[0].country,
+        subjectsCount: curricula[0].subjects?.length || 0,
+        firstSubject: curricula[0].subjects?.[0] || "No subjects",
+      });
+    }
 
     return curricula;
   } catch (error) {
