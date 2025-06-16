@@ -329,7 +329,7 @@ const getCurriculaByCountry = async (country) => {
       .populate({
         path: "subjects",
         select:
-          "name description category difficulty series educationLevel icon color statistics",
+          "name description category difficulty series educationLevel icon color statistics estimatedHours",
       })
       .lean();
 
