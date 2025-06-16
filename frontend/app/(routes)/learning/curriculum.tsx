@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react";
 import {
   View,
   Text,
@@ -10,10 +10,12 @@ import {
   FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { useCurriculum } from "../../../src/hooks/useCurriculum";
+import { useUser } from "../../../src/utils/UserContext";
 
 // Mock curriculum data based on curriculum.model
 const CURRICULUM_DATA = {
@@ -113,18 +115,88 @@ const CURRICULUM_DATA = {
 
 export default function CurriculumScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const { user } = useUser();
   const [selectedTerm, setSelectedTerm] = useState(1);
 
-  // TODO: Connect to backend API
-  // TODO: Add actual navigation hooks
-  // TODO: Integrate with state management
+  // Backend integration - determine filters
+  const filters = useMemo(() => {
+    const country = (params.country as string) || user?.country;
+    const series = (params.series as string) || "D";
+    const educationLevel = (params.educationLevel as string) || "secondary";
+    return { country, series, educationLevel };
+  }, [params, user]);
+
+  // Fetch curriculum from backend
+  const {
+    curriculum: backendCurriculum,
+    isLoading,
+    error,
+  } = useCurriculum(undefined, filters);
+
+  // Determine data source and curriculum to use
+  const { curriculumData, isBackendData } = useMemo(() => {
+    if (backendCurriculum && !isLoading && !error) {
+      // Use backend data
+      return {
+        curriculumData: {
+          ...backendCurriculum,
+          subjects:
+            backendCurriculum.subjects?.map((subject: any, index: number) => ({
+              _id: subject._id,
+              name: subject.name,
+              color: subject.color || "#3B82F6", // Use database color, fallback to blue
+              icon: subject.icon || "book", // Use database icon, fallback to book
+              totalTopics: Math.floor(Math.random() * 15) + 8,
+              completedTopics: Math.floor(Math.random() * 8) + 2,
+              estimatedHours: subject.estimatedHours,
+              progress: Math.floor(Math.random() * 80) + 20,
+            })) || [],
+          academicYear: backendCurriculum.academicYear
+            ? {
+                startDate: new Date(backendCurriculum.academicYear.startDate),
+                endDate: new Date(backendCurriculum.academicYear.endDate),
+                terms:
+                  backendCurriculum.academicYear.terms?.map((term: any) => ({
+                    term: term.term,
+                    startDate: new Date(term.startDate),
+                    endDate: new Date(term.endDate),
+                    holidays:
+                      term.holidays?.map((holiday: any) => ({
+                        name: holiday.name,
+                        startDate: new Date(holiday.startDate),
+                        endDate: new Date(holiday.endDate),
+                      })) || [],
+                  })) || [],
+              }
+            : CURRICULUM_DATA.academicYear,
+          analytics: backendCurriculum.analytics || CURRICULUM_DATA.analytics,
+        },
+        isBackendData: true,
+      };
+    } else {
+      // Use mock data
+      return {
+        curriculumData: CURRICULUM_DATA,
+        isBackendData: false,
+      };
+    }
+  }, [backendCurriculum, isLoading, error]);
+
+  // Log for debugging
+  console.log(
+    "🏫 CurriculumScreen - Using data source:",
+    isBackendData ? "Backend" : "Mock"
+  );
+  console.log("🏫 CurriculumScreen - Loading:", isLoading);
+  console.log("🏫 CurriculumScreen - Error:", error);
 
   const getCurrentTerm = () => {
     const now = new Date();
     return (
-      CURRICULUM_DATA.academicYear.terms.find(
+      curriculumData.academicYear.terms.find(
         (term) => now >= term.startDate && now <= term.endDate
-      ) || CURRICULUM_DATA.academicYear.terms[0]
+      ) || curriculumData.academicYear.terms[0]
     );
   };
 
@@ -144,11 +216,11 @@ export default function CurriculumScreen() {
   };
 
   const getOverallProgress = () => {
-    const totalTopics = CURRICULUM_DATA.subjects.reduce(
+    const totalTopics = curriculumData.subjects.reduce(
       (sum, subject) => sum + subject.totalTopics,
       0
     );
-    const completedTopics = CURRICULUM_DATA.subjects.reduce(
+    const completedTopics = curriculumData.subjects.reduce(
       (sum, subject) => sum + subject.completedTopics,
       0
     );
@@ -158,7 +230,7 @@ export default function CurriculumScreen() {
   const renderSubjectCard = ({
     item: subject,
   }: {
-    item: (typeof CURRICULUM_DATA.subjects)[0];
+    item: (typeof curriculumData.subjects)[0];
   }) => {
     return (
       <Animated.View entering={FadeIn.duration(300)}>
@@ -241,7 +313,7 @@ export default function CurriculumScreen() {
   };
 
   const renderTermCard = (
-    term: (typeof CURRICULUM_DATA.academicYear.terms)[0]
+    term: (typeof curriculumData.academicYear.terms)[0]
   ) => {
     const isActive = selectedTerm === term.term;
     const isCurrent = getCurrentTerm()?.term === term.term;
@@ -286,9 +358,244 @@ export default function CurriculumScreen() {
     );
   };
 
-  const selectedTermData = CURRICULUM_DATA.academicYear.terms.find(
+  const selectedTermData = curriculumData.academicYear.terms.find(
     (term) => term.term === selectedTerm
   );
+
+  // Loading Component
+  const CurriculumLoader = () => {
+    return (
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <TouchableOpacity style={styles.backButton}>
+              <Ionicons name="arrow-back" size={20} color="#64748B" />
+            </TouchableOpacity>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>Curriculum</Text>
+              <Text style={styles.subtitle}>Loading...</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Loading Content */}
+        <View style={styles.loadingContainer}>
+          <Animated.View
+            entering={FadeIn.duration(500)}
+            style={styles.loadingContent}
+          >
+            {/* Animated Book Icon */}
+            <Animated.View
+              entering={FadeIn.delay(200).duration(600)}
+              style={styles.loadingIconContainer}
+            >
+              <LinearGradient
+                colors={["#667eea", "#764ba2"]}
+                style={styles.loadingIconGradient}
+              >
+                <Ionicons name="library" size={48} color="white" />
+              </LinearGradient>
+            </Animated.View>
+
+            {/* Loading Text */}
+            <Animated.View entering={FadeIn.delay(400).duration(600)}>
+              <Text style={styles.loadingTitle}>Loading Curriculum</Text>
+              <Text style={styles.loadingSubtitle}>
+                Fetching your academic content...
+              </Text>
+            </Animated.View>
+
+            {/* Loading Progress Bars */}
+            <Animated.View
+              entering={FadeIn.delay(600).duration(600)}
+              style={styles.loadingBarsContainer}
+            >
+              {[1, 2, 3].map((index) => (
+                <View key={index} style={styles.loadingBarWrapper}>
+                  <View style={styles.loadingBar}>
+                    <Animated.View
+                      style={[
+                        styles.loadingBarFill,
+                        {
+                          backgroundColor:
+                            index === 1
+                              ? "#3B82F6"
+                              : index === 2
+                              ? "#10B981"
+                              : "#F59E0B",
+                        },
+                      ]}
+                      entering={FadeIn.delay(800 + index * 200).duration(800)}
+                    />
+                  </View>
+                  <Text style={styles.loadingBarLabel}>
+                    {index === 1
+                      ? "Subjects"
+                      : index === 2
+                      ? "Calendar"
+                      : "Progress"}
+                  </Text>
+                </View>
+              ))}
+            </Animated.View>
+
+            {/* Loading Dots */}
+            <Animated.View
+              entering={FadeIn.delay(1200).duration(600)}
+              style={styles.loadingDotsContainer}
+            >
+              {[1, 2, 3].map((dot) => (
+                <Animated.View
+                  key={dot}
+                  style={styles.loadingDot}
+                  entering={FadeIn.delay(1200 + dot * 100).duration(400)}
+                />
+              ))}
+            </Animated.View>
+          </Animated.View>
+        </View>
+      </SafeAreaView>
+    );
+  };
+
+  // Not Found Component
+  const CurriculumNotFound = ({
+    country,
+    series,
+    educationLevel,
+    onRetry,
+    onBack,
+  }: {
+    country: string;
+    series: string;
+    educationLevel: string;
+    onRetry: () => void;
+    onBack: () => void;
+  }) => {
+    return (
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <TouchableOpacity style={styles.backButton} onPress={onBack}>
+              <Ionicons name="arrow-back" size={20} color="#64748B" />
+            </TouchableOpacity>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>Curriculum</Text>
+              <Text style={styles.subtitle}>Not Found</Text>
+            </View>
+          </View>
+        </View>
+        <ScrollView>
+          {/* Not Found Content */}
+          <View style={styles.notFoundContainer}>
+            <Animated.View
+              entering={FadeIn.duration(600)}
+              style={styles.notFoundContent}
+            >
+              {/* Empty State Icon */}
+              <Animated.View
+                entering={FadeIn.delay(200).duration(600)}
+                style={styles.notFoundIconContainer}
+              >
+                <LinearGradient
+                  colors={["#FEF3C7", "#FCD34D"]}
+                  style={styles.notFoundIconGradient}
+                >
+                  <Ionicons name="school-outline" size={64} color="#F59E0B" />
+                </LinearGradient>
+              </Animated.View>
+
+              {/* Not Found Text */}
+              <Animated.View entering={FadeIn.delay(400).duration(600)}>
+                <Text style={styles.notFoundTitle}>Curriculum Not Found</Text>
+                <Text style={styles.notFoundSubtitle}>
+                  We couldn&apos;t find a curriculum matching your criteria
+                </Text>
+              </Animated.View>
+
+              {/* Search Criteria */}
+              <Animated.View
+                entering={FadeIn.delay(600).duration(600)}
+                style={styles.searchCriteriaContainer}
+              >
+                <Text style={styles.searchCriteriaTitle}>Search Criteria:</Text>
+                <View style={styles.criteriaItem}>
+                  <Ionicons name="location" size={16} color="#6B7280" />
+                  <Text style={styles.criteriaText}>Country: {country}</Text>
+                </View>
+                <View style={styles.criteriaItem}>
+                  <Ionicons name="school" size={16} color="#6B7280" />
+                  <Text style={styles.criteriaText}>
+                    Education Level: {educationLevel}
+                  </Text>
+                </View>
+                <View style={styles.criteriaItem}>
+                  <Ionicons name="list" size={16} color="#6B7280" />
+                  <Text style={styles.criteriaText}>Series: {series}</Text>
+                </View>
+              </Animated.View>
+
+              {/* Suggestions */}
+              <Animated.View
+                entering={FadeIn.delay(800).duration(600)}
+                style={styles.suggestionsContainer}
+              >
+                <Text style={styles.suggestionsTitle}>Suggestions:</Text>
+                <View style={styles.suggestionItem}>
+                  <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                  <Text style={styles.suggestionText}>
+                    Check your internet connection
+                  </Text>
+                </View>
+                <View style={styles.suggestionItem}>
+                  <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                  <Text style={styles.suggestionText}>
+                    Verify your country and series selection
+                  </Text>
+                </View>
+                <View style={styles.suggestionItem}>
+                  <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                  <Text style={styles.suggestionText}>
+                    Try refreshing the page
+                  </Text>
+                </View>
+              </Animated.View>
+
+              {/* Action Buttons */}
+              <Animated.View
+                entering={FadeIn.delay(1000).duration(600)}
+                style={styles.actionButtonsContainer}
+              >
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={onRetry}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={["#3B82F6", "#1D4ED8"]}
+                    style={styles.retryButtonGradient}
+                  >
+                    <Ionicons name="refresh" size={20} color="white" />
+                    <Text style={styles.retryButtonText}>Try Again</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.backToHomeButton}
+                  onPress={onBack}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.backToHomeButtonText}>Go Back</Text>
+                </TouchableOpacity>
+              </Animated.View>
+            </Animated.View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -330,11 +637,11 @@ export default function CurriculumScreen() {
     curriculumInfo: {
       backgroundColor: "#fff",
       borderRadius: 16,
-        padding: 16,
-        marginHorizontal: 20,
-        marginTop: 20,
-        borderWidth: 1,
-        borderColor: "#E2E8F0",
+      padding: 16,
+      marginHorizontal: 20,
+      marginTop: 20,
+      borderWidth: 1,
+      borderColor: "#E2E8F0",
     },
     curriculumTitle: {
       fontSize: 16,
@@ -678,7 +985,253 @@ export default function CurriculumScreen() {
       fontFamily: "Inter-Regular",
       marginTop: 4,
     },
+    // Loading Styles
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 40,
+      backgroundColor: "#F8FAFC",
+    },
+    loadingContent: {
+      alignItems: "center",
+      width: "100%",
+    },
+    loadingIconContainer: {
+      marginBottom: 30,
+    },
+    loadingIconGradient: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#667eea",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    loadingTitle: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: "#1E293B",
+      fontFamily: "Inter-Bold",
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    loadingSubtitle: {
+      fontSize: 16,
+      color: "#64748B",
+      fontFamily: "Inter-Regular",
+      textAlign: "center",
+      marginBottom: 40,
+    },
+    loadingBarsContainer: {
+      width: "100%",
+      marginBottom: 30,
+    },
+    loadingBarWrapper: {
+      marginBottom: 16,
+    },
+    loadingBar: {
+      height: 8,
+      backgroundColor: "#E5E7EB",
+      borderRadius: 4,
+      overflow: "hidden",
+      marginBottom: 8,
+    },
+    loadingBarFill: {
+      height: "100%",
+      width: "70%",
+      borderRadius: 4,
+    },
+    loadingBarLabel: {
+      fontSize: 14,
+      color: "#6B7280",
+      fontFamily: "Inter-Regular",
+    },
+    loadingDotsContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 8,
+    },
+    loadingDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: "#3B82F6",
+    },
+
+    // Not Found Styles
+    notFoundContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 30,
+      backgroundColor: "#F8FAFC",
+    },
+    notFoundContent: {
+      alignItems: "center",
+      width: "100%",
+      maxWidth: 400,
+    },
+    notFoundIconContainer: {
+      marginBottom: 30,
+    },
+    notFoundIconGradient: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#F59E0B",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.2,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    notFoundTitle: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: "#1E293B",
+      fontFamily: "Inter-ExtraBold",
+      textAlign: "center",
+      marginBottom: 12,
+    },
+    notFoundSubtitle: {
+      fontSize: 16,
+      color: "#64748B",
+      fontFamily: "Inter-Regular",
+      textAlign: "center",
+      lineHeight: 24,
+      marginBottom: 30,
+    },
+    searchCriteriaContainer: {
+      backgroundColor: "white",
+      borderRadius: 16,
+      padding: 20,
+      width: "100%",
+      marginBottom: 24,
+      borderWidth: 1,
+      borderColor: "#E2E8F0",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+    searchCriteriaTitle: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "#1E293B",
+      fontFamily: "Inter-SemiBold",
+      marginBottom: 12,
+    },
+    criteriaItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    criteriaText: {
+      fontSize: 14,
+      color: "#374151",
+      fontFamily: "Inter-Regular",
+      marginLeft: 8,
+    },
+    suggestionsContainer: {
+      backgroundColor: "#F0FDF4",
+      borderRadius: 16,
+      padding: 20,
+      width: "100%",
+      marginBottom: 30,
+      borderWidth: 1,
+      borderColor: "#BBF7D0",
+    },
+    suggestionsTitle: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "#065F46",
+      fontFamily: "Inter-SemiBold",
+      marginBottom: 12,
+    },
+    suggestionItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    suggestionText: {
+      fontSize: 14,
+      color: "#047857",
+      fontFamily: "Inter-Regular",
+      marginLeft: 8,
+      flex: 1,
+    },
+    actionButtonsContainer: {
+      width: "100%",
+      gap: 16,
+    },
+    retryButton: {
+      borderRadius: 16,
+      overflow: "hidden",
+      shadowColor: "#3B82F6",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+    retryButtonGradient: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+      gap: 8,
+    },
+    retryButtonText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "white",
+      fontFamily: "Inter-SemiBold",
+    },
+    backToHomeButton: {
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+      borderRadius: 16,
+      backgroundColor: "white",
+      borderWidth: 1,
+      borderColor: "#E2E8F0",
+      alignItems: "center",
+    },
+    backToHomeButtonText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "#64748B",
+      fontFamily: "Inter-SemiBold",
+    },
   });
+
+  // Show loading state
+  if (isLoading) {
+    return <CurriculumLoader />;
+  }
+
+  // Show not found state when there's an error or no curriculum
+  if (error || (!backendCurriculum && !isLoading)) {
+    return (
+      <CurriculumNotFound
+        country={filters.country || "Unknown"}
+        series={filters.series || "Unknown"}
+        educationLevel={filters.educationLevel || "Unknown"}
+        onRetry={() => {
+          // Add retry logic here if you have a refetch function
+          console.log("Retrying curriculum fetch...");
+        }}
+        onBack={() => router.back()}
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -693,8 +1246,9 @@ export default function CurriculumScreen() {
           <View style={styles.headerContent}>
             <Text style={styles.title}>Curriculum</Text>
             <Text style={styles.subtitle}>
-              {CURRICULUM_DATA.country} • {CURRICULUM_DATA.educationLevel} •
-              Series {CURRICULUM_DATA.series.join(", ")}
+              {curriculumData.country} • {curriculumData.educationLevel} •
+              Series {curriculumData.series.join(", ")}{" "}
+              {isBackendData ? "🌐" : "📱"}
             </Text>
           </View>
         </View>
@@ -704,26 +1258,26 @@ export default function CurriculumScreen() {
         <View style={styles.curriculumInfo}>
           <Text style={styles.curriculumTitle}>
             Academic Year{" "}
-            {formatDate(CURRICULUM_DATA.academicYear.startDate).split(",")[1]} -{" "}
-            {formatDate(CURRICULUM_DATA.academicYear.endDate).split(",")[1]}
+            {formatDate(curriculumData.academicYear.startDate).split(",")[1]} -{" "}
+            {formatDate(curriculumData.academicYear.endDate).split(",")[1]}
           </Text>
 
           <View style={styles.curriculumMeta}>
             <View style={styles.metaItem}>
               <Text style={styles.metaValue}>
-                {CURRICULUM_DATA.subjects.length}
+                {curriculumData.subjects.length}
               </Text>
               <Text style={styles.metaLabel}>Subjects</Text>
             </View>
             <View style={styles.metaItem}>
               <Text style={styles.metaValue}>
-                {CURRICULUM_DATA.academicYear.terms.length}
+                {curriculumData.academicYear.terms.length}
               </Text>
               <Text style={styles.metaLabel}>Terms</Text>
             </View>
             <View style={styles.metaItem}>
               <Text style={styles.metaValue}>
-                {CURRICULUM_DATA.analytics.enrollmentCount.toLocaleString()}
+                {curriculumData.analytics.enrollmentCount.toLocaleString()}
               </Text>
               <Text style={styles.metaLabel}>Students</Text>
             </View>
@@ -751,13 +1305,13 @@ export default function CurriculumScreen() {
             <View style={styles.academicYearHeader}>
               <Text style={styles.sectionTitle}>Academic Calendar</Text>
               <Text style={styles.academicYearDates}>
-                {formatDate(CURRICULUM_DATA.academicYear.startDate)} -{" "}
-                {formatDate(CURRICULUM_DATA.academicYear.endDate)}
+                {formatDate(curriculumData.academicYear.startDate)} -{" "}
+                {formatDate(curriculumData.academicYear.endDate)}
               </Text>
             </View>
 
             <View style={styles.termsContainer}>
-              {CURRICULUM_DATA.academicYear.terms.map(renderTermCard)}
+              {curriculumData.academicYear.terms.map(renderTermCard)}
             </View>
 
             {selectedTermData && (
@@ -766,23 +1320,58 @@ export default function CurriculumScreen() {
                   Term {selectedTerm} Details
                 </Text>
                 {selectedTermData.holidays.length > 0 ? (
-                  selectedTermData.holidays.map((holiday, index) => (
-                    <View key={index} style={styles.holidayItem}>
-                      <Ionicons
-                        name="calendar"
-                        size={20}
-                        color="#F59E0B"
-                        style={styles.holidayIcon}
-                      />
-                      <View style={styles.holidayInfo}>
-                        <Text style={styles.holidayName}>{holiday.name}</Text>
-                        <Text style={styles.holidayDates}>
-                          {formatDate(holiday.startDate)} -{" "}
-                          {formatDate(holiday.endDate)}
-                        </Text>
+                  selectedTermData.holidays.map(
+                    (
+                      holiday: {
+                        name:
+                          | string
+                          | number
+                          | bigint
+                          | boolean
+                          | ReactElement<
+                              unknown,
+                              string | JSXElementConstructor<any>
+                            >
+                          | Iterable<ReactNode>
+                          | ReactPortal
+                          | Promise<
+                              | string
+                              | number
+                              | bigint
+                              | boolean
+                              | ReactPortal
+                              | ReactElement<
+                                  unknown,
+                                  string | JSXElementConstructor<any>
+                                >
+                              | Iterable<ReactNode>
+                              | null
+                              | undefined
+                            >
+                          | null
+                          | undefined;
+                        startDate: Date;
+                        endDate: Date;
+                      },
+                      index: Key | null | undefined
+                    ) => (
+                      <View key={index} style={styles.holidayItem}>
+                        <Ionicons
+                          name="calendar"
+                          size={20}
+                          color="#F59E0B"
+                          style={styles.holidayIcon}
+                        />
+                        <View style={styles.holidayInfo}>
+                          <Text style={styles.holidayName}>{holiday.name}</Text>
+                          <Text style={styles.holidayDates}>
+                            {formatDate(holiday.startDate)} -{" "}
+                            {formatDate(holiday.endDate)}
+                          </Text>
+                        </View>
                       </View>
-                    </View>
-                  ))
+                    )
+                  )
                 ) : (
                   <Text style={styles.holidayDates}>
                     No holidays scheduled for this term
@@ -795,7 +1384,7 @@ export default function CurriculumScreen() {
           <View style={styles.subjectsSection}>
             <Text style={styles.sectionTitle}>Subjects</Text>
             <FlatList
-              data={CURRICULUM_DATA.subjects}
+              data={curriculumData.subjects}
               renderItem={renderSubjectCard}
               keyExtractor={(item) => item._id}
               scrollEnabled={false}
@@ -808,19 +1397,19 @@ export default function CurriculumScreen() {
             <View style={styles.analyticsGrid}>
               <View style={styles.analyticsItem}>
                 <Text style={styles.analyticsValue}>
-                  {CURRICULUM_DATA.analytics.enrollmentCount.toLocaleString()}
+                  {curriculumData.analytics.enrollmentCount.toLocaleString()}
                 </Text>
                 <Text style={styles.analyticsLabel}>Total Students</Text>
               </View>
               <View style={styles.analyticsItem}>
                 <Text style={styles.analyticsValue}>
-                  {CURRICULUM_DATA.analytics.activeUsers.toLocaleString()}
+                  {curriculumData.analytics.activeUsers.toLocaleString()}
                 </Text>
                 <Text style={styles.analyticsLabel}>Active Users</Text>
               </View>
               <View style={styles.analyticsItem}>
                 <Text style={styles.analyticsValue}>
-                  {CURRICULUM_DATA.analytics.completionRate}%
+                  {curriculumData.analytics.completionRate}%
                 </Text>
                 <Text style={styles.analyticsLabel}>Completion Rate</Text>
               </View>
