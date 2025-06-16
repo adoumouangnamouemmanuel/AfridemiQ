@@ -215,11 +215,12 @@ export default function SubjectsScreen() {
     },
     content: {
       flex: 1,
-      padding: 0,
+      paddingVertical: 0,
+      paddingHorizontal: 16,
     },
     subjectCard: {
       width: (SCREEN_WIDTH - 60) / 2,
-      margin: 16,
+      margin: 10,
       borderRadius: 24,
       overflow: "hidden",
       shadowColor: theme.colors.text,
@@ -604,7 +605,7 @@ export default function SubjectsScreen() {
   // ADD: Loading Component - exactly like curriculum and topic pattern
   const SubjectsLoader = () => {
     return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -673,7 +674,7 @@ export default function SubjectsScreen() {
 
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom",  "right", "left"]}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <TouchableOpacity
