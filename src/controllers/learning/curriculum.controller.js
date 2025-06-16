@@ -15,18 +15,23 @@ const createCurriculum = async (req, res) => {
 
     const curriculum = await curriculumService.createCurriculum(curriculumData);
     res.status(StatusCodes.CREATED).json({
+      status: "success",
       message: "Curriculum créé avec succès",
       data: curriculum,
     });
   } catch (error) {
-    logger.error("Error in createCurriculum controller", error);
-    throw error;
+    logger.error("Error creating curriculum Controller", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: "error",
+      message: error.message || "Erreur lors de la création du curriculum",
+    });
   }
 };
 
 // Get all curricula
 const getCurricula = async (req, res) => {
   try {
+    logger.info("Getting curricula", { query: req.query });
     const result = await curriculumService.getCurricula(req.query);
     res.status(StatusCodes.OK).json({
       message: "Curricula récupérés avec succès",
@@ -34,10 +39,11 @@ const getCurricula = async (req, res) => {
       pagination: result.pagination,
     });
   } catch (error) {
-    logger.error("Error in getCurricula controller", error, {
-      query: req.query,
+    logger.error("Error getting curricula controller", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: "error",
+      message: error.message || "Erreur lors de la récupération des curricula",
     });
-    throw error;
   }
 };
 
@@ -65,6 +71,7 @@ const updateCurriculum = async (req, res) => {
       req.body
     );
     res.status(StatusCodes.OK).json({
+      status: "success",
       message: "Curriculum mis à jour avec succès",
       data: curriculum,
     });
@@ -115,11 +122,17 @@ const addSubjectToCurriculum = async (req, res) => {
 // Remove subject from curriculum
 const removeSubjectFromCurriculum = async (req, res) => {
   try {
+    const { id, subjectId } = req.params;
+    logger.info("Removing subject from curriculum", {
+      curriculumId: id,
+      subjectId,
+    });
     const curriculum = await curriculumService.removeSubjectFromCurriculum(
       req.params.id,
       req.params.subjectId
     );
     res.status(StatusCodes.OK).json({
+      status: "success",
       message: "Matière retirée du curriculum avec succès",
       data: curriculum,
     });
@@ -132,19 +145,37 @@ const removeSubjectFromCurriculum = async (req, res) => {
   }
 };
 
-// Get curricula by country
+// Get curricula by country - THIS IS THE CRITICAL ONE
 const getCurriculaByCountry = async (req, res) => {
   try {
-    const curricula = await curriculumService.getCurriculaByCountry(
-      req.params.country
+    const { country } = req.params;
+
+    // TODO: Remove debug logs in production
+    console.log(`🏫 Controller - Getting curricula for country: ${country}`);
+    logger.info("Getting curricula by country", { country });
+
+    const curricula = await curriculumService.getCurriculaByCountry(country);
+
+    console.log(
+      `🏫 Controller - Found ${curricula.length} curricula for ${country}`
     );
+
     res.status(StatusCodes.OK).json({
-      message: "Curricula récupérés par pays avec succès",
+      status: "success",
       data: curricula,
     });
   } catch (error) {
-    logger.error("Error in getCurriculaByCountry controller", error, {
-      country: req.params.country,
+    console.error(
+      `🏫 Controller - Error getting curricula for ${req.params.country}:`,
+      error
+    );
+    logger.error("Error getting curricula by country", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: "error",
+      code: "INTERNAL_ERROR",
+      message:
+        error.message ||
+        "Erreur lors de la récupération des curricula par pays",
     });
     throw error;
   }
