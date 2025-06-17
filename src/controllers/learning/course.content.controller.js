@@ -151,17 +151,26 @@ const deleteCourseContent = async (req, res) => {
 const getCourseContentsBySubject = async (req, res) => {
   try {
     const { subjectId } = req.params;
-    const options = {
+    
+    // FIX: Extract filters from query parameters to handle topicId filtering
+    const filters = {
+      subjectId: subjectId,
       series: req.query.series,
       level: req.query.level,
+      topicId: req.query.topicId, // ADD: Include topicId from query
+      isActive: req.query.isActive !== undefined ? req.query.isActive : true,
     };
 
+    console.log("🔍 CourseContent Controller - Filters received:", filters);
+
     const courseContents =
-      await courseContentService.getCourseContentsBySubject(subjectId, options);
+      await courseContentService.getCourseContentsBySubject(subjectId, filters);
 
     logger.info(
-      `Retrieved ${courseContents.length} course contents for subject ${subjectId}`
+      `Retrieved ${courseContents.length} course contents for subject ${subjectId} with filters:`,
+      filters
     );
+    
     res.status(StatusCodes.OK).json({
       message: "Contenus de cours récupérés avec succès",
       data: courseContents,
