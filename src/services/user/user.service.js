@@ -441,6 +441,8 @@ const requestPhoneVerification = async (userId, phoneNumber) => {
 
 // Update subscription
 const updateSubscription = async (userId, subscriptionData) => {
+  //TODO: remove later
+  console.log(`===================updateSubscription=======================`);
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 
@@ -456,6 +458,8 @@ const updateSubscription = async (userId, subscriptionData) => {
 //   user.isPremium = subscriptionData.type === "premium";
 
   await user.save();
+  //TODO: remove later
+  console.log(`++++++✅ UPDATE SUBSCRIPTION: User subscription updated ++++++`);
   return user;
 };
 
