@@ -14,6 +14,7 @@ import {
 import Animated, { FadeIn, SlideInRight } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../../../../src/utils/ThemeContext";
+import { useBaseLesson } from "../../../../src/hooks/learning/lessons/useBaseLesson";
 
 // Dynamic lesson content based on lessonId
 const LESSON_CONTENT_BY_ID = {
@@ -272,36 +273,92 @@ export default function BaseLessonScreen() {
   const { lessonId, moduleId } = useLocalSearchParams();
   const { theme } = useTheme();
 
-  // Get lesson content based on lessonId
-  const lessonContent = useMemo(() => {
-    const content =
-      LESSON_CONTENT_BY_ID[lessonId as keyof typeof LESSON_CONTENT_BY_ID];
-    if (!content) {
-      console.warn(`No lesson content found for lessonId: ${lessonId}`);
-      // Return a default "coming soon" structure
+  // Fetch lesson from backend using the hook
+  const {
+    lesson: backendLesson,
+    isLoading,
+    error,
+  } = useBaseLesson(lessonId as string);
+
+  // Determine data source and lesson to use
+  const { lessonContent, isBackendData } = useMemo(() => {
+    if (backendLesson && !isLoading && !error) {
+      // Use backend data - transform to match frontend interface
+      const transformedLesson = {
+        _id: backendLesson._id,
+        topicId: typeof backendLesson.topicId === 'string' ? backendLesson.topicId : backendLesson.topicId._id,
+        title: backendLesson.title,
+        series: backendLesson.series || ["D"],
+        overview: backendLesson.overview,
+        objectives: backendLesson.objectives || [],
+        keyPoints: backendLesson.keyPoints || [],
+        prerequisites: [], // Base lesson model doesn't have prerequisites, so empty array
+        duration: backendLesson.duration,
+        resourceIds: typeof backendLesson.resourceIds[0] === 'string' 
+          ? backendLesson.resourceIds as string[]
+          : (backendLesson.resourceIds as any[]).map(r => r._id || r),
+        exerciseIds: typeof backendLesson.exerciseIds[0] === 'string'
+          ? backendLesson.exerciseIds as string[]
+          : (backendLesson.exerciseIds as any[]).map(e => e._id || e),
+        interactivityLevel: backendLesson.interactivityLevel,
+        offlineAvailable: backendLesson.offlineAvailable,
+        premiumOnly: backendLesson.premiumOnly,
+        hasVideo: backendLesson.resourceIds.length > 0, // Assume has video if has resources
+        videoId: `video_${backendLesson._id}`,
+        estimatedCompletionTime: Math.round(backendLesson.duration * 0.8), // 80% of duration
+        difficultyLevel: backendLesson.interactivityLevel === 'high' ? 'intermediate' : 'beginner',
+        learningOutcomes: backendLesson.objectives || [],
+      };
+
       return {
-        _id: lessonId as string,
-        title: "Lesson Coming Soon",
-        overview:
-          "This lesson content is being prepared and will be available soon.",
-        objectives: [],
-        keyPoints: [],
-        prerequisites: [],
-        duration: 0,
-        resourceIds: [],
-        exerciseIds: [],
-        interactivityLevel: "medium",
-        offlineAvailable: false,
-        premiumOnly: false,
-        hasVideo: false,
-        videoId: null,
-        estimatedCompletionTime: 0,
-        difficultyLevel: "beginner",
-        learningOutcomes: [],
+        lessonContent: transformedLesson,
+        isBackendData: true,
+      };
+    } else {
+      // Use mock data - get lesson content based on lessonId
+      const content = LESSON_CONTENT_BY_ID[lessonId as keyof typeof LESSON_CONTENT_BY_ID];
+      if (!content) {
+        console.warn(`No lesson content found for lessonId: ${lessonId}`);
+        // Return a default "coming soon" structure
+        return {
+          lessonContent: {
+            _id: lessonId as string,
+            title: "Lesson Coming Soon",
+            overview: "This lesson content is being prepared and will be available soon.",
+            objectives: [],
+            keyPoints: [],
+            prerequisites: [],
+            duration: 0,
+            resourceIds: [],
+            exerciseIds: [],
+            interactivityLevel: "medium",
+            offlineAvailable: false,
+            premiumOnly: false,
+            hasVideo: false,
+            videoId: null,
+            estimatedCompletionTime: 0,
+            difficultyLevel: "beginner",
+            learningOutcomes: [],
+          },
+          isBackendData: false,
+        };
+      }
+      return {
+        lessonContent: content,
+        isBackendData: false,
       };
     }
-    return content;
-  }, [lessonId]);
+  }, [backendLesson, isLoading, error, lessonId]);
+
+  // Log for debugging
+  console.log(
+    "📚 BaseLessonScreen - Using data source:",
+    isBackendData ? "Backend" : "Mock"
+  );
+  console.log("📚 BaseLessonScreen - Loading:", isLoading);
+  console.log("📚 BaseLessonScreen - Error:", error);
+  console.log("📚 BaseLessonScreen - Lesson ID:", lessonId);
+  console.log("📚 BaseLessonScreen - Found lesson:", lessonContent.title);
 
   const [currentSection, setCurrentSection] = useState<
     "overview" | "objectives" | "keypoints" | "prerequisites"
@@ -1026,7 +1083,126 @@ export default function BaseLessonScreen() {
       color: theme.colors.background,
       fontFamily: "Inter-Bold",
     },
+    // Loading styles
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 40,
+      backgroundColor: theme.colors.background,
+    },
+    loadingContent: {
+      alignItems: "center",
+      width: "100%",
+    },
+    loadingIconContainer: {
+      marginBottom: 30,
+    },
+    loadingIconGradient: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#667eea",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    loadingTitle: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: theme.colors.text,
+      fontFamily: "Inter-Bold",
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    loadingSubtitle: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+      fontFamily: "Inter-Regular",
+      textAlign: "center",
+      marginBottom: 40,
+    },
+    loadingDotsContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 8,
+    },
+    loadingDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: theme.colors.primary,
+    },
   });
+
+  // Loading Component
+  const BaseLessonLoader = () => {
+    return (
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <TouchableOpacity style={styles.backButton}>
+              <Ionicons name="arrow-back" size={20} color={theme.colors.textSecondary} />
+            </TouchableOpacity>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>Loading Lesson...</Text>
+              <Text style={styles.subtitle}>Base Lesson • Please wait</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Loading Content */}
+        <View style={styles.loadingContainer}>
+          <Animated.View
+            entering={FadeIn.duration(500)}
+            style={styles.loadingContent}
+          >
+            <Animated.View
+              entering={FadeIn.delay(200).duration(600)}
+              style={styles.loadingIconContainer}
+            >
+              <LinearGradient
+                colors={["#667eea", "#764ba2"]}
+                style={styles.loadingIconGradient}
+              >
+                <Ionicons name="school" size={48} color="white" />
+              </LinearGradient>
+            </Animated.View>
+
+            <Animated.View entering={FadeIn.delay(400).duration(600)}>
+              <Text style={styles.loadingTitle}>Loading Lesson</Text>
+              <Text style={styles.loadingSubtitle}>
+                Fetching lesson content...
+              </Text>
+            </Animated.View>
+
+            <Animated.View
+              entering={FadeIn.delay(600).duration(600)}
+              style={styles.loadingDotsContainer}
+            >
+              {[1, 2, 3].map((dot) => (
+                <Animated.View
+                  key={dot}
+                  style={styles.loadingDot}
+                  entering={FadeIn.delay(1200 + dot * 100).duration(400)}
+                />
+              ))}
+            </Animated.View>
+          </Animated.View>
+        </View>
+      </SafeAreaView>
+    );
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return <BaseLessonLoader />;
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -1045,7 +1221,7 @@ export default function BaseLessonScreen() {
           <View style={styles.headerContent}>
             <Text style={styles.title}>{lessonContent.title}</Text>
             <Text style={styles.subtitle}>
-              Base Lesson • {lessonContent.estimatedCompletionTime} min
+              Base Lesson • {lessonContent.estimatedCompletionTime} min {isBackendData ? "🌐" : "📱"}
             </Text>
           </View>
         </View>
@@ -1168,6 +1344,13 @@ export default function BaseLessonScreen() {
             <Text style={styles.startButtonText}>Start Interactive Lesson</Text>
           </LinearGradient>
         </TouchableOpacity>
+      )}
+
+      {error && (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingTitle}>Error Loading Lesson</Text>
+          <Text style={styles.loadingSubtitle}>{error}</Text>
+        </View>
       )}
     </SafeAreaView>
   );
