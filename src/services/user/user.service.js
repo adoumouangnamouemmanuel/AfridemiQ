@@ -157,6 +157,8 @@ const updateAllPreferences = async (userId, { preferences }) => {
 
 // Update specific preference type
 const updatePreferenceType = async (userId, type, { value }) => {
+  //TODO: remove later
+  console.log(`===================updatePreferenceType=======================`);
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 
@@ -181,6 +183,8 @@ const updatePreferenceType = async (userId, type, { value }) => {
   delete userResponse.resetPasswordToken;
   delete userResponse.resetPasswordExpires;
   delete userResponse.refreshToken;
+  //TODO: remove later
+  console.log(`++++++✅ UPDATE PREFERENCE TYPE: ${type} updated ++++++`);
   return userResponse;
 };
 
