@@ -190,6 +190,10 @@ const updatePreferenceType = async (userId, type, { value }) => {
 
 // Update multiple preference types
 const updateMultiplePreferences = async (userId, { preferences }) => {
+  //TODO: remove later
+  console.log(
+    `===================updateMultiplePreferences=======================`
+  );
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 
@@ -216,6 +220,10 @@ const updateMultiplePreferences = async (userId, { preferences }) => {
   delete userResponse.resetPasswordToken;
   delete userResponse.resetPasswordExpires;
   delete userResponse.refreshToken;
+  //TODO: remove later
+  console.log(
+    `++++++✅ UPDATE MULTIPLE PREFERENCES: Preferences updated ++++++`
+  );
   return userResponse;
 };
 
