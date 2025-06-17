@@ -86,7 +86,13 @@ const SESSION_STATUSES = ["scheduled", "completed", "cancelled"];
  */
 const USER_ROLES = ["student", "teacher", "admin"];
 const SUBSCRIPTION_TYPES = ["free", "premium", "pro"];
-const PAYMENT_STATUSES = ["active", "pending", "failed", "cancelled", "expired"];
+const PAYMENT_STATUSES = [
+  "active",
+  "pending",
+  "failed",
+  "cancelled",
+  "expired",
+];
 const ACCESS_LEVELS = ["basic", "premium", "unlimited"];
 const FONT_SIZES = ["small", "medium", "large"];
 const CONTENT_FORMATS = ["video", "text", "audio", "mixed"];
