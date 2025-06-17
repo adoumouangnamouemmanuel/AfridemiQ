@@ -124,6 +124,7 @@ class TopicApiService {
 
       return response;
     } catch (error) {
+      console.error(`🌐 TopicAPI - Request failed:`, error);
       throw error;
     } finally {
       // Remove from ongoing requests
