@@ -175,7 +175,7 @@ app.use("/api/exercises", exerciseRoutes);
 // Learning lesson routes
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/biology-lessons", biologyLessonRoutes);
-app.use("/api/math-lessons", mathLessonRoutes);
+app.use("/api/lessons/math", mathLessonRoutes);
 app.use("/api/english-lessons", englishLessonRoutes);
 app.use("/api/french-lessons", frenchLessonRoutes);
 app.use("/api/chemistry-lessons", chemistryLessonRoutes);
