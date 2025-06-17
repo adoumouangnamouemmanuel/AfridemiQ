@@ -178,8 +178,8 @@ const updatePreferenceType = async (userId, type, { value }) => {
   // Return user without sensitive fields
   const userResponse = user.toObject();
   delete userResponse.password;
-  delete userResponse.phoneVerificationCode;
-  delete userResponse.phoneVerificationExpires;
+  // delete userResponse.phoneVerificationCode;
+  // delete userResponse.phoneVerificationExpires;
   delete userResponse.resetPasswordToken;
   delete userResponse.resetPasswordExpires;
   delete userResponse.refreshToken;
