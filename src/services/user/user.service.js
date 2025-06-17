@@ -32,28 +32,19 @@ const register = async (data) => {
 
 // Login user
 const login = async ({ email, password }) => {
-  // TODO: Remove detailed logging before production
-  console.log("🔐 LOGIN: Attempting login for email:", email);
-
+  //TODO: remove later
+  console.log("===================login=======================");
   const user = await User.findOne({ email });
   if (!user) {
-    // TODO: Remove detailed logging before production
-    console.log("❌ LOGIN: User not found for email:", email);
     throw new UnauthorizedError("Email ou mot de passe incorrect");
   }
-
-  // TODO: Remove detailed logging before production
-  console.log("🔍 LOGIN: User found, comparing passwords");
-
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    // TODO: Remove detailed logging before production
-    console.log("❌ LOGIN: Password mismatch for email:", email);
     throw new UnauthorizedError("Email ou mot de passe incorrect");
   }
 
   // TODO: Remove detailed logging before production
-  console.log("✅ LOGIN: Password match, updating user data");
+  console.log("++++++✅ LOGIN: Password match, updating user data++++++");
 
   user.lastLogin = new Date();
   user.refreshToken = generateRefreshToken({
@@ -67,26 +58,27 @@ const login = async ({ email, password }) => {
 
   // TODO: Remove detailed logging before production
   console.log("✅ LOGIN: Login successful for user:", user._id);
-  console.log("✅ LOGIN: Generated token length:", token.length);
-  console.log(
-    "✅ LOGIN: Generated refresh token length:",
-    user.refreshToken.length
-  );
 
   return { user: user.toJSON(), token, refreshToken: user.refreshToken };
 };
 
 // Get user profile
 const getProfile = async (userId) => {
+  //TODO: remove later
+  console.log("===================getProfile=======================");
   const user = await User.findById(userId).select(
-    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
+    "-password -resetPasswordToken -resetPasswordExpires -refreshToken"
   );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
+  //TODO: remove later
+  console.log("++++++✅ GET PROFILE: User profile retrieved ++++++");
   return user;
 };
 
 // Update user profile
 const updateProfile = async (userId, updateData) => {
+  //TODO: remove later
+  console.log("===================updateProfile=======================");
   if (updateData.email) {
     const existingUser = await User.findOne({
       email: updateData.email,
@@ -98,9 +90,11 @@ const updateProfile = async (userId, updateData) => {
     new: true,
     runValidators: true,
   }).select(
-    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
+    "-password -resetPasswordToken -resetPasswordExpires -refreshToken"
   );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
+  //TODO: remove later
+  console.log("++++++✅ UPDATE PROFILE: User profile updated ++++++");
   return user;
 };
 
