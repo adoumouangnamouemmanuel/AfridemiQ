@@ -1,19 +1,22 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   FlatList,
   ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useCourseContentsBySubject } from "../../../src/hooks/learning/useCourseContent";
 import { useTheme } from "../../../src/utils/ThemeContext";
+// import type { CourseContent } from "../../../src/types/learning/course.content.types";
+
 
 // Dynamic course content based on topicId
 const COURSE_CONTENT_BY_TOPIC = {
@@ -425,35 +428,259 @@ const COURSE_CONTENT_BY_TOPIC = {
 
 export default function CourseContentScreen() {
   const router = useRouter();
-  const { topicId, topicName } = useLocalSearchParams();
+  const { topicId, topicName, subjectId } = useLocalSearchParams();
   const [expandedModule, setExpandedModule] = useState<string | null>(
     "module_1"
   );
   const { theme } = useTheme();
 
-  // Get course content based on topicId
-  const courseContent = useMemo(() => {
-    const content =
-      COURSE_CONTENT_BY_TOPIC[topicId as keyof typeof COURSE_CONTENT_BY_TOPIC];
-    if (!content) {
-      console.warn(`No course content found for topicId: ${topicId}`);
-      // Return a default "coming soon" structure
+  // FIX: Ensure all parameters are properly converted to strings
+  const validSubjectId = useMemo(() => {
+    if (Array.isArray(subjectId)) {
+      return subjectId[0] || "";
+    }
+    return typeof subjectId === 'string' ? subjectId : "";
+  }, [subjectId]);
+
+  const validTopicId = useMemo(() => {
+    if (Array.isArray(topicId)) {
+      return topicId[0] || "";
+    }
+    return typeof topicId === 'string' ? topicId : "";
+  }, [topicId]);
+
+  // FIX: Updated options to include topicId for better filtering
+  const courseContentOptions = useMemo(
+    () => ({
+      topicId: validTopicId,
+      sortBy: "title" as const,
+      sortOrder: "asc" as const,
+      isActive: true,
+    }),
+    [validTopicId]
+  );
+
+  // FIX: Use validSubjectId and ensure topicId filtering works
+  const {
+    courseContents: backendCourseContents,
+    isLoading,
+    error,
+  } = useCourseContentsBySubject(validSubjectId, courseContentOptions);
+
+  // FIX: Improved data processing logic
+  const { courseContentData, isBackendData } = useMemo(() => {
+    if (
+      backendCourseContents &&
+      backendCourseContents.length > 0 &&
+      !isLoading &&
+      !error
+    ) {
+      console.log("🔍 CourseContentScreen - Processing backend data:", backendCourseContents.length, "items");
+      console.log("🔍 CourseContentScreen - Looking for topicId:", validTopicId);
+      
+      // FIX: Better filtering strategy
+      let foundCourseContent = null;
+      
+      // Strategy 1: Find exact match by topicId
+      for (const content of backendCourseContents) {
+        const topicIdArray = Array.isArray(content.topicId) 
+          ? content.topicId 
+          : [content.topicId];
+        
+        const hasMatchingTopic = topicIdArray.some(id => {
+          // Handle both string IDs and object IDs
+          const idString = typeof id === 'object' && id !== null ? (id as any)._id || String(id) : String(id);
+          const matches = idString === validTopicId;
+          console.log("🔍 Comparing:", idString, "with", validTopicId, "=>", matches);
+          return matches;
+        });
+        
+        if (hasMatchingTopic) {
+          foundCourseContent = content;
+          console.log("🔍 Found matching course content:", content.title);
+          break;
+        }
+      }
+      
+      // Strategy 2: If no exact match, check if we should use the first available content
+      if (!foundCourseContent && backendCourseContents.length > 0) {
+        console.log("🔍 No exact topic match, checking if content is topic-agnostic");
+        // Only use first content if it seems to be general content for the subject
+        const firstContent = backendCourseContents[0];
+        if (!firstContent.topicId || firstContent.topicId.length === 0) {
+          foundCourseContent = firstContent;
+          console.log("🔍 Using general subject content");
+        }
+      }
+
+      if (foundCourseContent) {
+        // FIX: Ensure modules have the correct structure
+        const processedModules = (foundCourseContent.modules || []).map((module, index) => ({
+          id: module.id || `module_${index + 1}`,
+          title: module.title || `Module ${index + 1}`,
+          description: module.description || "Module description",
+          order: module.order || index + 1,
+          series: module.series || "D",
+          lessons: Array.isArray(module.lessons) ? module.lessons : [],
+          exerciseIds: Array.isArray(module.exerciseIds) ? module.exerciseIds : [],
+          assessment: module.assessment || null,
+          progressTracking: {
+            completedLessons: module.progressTracking?.completedLessons || 0,
+            totalLessons: module.progressTracking?.totalLessons || (module.lessons ? module.lessons.length : 0),
+            lastAccessedAt: module.progressTracking?.lastAccessedAt || null,
+          },
+          estimatedDuration: module.estimatedDuration || 60,
+          prerequisites: Array.isArray(module.prerequisites) ? module.prerequisites : [],
+          isLocked: module.isLocked !== undefined ? module.isLocked : false,
+          unlockConditions: {
+            requiredModules: module.unlockConditions?.requiredModules || [],
+            minimumScore: module.unlockConditions?.minimumScore || 0,
+          },
+        }));
+
+        const transformedContent = {
+          _id: foundCourseContent._id,
+          examId: foundCourseContent.examId || [],
+          subjectId: foundCourseContent.subjectId,
+          topicId: foundCourseContent.topicId || [],
+          series: foundCourseContent.series || ["D"],
+          title: foundCourseContent.title,
+          description: foundCourseContent.description,
+          level: foundCourseContent.level || "beginner",
+          modules: processedModules,
+          prerequisites: Array.isArray(foundCourseContent.prerequisites) ? foundCourseContent.prerequisites : [],
+          estimatedDuration: foundCourseContent.estimatedDuration || 0,
+          progressTracking: {
+            completedLessons: foundCourseContent.progressTracking?.completedLessons || 0,
+            totalLessons: foundCourseContent.progressTracking?.totalLessons || processedModules.reduce((sum, module) => sum + (module.lessons?.length || 0), 0),
+            lastAccessedAt: foundCourseContent.progressTracking?.lastAccessedAt || null,
+            averageCompletionTime: foundCourseContent.progressTracking?.averageCompletionTime || 0,
+          },
+          accessibilityOptions: foundCourseContent.accessibilityOptions || {
+            languages: ["french"],
+            formats: ["text"],
+            accommodations: [],
+            hasAudioVersion: false,
+            hasBrailleVersion: false,
+            screenReaderFriendly: true,
+          },
+          premiumOnly: foundCourseContent.premiumOnly || false,
+          accessType: foundCourseContent.accessType || "free",
+          analytics: foundCourseContent.analytics || {
+            enrollmentCount: 0,
+            completionRate: 0,
+            averageRating: 0,
+            totalViews: 0,
+            lastViewedAt: new Date(),
+          },
+          isActive: foundCourseContent.isActive !== false,
+          isArchived: foundCourseContent.isArchived || false,
+        };
+
+        return {
+          courseContentData: transformedContent,
+          isBackendData: true,
+        };
+      } else {
+        // FIX: No matching course content found for this topic
+        console.warn(`No course content found for topicId: ${validTopicId} in subject: ${validSubjectId}`);
+        return {
+          courseContentData: {
+            _id: `course_${validTopicId}_notfound`,
+            title: `${topicName} Course`,
+            description: `Course content for ${topicName} is not yet available. This topic may be under development or the content hasn't been created yet.`,
+            modules: [],
+            estimatedDuration: 0,
+            analytics: {
+              enrollmentCount: 0,
+              completionRate: 0,
+              averageRating: 0,
+              totalViews: 0,
+              lastViewedAt: new Date(),
+            },
+            progressTracking: {
+              completedLessons: 0,
+              totalLessons: 0,
+              lastAccessedAt: null,
+              averageCompletionTime: 0,
+            },
+            accessibilityOptions: {
+              languages: ["french"],
+              formats: ["text"],
+              accommodations: [],
+              hasAudioVersion: false,
+              hasBrailleVersion: false,
+              screenReaderFriendly: true,
+            },
+            premiumOnly: false,
+            accessType: "free",
+            isActive: true,
+            isArchived: false,
+          },
+          isBackendData: false,
+        };
+      }
+    }
+
+    // FIX: Improved mock data fallback with better error messaging
+    console.log("🔍 CourseContentScreen - Using mock data for topicId:", validTopicId);
+    const mockContent = COURSE_CONTENT_BY_TOPIC[validTopicId as keyof typeof COURSE_CONTENT_BY_TOPIC];
+    
+    if (!mockContent) {
+      console.warn(`No mock course content found for topicId: ${validTopicId}`);
       return {
-        _id: "course_default",
-        title: `${topicName} Course`,
-        description:
-          "Course content is being prepared and will be available soon.",
-        modules: [],
-        estimatedDuration: 0,
-        analytics: {
-          enrollmentCount: 0,
-          completionRate: 0,
-          averageRating: 0,
+        courseContentData: {
+          _id: "course_default",
+          title: `${topicName} Course`,
+          description: `Course content for ${topicName} is being prepared and will be available soon. This topic may be new or under development.`,
+          modules: [],
+          estimatedDuration: 0,
+          analytics: {
+            enrollmentCount: 0,
+            completionRate: 0,
+            averageRating: 0,
+            totalViews: 0,
+            lastViewedAt: new Date(),
+          },
+          progressTracking: {
+            completedLessons: 0,
+            totalLessons: 0,
+            lastAccessedAt: null,
+            averageCompletionTime: 0,
+          },
+          accessibilityOptions: {
+            languages: ["french"],
+            formats: ["text"],
+            accommodations: [],
+            hasAudioVersion: false,
+            hasBrailleVersion: false,
+            screenReaderFriendly: true,
+          },
+          premiumOnly: false,
+          accessType: "free",
+          isActive: true,
+          isArchived: false,
         },
+        isBackendData: false,
       };
     }
-    return content;
-  }, [topicId, topicName]);
+    
+    return {
+      courseContentData: mockContent,
+      isBackendData: false,
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [backendCourseContents, isLoading, error, validTopicId, topicName]);
+
+  // FIX: Updated console logs to use valid parameters
+  console.log("📚 CourseContentScreen - Using data source:", isBackendData ? "Backend" : "Mock");
+  console.log("📚 CourseContentScreen - Loading:", isLoading);
+  console.log("📚 CourseContentScreen - Error:", error);
+  console.log("📚 CourseContentScreen - Topic ID:", validTopicId);
+  console.log("📚 CourseContentScreen - Subject ID:", validSubjectId);
+  console.log("📚 CourseContentScreen - Found course content:", !!courseContentData);
+
+  const courseContent = courseContentData;
 
   const handleModulePress = (moduleId: string) => {
     setExpandedModule(expandedModule === moduleId ? null : moduleId);
@@ -1059,7 +1286,122 @@ export default function CourseContentScreen() {
       textAlign: "center",
       lineHeight: 20,
     },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 40,
+      backgroundColor: theme.colors.background,
+    },
+    loadingContent: {
+      alignItems: "center",
+      width: "100%",
+    },
+    loadingIconContainer: {
+      marginBottom: 30,
+      padding: 20,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 50,
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 8,
+    },
+    loadingTitle: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: theme.colors.text,
+      fontFamily: "Inter-Bold",
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    loadingSubtitle: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+      fontFamily: "Inter-Regular",
+      textAlign: "center",
+      marginBottom: 40,
+    },
+    loadingDotsContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 8,
+    },
+    loadingDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: theme.colors.primary,
+    },
   });
+
+  const CourseContentLoader = () => {
+    return (
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <TouchableOpacity style={styles.backButton}>
+              <Ionicons
+                name="arrow-back"
+                size={20}
+                color={theme.colors.textSecondary}
+              />
+            </TouchableOpacity>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>{topicName}</Text>
+              <Text style={styles.subtitle}>Loading Course Content...</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Loading Content */}
+        <View style={styles.loadingContainer}>
+          <Animated.View
+            entering={FadeIn.duration(500)}
+            style={styles.loadingContent}
+          >
+            <Animated.View
+              entering={FadeIn.delay(200).duration(600)}
+              style={styles.loadingIconContainer}
+            >
+              <Ionicons
+                name="play-circle"
+                size={48}
+                color={theme.colors.primary}
+              />
+            </Animated.View>
+
+            <Animated.View entering={FadeIn.delay(400).duration(600)}>
+              <Text style={styles.loadingTitle}>Loading Course</Text>
+              <Text style={styles.loadingSubtitle}>
+                Fetching {topicName} content...
+              </Text>
+            </Animated.View>
+
+            <Animated.View
+              entering={FadeIn.delay(600).duration(600)}
+              style={styles.loadingDotsContainer}
+            >
+              {[1, 2, 3].map((dot) => (
+                <Animated.View
+                  key={dot}
+                  style={styles.loadingDot}
+                  entering={FadeIn.delay(1200 + dot * 100).duration(400)}
+                />
+              ))}
+            </Animated.View>
+          </Animated.View>
+        </View>
+      </SafeAreaView>
+    );
+  };
+
+  if (isLoading) {
+    return <CourseContentLoader />;
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -1077,7 +1419,9 @@ export default function CourseContentScreen() {
           </TouchableOpacity>
           <View style={styles.headerContent}>
             <Text style={styles.title}>{topicName}</Text>
-            <Text style={styles.subtitle}>Course Content</Text>
+            <Text style={styles.subtitle}>
+              Course Content {isBackendData ? "🌐" : "📱"}
+            </Text>
           </View>
         </View>
       </View>
@@ -1169,10 +1513,23 @@ export default function CourseContentScreen() {
                 size={64}
                 color={theme.colors.textSecondary}
               />
-              <Text style={styles.emptyTitle}>Course Coming Soon</Text>
+              <Text style={styles.emptyTitle}>
+                {/* FIX: Better empty state messaging */}
+                {isLoading 
+                  ? "Loading Course..." 
+                  : isBackendData 
+                  ? "Course Ready - No Modules Yet" 
+                  : "Course Coming Soon"
+                }
+              </Text>
               <Text style={styles.emptySubtitle}>
-                Course content for {topicName} is being prepared and will be
-                available soon.
+                {error
+                  ? `Error: ${error}`
+                  : isLoading
+                  ? "Please wait while we fetch the course content..."
+                  : isBackendData
+                  ? `Course "${courseContent.title}" is available but modules are being prepared. Check back soon!`
+                  : `Course content for ${topicName} is being prepared and will be available soon.`}
               </Text>
             </View>
           )}
