@@ -1,11 +1,14 @@
 const { StatusCodes } = require("http-status-codes");
-const lessonService = require("../../../services/learning/lesson/lesson.service");
+const LessonService = require("../../../services/learning/lesson/lesson.service");
 const { asyncHandler } = require("../../../utils/asyncHandler");
 const { ApiError } = require("../../../utils/ApiError");
 const createLogger = require("../../../services/logging.service");
 const { Lesson } = require("../../../models/learning/lesson/lesson.base.model");
 
 const logger = createLogger("LessonController");
+
+// Create instance of the service
+const lessonService = new LessonService();
 
 class LessonController {
   createLesson = asyncHandler(async (req, res) => {
