@@ -419,6 +419,8 @@ const verifyPhone = async (userId, code) => {
   return user;
 };
 
+
+// TODO: Implement a service to send SMS verification codes
 // Request phone verification code
 const requestPhoneVerification = async (userId, phoneNumber) => {
   const user = await User.findById(userId);
