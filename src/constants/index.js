@@ -448,6 +448,9 @@ const SUBJECT_CATEGORIES = [
 const SUBJECT_DIFFICULTIES = ["facile", "moyen", "difficile"];
 const SUBJECT_STATUSES = ["active", "inactive", "archived"];
 
+const LIMIT = 10;
+const PAGE = 1;
+
 module.exports = {
   TOTAL_STEPS,
   NOTIFICATION_TYPES,
@@ -552,4 +555,6 @@ module.exports = {
   SUBJECT_CATEGORIES,
   SUBJECT_DIFFICULTIES,
   SUBJECT_STATUSES,
+  PAGE,
+  LIMIT,
 };
