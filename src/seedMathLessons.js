@@ -97,27 +97,27 @@ function getMockUserId() {
   return new mongoose.Types.ObjectId("6840c7494a8d3286ee2f7e7d");
 }
 
-// Complete math lesson data with all base fields included
-const getCompleteMathLessonData = (topicId, userId) => ({
+// Second math lesson data with all base fields included
+const getSecondMathLessonData = (topicId, userId) => ({
   // Base lesson fields (required by the discriminator)
   topicId: topicId,
-  title: "Introduction aux fonctions quadratiques",
+  title: "Résolution graphique et algébrique des équations",
   series: ["D"],
   overview:
-    "Cette leçon introduit les concepts fondamentaux des fonctions quadratiques, leur représentation graphique et leurs applications pratiques.",
+    "Cette leçon approfondit les méthodes de résolution des équations du premier et second degré, en combinant les approches graphiques et algébriques pour une compréhension complète.",
   objectives: [
-    "Comprendre la définition d'une fonction quadratique",
-    "Identifier les éléments caractéristiques d'une parabole",
-    "Résoudre des équations du second degré",
-    "Appliquer les fonctions quadratiques à des problèmes concrets",
+    "Maîtriser la résolution graphique des équations",
+    "Comparer les méthodes algébriques et graphiques",
+    "Interpréter graphiquement les solutions d'une équation",
+    "Résoudre des systèmes d'équations par substitution et élimination",
   ],
   keyPoints: [
-    "Forme générale : f(x) = ax² + bx + c",
-    "Le discriminant détermine le nombre de solutions",
-    "Le sommet de la parabole a pour coordonnées (-b/2a, f(-b/2a))",
-    "Les applications incluent la trajectoire des projectiles et l'optimisation",
+    "Une équation f(x) = 0 a pour solutions les abscisses des points d'intersection avec l'axe des x",
+    "Les équations f(x) = g(x) ont pour solutions les abscisses des points d'intersection des courbes",
+    "La méthode graphique donne une approximation, la méthode algébrique donne la valeur exacte",
+    "Les systèmes d'équations peuvent être résolus par plusieurs méthodes",
   ],
-  duration: 90, // 90 minutes
+  duration: 75, // 75 minutes
   resourceIds: [],
   exerciseIds: [],
   interactivityLevel: "high",
@@ -142,10 +142,10 @@ const getCompleteMathLessonData = (topicId, userId) => ({
 
   // Math-specific fields
   introduction: {
-    text: "Les fonctions quadratiques sont omniprésentes dans notre quotidien, de la trajectoire d'un ballon à l'optimisation des profits d'une entreprise. Cette leçon vous permettra de maîtriser ces concepts essentiels.",
-    videoUrl: "https://example.com/videos/fonctions-quadratiques-intro.mp4",
+    text: "La résolution d'équations est une compétence fondamentale en mathématiques. Cette leçon vous permettra de maîtriser les différentes approches, graphiques et algébriques, pour résoudre efficacement tout type d'équation.",
+    videoUrl: "https://example.com/videos/resolution-equations-intro.mp4",
     transcript:
-      "Dans cette vidéo, nous découvrirons ensemble les fonctions quadratiques...",
+      "Dans cette vidéo, nous explorerons les différentes méthodes pour résoudre des équations...",
     accessibility: {
       hasSubtitles: true,
       hasAudioDescription: false,
@@ -153,70 +153,135 @@ const getCompleteMathLessonData = (topicId, userId) => ({
   },
   concepts: [
     {
-      name: "Fonction quadratique",
+      name: "Résolution graphique",
       definition:
-        "Une fonction quadratique est une fonction polynomiale de degré 2, de la forme f(x) = ax² + bx + c où a ≠ 0.",
+        "La résolution graphique consiste à trouver les solutions d'une équation en analysant la représentation graphique des fonctions concernées.",
       topic: "algebra",
       explanation:
-        "Le terme quadratique vient du latin 'quadratus' qui signifie carré, en référence au terme x².",
+        "Cette méthode permet de visualiser les solutions et de comprendre leur signification géométrique.",
       difficultyLevel: "intermediate",
       examples: [
         {
-          expression: "f(x) = 2x² - 3x + 1",
+          expression: "x² - 2x - 3 = 0",
           explanation:
-            "Ici, a = 2, b = -3, c = 1. La parabole s'ouvre vers le haut car a > 0.",
+            "Graphiquement, on cherche les points où la parabole y = x² - 2x - 3 coupe l'axe des x.",
           steps: [
-            "Identifier les coefficients : a = 2, b = -3, c = 1",
-            "Déterminer le sens d'ouverture : a > 0 donc ouverture vers le haut",
-            "Calculer le discriminant : Δ = b² - 4ac = 9 - 8 = 1",
+            "Tracer la courbe y = x² - 2x - 3",
+            "Identifier les points d'intersection avec l'axe des x",
+            "Lire les abscisses de ces points : x = -1 et x = 3",
           ],
         },
       ],
       formulas: [
         {
-          formula: "f(x) = ax² + bx + c",
-          useCase: "Forme générale d'une fonction quadratique",
+          formula: "f(x) = 0 ⟺ Courbe coupe l'axe des x",
+          useCase: "Résolution graphique d'équations",
           derivationSteps: [
-            "Polynôme de degré 2",
-            "Coefficient dominant a ≠ 0",
+            "Représenter graphiquement f(x)",
+            "Trouver les intersections avec l'axe des x",
           ],
         },
       ],
       visualAid: {
         mediaType: "image",
-        url: "https://example.com/images/parabole-generale.png",
+        url: "https://example.com/images/resolution-graphique.png",
         altText:
-          "Graphique d'une parabole montrant l'axe de symétrie et le sommet",
+          "Graphique montrant l'intersection d'une parabole avec l'axe des x",
       },
     },
     {
-      name: "Discriminant",
+      name: "Systèmes d'équations linéaires",
       definition:
-        "Le discriminant d'une équation quadratique ax² + bx + c = 0 est Δ = b² - 4ac.",
+        "Un système d'équations linéaires est un ensemble d'équations du premier degré à résoudre simultanément.",
       topic: "algebra",
       explanation:
-        "Le discriminant permet de déterminer le nombre et la nature des solutions de l'équation.",
+        "Les systèmes peuvent être résolus par substitution, élimination ou méthodes graphiques.",
       difficultyLevel: "intermediate",
       examples: [
         {
-          expression: "x² - 5x + 6 = 0",
+          expression: "{ 2x + y = 5 ; x - y = 1 }",
           explanation:
-            "Δ = 25 - 24 = 1 > 0, donc deux solutions réelles distinctes.",
+            "Par addition : (2x + y) + (x - y) = 5 + 1, donc 3x = 6, x = 2, puis y = 1.",
           steps: [
-            "Identifier a = 1, b = -5, c = 6",
-            "Calculer Δ = (-5)² - 4(1)(6) = 25 - 24 = 1",
-            "Δ > 0 : deux solutions réelles distinctes",
+            "Méthode par élimination : additionner les équations",
+            "3x = 6, donc x = 2",
+            "Substituer dans la première : 2(2) + y = 5, donc y = 1",
+            "Vérifier : 2(2) + 1 = 5 ✓ et 2 - 1 = 1 ✓",
           ],
         },
       ],
       formulas: [
         {
-          formula: "Δ = b² - 4ac",
-          useCase:
-            "Déterminer le nombre de solutions d'une équation quadratique",
+          formula: "{ ax + by = c ; dx + ey = f }",
+          useCase: "Forme générale d'un système linéaire 2×2",
           derivationSteps: [
-            "Provient de la forme canonique",
-            "Analyse du terme sous la racine",
+            "Méthode de substitution",
+            "Méthode d'élimination",
+            "Méthode graphique",
+          ],
+        },
+      ],
+    },
+    {
+      name: "Équations du second degré",
+      definition:
+        "Une équation du second degré est de la forme ax² + bx + c = 0 où a ≠ 0.",
+      topic: "algebra",
+      explanation:
+        "Ces équations peuvent être résolues par factorisation, complétion du carré ou formule quadratique.",
+      difficultyLevel: "advanced",
+      examples: [
+        {
+          expression: "x² - 5x + 6 = 0",
+          explanation:
+            "Par factorisation : (x - 2)(x - 3) = 0, donc x = 2 ou x = 3.",
+          steps: [
+            "Chercher deux nombres qui multipliés donnent 6 et additionnés donnent -5",
+            "Ces nombres sont -2 et -3",
+            "Factoriser : x² - 5x + 6 = (x - 2)(x - 3)",
+            "Solutions : x = 2 et x = 3",
+          ],
+        },
+      ],
+      formulas: [
+        {
+          formula: "x = (-b ± √(b² - 4ac)) / (2a)",
+          useCase: "Formule quadratique pour résoudre ax² + bx + c = 0",
+          derivationSteps: [
+            "Complétion du carré",
+            "Isolation de x",
+            "Simplification",
+          ],
+        },
+      ],
+    },
+    {
+      name: "Méthodes de résolution comparées",
+      definition:
+        "Comparaison entre les méthodes graphiques et algébriques pour choisir l'approche la plus adaptée.",
+      topic: "algebra",
+      explanation:
+        "Chaque méthode a ses avantages selon le contexte et la précision requise.",
+      difficultyLevel: "intermediate",
+      examples: [
+        {
+          expression: "x² - 4x + 3 = 0",
+          explanation:
+            "Méthode graphique : approximation visuelle. Méthode algébrique : solutions exactes x = 1 et x = 3.",
+          steps: [
+            "Graphique : tracer y = x² - 4x + 3 et lire les intersections",
+            "Algébrique : factoriser (x-1)(x-3) = 0",
+            "Comparer : graphique donne ≈1 et ≈3, algébrique donne exactement 1 et 3",
+          ],
+        },
+      ],
+      formulas: [
+        {
+          formula: "Précision graphique ≈ ; Précision algébrique =",
+          useCase: "Choisir la méthode selon le besoin de précision",
+          derivationSteps: [
+            "Évaluer le contexte du problème",
+            "Déterminer la précision requise",
           ],
         },
       ],
@@ -224,71 +289,158 @@ const getCompleteMathLessonData = (topicId, userId) => ({
   ],
   theorems: [
     {
-      title: "Théorème de Viète",
+      title: "Théorème fondamental de l'algèbre (cas particulier)",
       statement:
-        "Pour une équation ax² + bx + c = 0 ayant deux racines x₁ et x₂, on a : x₁ + x₂ = -b/a et x₁ × x₂ = c/a",
+        "Toute équation polynomiale de degré n à coefficients complexes admet exactement n solutions (comptées avec multiplicité) dans ℂ.",
       proof: [
-        "Soit f(x) = ax² + bx + c avec racines x₁ et x₂",
-        "Alors f(x) = a(x - x₁)(x - x₂)",
-        "En développant : f(x) = a(x² - (x₁ + x₂)x + x₁x₂)",
-        "Par identification : -(x₁ + x₂) = b/a et x₁x₂ = c/a",
+        "Pour le cas du second degré : ax² + bx + c = 0",
+        "Le discriminant Δ = b² - 4ac détermine la nature des solutions",
+        "Si Δ ≥ 0 : deux solutions réelles",
+        "Si Δ < 0 : deux solutions complexes conjuguées",
       ],
       applications: [
-        "Vérification de solutions",
-        "Construction d'équations à partir de leurs racines",
-        "Simplification de calculs",
+        "Garantit l'existence de solutions",
+        "Détermine le nombre maximum de solutions",
+        "Justifie les méthodes de résolution",
+      ],
+    },
+    {
+      title: "Théorème de compatibilité des systèmes linéaires",
+      statement:
+        "Un système d'équations linéaires est compatible si et seulement si le rang de la matrice des coefficients est égal au rang de la matrice augmentée.",
+      proof: [
+        "Pour un système 2×2 : { ax + by = c ; dx + ey = f }",
+        "Le déterminant principal est Δ = ae - bd",
+        "Si Δ ≠ 0 : solution unique",
+        "Si Δ = 0 : soit aucune solution, soit infinité de solutions",
+      ],
+      applications: [
+        "Déterminer l'existence de solutions",
+        "Classifier les systèmes",
+        "Choisir la méthode de résolution appropriée",
       ],
     },
   ],
   workedExamples: [
     {
-      problem: "Résoudre l'équation 2x² - 7x + 3 = 0",
+      problem: "Résoudre graphiquement et algébriquement : x² - x - 2 = 0",
       solutionSteps: [
-        "Identifier les coefficients : a = 2, b = -7, c = 3",
-        "Calculer le discriminant : Δ = (-7)² - 4(2)(3) = 49 - 24 = 25",
-        "Δ > 0, donc deux solutions réelles",
-        "x₁ = (7 + √25)/(2×2) = (7 + 5)/4 = 3",
-        "x₂ = (7 - √25)/(2×2) = (7 - 5)/4 = 1/2",
+        "Méthode algébrique par factorisation :",
+        "Chercher deux nombres qui multipliés donnent -2 et additionnés donnent -1",
+        "Ces nombres sont -2 et +1",
+        "Factorisation : x² - x - 2 = (x - 2)(x + 1)",
+        "Solutions algébriques : x = 2 et x = -1",
+        "Méthode graphique :",
+        "Tracer la parabole y = x² - x - 2",
+        "Identifier les intersections avec l'axe des x",
+        "Lecture graphique : x ≈ -1 et x ≈ 2",
+        "Vérification : les deux méthodes concordent",
       ],
-      answer: "Les solutions sont x = 3 et x = 1/2",
+      answer:
+        "Les solutions sont x = -1 et x = 2 (confirmées par les deux méthodes)",
       difficultyLevel: "intermediate",
+    },
+    {
+      problem: "Résoudre le système : { 3x + 2y = 12 ; x - y = 1 }",
+      solutionSteps: [
+        "Méthode par substitution :",
+        "De la seconde équation : x = y + 1",
+        "Substituer dans la première : 3(y + 1) + 2y = 12",
+        "Développer : 3y + 3 + 2y = 12",
+        "Simplifier : 5y = 9, donc y = 9/5",
+        "Calculer x : x = 9/5 + 1 = 14/5",
+        "Vérification : 3(14/5) + 2(9/5) = 42/5 + 18/5 = 60/5 = 12 ✓",
+        "Vérification : 14/5 - 9/5 = 5/5 = 1 ✓",
+      ],
+      answer: "La solution est x = 14/5 et y = 9/5",
+      difficultyLevel: "intermediate",
+    },
+    {
+      problem: "Résoudre graphiquement : 2x - 1 = x² - 3x + 2",
+      solutionSteps: [
+        "Reformuler comme intersection de deux courbes :",
+        "y₁ = 2x - 1 (droite)",
+        "y₂ = x² - 3x + 2 (parabole)",
+        "Tracer les deux courbes sur le même graphique",
+        "Identifier les points d'intersection",
+        "Lecture graphique des abscisses : x ≈ 1 et x ≈ 3",
+        "Vérification algébrique : x² - 3x + 2 = 2x - 1",
+        "Simplifier : x² - 5x + 3 = 0",
+        "Solutions exactes : x = (5 ± √13)/2",
+      ],
+      answer:
+        "Solutions approximatives : x ≈ 1 et x ≈ 3 ; Solutions exactes : x = (5 ± √13)/2",
+      difficultyLevel: "advanced",
     },
   ],
   practiceExercises: [
     {
       exerciseId: new mongoose.Types.ObjectId(),
       type: "practice",
-      description: "Exercices sur la résolution d'équations quadratiques",
+      description: "Exercices de résolution d'équations mixtes",
+      difficultyLevel: "intermediate",
+    },
+    {
+      exerciseId: new mongoose.Types.ObjectId(),
+      type: "application",
+      description: "Problèmes appliqués avec systèmes d'équations",
+      difficultyLevel: "advanced",
+    },
+    {
+      exerciseId: new mongoose.Types.ObjectId(),
+      type: "comparison",
+      description: "Comparaison des méthodes graphiques et algébriques",
       difficultyLevel: "intermediate",
     },
   ],
   interactiveElements: [
     {
-      elementType: "geogebra",
-      url: "https://www.geogebra.org/m/fonction-quadratique",
+      elementType: "desmos",
+      url: "https://www.desmos.com/calculator/resolution-equations",
       instructions:
-        "Manipulez les curseurs pour voir l'effet des paramètres a, b et c sur la parabole.",
+        "Utilisez le graphique interactif pour visualiser les solutions des équations en temps réel.",
       offlineAvailable: false,
+    },
+    {
+      elementType: "simulation",
+      url: "https://example.com/simulation/systemes-equations",
+      instructions:
+        "Manipulez les coefficients pour voir l'effet sur les solutions du système.",
+      offlineAvailable: false,
+    },
+    {
+      elementType: "quiz",
+      url: "https://example.com/quiz/methods-comparison",
+      instructions:
+        "Quiz interactif pour tester votre capacité à choisir la bonne méthode.",
+      offlineAvailable: true,
     },
   ],
   summary: {
     keyTakeaways: [
-      "Les fonctions quadratiques ont une représentation graphique en forme de parabole",
-      "Le discriminant détermine le nombre de solutions de l'équation associée",
-      "Le sommet de la parabole est un point d'optimisation important",
+      "La résolution graphique offre une visualisation des solutions",
+      "La résolution algébrique donne des valeurs exactes",
+      "Les systèmes d'équations nécessitent des méthodes spécifiques",
+      "La vérification des solutions est toujours recommandée",
+      "Le choix de la méthode dépend du contexte et de la précision requise",
     ],
     suggestedNextTopics: [],
   },
   prerequisites: [],
   learningObjectives: [
-    "Maîtriser la forme générale des fonctions quadratiques",
-    "Savoir calculer et interpréter le discriminant",
-    "Résoudre des équations du second degré",
-    "Comprendre la représentation graphique des paraboles",
+    "Résoudre graphiquement des équations du premier et second degré",
+    "Maîtriser les méthodes algébriques de résolution",
+    "Résoudre des systèmes d'équations linéaires",
+    "Comparer et valider les solutions obtenues par différentes méthodes",
+    "Choisir la méthode de résolution la plus appropriée selon le contexte",
   ],
   gamification: {
-    badges: ["Expert en équations", "Maître des paraboles"],
-    points: 150,
+    badges: [
+      "Détective d'équations",
+      "Maître des systèmes",
+      "Expert en méthodes",
+    ],
+    points: 120,
   },
   accessibilityOptions: {
     hasBraille: false,
@@ -298,8 +450,8 @@ const getCompleteMathLessonData = (topicId, userId) => ({
   premiumOnly: false,
 });
 
-// Function to seed math lessons
-async function seedMathLessons() {
+// Function to seed the second math lesson
+async function seedSecondMathLesson() {
   try {
     // Get topic ID for "Fonctions et équations"
     const topicId = await getTopicIdByName("Fonctions et équations");
@@ -319,36 +471,54 @@ async function seedMathLessons() {
       console.log("Utilisateur existant trouvé avec l'ID:", userId);
     }
 
-    // Create mock exercise for practiceExercises validation
-    const mockExerciseId = new mongoose.Types.ObjectId();
-    const existingExercise = await Exercise.findById(mockExerciseId);
-    if (!existingExercise) {
-      await Exercise.create({
-        _id: mockExerciseId,
-        title: "Exercices sur les fonctions quadratiques",
-        description:
-          "Série d'exercices pour pratiquer la résolution d'équations quadratiques",
-        type: "practice",
-        difficulty: "intermediate",
-      });
-      console.log("Exercice mock créé avec l'ID:", mockExerciseId);
+    // Create mock exercises for practice exercises validation
+    const mockExerciseIds = [
+      new mongoose.Types.ObjectId(),
+      new mongoose.Types.ObjectId(),
+      new mongoose.Types.ObjectId(),
+    ];
+
+    for (let i = 0; i < mockExerciseIds.length; i++) {
+      const existingExercise = await Exercise.findById(mockExerciseIds[i]);
+      if (!existingExercise) {
+        const exerciseTypes = ["practice", "application", "comparison"];
+        const exerciseDescriptions = [
+          "Exercices de résolution d'équations mixtes",
+          "Problèmes appliqués avec systèmes d'équations",
+          "Comparaison des méthodes graphiques et algébriques",
+        ];
+
+        await Exercise.create({
+          _id: mockExerciseIds[i],
+          title: `Exercices de résolution d'équations ${i + 1}`,
+          description: exerciseDescriptions[i],
+          type: exerciseTypes[i],
+          difficulty: i === 1 ? "advanced" : "intermediate",
+        });
+        console.log(
+          `Exercice mock ${i + 1} créé avec l'ID:`,
+          mockExerciseIds[i]
+        );
+      }
     }
 
-    // Delete existing lessons for this topic
+    // Delete existing lessons with this title for this topic
     const deleteResult = await MathLesson.deleteMany({
       topicId: topicId,
-      title: "Introduction aux fonctions quadratiques",
+      title: "Résolution graphique et algébrique des équations",
     });
     console.log(`${deleteResult.deletedCount} leçons existantes supprimées`);
 
-    // Get complete math lesson data and update exerciseId
-    const mathLessonData = getCompleteMathLessonData(topicId, userId);
-    mathLessonData.practiceExercises[0].exerciseId = mockExerciseId;
+    // Get complete math lesson data and update exercise IDs
+    const mathLessonData = getSecondMathLessonData(topicId, userId);
+    mathLessonData.practiceExercises[0].exerciseId = mockExerciseIds[0];
+    mathLessonData.practiceExercises[1].exerciseId = mockExerciseIds[1];
+    mathLessonData.practiceExercises[2].exerciseId = mockExerciseIds[2];
 
     // Create complete math lesson with validation disabled temporarily
     const mathLesson = new MathLesson(mathLessonData);
     await mathLesson.save({ validateBeforeSave: false });
-    console.log("Leçon de mathématiques créée :", mathLesson._id);
+    console.log("Deuxième leçon de mathématiques créée :", mathLesson._id);
 
     // Display summary
     console.log("\n=== RÉSUMÉ DE L'ENSEMENCEMENT ===");
@@ -380,6 +550,21 @@ async function seedMathLessons() {
       console.log(`   - Formules : ${concept.formulas.length}`);
     });
 
+    // Display theorems
+    console.log("\n=== THÉORÈMES COUVERTS ===");
+    mathLesson.theorems.forEach((theorem, index) => {
+      console.log(`${index + 1}. ${theorem.title}`);
+      console.log(`   - Applications : ${theorem.applications.length}`);
+    });
+
+    // Display worked examples
+    console.log("\n=== EXEMPLES RÉSOLUS ===");
+    mathLesson.workedExamples.forEach((example, index) => {
+      console.log(`${index + 1}. ${example.problem}`);
+      console.log(`   - Niveau : ${example.difficultyLevel}`);
+      console.log(`   - Étapes : ${example.solutionSteps.length}`);
+    });
+
     // Close connection
     await mongoose.connection.close();
     console.log("\nConnexion MongoDB fermée");
@@ -390,4 +575,4 @@ async function seedMathLessons() {
 }
 
 // Execute seeding function
-seedMathLessons();
+seedSecondMathLesson();
