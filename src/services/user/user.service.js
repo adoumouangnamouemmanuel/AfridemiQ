@@ -330,6 +330,8 @@ const addFriend = async (userId, friendId) => {
 
 // Remove friend
 const removeFriend = async (userId, friendId) => {
+  //TODO: remove later
+  console.log(`===================removeFriend=======================`);
   try {
     // Validate IDs
     if (
@@ -390,6 +392,8 @@ const removeFriend = async (userId, friendId) => {
       });
     }
 
+    //TODO: remove later
+    console.log(`++++++✅ REMOVE FRIEND: ${friendId} removed from ${userId}'s friends ++++++`);
     logger.info(`L'utilisateur ${userId} a retiré ${friendId} de ses amis`);
     return await User.findById(userId);
   } catch (error) {
