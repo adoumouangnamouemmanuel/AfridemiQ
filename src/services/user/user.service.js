@@ -454,8 +454,8 @@ const updateSubscription = async (userId, subscriptionData) => {
     accessLevel: subscriptionData.type === "premium" ? "premium" : "basic",
   };
 
-//   // Update isPremium flag
-//   user.isPremium = subscriptionData.type === "premium";
+  // // Update isPremium flag
+  // user.isPremium = subscriptionData.type === "premium";
 
   await user.save();
   //TODO: remove later
