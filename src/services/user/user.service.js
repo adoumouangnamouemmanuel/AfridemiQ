@@ -492,9 +492,13 @@ const getUserById = async (userId, authUser) => {
 
 // Log out user
 const logOut = async (userId) => {
+  //TODO: remove later
+  console.log(`===================logOut=======================`);
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
   user.refreshToken = undefined; // Clear refresh token
+  //TODO: remove later
+  console.log(`++++++✅ LOG OUT: User ${userId} logged out ++++++`);
   await user.save();
 };
 
