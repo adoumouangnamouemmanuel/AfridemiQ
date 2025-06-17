@@ -211,15 +211,33 @@ const updateMultiplePreferences = async (userId, { preferences }) => {
 
 // Update progress
 const updateProgress = async (userId, progress) => {
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { progress },
-    { new: true, runValidators: true }
-  ).select(
-    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
-  );
+  //TODO: remove later
+  console.log(`===================updateProgress=======================`);
+
+  // First retrieve the user
+  const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
-  return user;
+
+  // Merge the progress data instead of replacing it entirely
+  user.progress = {
+    ...user.progress,
+    ...progress,
+  };
+
+  // Save the user document (will run all middleware)
+  await user.save();
+
+  //TODO: remove later
+  console.log("++++++✅ UPDATE PROGRESS: User progress updated ++++++");
+
+  // Return user without sensitive fields
+  const userResponse = user.toObject();
+  delete userResponse.password;
+  delete userResponse.resetPasswordToken;
+  delete userResponse.resetPasswordExpires;
+  delete userResponse.refreshToken;
+
+  return userResponse;
 };
 
 // Add friend
