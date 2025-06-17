@@ -465,6 +465,8 @@ const updateSubscription = async (userId, subscriptionData) => {
 
 // Get user by ID
 const getUserById = async (userId, authUser) => {
+  //TODO: remove later
+  console.log(`===================getUserById=======================`);
   const user = await User.findById(userId).select(
     "-password -resetPasswordToken -resetPasswordExpires -refreshToken"
   );
@@ -483,6 +485,8 @@ const getUserById = async (userId, authUser) => {
       throw new UnauthorizedError("Accès au profil réservé aux amis");
     }
   }
+  //TODO: remove later
+  console.log(`++++++✅ GET USER BY ID: User ${userId} retrieved ++++++`);
   return user;
 };
 
