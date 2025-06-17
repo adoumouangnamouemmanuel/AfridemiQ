@@ -5,7 +5,7 @@ const {
 const { Subject } = require("../../../models/learning/subject.model");
 const { Topic } = require("../../../models/learning/topic.model");
 const { Exam } = require("../../../models/assessment/exam.model");
-const createLogger  = require("../../logging.service");
+const createLogger = require("../../logging.service");
 
 const logger = createLogger("CourseContentService");
 
