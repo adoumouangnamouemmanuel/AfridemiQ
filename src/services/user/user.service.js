@@ -242,6 +242,8 @@ const updateProgress = async (userId, progress) => {
 
 // Add friend
 const addFriend = async (userId, friendId) => {
+  //TODO: remove later
+  console.log(`===================addFriend=======================`);
   try {
     // Validate IDs
     if (
@@ -318,6 +320,8 @@ const addFriend = async (userId, friendId) => {
 
     // Return the updated user
     return await User.findById(userId);
+    //TODO: remove later
+    console.log("++++++✅ ADD FRIEND: Friend added successfully ++++++");
   } catch (error) {
     logger.error(`Erreur lors de l'ajout d'un ami: ${error.message}`);
     throw error;
