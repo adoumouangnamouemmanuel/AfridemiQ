@@ -126,6 +126,8 @@ const getAllUsers = async (query) => {
 
 // Update all preferences
 const updateAllPreferences = async (userId, { preferences }) => {
+  //TODO: remove later
+  console.log("===================updateAllPreferences=======================");
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 
@@ -146,6 +148,10 @@ const updateAllPreferences = async (userId, { preferences }) => {
   delete userResponse.resetPasswordToken;
   delete userResponse.resetPasswordExpires;
   delete userResponse.refreshToken;
+  //TODO: remove later
+  console.log(
+    "++++++✅ UPDATE ALL PREFERENCES: User preferences updated ++++++"
+  );
   return userResponse;
 };
 
