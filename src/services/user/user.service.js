@@ -462,7 +462,7 @@ const updateSubscription = async (userId, subscriptionData) => {
 // Get user by ID
 const getUserById = async (userId, authUser) => {
   const user = await User.findById(userId).select(
-    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
+    "-password -resetPasswordToken -resetPasswordExpires -refreshToken"
   );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
   if (authUser.role !== "admin" && authUser._id.toString() !== userId) {
