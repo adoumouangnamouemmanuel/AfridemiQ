@@ -409,7 +409,7 @@ CourseContentSchema.index({ subjectId: 1, series: 1 });
 CourseContentSchema.index({ examId: 1 });
 CourseContentSchema.index({ topicId: 1 });
 CourseContentSchema.index({ level: 1, accessType: 1 });
-CourseContentSchema.index({ "modules.lessons": 1, series: 1 }, { sparse: true });
+CourseContentSchema.index({ "modules.lessons": 1 }, { sparse: true });
 CourseContentSchema.index({ premiumOnly: 1 });
 CourseContentSchema.index({ "metadata.tags": 1 }, { sparse: true });
 CourseContentSchema.index({ "metadata.status": 1 });
