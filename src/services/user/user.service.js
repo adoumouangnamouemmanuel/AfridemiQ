@@ -100,6 +100,8 @@ const updateProfile = async (userId, updateData) => {
 
 // Delete user
 const deleteUser = async (userId) => {
+  //TODO: remove later
+  console.log("===================deleteUser=======================");
   const user = await User.findByIdAndDelete(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 };
