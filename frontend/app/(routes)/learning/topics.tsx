@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo, useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-import { useTheme } from "../../../src/utils/ThemeContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useTopicsBySubject } from "../../../src/hooks/useTopic";
+import { useTheme } from "../../../src/utils/ThemeContext";
 
 // Mock topics data for ALL subjects (not just Math)
 const ALL_TOPICS = {
@@ -603,11 +603,15 @@ export default function TopicsScreen() {
   });
 
   // Memoize the options to prevent unnecessary re-renders
-  const topicOptions = useMemo(() => ({
-    difficulty: selectedDifficulty === "all" ? undefined : (selectedDifficulty as any),
-    sortBy: "name" as const,
-    sortOrder: "asc" as const,
-  }), [selectedDifficulty]);
+  const topicOptions = useMemo(
+    () => ({
+      difficulty:
+        selectedDifficulty === "all" ? undefined : (selectedDifficulty as any),
+      sortBy: "name" as const,
+      sortOrder: "asc" as const,
+    }),
+    [selectedDifficulty]
+  );
 
   // Backend integration - use memoized options
   const {
@@ -628,7 +632,9 @@ export default function TopicsScreen() {
         description: topic.description,
         difficulty: topic.difficulty,
         estimatedTime: topic.estimatedTime,
-        estimatedCompletionDate: topic.estimatedCompletionDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        estimatedCompletionDate:
+          topic.estimatedCompletionDate ||
+          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         relatedTopics: topic.relatedTopics || [],
         hasPractice: topic.hasPractice,
         hasNote: topic.hasNote,
@@ -687,8 +693,23 @@ export default function TopicsScreen() {
     }
 
     if (topic.hasLessons) {
+      // FIX: Ensure subjectId is passed as a string parameter
+      const validSubjectId = Array.isArray(subjectId)
+        ? subjectId[0]
+        : subjectId;
+      console.log(
+        "📚 TopicsScreen - Navigating with subjectId:",
+        validSubjectId,
+        "topicId:",
+        topic._id
+      );
+
       router.push(
-        `/(routes)/learning/course-content?topicId=${topic._id}&topicName=${topic.name}`
+        `/(routes)/learning/course-content?topicId=${
+          topic._id
+        }&topicName=${encodeURIComponent(
+          topic.name
+        )}&subjectId=${encodeURIComponent(validSubjectId || "")}`
       );
     } else {
       // TODO: Navigate to topic overview or coming soon screen
@@ -954,7 +975,8 @@ export default function TopicsScreen() {
             <Text style={styles.title}>{subjectName} Topics</Text>
             <Text style={styles.subtitle}>
               {/* UPDATE: Show data source indicator like curriculum */}
-              {filteredTopics.length} topics available {isBackendData ? "🌐" : "📱"}
+              {filteredTopics.length} topics available{" "}
+              {isBackendData ? "🌐" : "📱"}
             </Text>
           </View>
         </View>
@@ -1012,12 +1034,11 @@ export default function TopicsScreen() {
               {isLoading ? "Loading Topics..." : "No Topics Available"}
             </Text>
             <Text style={styles.emptySubtitle}>
-              {error 
+              {error
                 ? `Error: ${error}`
-                : isLoading 
+                : isLoading
                 ? "Please wait while we fetch the topics..."
-                : `Topics for ${subjectName} are coming soon!`
-              }
+                : `Topics for ${subjectName} are coming soon!`}
             </Text>
           </View>
         )}
