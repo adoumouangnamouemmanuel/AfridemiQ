@@ -108,17 +108,19 @@ const deleteUser = async (userId) => {
 
 // Get all users (admin only)
 const getAllUsers = async (query) => {
-  const { page = 1, limit = 10, role, country } = query;
+  //TODO: remove later
+  console.log("===================getAllUsers=======================");
+  const { page = PAGE, limit = LIMIT, role, country } = query;
   const filter = {};
   if (role) filter.role = role;
   if (country) filter.country = country;
   const users = await User.find(filter)
-    .select(
-      "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
-    )
+    .select("-password -resetPasswordToken -resetPasswordExpires -refreshToken")
     .skip((page - 1) * limit)
     .limit(Number(limit));
   const count = await User.countDocuments(filter);
+  //TODO: remove later
+  console.log("++++++✅ GET ALL USERS: Users retrieved ++++++");
   return { users, count };
 };
 
