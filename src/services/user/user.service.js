@@ -19,13 +19,14 @@ const logger = createLogger("UserService");
 
 // Register a new user
 const register = async (data) => {
-  // console.log("Register: Checking email:", data.email);
+  //TODO: remove later
+  console.log("======================register===================");
   const existingUser = await User.findOne({ email: data.email });
   if (existingUser) throw new ConflictError("Email déjà utilisé");
-  // console.log("Register: Creating user");
   const user = await User.create(data); // Rely on pre("save") for hashing
-  console.log("Register: User created:", user._id);
   const token = generateToken({ userId: user._id, role: user.role });
+  //TODO: remove later
+  console.log("++++++✅ REGISTER: Registration successful ++++++");
   return { user: user.toJSON(), token };
 };
 
