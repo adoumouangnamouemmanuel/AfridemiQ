@@ -205,7 +205,6 @@ export interface UserProfile {
   onboardingStatusId?: string;
   createdAt: string | Date;
   updatedAt: string | Date;
-  bio: string;
 }
 
 /**
