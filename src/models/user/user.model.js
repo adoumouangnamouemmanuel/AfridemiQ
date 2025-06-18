@@ -402,13 +402,17 @@ UserSchema.virtual("fullName").get(function () {
 // Exclude sensitive fields from JSON output
 UserSchema.set("toJSON", {
   transform: (doc, ret) => {
-    delete ret.password;
-    delete ret.phoneVerificationCode;
-    delete ret.phoneVerificationExpires;
-    delete ret.resetPasswordToken;
-    delete ret.resetPasswordExpires;
-    delete ret.refreshToken;
-    delete ret.tokenVersion;
+    const sensitiveFields = [
+      "password",
+      // "phoneVerificationCode",
+      // "phoneVerificationExpires",
+      "resetPasswordToken",
+      "resetPasswordExpires",
+      "refreshToken",
+      "tokenVersion",
+      "twoFactorAuth.secret",
+    ];
+    sensitiveFields.forEach((field) => delete ret[field]);
     return ret;
   },
 });
