@@ -178,6 +178,13 @@ CountrySchema.virtual("examBoardCount").get(function () {
   return this.examBoards?.length ?? 0;
 });
 
+CountrySchema.virtual("activeUsers").get(async function () {
+  return await User.countDocuments({
+    countryId: this._id,
+    "subscription.paymentStatus": "active",
+  });
+});
+
 // =============== MIDDLEWARE =============
 /**
  * Pre-save middleware to ensure unique languages and update statistics.
