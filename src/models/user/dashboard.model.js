@@ -56,12 +56,6 @@ const DashboardSchema = new Schema(
         required: [true, "L'ID du sujet recommandé est requis"],
       },
     ],
-    // User streak counter
-    streak: {
-      type: Number,
-      default: 0,
-      min: [0, "La série ne peut pas être négative"],
-    },
     // Notifications array
     notifications: [
       {
