@@ -223,7 +223,6 @@ const UserSchema = new Schema(
       showStepSolutions: { type: Boolean, default: true },
       leaderboardVisibility: { type: Boolean, default: true },
       allowFriendRequests: { type: Boolean, default: true },
-      multilingualSupport: { type: [String], default: [] },
       studyField: { type: String }, // e.g., "Science", "Arts"
       targetUniversity: {
         type: String,
