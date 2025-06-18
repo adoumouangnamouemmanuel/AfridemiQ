@@ -19,10 +19,6 @@ const registerSchema = Joi.object({
   role: Joi.string().valid("student", "teacher", "admin").default("student"),
   gender: Joi.string().valid("male", "female"),
   dateOfBirth: Joi.date(),
-  // Add missing fields that can be provided during registration
-  schoolName: Joi.string().optional(),
-  gradeLevel: Joi.string().optional(),
-  timeZone: Joi.string().optional(),
   preferredLanguage: Joi.string(),
 });
 
