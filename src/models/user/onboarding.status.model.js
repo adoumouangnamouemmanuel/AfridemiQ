@@ -21,10 +21,12 @@ const OnboardingStatusSchema = new Schema(
       required: [true, "L'ID utilisateur est requis"],
       unique: true,
     },
-    completedSteps: {
-      type: [String],
-      default: [],
+    completedSteps: [
+      {
+        step: { type: String },
+        completedAt: { type: Date, default: Date.now },
     },
+    ],
     currentStep: {
       type: String,
       required: [true, "L'étape actuelle est requise"],
@@ -32,6 +34,10 @@ const OnboardingStatusSchema = new Schema(
     lastUpdated: {
       type: Date,
       default: Date.now,
+    },
+    metadata: {
+      type: Map,
+      of: String,
     },
   },
   {
