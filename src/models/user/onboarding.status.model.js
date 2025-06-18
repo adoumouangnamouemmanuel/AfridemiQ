@@ -25,7 +25,7 @@ const OnboardingStatusSchema = new Schema(
       {
         step: { type: String },
         completedAt: { type: Date, default: Date.now },
-    },
+      },
     ],
     currentStep: {
       type: String,
