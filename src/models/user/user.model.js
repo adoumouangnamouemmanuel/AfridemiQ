@@ -38,6 +38,8 @@ const TrialPeriodSchema = new Schema({
 const SocialLinkSchema = new Schema({
   platform: {
     type: String,
+    enum: ["twitter", "linkedin", "github"],
+    required: true,
   },
   url: {
     type: String,
