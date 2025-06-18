@@ -6,12 +6,6 @@ const { Schema, model, Types } = require("mongoose");
  * @module FeedbackSubSchema
  */
 const FeedbackSchema = new Schema({
-  // User reference
-  userId: {
-    type: Types.ObjectId,
-    ref: "User",
-    required: [true, "L'ID utilisateur est requis"],
-  },
   // Rating value
   rating: {
     type: Number,
