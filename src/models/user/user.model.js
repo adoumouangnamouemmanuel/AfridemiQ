@@ -360,6 +360,10 @@ UserSchema.index({ "progress.xp": -1 });
 UserSchema.index({ lastLogin: -1 });
 UserSchema.index({ createdAt: -1 });
 
+// new indexes
+UserSchema.index({ "subscription.type": 1, "subscription.expiresAt": 1 });
+UserSchema.index({ countryId: 1 });
+
 // =============== MIDDLEWARE =============
 /**
  * Pre-save middleware to hash password.
