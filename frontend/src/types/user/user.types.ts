@@ -65,7 +65,7 @@ export interface TrialPeriod {
  * Social media link structure
  */
 export interface SocialLink {
-  platform: string;
+  platform: "twitter" | "linkedin" | "github"; // Extend as needed
   url: string;
 }
 
