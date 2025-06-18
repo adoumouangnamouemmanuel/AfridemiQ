@@ -42,10 +42,16 @@ const SocialLinkSchema = new Schema({
   url: {
     type: String,
     validate: {
-      validator: (v) =>
-        !v ||
-        /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(v),
-      message: (props) => `${props.value} n'est pas une URL valide!`,
+      validator: function (v) {
+        const regexes = {
+          twitter: /^https?:\/\/(www\.)?twitter\.com\/.+/,
+          linkedin: /^https?:\/\/(www\.)?linkedin\.com\/in\/.+/,
+          github: /^https?:\/\/(www\.)?github\.com\/.+/,
+        };
+        return regexes[this.platform].test(v);
+      },
+      message: (props) =>
+        `${props.value} is not a valid URL for ${props.path.platform}!`,
     },
   },
 });
