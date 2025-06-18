@@ -64,6 +64,13 @@ const DashboardSchema = new Schema(
         required: [true, "L'ID de la notification est requis"],
       },
     ],
+
+    recommendedLessons: [
+      {
+        lessonId: { type: Types.ObjectId, ref: "LessonBase" },
+        reason: { type: String }, // e.g., "Weak subject: Math"
+      },
+    ],
   },
   {
     timestamps: true,
