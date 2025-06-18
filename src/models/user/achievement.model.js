@@ -54,6 +54,18 @@ const AchievementSchema = new Schema(
     series: {
       type: String,
     },
+
+    // Achievement category
+    // Categories: academic (academic achievements), engagement (community or platform engagement), social (social
+    category: {
+      type: String,
+      enum: ["academic", "engagement", "social", "milestone"],
+      required: true,
+    },
+    tier: {
+      type: String,
+      enum: ["bronze", "silver", "gold"],
+    },
   },
   {
     timestamps: true,
