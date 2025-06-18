@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const CustomError = require("../errors/customError");
-const createLogger = require("../logging.service");
+const createLogger = require("../services/logging.service");
 
 const logger = createLogger("ErrorMiddleware");
 
