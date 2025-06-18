@@ -154,6 +154,31 @@ const UserProgressSchema = new Schema(
       default: [],
     },
 
+    quizProgress: [
+      {
+        quizId: { type: Types.ObjectId, ref: "Quiz" },
+        score: { type: Number, min: 0, max: 100 },
+        completedAt: { type: Date },
+        timeSpent: { type: Number, min: 0 },
+        attempts: { type: Number, min: 0, default: 0 },
+      },
+    ],
+
+    // from user to user progress
+    xp: { type: Number, default: 0 },
+    level: { type: Number, default: 1 },
+    completedTopics: { type: [String], default: [] },
+    weakSubjects: { type: [String], default: [] },
+    badges: { type: [String], default: [] },
+    achievements: {
+      type: [{ type: Types.ObjectId, ref: "Achievement" }],
+      default: [],
+    },
+    progressSummary: {
+      completedPercentage: { type: Number },
+      remainingTopics: { type: Number },
+    },
+
     // Overall learning metrics
     overallMetrics: {
       totalLessonsStarted: {
