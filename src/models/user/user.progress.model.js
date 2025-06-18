@@ -266,7 +266,6 @@ const UserProgressSchema = new Schema(
 );
 
 // Indexes for better performance
-UserProgressSchema.index({ userId: 1 }, { unique: true });
 UserProgressSchema.index({ "lessonProgress.lessonId": 1 });
 UserProgressSchema.index({ "courseProgress.courseId": 1 });
 UserProgressSchema.index({ "lessonProgress.status": 1 });
