@@ -1,4 +1,7 @@
 const rateLimit = require("express-rate-limit");
+const createLogger = require("../services/logging.service");
+
+const logger = createLogger("RateLimitMiddleware");
 
 /**
  * Create a rate limiter middleware
@@ -16,12 +19,34 @@ const createRateLimiter = (options = {}) => {
       status: "error",
       code: "RATE_LIMIT_EXCEEDED",
     },
+    keyGenerator: (req) => {
+      // Use user ID for authenticated users, fallback to IP
+      return req.user?.userId || req.ip;
+    },
   };
 
-  return rateLimit({
+  // Validate options
+  if (
+    options.message &&
+    (!options.message.message ||
+      !options.message.status ||
+      !options.message.code)
+  ) {
+    throw new Error("Invalid message configuration in rate limiter options");
+  }
+
+  const limiter = rateLimit({
     ...defaultOptions,
     ...options,
+    handler: (req, res, next, optionsUsed) => {
+      logger.warn(
+        `Rate limit exceeded for ${req.user?.userId || req.ip} on ${req.path}`
+      );
+      res.status(429).json(optionsUsed.message);
+    },
   });
+
+  return limiter;
 };
 
 // Authentication rate limiter (more strict)
