@@ -58,6 +58,16 @@ const NotificationSchema = new Schema(
       relatedEntityId: { type: String },
       relatedEntityType: { type: String },
     },
+    category: {
+      type: String,
+      enum: ["system", "progress", "social", "marketing"],
+      required: true,
+    },
+    delivery: {
+      email: { type: Boolean, default: false },
+      push: { type: Boolean, default: false },
+      sentAt: { type: Date },
+    },
   },
   {
     timestamps: true,
