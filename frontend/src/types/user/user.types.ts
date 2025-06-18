@@ -92,7 +92,6 @@ export interface UserPreferences {
   showStepSolutions: boolean;
   leaderboardVisibility: boolean;
   allowFriendRequests: boolean;
-  multilingualSupport: string[];
   studyField?: string;
   targetUniversity?: string;
   studyHours?: number;
