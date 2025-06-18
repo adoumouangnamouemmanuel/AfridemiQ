@@ -96,6 +96,13 @@ AchievementSchema.virtual("isCompleted").get(function () {
   return this.progress >= this.target;
 });
 
+AchievementSchema.pre("save", function (next) {
+  if (this.progress >= this.target && !this.earnedDate) {
+    this.earnedDate = new Date();
+  }
+  next();
+});
+
 /**
  * Achievement model for interacting with the Achievement collection.
  * @type {mongoose.Model}
