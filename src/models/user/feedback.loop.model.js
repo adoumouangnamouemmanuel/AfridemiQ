@@ -42,6 +42,11 @@ const FeedbackLoopSchema = new Schema(
       enum: ["question", "exercise", "lesson", "platform"],
       required: [true, "Le type de feedback est requis"],
     },
+    category: {
+      type: String,
+      enum: ["bug", "suggestion", "complaint", "praise"],
+      required: true,
+    },
     // Feedback entries
     feedback: [FeedbackSchema],
     // Feedback status
