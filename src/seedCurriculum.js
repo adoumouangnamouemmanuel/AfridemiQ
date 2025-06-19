@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 const { Curriculum } = require("./models/learning/curriculum.model");
 
 // Connecter à MongoDB
-const MONGO_URI = "mongodb://localhost:27017/AfricaExamPrep";
+// const MONGO_URI = "mongodb://localhost:27017/AfricaExamPrep";
+MONGO_URI="mongodb+srv://adoumouangnamouemmanuel:LEgraoe90062033?@africa-exam-prep.rcj7p7m.mongodb.net/AfricaExamPrep"
 mongoose
   .connect(MONGO_URI)
   .then(() => console.log("Connecté à MongoDB"))
