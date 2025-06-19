@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const { Exam, Subject } = require('./models/AfricaExamPrepMongoSchema'); // Adjust path to your models
 
 // MongoDB connection URL
-const MONGO_URI = 'mongodb://localhost:27017/AfricaExamPrep';
+// const MONGO_URI = 'mongodb://localhost:27017/AfricaExamPrep';
+MONGO_URI="mongodb+srv://adoumouangnamouemmanuel:LEgraoe90062033?@africa-exam-prep.rcj7p7m.mongodb.net/AfricaExamPrep"
 mongoose.connect(MONGO_URI).then(() => console.log('Connected to MongoDB')).catch(err => console.error('Connection error:', err));
 
 // Function to fetch subject IDs from the database
