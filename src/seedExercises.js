@@ -6,7 +6,8 @@ const {
 } = require("./models/AfricaExamPrepMongoSchema"); // Adjust path as needed
 
 // MongoDB connection URL (update if different)
-const MONGO_URI = "mongodb://localhost:27017/AfricaExamPrep";
+// const MONGO_URI = "mongodb://localhost:27017/AfricaExamPrep";
+MONGO_URI="mongodb+srv://adoumouangnamouemmanuel:LEgraoe90062033?@africa-exam-prep.rcj7p7m.mongodb.net/AfricaExamPrep"
 
 // Sample data for French exercises
 const frenchExercises = [
