@@ -129,123 +129,30 @@ const updatePersonalInfo = async (userId, personalInfoData) => {
   return updatedUser;
 };
 
-// Update progress
-const updateProgress = async (userId, progress) => {
-  //TODO: remove later
-  console.log(`===================updateProgress=======================`);
+// Update notification preferences
+const updateNotifications = async (userId, { notifications }) => {
+  console.log("===================updateNotifications=======================");
 
-  // First retrieve the user
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 
-  // Merge the progress data instead of replacing it entirely
-  user.progress = {
-    ...user.progress,
-    ...progress,
-  };
-
-  // Save the user document (will run all middleware)
-  await user.save();
-
-  //TODO: remove later
-  console.log("++++++✅ UPDATE PROGRESS: User progress updated ++++++");
-
-  // Return user without sensitive fields
-  const userResponse = user.toObject();
-  delete userResponse.password;
-  delete userResponse.resetPasswordToken;
-  delete userResponse.resetPasswordExpires;
-  delete userResponse.refreshToken;
-
-  return userResponse;
-};
-
-// Add friend
-const addFriend = async (userId, friendId) => {
-  //TODO: remove later
-  console.log(`===================addFriend=======================`);
-  try {
-    // Validate IDs
-    if (
-      !mongoose.Types.ObjectId.isValid(userId) ||
-      !mongoose.Types.ObjectId.isValid(friendId)
-    ) {
-      throw new BadRequestError("Format d'ID utilisateur invalide");
-    }
-
-    // Prevent self-friending
-    if (userId === friendId) {
-      throw new BadRequestError(
-        "Vous ne pouvez pas vous ajouter vous-même comme ami"
-      );
-    }
-
-    // Check if users exist
-    const [user, friend] = await Promise.all([
-      User.findById(userId),
-      User.findById(friendId),
-    ]);
-
-    if (!user || !friend) {
-      throw new NotFoundError("Utilisateur ou ami non trouvé");
-    }
-
-    if (user.friends.includes(friendId)) {
-      throw new ConflictError("Cet utilisateur est déjà un ami");
-    }
-
-    if (!friend.preferences.allowFriendRequests) {
-      throw new BadRequestError("Les demandes d'amis sont désactivées");
-    }
-
-    // Check if either user has blocked the other
-    if (
-      user.blockedUsers.includes(friendId) ||
-      friend.blockedUsers.includes(userId)
-    ) {
-      throw new BadRequestError(
-        "Impossible d'ajouter cet utilisateur comme ami"
-      );
-    }
-
-    // Update both users' friend lists using atomic operations
-    await Promise.all([
-      User.findByIdAndUpdate(
+  const updatedUser = await User.findByIdAndUpdate(
         userId,
-        { $addToSet: { friends: friendId } },
-        { new: true }
-      ),
-      User.findByIdAndUpdate(
-        friendId,
-        { $addToSet: { friends: userId } },
-        { new: true }
-      ),
-    ]);
-
-    // Create notification for the friend
-    await notificationService.createNotification({
-      userId: friendId,
-      type: "friend_request",
-      title: "Nouvelle demande d'ami",
-      message: `${user.name} vous a ajouté comme ami`,
-      priority: "medium",
-      actionUrl: `/profile/${userId}`,
-      metadata: {
-        requesterId: userId,
-        requesterName: user.name,
+    {
+      $set: {
+        "notifications.dailyReminders": notifications.dailyReminders,
+        "notifications.progressUpdates": notifications.progressUpdates,
+        "notifications.examAlerts": notifications.examAlerts,
       },
-    });
+    },
+    { new: true, runValidators: true }
+  ).select("-password -resetPasswordToken -resetPasswordExpires -refreshToken");
 
-    logger.info(`L'utilisateur ${userId} a ajouté ${friendId} comme ami`);
+  if (!updatedUser)
+    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
 
-    // Return the updated user
-    return await User.findById(userId);
-    //TODO: remove later
-    console.log("++++++✅ ADD FRIEND: Friend added successfully ++++++");
-  } catch (error) {
-    logger.error(`Erreur lors de l'ajout d'un ami: ${error.message}`);
-    throw error;
-  }
+  console.log("++++++✅ UPDATE NOTIFICATIONS: Notifications updated ++++++");
+  return updatedUser;
 };
 
 // Remove friend
