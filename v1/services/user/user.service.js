@@ -137,7 +137,7 @@ const updateNotifications = async (userId, { notifications }) => {
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 
   const updatedUser = await User.findByIdAndUpdate(
-        userId,
+    userId,
     {
       $set: {
         "notifications.dailyReminders": notifications.dailyReminders,
