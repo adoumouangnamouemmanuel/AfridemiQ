@@ -2,9 +2,11 @@ const { StatusCodes } = require("http-status-codes");
 const userService = require("../../services/user/user.service");
 const jwt = require("jsonwebtoken");
 const tokenBlacklist = require("../../services/token.blacklist.service");
-const createLogger = require("../../services/logging.service"); // Add this import
+const createLogger = require("../../services/logging.service");
 
-const logger = createLogger("UserController"); // Add this line
+const logger = createLogger("UserController");
+
+// =============== CORE AUTH (KEEP 100% INTACT) ===============
 
 // Register a new user
 const register = async (req, res) => {
