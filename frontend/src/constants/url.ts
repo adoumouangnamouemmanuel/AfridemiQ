@@ -1,1 +1,1 @@
-export const API_BASE_URL = "https://tame-hornets-falm.loca.lt/api";
+export const API_BASE_URL = "https://floppy-bikes-tickle.loca.lt/api";
