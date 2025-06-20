@@ -39,6 +39,8 @@ const login = async (req, res) => {
   }
 };
 
+// =============== PROFILE MANAGEMENT ===============
+
 // Get user profile
 const getProfile = async (req, res) => {
   const user = await userService.getProfile(req.user.userId); // Changed from _id to userId
