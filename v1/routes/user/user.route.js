@@ -76,16 +76,24 @@ router.put(
 router.delete("/profile", userController.deleteUser);
 router.post("/logout", userController.logOut);
 
+// Onboarding routes
 router.post(
-  "/verify-phone",
-  validateMiddleware(verifyPhoneSchema),
-  userController.verifyPhone
+  "/onboarding",
+  validateMiddleware(onboardingSchema),
+  userController.completeOnboarding
 );
+router.get("/onboarding/status", userController.checkOnboardingStatus);
 
-router.post(
-  "/request-phone-verification",
-  validateMiddleware(phoneVerificationSchema),
-  userController.requestPhoneVerification
+// Personal info and notifications
+router.put(
+  "/personal-info",
+  validateMiddleware(updatePersonalInfoSchema),
+  userController.updatePersonalInfo
+);
+router.put(
+  "/notifications",
+  validateMiddleware(updateNotificationsSchema),
+  userController.updateNotifications
 );
 
 router.put(
