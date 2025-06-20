@@ -115,12 +115,11 @@ const changePassword = async (req, res) => {
   });
 };
 
-// Update subscription
-const updateSubscription = async (req, res) => {
-  const user = await userService.updateSubscription(req.user.userId, req.body); // Changed from _id to userId
+// Request password reset
+const requestPasswordReset = async (req, res) => {
+  await userService.requestPasswordReset(req.body.email);
   res.status(StatusCodes.OK).json({
-    message: "Abonnement mis à jour",
-    data: user,
+    message: "Lien de réinitialisation envoyé",
   });
 };
 
