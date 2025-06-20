@@ -103,18 +103,14 @@ router.put(
   userController.changePassword
 );
 
+// User search and discovery
 router.get(
   "/search",
   validateMiddleware(searchUsersSchema),
   userController.searchUsers
 );
 
-router.put(
-  "/social-profile",
-  validateMiddleware(updateSocialProfileSchema),
-  userController.updateSocialProfile
-);
-
+// Get user by ID
 router.get("/:id", userController.getUserById);
 
 router.post("/logout", userController.logOut);
