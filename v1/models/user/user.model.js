@@ -97,13 +97,19 @@ const UserSchema = new Schema(
       trim: true,
       enum: {
         values: EDUCATION_LEVELS,
-        message: "Le niveau d'education n'est pas valide"
-      }
+        message: "Le niveau d'education n'est pas valide",
+      },
     },
     targetExamYear: {
       type: Number,
       min: [2024, "L'année d'examen doit être actuelle ou future"],
       max: [2030, "L'année d'examen ne peut pas dépasser 2030"],
+    },
+
+    // =============== ONBOARDING STATUS ===============
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
     },
 
     // =============== PRÉFÉRENCES DE BASE ===============
