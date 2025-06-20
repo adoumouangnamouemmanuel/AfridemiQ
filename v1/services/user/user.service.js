@@ -293,14 +293,12 @@ const refreshToken = async (refreshToken) => {
   try {
     // TODO: Remove detailed logging before production
     console.log("🔄 REFRESH: Starting token refresh process");
-    console.log("🔄 REFRESH: Refresh token length:", refreshToken.length);
 
     const payload = jwt.verify(
       refreshToken,
       process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
     );
 
-    // TODO: Remove detailed logging before production
     console.log(
       "🔍 REFRESH: Refresh token verified, finding user:",
       payload.userId
