@@ -249,7 +249,7 @@ const getUserById = async (req, res) => {
 // Get all users (admin only)
 const getAllUsers = async (req, res) => {
   const { users, count } = await userService.getAllUsers(req.query);
-    res.status(StatusCodes.OK).json({
+  res.status(StatusCodes.OK).json({
     message: "Liste des utilisateurs récupérée",
     data: { users, total: count },
   });
