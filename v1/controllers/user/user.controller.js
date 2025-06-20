@@ -131,6 +131,30 @@ const resetPassword = async (req, res) => {
   });
 };
 
+// =============== TOKEN MANAGEMENT ===============
+
+// Refresh token
+const refreshToken = async (req, res) => {
+  try {
+    // TODO: Remove detailed logging before production
+    console.log("🔄 CONTROLLER: Token refresh request received");
+
+    const { token } = await userService.refreshToken(req.body.refreshToken);
+
+    // TODO: Remove detailed logging before production
+    console.log("✅ CONTROLLER: Token refresh successful");
+
+    res.status(StatusCodes.OK).json({
+      message: "Token rafraîchi avec succès",
+      data: { token },
+    });
+  } catch (error) {
+    // TODO: Remove detailed logging before production
+    console.error("❌ CONTROLLER: Token refresh failed:", error.message);
+    throw error;
+  }
+};
+
 // Log out user
 const logOut = async (req, res) => {
   try {
