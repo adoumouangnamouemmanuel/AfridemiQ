@@ -96,10 +96,11 @@ router.put(
   userController.updateNotifications
 );
 
+// Password management
 router.put(
-  "/subscription",
-  validateMiddleware(updateSubscriptionSchema),
-  userController.updateSubscription
+  "/change-password",
+  validateMiddleware(changePasswordSchema),
+  userController.changePassword
 );
 
 router.get(
