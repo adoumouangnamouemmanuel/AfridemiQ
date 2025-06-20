@@ -103,133 +103,30 @@ const updateProfile = async (userId, updateData) => {
   return user;
 };
 
-// Delete user
-const deleteUser = async (userId) => {
-  //TODO: remove later
-  console.log("===================deleteUser=======================");
-  const user = await User.findByIdAndDelete(userId);
-  if (!user) throw new NotFoundError("Utilisateur non trouvé");
-};
+// Update personal information
+const updatePersonalInfo = async (userId, personalInfoData) => {
+  console.log("===================updatePersonalInfo=======================");
 
-// Get all users (admin only)
-const getAllUsers = async (query) => {
-  //TODO: remove later
-  console.log("===================getAllUsers=======================");
-  const { page = PAGE, limit = LIMIT, role, country } = query;
-  const filter = {};
-  if (role) filter.role = role;
-  if (country) filter.country = country;
-  const users = await User.find(filter)
-    .select("-password -resetPasswordToken -resetPasswordExpires -refreshToken")
-    .skip((page - 1) * limit)
-    .limit(Number(limit));
-  const count = await User.countDocuments(filter);
-  //TODO: remove later
-  console.log("++++++✅ GET ALL USERS: Users retrieved ++++++");
-  return { users, count };
-};
-
-// Update all preferences
-const updateAllPreferences = async (userId, { preferences }) => {
-  //TODO: remove later
-  console.log("===================updateAllPreferences=======================");
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 
-  // Update preferences
-  user.preferences = {
-    ...user.preferences,
-    ...preferences,
-  };
-
-  // Save the user document
-  await user.save();
-
-  // Return user without sensitive fields
-  const userResponse = user.toObject();
-  delete userResponse.password;
-  // delete userResponse.phoneVerificationCode;
-  // delete userResponse.phoneVerificationExpires;
-  delete userResponse.resetPasswordToken;
-  delete userResponse.resetPasswordExpires;
-  delete userResponse.refreshToken;
-  //TODO: remove later
-  console.log(
-    "++++++✅ UPDATE ALL PREFERENCES: User preferences updated ++++++"
-  );
-  return userResponse;
-};
-
-// Update specific preference type
-const updatePreferenceType = async (userId, type, { value }) => {
-  //TODO: remove later
-  console.log(`===================updatePreferenceType=======================`);
-  const user = await User.findById(userId);
-  if (!user) throw new NotFoundError("Utilisateur non trouvé");
-
-  // Handle nested preferences (like notifications)
-  if (type === "notifications") {
-    user.preferences.notifications = {
-      ...user.preferences.notifications,
-      ...value,
-    };
-  } else {
-    user.preferences[type] = value;
+  // Check email uniqueness if email is being updated
+  if (personalInfoData.email && personalInfoData.email !== user.email) {
+    const existingUser = await User.findOne({ email: personalInfoData.email });
+    if (existingUser) throw new ConflictError("Email déjà utilisé");
   }
 
-  // Save the user document
-  await user.save();
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: personalInfoData },
+    { new: true, runValidators: true }
+  ).select("-password -resetPasswordToken -resetPasswordExpires -refreshToken");
 
-  // Return user without sensitive fields
-  const userResponse = user.toObject();
-  delete userResponse.password;
-  // delete userResponse.phoneVerificationCode;
-  // delete userResponse.phoneVerificationExpires;
-  delete userResponse.resetPasswordToken;
-  delete userResponse.resetPasswordExpires;
-  delete userResponse.refreshToken;
-  //TODO: remove later
-  console.log(`++++++✅ UPDATE PREFERENCE TYPE: ${type} updated ++++++`);
-  return userResponse;
-};
+  if (!updatedUser)
+    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
 
-// Update multiple preference types
-const updateMultiplePreferences = async (userId, { preferences }) => {
-  //TODO: remove later
-  console.log(
-    `===================updateMultiplePreferences=======================`
-  );
-  const user = await User.findById(userId);
-  if (!user) throw new NotFoundError("Utilisateur non trouvé");
-
-  // Update each specified preference type
-  Object.entries(preferences).forEach(([type, value]) => {
-    if (type === "notifications") {
-      user.preferences.notifications = {
-        ...user.preferences.notifications,
-        ...value,
-      };
-    } else {
-      user.preferences[type] = value;
-    }
-  });
-
-  // Save the user document
-  await user.save();
-
-  // Return user without sensitive fields
-  const userResponse = user.toObject();
-  delete userResponse.password;
-  // delete userResponse.phoneVerificationCode;
-  // delete userResponse.phoneVerificationExpires;
-  delete userResponse.resetPasswordToken;
-  delete userResponse.resetPasswordExpires;
-  delete userResponse.refreshToken;
-  //TODO: remove later
-  console.log(
-    `++++++✅ UPDATE MULTIPLE PREFERENCES: Preferences updated ++++++`
-  );
-  return userResponse;
+  console.log("++++++✅ UPDATE PERSONAL INFO: Personal info updated ++++++");
+  return updatedUser;
 };
 
 // Update progress
