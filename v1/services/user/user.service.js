@@ -173,21 +173,23 @@ const completeOnboarding = async (userId, onboardingData) => {
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 
-  // Update subscription data
-  user.subscription = {
-    ...user.subscription,
-    ...subscriptionData,
-    // Update accessLevel based on subscription type
-    accessLevel: subscriptionData.type === "premium" ? "premium" : "basic",
-  };
+  // Update user with onboarding data
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: {
+        ...onboardingData,
+        onboardingCompleted: true,
+      },
+    },
+    { new: true, runValidators: true }
+  ).select("-password -resetPasswordToken -resetPasswordExpires -refreshToken");
 
-  // // Update isPremium flag
-  // user.isPremium = subscriptionData.type === "premium";
+  if (!updatedUser)
+    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
 
-  await user.save();
-  //TODO: remove later
-  console.log(`++++++✅ UPDATE SUBSCRIPTION: User subscription updated ++++++`);
-  return user;
+  console.log("++++++✅ COMPLETE ONBOARDING: Onboarding completed ++++++");
+  return updatedUser;
 };
 
 // Get user by ID
