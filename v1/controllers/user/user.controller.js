@@ -123,12 +123,11 @@ const requestPasswordReset = async (req, res) => {
   });
 };
 
-// Get user by ID
-const getUserById = async (req, res) => {
-  const user = await userService.getUserById(req.params.id, req.user);
+// Reset password
+const resetPassword = async (req, res) => {
+  await userService.resetPassword(req.body.token, req.body.password);
   res.status(StatusCodes.OK).json({
-    message: "Utilisateur récupéré avec succès",
-    data: user,
+    message: "Mot de passe réinitialisé avec succès",
   });
 };
 
