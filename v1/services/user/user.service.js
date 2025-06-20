@@ -263,21 +263,30 @@ const requestPasswordReset = async (email) => {
 
 // Reset password
 const resetPassword = async (token, password) => {
+  console.log("===================resetPassword=======================");
+
   const resetTokenHash = crypto
     .createHash("sha256")
     .update(token)
     .digest("hex");
+
   const user = await User.findOne({
     resetPasswordToken: resetTokenHash,
     resetPasswordExpires: { $gt: new Date() },
   });
+
   if (!user)
     throw new BadRequestError("Lien de réinitialisation invalide ou expiré");
-  user.password = await bcrypt.hash(password, 10);
+
+  user.password = password; // Will be hashed by pre-save middleware
   user.resetPasswordToken = undefined;
   user.resetPasswordExpires = undefined;
   await user.save();
+
+  console.log("++++++✅ RESET PASSWORD: Password reset ++++++");
 };
+
+// =============== TOKEN MANAGEMENT ===============
 
 // Refresh token
 const refreshToken = async (refreshToken) => {
