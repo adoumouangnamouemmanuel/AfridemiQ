@@ -155,121 +155,21 @@ const updateNotifications = async (userId, { notifications }) => {
   return updatedUser;
 };
 
-// Remove friend
-const removeFriend = async (userId, friendId) => {
+// Delete user
+const deleteUser = async (userId) => {
   //TODO: remove later
-  console.log(`===================removeFriend=======================`);
-  try {
-    // Validate IDs
-    if (
-      !mongoose.Types.ObjectId.isValid(userId) ||
-      !mongoose.Types.ObjectId.isValid(friendId)
-    ) {
-      throw new BadRequestError("Format d'ID utilisateur invalide");
-    }
-
-    // Prevent self-friending
-    if (userId === friendId) {
-      throw new BadRequestError(
-        "Vous ne pouvez pas vous retirer vous-même comme ami"
-      );
-    }
-
-    // Check if users exist
-    const [user, friend] = await Promise.all([
-      User.findById(userId),
-      User.findById(friendId),
-    ]);
-
-    if (!user) {
-      throw new NotFoundError("Utilisateur non trouvé");
-    }
-
-    if (!user.friends.includes(friendId)) {
-      throw new NotFoundError("Cet utilisateur n'est pas un ami");
-    }
-
-    // Remove from both users' friend lists using atomic operations
-    await Promise.all([
-      User.findByIdAndUpdate(
-        userId,
-        { $pull: { friends: friendId } },
-        { new: true }
-      ),
-      User.findByIdAndUpdate(
-        friendId,
-        { $pull: { friends: userId } },
-        { new: true }
-      ),
-    ]);
-
-    // Create notification for the removed friend
-    if (friend) {
-      await notificationService.createNotification({
-        userId: friendId,
-        type: "friend_removed",
-        title: "Ami retiré",
-        message: `${user.name} vous a retiré de sa liste d'amis`,
-        priority: "low",
-        actionUrl: `/profile/${userId}`,
-        metadata: {
-          removedById: userId,
-          removedByName: user.name,
-        },
-      });
-    }
-
-    //TODO: remove later
-    console.log(`++++++✅ REMOVE FRIEND: ${friendId} removed from ${userId}'s friends ++++++`);
-    logger.info(`L'utilisateur ${userId} a retiré ${friendId} de ses amis`);
-    return await User.findById(userId);
-  } catch (error) {
-    logger.error(`Erreur lors du retrait d'un ami: ${error.message}`);
-    throw error;
-  }
-};
-
-// Verify phone
-const verifyPhone = async (userId, code) => {
-  const user = await User.findById(userId);
+  console.log("===================deleteUser=======================");
+  const user = await User.findByIdAndDelete(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
-  if (
-    user.phoneVerificationCode !== code ||
-    user.phoneVerificationExpires < new Date()
-  ) {
-    throw new BadRequestError("Code de vérification invalide ou expiré");
-  }
-  user.isPhoneVerified = true;
-  user.phoneVerificationCode = undefined;
-  user.phoneVerificationExpires = undefined;
-  await user.save();
-  return user;
+  console.log("++++++✅ DELETE USER: User deleted ++++++");
 };
 
+// =============== ONBOARDING ===============
 
-// TODO: Implement a service to send SMS verification codes
-// Request phone verification code
-const requestPhoneVerification = async (userId, phoneNumber) => {
-  const user = await User.findById(userId);
-  if (!user) throw new NotFoundError("Utilisateur non trouvé");
-  const existingUser = await User.findOne({
-    phoneNumber,
-    _id: { $ne: userId },
-  });
-  if (existingUser) throw new ConflictError("Numéro de téléphone déjà utilisé");
-  user.phoneNumber = phoneNumber;
-  user.phoneVerificationCode = Math.floor(
-    100000 + Math.random() * 900000
-  ).toString();
-  user.phoneVerificationExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-  await user.save();
-  // TODO: Implement SMS service to send code
-};
+// Complete onboarding process
+const completeOnboarding = async (userId, onboardingData) => {
+  console.log("===================completeOnboarding=======================");
 
-// Update subscription
-const updateSubscription = async (userId, subscriptionData) => {
-  //TODO: remove later
-  console.log(`===================updateSubscription=======================`);
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
 
