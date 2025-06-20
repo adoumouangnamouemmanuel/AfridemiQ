@@ -52,7 +52,7 @@ const getProfile = async (req, res) => {
 
 // Update user profile
 const updateProfile = async (req, res) => {
-  const user = await userService.updateProfile(req.user.userId, req.body); // Changed from _id to userId
+  const user = await userService.updateProfile(req.user.userId, req.body);
   res.status(StatusCodes.OK).json({
     message: "Profil mis à jour avec succès",
     data: user,
