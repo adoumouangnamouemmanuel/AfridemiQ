@@ -105,14 +105,13 @@ const checkOnboardingStatus = async (req, res) => {
   });
 };
 
-// Request phone verification code
-const requestPhoneVerification = async (req, res) => {
-  await userService.requestPhoneVerification(
-    req.user.userId, // Changed from _id to userId
-    req.body.phoneNumber
-  );
+// =============== PASSWORD MANAGEMENT ===============
+
+// Change password
+const changePassword = async (req, res) => {
+  await userService.changePassword(req.user.userId, req.body);
   res.status(StatusCodes.OK).json({
-    message: "Code de vérification envoyé",
+    message: "Mot de passe modifié avec succès",
   });
 };
 
