@@ -191,7 +191,14 @@ const logOut = async (req, res) => {
 // Search users
 const searchUsers = async (req, res) => {
   try {
-    const { search, page = 1, limit = 10 } = req.query;
+    const {
+      search,
+      page = 1,
+      limit = 10,
+      country,
+      examType,
+      educationLevel,
+    } = req.query;
 
     if (!search) {
       return res.status(400).json({
