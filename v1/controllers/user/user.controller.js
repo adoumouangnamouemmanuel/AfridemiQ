@@ -244,13 +244,11 @@ const getUserById = async (req, res) => {
   });
 };
 
-// Block friend
-const blockFriend = async (req, res) => {
-  try {
-    const { friendId } = req.params;
-    const userId = req.user.userId;
+// =============== ADMIN ROUTES ===============
 
-    const user = await userService.blockFriend(userId, friendId);
+// Get all users (admin only)
+const getAllUsers = async (req, res) => {
+  const { users, count } = await userService.getAllUsers(req.query);
     res.status(StatusCodes.OK).json({
       message: "Utilisateur bloqué avec succès",
       data: user,
