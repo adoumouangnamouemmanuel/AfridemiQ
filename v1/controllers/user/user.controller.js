@@ -59,11 +59,12 @@ const updateProfile = async (req, res) => {
   });
 };
 
-// Delete user
-const deleteUser = async (req, res) => {
-  await userService.deleteUser(req.user.userId); // Changed from _id to userId
+// Update personal information
+const updatePersonalInfo = async (req, res) => {
+  const user = await userService.updatePersonalInfo(req.user.userId, req.body);
   res.status(StatusCodes.OK).json({
-    message: "Utilisateur supprimé avec succès",
+    message: "Informations personnelles mises à jour avec succès",
+    data: user,
   });
 };
 
