@@ -68,82 +68,11 @@ const updatePersonalInfo = async (req, res) => {
   });
 };
 
-// Get all users (admin only)
-const getAllUsers = async (req, res) => {
-  const { users, count } = await userService.getAllUsers(req.query);
+// Update notification preferences
+const updateNotifications = async (req, res) => {
+  const user = await userService.updateNotifications(req.user.userId, req.body);
   res.status(StatusCodes.OK).json({
-    message: "Liste des utilisateurs récupérée",
-    data: { users, total: count },
-  });
-};
-
-// Update all preferences
-const updateAllPreferences = async (req, res) => {
-  try {
-    const user = await userService.updateAllPreferences(
-      req.user.userId,
-      req.body
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Préférences mises à jour avec succès",
-      data: user,
-    });
-  } catch (error) {
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: error.message,
-      status: "error",
-      code: error.name,
-    });
-  }
-};
-
-// Update specific preference type
-const updatePreferenceType = async (req, res) => {
-  try {
-    const { type } = req.params;
-    const user = await userService.updatePreferenceType(
-      req.user.userId,
-      type,
-      req.body
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Préférences mises à jour avec succès",
-      data: user,
-    });
-  } catch (error) {
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: error.message,
-      status: "error",
-      code: error.name,
-    });
-  }
-};
-
-// Update multiple preference types
-const updateMultiplePreferences = async (req, res) => {
-  try {
-    const user = await userService.updateMultiplePreferences(
-      req.user.userId,
-      req.body
-    );
-    res.status(StatusCodes.OK).json({
-      message: "Préférences mises à jour avec succès",
-      data: user,
-    });
-  } catch (error) {
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: error.message,
-      status: "error",
-      code: error.name,
-    });
-  }
-};
-
-// Update progress
-const updateProgress = async (req, res) => {
-  const user = await userService.updateProgress(req.user.userId, req.body); // Changed from _id to userId
-  res.status(StatusCodes.OK).json({
-    message: "Progrès mis à jour",
+    message: "Préférences de notification mises à jour avec succès",
     data: user,
   });
 };
