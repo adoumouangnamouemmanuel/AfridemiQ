@@ -1,4 +1,12 @@
 const { Schema, model } = require("mongoose");
+const {
+  COUNTRIES,
+  EXAM_TYPES,
+  EDUCATION_LEVELS,
+  LANGUAGES,
+  USER_ROLES,
+  GENDERS,
+} = require("../../constants");
 const bcrypt = require("bcryptjs");
 
 const UserSchema = new Schema(
@@ -31,7 +39,7 @@ const UserSchema = new Schema(
     country: {
       type: String,
       enum: {
-        values: ["nigeria", "ghana", "kenya", "cameroon", "senegal", "chad"],
+        values: COUNTRIES,
         message:
           "Le pays doit être l'un des suivants : Nigeria, Ghana, Kenya, Cameroun, Sénégal, Tchad",
       },
@@ -40,7 +48,7 @@ const UserSchema = new Schema(
     examType: {
       type: String,
       enum: {
-        values: ["WAEC", "NECO", "JAMB", "KCSE", "BAC", "BEPC"],
+        values: EXAM_TYPES,
         message:
           "Le type d'examen doit être l'un des suivants : WAEC, NECO, JAMB, KCSE, BAC, BEPC",
       },
@@ -66,7 +74,7 @@ const UserSchema = new Schema(
     gender: {
       type: String,
       enum: {
-        values: ["male", "female", "prefer_not_to_say"],
+        values: GENDERS,
         message: "Le genre doit être : homme, femme ou préfère ne pas dire",
       },
     },
@@ -87,6 +95,10 @@ const UserSchema = new Schema(
     gradeLevel: {
       type: String,
       trim: true,
+      enum: {
+        values: EDUCATION_LEVELS,
+        message: "Le niveau d'education n'est pas valide"
+      }
     },
     targetExamYear: {
       type: Number,
@@ -98,7 +110,7 @@ const UserSchema = new Schema(
     preferredLanguage: {
       type: String,
       enum: {
-        values: ["english", "french"],
+        values: LANGUAGES,
         message: "La langue préférée doit être : anglais ou français",
       },
       default: "french",
@@ -146,7 +158,7 @@ const UserSchema = new Schema(
     role: {
       type: String,
       enum: {
-        values: ["student", "admin"],
+        values: USER_ROLES,
         message: "Le rôle doit être : étudiant ou administrateur",
       },
       default: "student",
