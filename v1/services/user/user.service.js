@@ -219,16 +219,24 @@ const checkOnboardingStatus = async (userId) => {
   };
 };
 
-// Log out user
-const logOut = async (userId) => {
-  //TODO: remove later
-  console.log(`===================logOut=======================`);
+// =============== PASSWORD MANAGEMENT ===============
+
+// Change password
+const changePassword = async (userId, { currentPassword, newPassword }) => {
+  console.log("===================changePassword=======================");
+
   const user = await User.findById(userId);
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
-  user.refreshToken = undefined; // Clear refresh token
-  //TODO: remove later
-  console.log(`++++++✅ LOG OUT: User ${userId} logged out ++++++`);
+
+  // Verify current password
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) throw new BadRequestError("Mot de passe actuel incorrect");
+
+  // Update password (will be hashed by pre-save middleware)
+  user.password = newPassword;
   await user.save();
+
+  console.log("++++++✅ CHANGE PASSWORD: Password changed ++++++");
 };
 
 // Request password reset
