@@ -9,35 +9,26 @@ const {
   apiLimiter,
 } = require("../../middlewares/rate.limit.middleware");
 
-// Import schemas (removed updateSinglePreferenceSchema)
+// Import simplified MVP schemas
 const {
   registerSchema,
   loginSchema,
   updateProfileSchema,
-  updateProgressSchema,
-  addFriendSchema,
-  verifyPhoneSchema,
-  phoneVerificationSchema,
-  updateSubscriptionSchema,
+  updatePersonalInfoSchema,
+  updateNotificationsSchema,
+  onboardingSchema,
+  checkOnboardingSchema,
   passwordResetRequestSchema,
   passwordResetSchema,
+  changePasswordSchema,
   refreshTokenSchema,
   searchUsersSchema,
-  updateSocialProfileSchema,
-  updateAllPreferencesSchema,
-  updatePreferenceTypeSchema,
-  updateMultiplePreferencesSchema,
-  updateBioSchema,
-  updatePersonalInfoSchema,
-  updateEducationSchema,
-  updateExamPreparationSchema,
-  // updateSinglePreferenceSchema, // ❌ REMOVED - no longer needed
 } = require("../../schemas/user/user.schema");
 
 // Apply rate limiting to all routes
 router.use(apiLimiter);
 
-// Public routes with stricter rate limiting for auth endpoints
+// =============== PUBLIC ROUTES (AUTH) ===============
 router.post(
   "/register",
   authLimiter,
@@ -72,7 +63,7 @@ router.post(
   userController.refreshToken
 );
 
-// Protected routes
+// =============== PROTECTED ROUTES ===============
 router.use(authMiddleware);
 
 // User routes
