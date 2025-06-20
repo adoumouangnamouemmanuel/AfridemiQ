@@ -10,12 +10,12 @@ const BadRequestError = require("../../errors/badRequestError");
 const NotFoundError = require("../../errors/notFoundError");
 const UnauthorizedError = require("../../errors/unauthorizedError");
 const ConflictError = require("../../errors/conflictError");
-const mongoose = require("mongoose");
-const notificationService = require("./notification/notification.service");
 const createLogger = require("../logging.service");
-const { LIMIT, PAGE } = require("../../constants/index");
+const { PAGINATION } = require("../../constants");
 
 const logger = createLogger("UserService");
+
+// =============== CORE AUTH (KEEP 100% INTACT) ===============
 
 // Register a new user
 const register = async (data) => {
