@@ -325,30 +325,53 @@ const refreshToken = async (refreshToken) => {
   }
 };
 
-// Search users
-const searchUsers = async (searchQuery, page = 1, limit = 10) => {
+// Log out user
+const logOut = async (userId) => {
+  //TODO: remove later
+  console.log("===================logOut=======================");
+  const user = await User.findById(userId);
+  if (!user) throw new NotFoundError("Utilisateur non trouvé");
+  user.refreshToken = undefined; // Clear refresh token
+  await user.save();
+  console.log("++++++✅ LOG OUT: User logged out ++++++");
+};
+
+// =============== USER SEARCH & DISCOVERY ===============
+
+// Search users with Africa-specific filters
+const searchUsers = async (searchQuery, page = 1, limit = 10, filters = {}) => {
+  console.log("===================searchUsers=======================");
+
   try {
     const skip = (page - 1) * limit;
 
     // Create a case-insensitive search regex
     const searchRegex = new RegExp(searchQuery, "i");
 
-    // Search across multiple fields with partial matching
+    // Base query with search across relevant fields
     const query = {
       $or: [
         { name: searchRegex },
         { email: searchRegex },
-        { country: searchRegex },
-        { city: searchRegex },
-        { school: searchRegex },
-        { grade: searchRegex },
+        { schoolName: searchRegex },
       ],
     };
+
+    // Add Africa-specific filters
+    if (filters.country) {
+      query.country = filters.country;
+    }
+    if (filters.examType) {
+      query.examType = filters.examType;
+    }
+    if (filters.educationLevel) {
+      query.educationLevel = filters.educationLevel;
+    }
 
     const [users, total] = await Promise.all([
       User.find(query)
         .select(
-          "-password -refreshToken -verificationToken -resetPasswordToken"
+          "name email country examType educationLevel schoolName preferredLanguage stats.averageScore createdAt"
         )
         .skip(skip)
         .limit(limit)
@@ -356,6 +379,7 @@ const searchUsers = async (searchQuery, page = 1, limit = 10) => {
       User.countDocuments(query),
     ]);
 
+    console.log("++++++✅ SEARCH USERS: Users found ++++++");
     return {
       users,
       total,
