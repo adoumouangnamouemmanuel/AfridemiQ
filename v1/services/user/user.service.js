@@ -62,6 +62,8 @@ const login = async ({ email, password }) => {
   return { user: user.toJSON(), token, refreshToken: user.refreshToken };
 };
 
+// =============== PROFILE MANAGEMENT ===============
+
 // Get user profile
 const getProfile = async (userId) => {
   //TODO: remove later
@@ -79,6 +81,8 @@ const getProfile = async (userId) => {
 const updateProfile = async (userId, updateData) => {
   //TODO: remove later
   console.log("===================updateProfile=======================");
+
+  // Check email uniqueness if email is being updated
   if (updateData.email) {
     const existingUser = await User.findOne({
       email: updateData.email,
@@ -86,6 +90,7 @@ const updateProfile = async (userId, updateData) => {
     });
     if (existingUser) throw new ConflictError("Email déjà utilisé");
   }
+
   const user = await User.findByIdAndUpdate(userId, updateData, {
     new: true,
     runValidators: true,
