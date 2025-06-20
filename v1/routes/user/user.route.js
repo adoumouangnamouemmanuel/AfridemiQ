@@ -66,9 +66,8 @@ router.post(
 // =============== PROTECTED ROUTES ===============
 router.use(authMiddleware);
 
-// User routes
+// Core profile routes
 router.get("/profile", userController.getProfile);
-
 router.put(
   "/profile",
   validateMiddleware(updateProfileSchema),
