@@ -241,17 +241,23 @@ const changePassword = async (userId, { currentPassword, newPassword }) => {
 
 // Request password reset
 const requestPasswordReset = async (email) => {
+  console.log("===================requestPasswordReset=======================");
+
   const user = await User.findOne({ email });
   if (!user) return; // Silent fail for security
+
   const resetToken = crypto.randomBytes(32).toString("hex");
   const resetTokenHash = crypto
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
+
   user.resetPasswordToken = resetTokenHash;
   user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
   await user.save();
+
   // TODO: Implement email service to send reset link with token
+  console.log("++++++✅ REQUEST PASSWORD RESET: Reset token created ++++++");
   return resetToken; // Return for testing; remove in production
 };
 
