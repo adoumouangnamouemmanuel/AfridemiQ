@@ -77,15 +77,11 @@ const updateNotifications = async (req, res) => {
   });
 };
 
-// Add friend
-const addFriend = async (req, res) => {
-  const user = await userService.addFriend(
-    req.user.userId,
-    req.params.friendId
-  );
+// Delete user
+const deleteUser = async (req, res) => {
+  await userService.deleteUser(req.user.userId);
   res.status(StatusCodes.OK).json({
-    message: "Ami ajouté avec succès",
-    data: user,
+    message: "Utilisateur supprimé avec succès",
   });
 };
 
