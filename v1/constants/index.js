@@ -69,6 +69,11 @@ const SUBJECT_CATEGORIES = [
 const DIFFICULTY_LEVELS = ["easy", "medium", "hard"];
 
 /**
+ * learning objectives
+ * /
+ const LEARNING_OBJECTIVES = ["remember", "understand", "apply", "analyze"];
+ 
+/**
  * Types de questions
  */
 const QUESTION_TYPES = ["multiple_choice", "true_false", "short_answer"];
