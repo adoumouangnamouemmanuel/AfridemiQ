@@ -186,43 +186,7 @@ const logOut = async (req, res) => {
   }
 };
 
-// Request password reset
-const requestPasswordReset = async (req, res) => {
-  await userService.requestPasswordReset(req.body.email);
-  res.status(StatusCodes.OK).json({
-    message: "Lien de réinitialisation envoyé",
-  });
-};
-
-// Reset password
-const resetPassword = async (req, res) => {
-  await userService.resetPassword(req.body.token, req.body.password);
-  res.status(StatusCodes.OK).json({
-    message: "Mot de passe réinitialisé avec succès",
-  });
-};
-
-// Refresh token
-const refreshToken = async (req, res) => {
-  try {
-    // TODO: Remove detailed logging before production
-    console.log("🔄 CONTROLLER: Token refresh request received");
-
-    const { token } = await userService.refreshToken(req.body.refreshToken);
-
-    // TODO: Remove detailed logging before production
-    console.log("✅ CONTROLLER: Token refresh successful");
-
-    res.status(StatusCodes.OK).json({
-      message: "Token rafraîchi avec succès",
-      data: { token },
-    });
-  } catch (error) {
-    // TODO: Remove detailed logging before production
-    console.error("❌ CONTROLLER: Token refresh failed:", error.message);
-    throw error;
-  }
-};
+// =============== USER SEARCH & DISCOVERY ===============
 
 // Search users
 const searchUsers = async (req, res) => {
