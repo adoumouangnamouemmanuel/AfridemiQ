@@ -85,14 +85,13 @@ const deleteUser = async (req, res) => {
   });
 };
 
-// Remove friend
-const removeFriend = async (req, res) => {
-  const user = await userService.removeFriend(
-    req.user.userId,
-    req.params.friendId
-  );
+// =============== ONBOARDING ===============
+
+// Complete onboarding process
+const completeOnboarding = async (req, res) => {
+  const user = await userService.completeOnboarding(req.user.userId, req.body);
   res.status(StatusCodes.OK).json({
-    message: "Ami supprimé avec succès",
+    message: "Inscription complétée avec succès",
     data: user,
   });
 };
