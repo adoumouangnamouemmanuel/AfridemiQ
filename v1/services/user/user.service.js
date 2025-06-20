@@ -192,31 +192,31 @@ const completeOnboarding = async (userId, onboardingData) => {
   return updatedUser;
 };
 
-// Get user by ID
-const getUserById = async (userId, authUser) => {
-  //TODO: remove later
-  console.log(`===================getUserById=======================`);
+// Check onboarding status
+const checkOnboardingStatus = async (userId) => {
+  console.log(
+    "===================checkOnboardingStatus======================="
+  );
+
   const user = await User.findById(userId).select(
-    "-password -resetPasswordToken -resetPasswordExpires -refreshToken"
+    "onboardingCompleted country examType educationLevel"
   );
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
-  if (authUser.role !== "admin" && authUser._id.toString() !== userId) {
-    if (
-      user.socialProfile.visibility === "private" &&
-      !user.friends.includes(authUser._id)
-    ) {
-      throw new UnauthorizedError("Accès au profil non autorisé");
-    }
-    if (
-      user.socialProfile.visibility === "friends" &&
-      !user.friends.includes(authUser._id)
-    ) {
-      throw new UnauthorizedError("Accès au profil réservé aux amis");
-    }
-  }
-  //TODO: remove later
-  console.log(`++++++✅ GET USER BY ID: User ${userId} retrieved ++++++`);
-  return user;
+
+  const isComplete =
+    user.onboardingCompleted &&
+    user.country &&
+    user.examType &&
+    user.educationLevel;
+
+  console.log("++++++✅ CHECK ONBOARDING: Status checked ++++++");
+  return {
+    onboardingCompleted: isComplete,
+    hasCountry: !!user.country,
+    hasExamType: !!user.examType,
+    hasEducationLevel: !!user.educationLevel,
+    requiresOnboarding: !isComplete,
+  };
 };
 
 // Log out user
