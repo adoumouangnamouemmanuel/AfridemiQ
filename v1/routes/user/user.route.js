@@ -17,7 +17,6 @@ const {
   updatePersonalInfoSchema,
   updateNotificationsSchema,
   onboardingSchema,
-  checkOnboardingSchema,
   passwordResetRequestSchema,
   passwordResetSchema,
   changePasswordSchema,
