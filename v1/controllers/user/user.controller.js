@@ -43,7 +43,7 @@ const login = async (req, res) => {
 
 // Get user profile
 const getProfile = async (req, res) => {
-  const user = await userService.getProfile(req.user.userId); // Changed from _id to userId
+  const user = await userService.getProfile(req.user.userId);
   res.status(StatusCodes.OK).json({
     message: "Profil récupéré avec succès",
     data: user,
