@@ -441,187 +441,47 @@ const getAllUsers = async (query) => {
   if (country) filter.country = country;
   if (examType) filter.examType = examType;
 
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new NotFoundError("Utilisateur non trouvé");
-  }
+  const users = await User.find(filter)
+    .select("-password -resetPasswordToken -resetPasswordExpires -refreshToken")
+    .skip((page - 1) * limit)
+    .limit(Number(limit))
+    .sort({ createdAt: -1 });
 
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    {
-      $set: {
-        schoolName: educationData.schoolName,
-        gradeLevel: educationData.gradeLevel,
-        "preferences.studyField": educationData.studyField, // ✅ Correct path
-        "preferences.studyHours": educationData.studyHours, // ✅ Correct path
-      },
-    },
-    { new: true, runValidators: true }
-  ).select(
-    "-password -refreshToken -phoneVerificationToken -resetPasswordToken"
-  );
+  const count = await User.countDocuments(filter);
 
-  if (!updatedUser) {
-    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
-  }
-
-  console.log(`Updated education for user ${userId}`, {
-    schoolName: updatedUser.schoolName,
-    gradeLevel: updatedUser.gradeLevel,
-    "preferences.studyField": educationData.studyField, // ✅ Correct path
-    "preferences.studyHours": educationData.studyHours, // ✅ Correct path
-  });
-
-  return updatedUser;
-}
-
-// Updates exam preparation fields (progress-related)
-// @param {string} userId - ID of the user
-// @param {object} examPrepData - Data containing exam preparation fields
-// @returns {object} Updated user object with sensitive fields excluded
-async function updateExamPreparation(userId, examPrepData) {
-  // TODO: Remove console.log before production
-  console.log(`Updating exam preparation for user ${userId}`);
-
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new NotFoundError("Utilisateur non trouvé");
-  }
-
-  // Map input fields to MongoDB fields using $set
-  const updateFields = {};
-  for (const [key, value] of Object.entries(examPrepData)) {
-    updateFields[`progress.${key}`] = value;
-  }
-
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { $set: updateFields },
-    { new: true, runValidators: true }
-  ).select(
-    "-password -refreshToken -phoneVerificationToken -resetPasswordToken"
-  );
-
-  if (!updatedUser) {
-    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
-  }
-
-  return updatedUser;
-}
-
-// COMPLETELY NEW APPROACH: Updates a single preference using direct MongoDB operations
-// @param {string} userId - ID of the user
-// @param {string} key - Preference key (e.g., notifications.general, autoPlayAudio)
-// @param {any} value - New value for the preference
-// @returns {object} Updated user object with sensitive fields excluded
-async function updateSinglePreference(userId, key, value) {
-  console.log(
-    `🔧 SERVICE: Starting single preference update for user ${userId}`
-  );
-  console.log(`🔧 SERVICE: Key: "${key}", Value:`, value, `(${typeof value})`);
-
-  try {
-    // Find user first
-    const user = await User.findById(userId);
-    if (!user) {
-      throw new NotFoundError("Utilisateur non trouvé");
-    }
-
-    console.log(
-      `🔧 SERVICE: User found, current preferences:`,
-      JSON.stringify(user.preferences, null, 2)
-    );
-
-    // Build the update object based on key type
-    let updateObject = {};
-
-    if (key.includes(".")) {
-      // Handle nested keys like "notifications.general"
-      const dotNotationKey = `preferences.${key}`;
-      updateObject[dotNotationKey] = value;
-      console.log(
-        `🔧 SERVICE: Using dot notation update for nested key: ${dotNotationKey}`
-      );
-    } else {
-      // Handle direct keys like "autoPlayAudio"
-      const directKey = `preferences.${key}`;
-      updateObject[directKey] = value;
-      console.log(`🔧 SERVICE: Using direct update for key: ${directKey}`);
-    }
-
-    console.log(
-      `🔧 SERVICE: Update object:`,
-      JSON.stringify(updateObject, null, 2)
-    );
-
-    // Use findByIdAndUpdate with $set operator
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $set: updateObject },
-      {
-        new: true,
-        runValidators: true,
-        // Ensure we get the updated document
-        returnDocument: "after",
-      }
-    ).select(
-      "-password -refreshToken -phoneVerificationToken -resetPasswordToken"
-    );
-
-    if (!updatedUser) {
-      throw new NotFoundError("Utilisateur non trouvé après mise à jour");
-    }
-
-    console.log(`✅ SERVICE: Preference update successful`);
-    console.log(
-      `✅ SERVICE: Updated preferences:`,
-      JSON.stringify(updatedUser.preferences, null, 2)
-    );
-
-    return updatedUser;
-  } catch (error) {
-    console.error(`❌ SERVICE: Error in updateSinglePreference:`, error);
-
-    // Re-throw known errors
-    if (error instanceof NotFoundError) {
-      throw error;
-    }
-
-    // Wrap unknown errors
-    throw new BadRequestError(
-      `Erreur lors de la mise à jour de la préférence: ${error.message}`
-    );
-  }
-}
+  console.log("++++++✅ GET ALL USERS: Users retrieved ++++++");
+  return { users, count };
+};
 
 module.exports = {
+  // Core auth (100% intact)
   register,
   login,
+
+  // Profile management
   getProfile,
   updateProfile,
+  updatePersonalInfo,
+  updateNotifications,
   deleteUser,
-  getAllUsers,
-  updateAllPreferences,
-  updatePreferenceType,
-  updateMultiplePreferences,
-  updateProgress,
-  addFriend,
-  removeFriend,
-  blockFriend,
-  unblockFriend,
-  verifyPhone,
-  requestPhoneVerification,
-  updateSubscription,
-  getUserById,
-  logOut,
+
+  // Onboarding
+  completeOnboarding,
+  checkOnboardingStatus,
+
+  // Password management
+  changePassword,
   requestPasswordReset,
   resetPassword,
+
+  // Token management
   refreshToken,
+  logOut,
+
+  // User search & discovery
   searchUsers,
-  updateSocialProfile,
-  updateBio,
-  updatePersonalInfo,
-  updateEducation,
-  updateExamPreparation,
-  updateSinglePreference,
+  getUserById,
+
+  // Admin
+  getAllUsers,
 };
