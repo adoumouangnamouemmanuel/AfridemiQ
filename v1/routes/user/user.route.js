@@ -73,7 +73,6 @@ router.put(
   validateMiddleware(updateProfileSchema),
   userController.updateProfile
 );
-
 router.delete("/profile", userController.deleteUser);
 
 router.put(
