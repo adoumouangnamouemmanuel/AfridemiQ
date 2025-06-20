@@ -74,12 +74,7 @@ router.put(
   userController.updateProfile
 );
 router.delete("/profile", userController.deleteUser);
-
-router.put(
-  "/progress",
-  validateMiddleware(updateProgressSchema),
-  userController.updateProgress
-);
+router.post("/logout", userController.logOut);
 
 router.post(
   "/verify-phone",
