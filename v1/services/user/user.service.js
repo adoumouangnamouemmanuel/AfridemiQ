@@ -391,24 +391,33 @@ const searchUsers = async (searchQuery, page = 1, limit = 10, filters = {}) => {
   }
 };
 
-const updateSocialProfile = async (
-  userId,
-  { bio, visibility, publicAchievements, socialLinks }
-) => {
-  const socialProfile = {
-    bio,
-    visibility,
-    publicAchievements: publicAchievements || [],
-    socialLinks: socialLinks || [],
-  };
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { socialProfile },
-    { new: true, runValidators: true }
-  ).select(
-    "-password -phoneVerificationCode -phoneVerificationExpires -resetPasswordToken -resetPasswordExpires -refreshToken"
+// Get user by ID with simplified visibility
+const getUserById = async (userId, authUser) => {
+  //TODO: remove later
+  console.log("===================getUserById=======================");
+
+  const user = await User.findById(userId).select(
+    "name email country examType educationLevel schoolName preferredLanguage stats onboardingCompleted createdAt"
   );
+
   if (!user) throw new NotFoundError("Utilisateur non trouvé");
+
+  // Simple visibility: users can see basic info of other users
+  // Admin can see everything
+  if (authUser.role !== "admin" && authUser.userId !== userId) {
+    // Return limited public profile for non-admin, non-self requests
+    return {
+      _id: user._id,
+      name: user.name,
+      country: user.country,
+      examType: user.examType,
+      educationLevel: user.educationLevel,
+      preferredLanguage: user.preferredLanguage,
+      createdAt: user.createdAt,
+    };
+  }
+
+  console.log("++++++✅ GET USER BY ID: User retrieved ++++++");
   return user;
 };
 
