@@ -235,11 +235,11 @@ const searchUsers = async (req, res) => {
   }
 };
 
-// Update social profile
-const updateSocialProfile = async (req, res) => {
-  const user = await userService.updateSocialProfile(req.user.userId, req.body); // Changed from _id to userId
+// Get user by ID
+const getUserById = async (req, res) => {
+  const user = await userService.getUserById(req.params.id, req.user);
   res.status(StatusCodes.OK).json({
-    message: "Profil social mis à jour",
+    message: "Utilisateur récupéré avec succès",
     data: user,
   });
 };
