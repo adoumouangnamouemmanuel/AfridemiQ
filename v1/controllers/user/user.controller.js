@@ -210,7 +210,8 @@ const searchUsers = async (req, res) => {
     const result = await userService.searchUsers(
       search,
       Number.parseInt(page),
-      Number.parseInt(limit)
+      Number.parseInt(limit),
+      { country, examType, educationLevel }
     );
 
     res.json({
