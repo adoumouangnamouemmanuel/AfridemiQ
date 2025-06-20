@@ -8,7 +8,6 @@ const {
   authLimiter,
   apiLimiter,
 } = require("../../middlewares/rate.limit.middleware");
-const validateKeyValueMiddleware = require("../../middlewares/validateKeyValue.middleware");
 
 // Import schemas (removed updateSinglePreferenceSchema)
 const {
