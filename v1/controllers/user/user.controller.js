@@ -256,33 +256,34 @@ const getAllUsers = async (req, res) => {
 };
 
 module.exports = {
+  // Core auth (100% intact)
   register,
   login,
+
+  // Profile management
   getProfile,
   updateProfile,
+  updatePersonalInfo,
+  updateNotifications,
   deleteUser,
-  getAllUsers,
-  updateAllPreferences,
-  updatePreferenceType,
-  updateMultiplePreferences,
-  updateProgress,
-  addFriend,
-  removeFriend,
-  verifyPhone,
-  requestPhoneVerification,
-  updateSubscription,
-  getUserById,
-  logOut,
+
+  // Onboarding
+  completeOnboarding,
+  checkOnboardingStatus,
+
+  // Password management
+  changePassword,
   requestPasswordReset,
   resetPassword,
+
+  // Token management
   refreshToken,
+  logOut,
+
+  // User search & discovery
   searchUsers,
-  updateSocialProfile,
-  blockFriend,
-  unblockFriend,
-  updateBio,
-  updatePersonalInfo,
-  updateEducation,
-  updateExamPreparation,
-  updateSinglePreference, // ✅ Only this method, updatePreferenceByParams removed
+  getUserById,
+
+  // Admin
+  getAllUsers,
 };
