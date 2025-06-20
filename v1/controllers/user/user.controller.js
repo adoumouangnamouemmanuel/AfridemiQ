@@ -96,12 +96,12 @@ const completeOnboarding = async (req, res) => {
   });
 };
 
-// Verify phone
-const verifyPhone = async (req, res) => {
-  const user = await userService.verifyPhone(req.user.userId, req.body.code); // Changed from _id to userId
+// Check onboarding status
+const checkOnboardingStatus = async (req, res) => {
+  const status = await userService.checkOnboardingStatus(req.user.userId);
   res.status(StatusCodes.OK).json({
-    message: "Téléphone vérifié avec succès",
-    data: user,
+    message: "Statut d'inscription récupéré",
+    data: status,
   });
 };
 
