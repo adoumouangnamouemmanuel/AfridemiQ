@@ -421,209 +421,25 @@ const getUserById = async (userId, authUser) => {
   return user;
 };
 
-// Block friend
-const blockFriend = async (userId, friendId) => {
-  try {
-    // Validate IDs
-    if (
-      !mongoose.Types.ObjectId.isValid(userId) ||
-      !mongoose.Types.ObjectId.isValid(friendId)
-    ) {
-      throw new BadRequestError("Format d'ID utilisateur invalide");
-    }
+// =============== ADMIN FUNCTIONS ===============
 
-    // Prevent self-blocking
-    if (userId === friendId) {
-      throw new BadRequestError("Vous ne pouvez pas vous bloquer vous-même");
-    }
+// Get all users (admin only)
+const getAllUsers = async (query) => {
+  //TODO: remove later
+  console.log("===================getAllUsers=======================");
 
-    const user = await User.findById(userId);
-    const friend = await User.findById(friendId);
+  const {
+    page = PAGINATION.DEFAULT_PAGE,
+    limit = PAGINATION.DEFAULT_LIMIT,
+    role,
+    country,
+    examType,
+  } = query;
 
-    if (!user || !friend) {
-      throw new NotFoundError("Utilisateur non trouvé");
-    }
-
-    // Check if already blocked
-    if (user.blockedUsers.includes(friendId)) {
-      throw new ConflictError("Cet utilisateur est déjà bloqué");
-    }
-
-    // Add to blocked users
-    user.blockedUsers.push(friendId);
-
-    // Remove from friends if they were friends
-    if (user.friends.includes(friendId)) {
-      user.friends = user.friends.filter(
-        (f) => f.toString() !== friendId.toString()
-      );
-    }
-
-    await user.save();
-
-    // Create notification for the blocked user
-    await notificationService.createNotification({
-      userId: friendId,
-      type: "user_blocked",
-      title: "Utilisateur bloqué",
-      message: `${user.name} vous a bloqué`,
-      priority: "high",
-      actionUrl: `/profile/${userId}`,
-      metadata: {
-        blockedById: userId,
-        blockedByName: user.name,
-      },
-    });
-
-    logger.info(`L'utilisateur ${userId} a bloqué ${friendId}`);
-    return user;
-  } catch (error) {
-    logger.error(`Erreur lors du blocage d'un utilisateur: ${error.message}`);
-    throw error;
-  }
-};
-
-// Unblock friend
-const unblockFriend = async (userId, friendId) => {
-  try {
-    // Validate IDs
-    if (
-      !mongoose.Types.ObjectId.isValid(userId) ||
-      !mongoose.Types.ObjectId.isValid(friendId)
-    ) {
-      throw new BadRequestError("Format d'ID utilisateur invalide");
-    }
-
-    const user = await User.findById(userId);
-    const friend = await User.findById(friendId);
-
-    if (!user || !friend) {
-      throw new NotFoundError("Utilisateur non trouvé");
-    }
-
-    // Check if user is blocked
-    if (!user.blockedUsers.includes(friendId)) {
-      throw new NotFoundError("Cet utilisateur n'est pas bloqué");
-    }
-
-    // Remove from blocked users
-    user.blockedUsers = user.blockedUsers.filter(
-      (f) => f.toString() !== friendId.toString()
-    );
-
-    // Add back to friends list if they were friends before and not already in the list
-    if (!user.friends.includes(friendId)) {
-      user.friends.push(friendId);
-    }
-
-    // Only add to friend's list if not already there
-    if (!friend.friends.includes(userId)) {
-      friend.friends.push(userId);
-    }
-
-    // Save both users
-    await Promise.all([user.save(), friend.save()]);
-
-    // Create notification for the unblocked user
-    await notificationService.createNotification({
-      userId: friendId,
-      type: "friend_request",
-      title: "Ami débloqué",
-      message: `${user.name} vous a débloqué et ajouté comme ami`,
-      priority: "medium",
-      actionUrl: `/profile/${userId}`,
-      metadata: {
-        unblockedById: userId,
-        unblockedByName: user.name,
-      },
-    });
-
-    logger.info(`L'utilisateur ${userId} a débloqué ${friendId}`);
-    return user;
-  } catch (error) {
-    logger.error(`Erreur lors du déblocage d'un utilisateur: ${error.message}`);
-    throw error;
-  }
-};
-
-// Updates only the user's bio (part of socialProfile)
-// @param {string} userId - ID of the user
-// @param {object} bioData - Data containing the bio field
-// @returns {object} Updated user object with sensitive fields excluded
-async function updateBio(userId, bioData) {
-  // TODO: Remove console.log before production
-  console.log(`Updating bio for user ${userId}`);
-
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new NotFoundError("Utilisateur non trouvé");
-  }
-
-  // Update bio using $set to target specific field
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { $set: { "socialProfile.bio": bioData.bio } },
-    { new: true, runValidators: true }
-  ).select(
-    "-password -refreshToken -phoneVerificationToken -resetPasswordToken"
-  );
-
-  if (!updatedUser) {
-    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
-  }
-
-  return updatedUser;
-}
-
-// Updates personal information fields
-// @param {string} userId - ID of the user
-// @param {object} personalInfoData - Data containing personal info fields
-// @returns {object} Updated user object with sensitive fields excluded
-async function updatePersonalInfo(userId, personalInfoData) {
-  // TODO: Remove console.log before production
-  console.log(`Updating personal info for user ${userId}`);
-
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new NotFoundError("Utilisateur non trouvé");
-  }
-
-  // Map input fields to MongoDB fields using $set
-  const updateFields = {};
-  for (const [key, value] of Object.entries(personalInfoData)) {
-    updateFields[key] = value;
-  }
-
-  // Check for email uniqueness if email is being updated
-  if (personalInfoData.email && personalInfoData.email !== user.email) {
-    const existingUser = await User.findOne({ email: personalInfoData.email });
-    if (existingUser) {
-      throw new BadRequestError("Cet email est déjà utilisé");
-    }
-  }
-
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { $set: updateFields },
-    { new: true, runValidators: true }
-  ).select(
-    "-password -refreshToken -phoneVerificationToken -resetPasswordToken"
-  );
-
-  if (!updatedUser) {
-    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
-  }
-
-  return updatedUser;
-}
-
-// Updates education information fields
-// @param {string} userId - ID of the user
-// @param {object} educationData - Data containing education fields
-// @returns {object} Updated user object with sensitive fields excluded
-// user.service.js (updated updateEducation)
-async function updateEducation(userId, educationData) {
-  console.log(`Updating education for user ${userId}`, educationData);
+  const filter = {};
+  if (role) filter.role = role;
+  if (country) filter.country = country;
+  if (examType) filter.examType = examType;
 
   const user = await User.findById(userId);
   if (!user) {
