@@ -235,28 +235,24 @@ const getResourceStatistics = async (req, res) => {
   }
 };
 
-// Get resources by exam
-const getResourcesByExam = async (req, res) => {
+// =============== GET RESOURCE FORMATS ===============
+const getResourceFormats = async (req, res) => {
+  logger.info("===================getResourceFormats=======================");
+
   try {
-    const { examId } = req.params;
-    const options = {
-      page: req.query.page,
-      limit: req.query.limit,
-      sortBy: req.query.sortBy,
-      sortOrder: req.query.sortOrder,
-    };
+    const formats = await resourceService.getResourceFormats();
 
-    const result = await resourceService.getResourcesByExam(examId, options);
-
+    logger.info("++++++✅ GET RESOURCE FORMATS: Formats retrieved ++++++");
     res.status(StatusCodes.OK).json({
-      message: "Resources retrieved successfully",
-      data: result,
+      success: true,
+      message: "Formats récupérés avec succès",
+      data: { formats },
     });
   } catch (error) {
-    logger.error("Error getting resources by exam:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error retrieving resources",
-      error: error.message,
+    logger.error("❌ GET RESOURCE FORMATS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des formats",
     });
   }
 };
