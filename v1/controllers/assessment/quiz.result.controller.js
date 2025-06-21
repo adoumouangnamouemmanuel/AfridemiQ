@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
-const quizResultService = require("../../services/assessment/quiz.result.service");
+const quizResultService = require("../../services/assessment/quizResult/quiz.result.service");
 const createLogger = require("../../services/logging.service");
 
 const logger = createLogger("QuizResultController");
