@@ -63,9 +63,9 @@ const UserSchema = new Schema(
     },
 
     // =============== ONBOARDING STATUS ===============
-    onboardingStatusId: {
-      type: Types.ObjectId,
-      ref: "OnboardingStatus",
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
     },
 
     // =============== PRÉFÉRENCES DE BASE ===============
