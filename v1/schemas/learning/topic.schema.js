@@ -113,27 +113,34 @@ const updateTopicSchema = Joi.object({
   learningObjectives: Joi.array()
     .items(
       Joi.object({
-        id: Joi.string()
-          .pattern(/^[0-9a-fA-F]{24}$/)
-          .required()
-          .messages({
-            "string.pattern.base": "Invalid topic ID format",
-            "any.required": "Topic ID is required",
-          }),
-        data: updateTopicSchema.required().messages({
-          "any.required": "Update data is required",
-        }),
+        objective: Joi.string().required().trim().max(200),
+        level: Joi.string().valid(...LEARNING_OBJECTIVES).optional().default("understand"),
       })
     )
     .min(1)
-    .max(50)
-    .required()
-    .messages({
-      "array.base": "Updates must be an array",
-      "array.min": "At least one update is required",
-      "array.max": "Cannot update more than 50 topics at once",
-      "any.required": "Updates array is required",
-    }),
+    .optional(),
+  prerequisites: Joi.array().items(Joi.string().trim().max(100)).optional(),
+  keywords: Joi.array().items(Joi.string().trim().max(50)).optional(),
+  order: Joi.number().min(0).optional(),
+  isPremium: Joi.boolean().optional(),
+  isPopular: Joi.boolean().optional(),
+  isActive: Joi.boolean().optional(),
+});
+
+// =============== QUERY PARAMS SCHEMA ===============
+const getTopicsQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).optional().default(1),
+  limit: Joi.number().integer().min(1).max(100).optional().default(10),
+  subjectId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).optional(),
+  difficulty: Joi.string().valid(...DIFFICULTY_LEVELS).optional(),
+  isActive: Joi.boolean().optional(),
+  isPremium: Joi.boolean().optional(),
+  isPopular: Joi.boolean().optional(),
+  hasQuestions: Joi.boolean().optional(),
+  hasResources: Joi.boolean().optional(),
+  search: Joi.string().trim().max(100).optional(),
+  sortBy: Joi.string().valid("name", "createdAt", "order", "difficulty", "stats.averageScore").optional().default("order"),
+  sortOrder: Joi.string().valid("asc", "desc").optional().default("asc"),
 });
 
 module.exports = {
