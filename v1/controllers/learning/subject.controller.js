@@ -201,38 +201,34 @@ const getSubjectsByEducationAndCountry = async (req, res) => {
   }
 };
 
-// Subject Performance Controller
-const getSubjectPerformance = async (req, res) => {
+// =============== GET SUBJECTS BY EXAM TYPE ===============
+const getSubjectsByExamType = async (req, res) => {
+  logger.info(
+    "===================getSubjectsByExamType======================="
+  );
+
   try {
-    const performance = await analyticsService.getSubjectPerformance(
-      req.params.id
+    const { examType } = req.params;
+    const { educationLevel } = req.query;
+    const subjects = await subjectService.getSubjectsByExamType(
+      examType,
+      educationLevel
+    );
+
+    logger.info(
+      "++++++✅ GET SUBJECTS BY EXAM TYPE: Subjects retrieved ++++++"
     );
     res.status(StatusCodes.OK).json({
-      message: "Performance de la matière récupérée avec succès",
-      data: performance,
+      success: true,
+      message: "Matières récupérées avec succès",
+      data: { subjects },
     });
   } catch (error) {
-    logger.error("Error in getSubjectPerformance controller", error, {
-      subjectId: req.params.id,
+    logger.error("❌ GET SUBJECTS BY EXAM TYPE ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des matières",
     });
-    throw error;
-  }
-};
-
-// Compare Subjects Controller
-const compareSubjects = async (req, res) => {
-  try {
-    const { ids } = req.body;
-    const comparison = await analyticsService.compareSubjects(ids);
-    res.status(StatusCodes.OK).json({
-      message: "Comparaison des matières effectuée avec succès",
-      data: comparison,
-    });
-  } catch (error) {
-    logger.error("Error in compareSubjects controller", error, {
-      ids: req.body.ids,
-    });
-    throw error;
   }
 };
 
