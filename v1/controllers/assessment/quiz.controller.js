@@ -1,37 +1,51 @@
 const quizService = require("../../services/assessment/quiz/quiz.service");
-const { asyncHandler } = require("../../utils/asyncHandler");
-const { ApiError } = require("../../utils/ApiError");
+const createLogger = require("../../services/logging.service");
 
-class QuizController {
-  // Create quiz
-  createQuiz = asyncHandler(async (req, res) => {
-    const quizData = {
-      ...req.body,
-      createdBy: req.user.id,
-    };
+const logger = createLogger("QuizController");
 
-    const result = await quizService.createQuiz(quizData);
-    res.status(result.statusCode).json(result);
-  });
+// =============== CREATE QUIZ ===============
+const createQuiz = async (req, res) => {
+  logger.info("===================createQuiz=======================");
 
-  // Get all quizzes
-  getAllQuizzes = asyncHandler(async (req, res) => {
-    const options = {
-      page: Number.parseInt(req.query.page) || 1,
-      limit: Number.parseInt(req.query.limit) || 10,
-      sortBy: req.query.sortBy || "createdAt",
-      sortOrder: req.query.sortOrder || "desc",
-      search: req.query.search,
-      subjectId: req.query.subjectId,
-      level: req.query.level,
-      difficulty: req.query.difficulty,
-      premiumOnly: req.query.premiumOnly === "true",
-      isActive: req.query.isActive !== "false",
-    };
+  try {
+    const quiz = await quizService.createQuiz(req.body);
 
-    const result = await quizService.getAllQuizzes({}, options);
-    res.status(result.statusCode).json(result);
-  });
+    logger.info("++++++✅ CREATE QUIZ: Quiz created successfully ++++++");
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: "Quiz créé avec succès",
+      data: { quiz },
+    });
+  } catch (error) {
+    logger.error("❌ CREATE QUIZ ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la création du quiz",
+    });
+  }
+};
+
+// =============== GET ALL QUIZZES ===============
+const getQuizzes = async (req, res) => {
+  logger.info("===================getQuizzes=======================");
+
+  try {
+    const result = await quizService.getQuizzes(req.query);
+
+    logger.info("++++++✅ GET QUIZZES: Quizzes retrieved successfully ++++++");
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Quizzes récupérés avec succès",
+      data: result,
+    });
+  } catch (error) {
+    logger.error("❌ GET QUIZZES ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des quizzes",
+    });
+  }
+};
 
   // Get quiz by ID
   getQuizById = asyncHandler(async (req, res) => {
