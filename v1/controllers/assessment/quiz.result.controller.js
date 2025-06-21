@@ -28,16 +28,27 @@ const createQuizResult = async (req, res) => {
   }
 };
 
-const getQuizResultById = async (req, res) => {
+// =============== GET ALL QUIZ RESULTS ===============
+const getQuizResults = async (req, res) => {
+  logger.info("===================getQuizResults=======================");
+
   try {
-    const quizResult = await quizResultService.getQuizResultById(req.params.id);
+    const result = await quizResultService.getQuizResults(req.query);
+
+    logger.info(
+      "++++++✅ GET QUIZ RESULTS: Quiz results retrieved successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Résultat de quiz récupéré avec succès",
-      data: quizResult,
+      success: true,
+      message: "Résultats de quiz récupérés avec succès",
+      data: result,
     });
   } catch (error) {
-    logger.error("Error retrieving quiz result:", error);
-    throw error;
+    logger.error("❌ GET QUIZ RESULTS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des résultats",
+    });
   }
 };
 
