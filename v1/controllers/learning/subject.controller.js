@@ -144,48 +144,30 @@ const getFeaturedSubjects = async (req, res) => {
   }
 };
 
-// Remove exam from subject
-const removeExamFromSubject = async (req, res) => {
+// =============== GET POPULAR SUBJECTS ===============
+const getPopularSubjects = async (req, res) => {
+  logger.info("===================getPopularSubjects=======================");
+
   try {
-    const subject = await subjectService.removeExamFromSubject(
-      req.params.id,
-      req.params.examId
+    const limit = parseInt(req.query.limit) || 10;
+    const subjects = await subjectService.getPopularSubjects(limit);
+
+    logger.info(
+      "++++++✅ GET POPULAR SUBJECTS: Popular subjects retrieved ++++++"
     );
     res.status(StatusCodes.OK).json({
-      message: "Examen retiré de la matière avec succès",
-      data: subject,
+      success: true,
+      message: "Matières populaires récupérées avec succès",
+      data: { subjects },
     });
   } catch (error) {
-    logger.error("Error in removeExamFromSubject controller", error, {
-      subjectId: req.params.id,
-      examId: req.params.examId,
+    logger.error("❌ GET POPULAR SUBJECTS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message:
+        error.message ||
+        "Erreur lors de la récupération des matières populaires",
     });
-    throw error;
-  }
-};
-
-// Get subjects by series
-const getSubjectsBySeries = async (req, res) => {
-  try {
-    // Merge series param with other query parameters
-    const queryWithSeries = {
-      ...req.query,
-      series: req.params.series,
-    };
-
-    const subjects = await subjectService.getSubjects(queryWithSeries);
-
-    res.status(StatusCodes.OK).json({
-      message: "Matières récupérées par série avec succès",
-      data: subjects.subjects,
-      pagination: subjects.pagination,
-    });
-  } catch (error) {
-    logger.error("Error in getSubjectsBySeries controller", error, {
-      series: req.params.series,
-      query: req.query,
-    });
-    throw error;
   }
 };
 
