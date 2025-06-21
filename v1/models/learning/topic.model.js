@@ -54,12 +54,12 @@ const TopicSchema = new Schema(
     ],
 
     // =============== PRÉREQUIS SIMPLES ===============
-    prerequisites: [
-      {
-        type: Types.ObjectId,
-        ref: "Topic",
-      },
-    ],
+    // Simple Prerequisites
+    prerequisites: [String], // Simple array of topic names
+
+    // Flags for Available Content
+    hasQuestions: { type: Boolean, default: false },
+    hasResources: { type: Boolean, default: false },
 
     // =============== STATISTIQUES SIMPLES ===============
     stats: {
