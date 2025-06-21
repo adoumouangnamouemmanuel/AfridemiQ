@@ -52,17 +52,27 @@ const getQuestions = async (req, res) => {
   }
 };
 
-const getQuestions = async (req, res) => {
+// =============== GET QUESTION BY ID ===============
+const getQuestionById = async (req, res) => {
+  logger.info("===================getQuestionById=======================");
+
   try {
-    const result = await questionService.getQuestions(req.query, req.query);
+    const question = await questionService.getQuestionById(req.params.id);
+
+    logger.info(
+      "++++++✅ GET QUESTION BY ID: Question retrieved successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Questions récupérées avec succès",
-      data: result.questions,
-      pagination: result.pagination,
+      success: true,
+      message: "Question récupérée avec succès",
+      data: { question },
     });
   } catch (error) {
-    logger.error("Error retrieving questions:", error);
-    throw error;
+    logger.error("❌ GET QUESTION BY ID ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération de la question",
+    });
   }
 };
 
