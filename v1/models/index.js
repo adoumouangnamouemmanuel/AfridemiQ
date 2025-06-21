@@ -58,7 +58,7 @@ const User = require("./user/user.model");
 // const Exercise = require("./assessment/exercise.model");
 const Question = require("./assessment/question.model");
 const Quiz = require("./assessment/quiz.model");
-const QuizSession = require("./assessment/quiz.session.model");
+// const QuizSession = require("./assessment/quiz.session.model");
 
 // =============== RESULTS MODELS =============
 // Results models
@@ -71,6 +71,7 @@ const QuizResult = require("./assessment/quiz.result.model");
 // Learning models
 const Subject = require("./learning/subject.model");
 const Topic = require("./learning/topic.model");
+const Resource = require("./learning/resource.model");
 
 // =============== LEARNING/LESSON MODELS =============
 // Learning/lesson models
@@ -84,8 +85,9 @@ module.exports = {
   // Exercise, // TODO: Uncomment once Exercise model is implemented
   Question,
   Quiz,
-  QuizSession,
+  // QuizSession,
   QuizResult,
   Subject,
   Topic,
+  Resource,
 };
