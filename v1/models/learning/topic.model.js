@@ -14,8 +14,10 @@ const TopicSchema = new Schema(
       trim: true,
       maxlength: [150, "Le nom ne peut pas dépasser 150 caractères"],
     },
+
     description: {
       type: String,
+      required: [true, "La description est requise"],
       maxlength: [500, "La description ne peut pas dépasser 500 caractères"],
     },
 
@@ -24,6 +26,7 @@ const TopicSchema = new Schema(
       type: Types.ObjectId,
       ref: "Subject",
       required: [true, "L'ID de la matière est requis"],
+      index: true,
     },
 
     // =============== ORGANISATION ===============
