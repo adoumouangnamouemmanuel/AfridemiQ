@@ -197,4 +197,72 @@ SubjectSchema.virtual("displayName").get(function () {
   return `${this.name} (${this.code})`;
 });
 
+SubjectSchema.virtual("popularity").get(function () {
+  return this.stats.totalStudents * 0.6 + this.stats.totalQuestions * 0.4;
+});
+
+SubjectSchema.virtual("completionRate").get(function () {
+  if (this.stats.totalTopics === 0) return 0;
+  return Math.round((this.stats.averageScore / 100) * 100);
+});
+
+// =============== MÉTHODES ===============
+SubjectSchema.methods.updateStats = function (field, increment = 1) {
+  if (this.stats[field] !== undefined) {
+    this.stats[field] += increment;
+  }
+  return this.save();
+};
+
+SubjectSchema.methods.addStudent = function () {
+  this.stats.totalStudents += 1;
+  return this.save();
+};
+
+// =============== MÉTHODES STATIQUES ===============
+SubjectSchema.statics.findByEducationAndCountry = function (
+  educationLevel,
+  country
+) {
+  return this.find({
+    educationLevels: educationLevel,
+    countries: country,
+    isActive: true,
+    status: "active",
+  });
+};
+
+SubjectSchema.statics.findByExamType = function (examType, educationLevel) {
+  const query = {
+    examTypes: examType,
+    isActive: true,
+    status: "active",
+  };
+
+  if (educationLevel) {
+    query.educationLevels = educationLevel;
+  }
+
+  return this.find(query);
+};
+
+SubjectSchema.statics.getFeatured = function (limit = 6) {
+  return this.find({
+    isFeatured: true,
+    isActive: true,
+    status: "active",
+  })
+    .sort({ "stats.totalStudents": -1 })
+    .limit(limit);
+};
+
+SubjectSchema.statics.getPopular = function (limit = 10) {
+  return this.find({
+    isActive: true,
+    status: "active",
+  })
+    .sort({ "stats.totalStudents": -1, "stats.averageScore": -1 })
+    .limit(limit);
+};
+
 module.exports = { Subject: model("Subject", SubjectSchema) };
