@@ -114,8 +114,32 @@ const SubjectSchema = new Schema(
 
     // =============== STATISTIQUES ===============
     stats: {
-      totalTopics: { type: Number, default: 0 },
-      totalQuestions: { type: Number, default: 0 },
+      totalTopics: {
+        type: Number,
+        default: 0,
+        min: [0, "Ne peut pas être négatif"],
+      },
+      totalQuestions: {
+        type: Number,
+        default: 0,
+        min: [0, "Ne peut pas être négatif"],
+      },
+      totalResources: {
+        type: Number,
+        default: 0,
+        min: [0, "Ne peut pas être négatif"],
+      },
+      averageScore: {
+        type: Number,
+        default: 0,
+        min: [0, "Score minimum 0"],
+        max: [100, "Score maximum 100"],
+      },
+      totalStudents: {
+        type: Number,
+        default: 0,
+        min: [0, "Ne peut pas être négatif"],
+      },
     },
 
     // =============== GESTION ===============
