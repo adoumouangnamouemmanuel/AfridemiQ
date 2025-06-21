@@ -28,31 +28,32 @@ const getAllResources = async (req, res) => {
   }
 };
 
-// Get resource by ID
+// =============== GET RESOURCE BY ID ===============
 const getResourceById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const resource = await resourceService.getResourceById(id);
+  logger.info("===================getResourceById=======================");
 
+  try {
+    const resource = await resourceService.getResourceById(req.params.id);
+
+    logger.info(
+      "++++++✅ GET RESOURCE BY ID: Resource retrieved successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Resource retrieved successfully",
-      data: resource,
+      success: true,
+      message: "Ressource récupérée avec succès",
+      data: { resource },
     });
   } catch (error) {
-    logger.error("Error getting resource by ID:", error);
-    const statusCode =
-      error.message === "Resource not found"
-        ? StatusCodes.NOT_FOUND
-        : StatusCodes.INTERNAL_SERVER_ERROR;
-
-    res.status(statusCode).json({
-      message: error.message || "Error retrieving resource",
-      error: error.message,
+    logger.error("❌ GET RESOURCE BY ID ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message:
+        error.message || "Erreur lors de la récupération de la ressource",
     });
   }
 };
 
-// Create resource
+// =============== CREATE RESOURCE ===============
 const createResource = async (req, res) => {
   try {
     const resource = await resourceService.createResource(req.body);
