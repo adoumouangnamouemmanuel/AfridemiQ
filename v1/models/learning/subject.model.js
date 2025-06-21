@@ -77,7 +77,7 @@ const SubjectSchema = new Schema(
       },
     ],
 
-    // =============== ORGANISATION SIMPLE ===============
+    // =============== ORGANISATION ===============
     category: {
       type: String,
       enum: {
