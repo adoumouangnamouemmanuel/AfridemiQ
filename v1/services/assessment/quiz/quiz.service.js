@@ -39,90 +39,80 @@ const getQuizzes = async (query) => {
       const {
         page = 1,
         limit = 10,
+    subjectId,
+    topicId,
+    format,
+    difficulty,
+    educationLevel,
+    examType,
+    isActive,
+    isPremium,
+    status,
+    search,
         sortBy = "createdAt",
         sortOrder = "desc",
-        search,
-        subjectId,
-        level,
-        difficulty,
-        premiumOnly,
-        isActive = true,
-      } = options;
+  } = query;
 
-      // Build query
-      const query = { isActive };
+  // Build filter object
+  const filter = {};
 
-      if (subjectId) query.subjectId = subjectId;
-      if (level) query.level = level;
-      if (difficulty) query.difficulty = difficulty;
-      if (premiumOnly !== undefined) query.premiumOnly = premiumOnly;
+  if (subjectId) filter.subjectId = subjectId;
+  if (topicId) filter.topicIds = { $in: [topicId] };
+  if (format) filter.format = format;
+  if (difficulty) filter.difficulty = difficulty;
+  if (educationLevel) filter.educationLevel = educationLevel;
+  if (examType) filter.examType = examType;
+  if (isActive !== undefined) filter.isActive = isActive === "true";
+  if (isPremium !== undefined) filter.isPremium = isPremium === "true";
+  if (status) filter.status = status;
 
+  // Add search functionality
       if (search) {
-        query.$or = [
+    filter.$or = [
           { title: { $regex: search, $options: "i" } },
           { description: { $regex: search, $options: "i" } },
-          { tags: { $in: [new RegExp(search, "i")] } },
         ];
       }
 
-      // Apply additional filters
-      Object.assign(query, filters);
+  // Build sort object
+  const sort = {};
+  sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
+  // Calculate pagination
       const skip = (page - 1) * limit;
-      const sortOptions = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
 
+  // Execute query with pagination
       const [quizzes, total] = await Promise.all([
-        Quiz.find(query)
+    Quiz.find(filter)
           .populate("subjectId", "name code")
           .populate("topicIds", "name")
-          .populate("createdBy", "name email")
-          .sort(sortOptions)
+      .sort(sort)
           .skip(skip)
-          .limit(parseInt(limit)),
-        Quiz.countDocuments(query),
+      .limit(parseInt(limit))
+      .lean(),
+    Quiz.countDocuments(filter),
       ]);
 
       const pagination = {
         currentPage: parseInt(page),
         totalPages: Math.ceil(total / limit),
-        totalItems: total,
-        itemsPerPage: parseInt(limit),
-        hasNext: page < Math.ceil(total / limit),
-        hasPrev: page > 1,
+    totalCount: total,
+    hasNextPage: page < Math.ceil(total / limit),
+    hasPrevPage: page > 1,
       };
 
-      logger.info(`Retrieved ${quizzes.length} quizzes with filters:`, {
-        filters,
-        options,
-      });
-      return new ApiResponse(
-        200,
-        { quizzes, pagination },
-        "Quizzes retrieved successfully"
-      );
-    } catch (error) {
-      logger.error("Error retrieving quizzes:", error);
-      throw new ApiError(500, "Failed to retrieve quizzes", error.message);
-    }
-  }
+  logger.info("++++++✅ GET QUIZZES: Quizzes retrieved successfully ++++++");
+  return { quizzes, pagination };
+};
 
-  // Get quiz by ID
-  async getQuizById(quizId, includeQuestions = false) {
-    try {
-      let populateOptions = [
-        { path: "subjectId", select: "name code" },
-        { path: "topicIds", select: "name" },
-        { path: "createdBy", select: "name email" },
-      ];
+// =============== GET QUIZ BY ID ===============
+const getQuizById = async (quizId) => {
+  logger.info("===================getQuizById=======================");
 
-      if (includeQuestions) {
-        populateOptions.push({
-          path: "questionIds",
-          select: "question format options difficulty points",
-        });
-      }
-
-      const quiz = await Quiz.findById(quizId).populate(populateOptions);
+  const quiz = await Quiz.findById(quizId)
+    .populate("subjectId", "name code")
+    .populate("topicIds", "name")
+    .populate("questionIds", "question type difficulty");
 
       if (!quiz) {
         logger.warn(`Quiz not found: ${quizId}`);
