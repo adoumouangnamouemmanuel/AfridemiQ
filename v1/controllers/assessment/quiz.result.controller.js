@@ -4,16 +4,27 @@ const createLogger = require("../../services/logging.service");
 
 const logger = createLogger("QuizResultController");
 
+// =============== CREATE QUIZ RESULT ===============
 const createQuizResult = async (req, res) => {
+  logger.info("===================createQuizResult=======================");
+
   try {
     const quizResult = await quizResultService.createQuizResult(req.body);
+
+    logger.info(
+      "++++++✅ CREATE QUIZ RESULT: Quiz result created successfully ++++++"
+    );
     res.status(StatusCodes.CREATED).json({
+      success: true,
       message: "Résultat de quiz créé avec succès",
-      data: quizResult,
+      data: { quizResult },
     });
   } catch (error) {
-    logger.error("Error creating quiz result:", error);
-    throw error;
+    logger.error("❌ CREATE QUIZ RESULT ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la création du résultat",
+    });
   }
 };
 
