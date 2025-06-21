@@ -342,76 +342,25 @@ const updateQuizStats = async (
 
       const quiz = await Quiz.findById(quizId);
       if (!quiz) {
-        throw new ApiError(404, "Quiz not found");
+    throw new NotFoundError("Quiz non trouvé");
       }
 
-      const results = await QuizResult.find({ quizId });
+  await quiz.updateStats(score, completionTimeMinutes, passed);
 
-      const stats = {
-        totalAttempts: results.length,
-        averageScore:
-          results.length > 0
-            ? Math.round(
-                results.reduce((sum, r) => sum + r.score, 0) / results.length
-              )
-            : 0,
-        averageTime:
-          results.length > 0
-            ? Math.round(
-                results.reduce((sum, r) => sum + r.timeTaken, 0) /
-                  results.length
-              )
-            : 0,
-        highestScore:
-          results.length > 0 ? Math.max(...results.map((r) => r.score)) : 0,
-        lowestScore:
-          results.length > 0 ? Math.min(...results.map((r) => r.score)) : 0,
-        passRate:
-          results.length > 0
-            ? Math.round(
-                (results.filter((r) => r.score >= quiz.totalPoints * 0.6)
-                  .length /
-                  results.length) *
-                  100
-              )
-            : 0,
-        scoreDistribution: this.calculateScoreDistribution(
-          results,
-          quiz.totalPoints
-        ),
-      };
+  logger.info("++++++✅ UPDATE QUIZ STATS: Stats updated successfully ++++++");
+  return quiz;
+};
 
-      return new ApiResponse(
-        200,
-        stats,
-        "Quiz statistics retrieved successfully"
-      );
-    } catch (error) {
-      if (error instanceof ApiError) throw error;
-      throw new ApiError(
-        500,
-        "Failed to retrieve quiz statistics",
-        error.message
-      );
-    }
-  }
-
-  // Helper method to calculate score distribution
-  calculateScoreDistribution(results, totalPoints) {
-    const ranges = [
-      { label: "0-20%", min: 0, max: totalPoints * 0.2 },
-      { label: "21-40%", min: totalPoints * 0.2, max: totalPoints * 0.4 },
-      { label: "41-60%", min: totalPoints * 0.4, max: totalPoints * 0.6 },
-      { label: "61-80%", min: totalPoints * 0.6, max: totalPoints * 0.8 },
-      { label: "81-100%", min: totalPoints * 0.8, max: totalPoints },
-    ];
-
-    return ranges.map((range) => ({
-      label: range.label,
-      count: results.filter((r) => r.score > range.min && r.score <= range.max)
-        .length,
-    }));
-  }
-}
-
-module.exports = new QuizService();
+module.exports = {
+  createQuiz,
+  getQuizzes,
+  getQuizById,
+  updateQuiz,
+  deleteQuiz,
+  getPopularQuizzes,
+  getQuizzesBySubject,
+  getQuizzesByTopic,
+  getQuizzesByEducationAndExam,
+  searchQuizzes,
+  updateQuizStats,
+};
