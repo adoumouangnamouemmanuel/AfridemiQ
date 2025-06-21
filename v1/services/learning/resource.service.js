@@ -398,12 +398,33 @@ const trackView = async (resourceId) => {
   if (!resource) {
     throw new NotFoundError("Ressource non trouvée");
     }
+
+  await resource.incrementViews();
+
+  logger.info("++++++✅ TRACK VIEW: View tracked successfully ++++++");
+  return resource;
+};
+
+// =============== TRACK DOWNLOAD ===============
+const trackDownload = async (resourceId) => {
+  logger.info("===================trackDownload=======================");
+
+  const resource = await Resource.findById(resourceId);
+  if (!resource) {
+    throw new NotFoundError("Ressource non trouvée");
   }
 
-  // Bulk create resources
-  async bulkCreateResources(resourcesData) {
-    try {
-      // Validate all references
+  await resource.incrementDownloads();
+
+  logger.info("++++++✅ TRACK DOWNLOAD: Download tracked successfully ++++++");
+  return resource;
+};
+
+// =============== BULK CREATE RESOURCES ===============
+const bulkCreateResources = async (resourcesData) => {
+  logger.info("===================bulkCreateResources=======================");
+
+  // Validate each resource
       for (const resourceData of resourcesData) {
         await this.validateReferences(resourceData);
       }
