@@ -145,34 +145,24 @@ const getTopicsByDifficulty = async (req, res) => {
   );
 
     try {
-      const { page, limit, sortBy, sortOrder } = req.query;
-      const result = await topicService.getTopicsBySeries(req.params.series, {
-        page,
-        limit,
-        sortBy,
-        sortOrder,
-      });
+    const { difficulty } = req.params;
+    const { subjectId } = req.query;
+    const topics = await topicService.getTopicsByDifficulty(
+      difficulty,
+      subjectId
+    );
 
-      res.status(200).json({
+    logger.info("++++++✅ GET TOPICS BY DIFFICULTY: Topics retrieved ++++++");
+    res.status(StatusCodes.OK).json({
         success: true,
-        message: "Topics retrieved successfully",
-        data: result.topics,
-        pagination: result.pagination,
+      message: "Sujets récupérés avec succès",
+      data: { topics },
       });
     } catch (error) {
-      next(error);
-    }
-  }
-
-  // Search topics
-  async searchTopics(req, res, next) {
-    try {
-      const { q: searchTerm, page, limit, sortBy, sortOrder } = req.query;
-
-      if (!searchTerm) {
-        return res.status(400).json({
+    logger.error("❌ GET TOPICS BY DIFFICULTY ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
           success: false,
-          message: "Search term is required",
+      message: error.message || "Erreur lors de la récupération des sujets",
         });
       }
 
