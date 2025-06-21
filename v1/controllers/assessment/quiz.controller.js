@@ -89,10 +89,28 @@ const updateQuiz = async (req, res) => {
       message: error.message || "Erreur lors de la mise à jour du quiz",
     });
     }
+};
 
-    const result = await quizService.updateQuiz(id, req.body);
-    res.status(result.statusCode).json(result);
-  });
+// =============== DELETE QUIZ ===============
+const deleteQuiz = async (req, res) => {
+  logger.info("===================deleteQuiz=======================");
+
+  try {
+    await quizService.deleteQuiz(req.params.id);
+
+    logger.info("++++++✅ DELETE QUIZ: Quiz deleted successfully ++++++");
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Quiz supprimé avec succès",
+    });
+  } catch (error) {
+    logger.error("❌ DELETE QUIZ ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la suppression du quiz",
+    });
+  }
+};
 
   // Delete quiz
   deleteQuiz = asyncHandler(async (req, res) => {
