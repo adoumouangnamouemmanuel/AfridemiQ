@@ -1,0 +1,27 @@
+{
+  "title": "JAMB Mathematics Formula Sheet - Quick Reference",
+  "description": "Essential mathematical formulas and quick reference guide for JAMB preparation covering algebra, geometry, statistics, and calculus",
+  "type": "pdf",
+  "category": "cheat_sheet",
+  "url": "https://formulas.africaexamprep.com/jamb/math-formulas.pdf",
+  "subjectId": "6856e110aff9659b6e3ec887",
+  "difficulty": "medium",
+  "targetLevel": "senior_secondary",
+  "fileInfo": {
+    "size": 512000,
+    "mimeType": "application/pdf",
+    "pages": 4
+  },
+  "tags": ["jamb", "formulas", "quick-reference", "mathematics"],
+  "keywords": ["algebra", "geometry", "statistics", "formulas"],
+  "author": {
+    "name": "JAMB Preparation Team",
+    "institution": "Africa Exam Prep Academy"
+  },
+  "source": "JAMB Study Materials",
+  "isPublic": true,
+  "isPremium": false,
+  "requiresDownload": true,
+  "isFeatured": false,
+  "isVerified": true
+}
