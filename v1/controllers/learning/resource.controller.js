@@ -334,21 +334,27 @@ const trackDownload = async (req, res) => {
   }
 };
 
-// Bulk create resources
+// =============== BULK CREATE RESOURCES ===============
 const bulkCreateResources = async (req, res) => {
+  logger.info("===================bulkCreateResources=======================");
+
   try {
     const { resources } = req.body;
     const result = await resourceService.bulkCreateResources(resources);
 
+    logger.info(
+      "++++++✅ BULK CREATE RESOURCES: Resources created successfully ++++++"
+    );
     res.status(StatusCodes.CREATED).json({
-      message: "Resources created successfully",
-      data: result,
+      success: true,
+      message: "Ressources créées avec succès",
+      data: { resources: result },
     });
   } catch (error) {
-    logger.error("Error bulk creating resources:", error);
-    res.status(StatusCodes.BAD_REQUEST).json({
-      message: "Error creating resources",
-      error: error.message,
+    logger.error("❌ BULK CREATE RESOURCES ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la création des ressources",
     });
   }
 };
