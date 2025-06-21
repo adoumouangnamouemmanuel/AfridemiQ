@@ -194,4 +194,23 @@ QuizSchema.methods.updateStats = function (
   return this.save();
 };
 
+// =============== MÉTHODES STATIQUES ===============
+QuizSchema.statics.findByEducationAndExam = function (
+  educationLevel,
+  examType
+) {
+  return this.find({
+    educationLevel,
+    examType: examType || { $exists: true },
+    isActive: true,
+    status: "active",
+  });
+};
+
+QuizSchema.statics.findPopular = function (limit = 10) {
+  return this.find({ isActive: true, status: "active" })
+    .sort({ "stats.totalAttempts": -1, "stats.averageScore": -1 })
+    .limit(limit);
+};
+
 module.exports = { Quiz: model("Quiz", QuizSchema) };
