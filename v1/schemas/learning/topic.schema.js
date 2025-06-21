@@ -8,21 +8,19 @@ const {
 
 // =============== CREATE TOPIC SCHEMA ===============
 const createTopicSchema = Joi.object({
-  name: {
-    type: String,
-    required: [true, "Le nom du sujet est requis"],
-    trim: true,
-    maxlength: [150, "Le nom ne peut pas dépasser 150 caractères"],
-  },
-
-  description: Joi.string()
+  name: Joi.string() // ✅ FIXED - This should be a Joi string, not an object
     .required()
     .trim()
-    .max(500)
+    .max(150)
     .messages({
-      "any.required": "La description est requise",
-      "string.max": "La description ne peut pas dépasser 500 caractères",
+      "any.required": "Le nom du sujet est requis",
+      "string.max": "Le nom ne peut pas dépasser 150 caractères",
     }),
+
+  description: Joi.string().required().trim().max(500).messages({
+    "any.required": "La description est requise",
+    "string.max": "La description ne peut pas dépasser 500 caractères",
+  }),
 
   subjectId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
@@ -53,14 +51,10 @@ const createTopicSchema = Joi.object({
   learningObjectives: Joi.array()
     .items(
       Joi.object({
-        objective: Joi.string()
-          .required()
-          .trim()
-          .max(200)
-          .messages({
-            "any.required": "L'objectif d'apprentissage est requis",
-            "string.max": "L'objectif ne peut pas dépasser 200 caractères",
-          }),
+        objective: Joi.string().required().trim().max(200).messages({
+          "any.required": "L'objectif d'apprentissage est requis",
+          "string.max": "L'objectif ne peut pas dépasser 200 caractères",
+        }),
         level: Joi.string()
           .valid(...LEARNING_OBJECTIVES)
           .optional()
@@ -84,20 +78,13 @@ const createTopicSchema = Joi.object({
       "string.max": "Le prérequis ne peut pas dépasser 100 caractères",
     }),
 
-  keywords: Joi.array()
-    .items(Joi.string().trim().max(50))
-    .optional()
-    .messages({
-      "string.max": "Le mot-clé ne peut pas dépasser 50 caractères",
-    }),
+  keywords: Joi.array().items(Joi.string().trim().max(50)).optional().messages({
+    "string.max": "Le mot-clé ne peut pas dépasser 50 caractères",
+  }),
 
-  order: Joi.number()
-    .min(0)
-    .optional()
-    .default(0)
-    .messages({
-      "number.min": "L'ordre ne peut pas être négatif",
-    }),
+  order: Joi.number().min(0).optional().default(0).messages({
+    "number.min": "L'ordre ne peut pas être négatif",
+  }),
 
   isPremium: Joi.boolean().optional().default(false),
   isPopular: Joi.boolean().optional().default(false),
