@@ -174,18 +174,19 @@ const deleteTopic = async (topicId) => {
     throw new NotFoundError("Sujet non trouvé");
       }
 
-      return { message: "Topic deleted successfully" };
-    } catch (error) {
-      if (error.name === "CastError") {
-        throw new BadRequestError("Invalid topic ID format");
-      }
-      throw error;
-    }
-  }
+  // Soft delete - just mark as inactive
+  await Topic.findByIdAndUpdate(topicId, {
+    isActive: false,
+    status: "inactive",
+  });
 
-  // Get topics by subject
-  async getTopicsBySubject(subjectId, options = {}) {
-    try {
+  logger.info("++++++✅ DELETE TOPIC: Topic deleted successfully ++++++");
+};
+
+// =============== GET TOPICS BY SUBJECT ===============
+const getTopicsBySubject = async (subjectId, options = {}) => {
+  logger.info("===================getTopicsBySubject=======================");
+
       // Verify subject exists
       const subject = await Subject.findById(subjectId);
       if (!subject) {
