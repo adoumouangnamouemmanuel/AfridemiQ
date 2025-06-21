@@ -74,13 +74,48 @@ const TopicSchema = new Schema(
       },
     ],
 
-    // =============== PRÉREQUIS SIMPLES ===============
-    // Simple Prerequisites
-    prerequisites: [String], // Simple array of topic names
+    // =============== PRÉREQUIS ===============
+    prerequisites: [
+      {
+        type: String,
+        trim: true,
+        maxlength: [100, "Le prérequis ne peut pas dépasser 100 caractères"],
+      },
+    ],
 
-    // Flags for Available Content
-    hasQuestions: { type: Boolean, default: false },
-    hasResources: { type: Boolean, default: false },
+    // Sujets qui découlent de celui-ci
+    nextTopics: [
+      {
+        type: Types.ObjectId,
+        ref: "Topic",
+      },
+    ],
+
+    // =============== CONTENU DISPONIBLE ===============
+    hasQuestions: {
+      type: Boolean,
+      default: false,
+    },
+
+    hasResources: {
+      type: Boolean,
+      default: false,
+    },
+
+    hasExamples: {
+      type: Boolean,
+      default: false,
+    },
+
+    // =============== MOTS-CLÉS POUR RECHERCHE ===============
+    keywords: [
+      {
+        type: String,
+        trim: true,
+        lowercase: true,
+        maxlength: [50, "Le mot-clé ne peut pas dépasser 50 caractères"],
+      },
+    ],
 
     // =============== STATISTIQUES SIMPLES ===============
     stats: {
