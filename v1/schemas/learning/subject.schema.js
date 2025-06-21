@@ -120,7 +120,7 @@ const updateSubjectSchema = Joi.object({
     .min(1)
     .optional(),
   series: Joi.array()
-    .items(Joi.string().valid("A", "C", "D", "ALL"))
+    .items(Joi.string().valid(...SERIES))
     .optional(),
   icon: Joi.string().max(50).optional(),
   color: Joi.string()
