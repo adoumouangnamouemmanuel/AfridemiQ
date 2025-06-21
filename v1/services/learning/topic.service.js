@@ -2,45 +2,46 @@ const { Topic } = require("../../../models/learning/topic.model");
 const { Subject } = require("../../../models/learning/subject.model");
 const NotFoundError = require("../../../errors/notFoundError");
 const BadRequestError = require("../../../errors/badRequestError");
+const ConflictError = require("../../../errors/conflictError");
+const createLogger = require("../../logging.service");
 
-class TopicService {
-  // Create a new topic
-  async createTopic(topicData) {
-    try {
+const logger = createLogger("TopicService");
+
+// =============== CREATE TOPIC ===============
+const createTopic = async (topicData) => {
+  logger.info("===================createTopic=======================");
+
       // Verify subject exists
       const subject = await Subject.findById(topicData.subjectId);
       if (!subject) {
-        throw new NotFoundError("Subject not found");
+    throw new NotFoundError("Matière non trouvée");
       }
 
       // Check if topic with same name exists for this subject
       const existingTopic = await Topic.findOne({
-        name: topicData.name,
+    name: { $regex: new RegExp(`^${topicData.name}$`, "i") },
         subjectId: topicData.subjectId,
       });
-
       if (existingTopic) {
-        throw new BadRequestError(
-          "Topic with this name already exists for this subject"
+    throw new ConflictError(
+      "Un sujet avec ce nom existe déjà pour cette matière"
         );
       }
 
       const topic = new Topic(topicData);
       await topic.save();
 
-      return await this.getTopicById(topic._id);
-    } catch (error) {
-      if (error.name === "ValidationError") {
-        const messages = Object.values(error.errors).map((err) => err.message);
-        throw new BadRequestError(`Validation failed: ${messages.join(", ")}`);
-      }
-      throw error;
-    }
-  }
+  // Populate subject information
+  await topic.populate("subjectId", "name code");
 
-  // Get all topics with filtering and pagination
-  async getAllTopics(filters = {}, options = {}) {
-    try {
+  logger.info("++++++✅ CREATE TOPIC: Topic created successfully ++++++");
+  return topic;
+};
+
+// =============== GET ALL TOPICS ===============
+const getTopics = async (query) => {
+  logger.info("===================getTopics=======================");
+
       const {
         page = 1,
         limit = 10,
