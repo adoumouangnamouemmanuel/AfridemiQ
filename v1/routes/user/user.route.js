@@ -15,7 +15,6 @@ const {
   loginSchema,
   updateProfileSchema,
   updatePersonalInfoSchema,
-  updateNotificationsSchema,
   onboardingSchema,
   passwordResetRequestSchema,
   passwordResetSchema,
@@ -88,11 +87,6 @@ router.put(
   "/personal-info",
   validateMiddleware(updatePersonalInfoSchema),
   userController.updatePersonalInfo
-);
-router.put(
-  "/notifications",
-  validateMiddleware(updateNotificationsSchema),
-  userController.updateNotifications
 );
 
 // Password management
