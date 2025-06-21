@@ -1,298 +1,399 @@
-const { StatusCodes } = require("http-status-codes");
-const questionService = require("../../services/assessment/question/question.service");
-const createLogger = require("../../services/logging.service");
+const { Question } = require("../../../models/assessment/question.model");
+const NotFoundError = require("../../../errors/notFoundError");
+const BadRequestError = require("../../../errors/badRequestError");
+const createLogger = require("../../logging.service");
 
-const logger = createLogger("QuestionController");
+const logger = createLogger("QuestionService");
 
 // =============== CREATE QUESTION ===============
-const createQuestion = async (req, res) => {
+const createQuestion = async (questionData) => {
   logger.info("===================createQuestion=======================");
 
-  try {
-    const question = await questionService.createQuestion(req.body);
+  // Validate options for multiple choice questions
+  if (questionData.type === "multiple_choice") {
+    if (!questionData.options || questionData.options.length < 2) {
+      throw new BadRequestError(
+        "Les questions à choix multiples doivent avoir au moins 2 options"
+      );
+    }
+    if (questionData.options.length > 5) {
+      throw new BadRequestError("Maximum 5 options autorisées");
+    }
 
-    logger.info(
-      "++++++✅ CREATE QUESTION: Question created successfully ++++++"
-    );
-    res.status(StatusCodes.CREATED).json({
-      success: true,
-      message: "Question créée avec succès",
-      data: { question },
-    });
-  } catch (error) {
-    logger.error("❌ CREATE QUESTION ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message || "Erreur lors de la création de la question",
-    });
+    // Validate correct answer index for multiple choice
+    const answerIndex = parseInt(questionData.correctAnswer);
+    if (
+      isNaN(answerIndex) ||
+      answerIndex < 0 ||
+      answerIndex >= questionData.options.length
+    ) {
+      throw new BadRequestError("L'index de la réponse correcte est invalide");
+    }
   }
+
+  // Validate true/false questions
+  if (questionData.type === "true_false") {
+    if (!["true", "false", true, false].includes(questionData.correctAnswer)) {
+      throw new BadRequestError("Réponse invalide pour une question vrai/faux");
+    }
+  }
+
+  const question = new Question(questionData);
+  await question.save();
+
+  logger.info("++++++✅ CREATE QUESTION: Question created successfully ++++++");
+  return question;
 };
 
 // =============== GET ALL QUESTIONS ===============
-const getQuestions = async (req, res) => {
+const getQuestions = async (query) => {
   logger.info("===================getQuestions=======================");
 
-  try {
-    const result = await questionService.getQuestions(req.query);
+  const {
+    page = 1,
+    limit = 10,
+    subjectId,
+    topicId,
+    type,
+    difficulty,
+    educationLevel,
+    examType,
+    isActive,
+    isPremium,
+    status,
+    search,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = query;
 
-    logger.info(
-      "++++++✅ GET QUESTIONS: Questions retrieved successfully ++++++"
-    );
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Questions récupérées avec succès",
-      data: result,
-    });
-  } catch (error) {
-    logger.error("❌ GET QUESTIONS ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message || "Erreur lors de la récupération des questions",
-    });
+  // Build filter object
+  const filter = {};
+
+  if (subjectId) filter.subjectId = subjectId;
+  if (topicId) filter.topicId = topicId;
+  if (type) filter.type = type;
+  if (difficulty) filter.difficulty = difficulty;
+  if (educationLevel) filter.educationLevel = educationLevel;
+  if (examType) filter.examType = examType;
+  if (isActive !== undefined) filter.isActive = isActive === "true";
+  if (isPremium !== undefined) filter.isPremium = isPremium === "true";
+  if (status) filter.status = status;
+
+  // Add search functionality
+  if (search) {
+    filter.$or = [
+      { question: { $regex: search, $options: "i" } },
+      { explanation: { $regex: search, $options: "i" } },
+      { tags: { $in: [new RegExp(search, "i")] } },
+    ];
   }
+
+  // Build sort object
+  const sort = {};
+  sort[sortBy] = sortOrder === "desc" ? -1 : 1;
+
+  // Calculate pagination
+  const skip = (page - 1) * limit;
+
+  // Execute query with pagination
+  const [questions, total] = await Promise.all([
+    Question.find(filter)
+      .populate("subjectId", "name code")
+      .populate("topicId", "name")
+      .sort(sort)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean(),
+    Question.countDocuments(filter),
+  ]);
+
+  const pagination = {
+    currentPage: parseInt(page),
+    totalPages: Math.ceil(total / limit),
+    totalCount: total,
+    hasNextPage: page < Math.ceil(total / limit),
+    hasPrevPage: page > 1,
+  };
+
+  logger.info(
+    "++++++✅ GET QUESTIONS: Questions retrieved successfully ++++++"
+  );
+  return { questions, pagination };
 };
 
 // =============== GET QUESTION BY ID ===============
-const getQuestionById = async (req, res) => {
+const getQuestionById = async (questionId) => {
   logger.info("===================getQuestionById=======================");
 
-  try {
-    const question = await questionService.getQuestionById(req.params.id);
+  const question = await Question.findById(questionId)
+    .populate("subjectId", "name code")
+    .populate("topicId", "name");
 
-    logger.info(
-      "++++++✅ GET QUESTION BY ID: Question retrieved successfully ++++++"
-    );
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Question récupérée avec succès",
-      data: { question },
-    });
-  } catch (error) {
-    logger.error("❌ GET QUESTION BY ID ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message || "Erreur lors de la récupération de la question",
-    });
+  if (!question) {
+    throw new NotFoundError("Question non trouvée");
   }
+
+  logger.info(
+    "++++++✅ GET QUESTION BY ID: Question retrieved successfully ++++++"
+  );
+  return question;
 };
 
 // =============== UPDATE QUESTION ===============
-const updateQuestion = async (req, res) => {
+const updateQuestion = async (questionId, updateData) => {
   logger.info("===================updateQuestion=======================");
 
-  try {
-    const question = await questionService.updateQuestion(
-      req.params.id,
-      req.body
-    );
-
-    logger.info(
-      "++++++✅ UPDATE QUESTION: Question updated successfully ++++++"
-    );
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Question mise à jour avec succès",
-      data: { question },
-    });
-  } catch (error) {
-    logger.error("❌ UPDATE QUESTION ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message || "Erreur lors de la mise à jour de la question",
-    });
+  // Check if question exists
+  const existingQuestion = await Question.findById(questionId);
+  if (!existingQuestion) {
+    throw new NotFoundError("Question non trouvée");
   }
+
+  // Validate options for multiple choice questions
+  if (
+    updateData.type === "multiple_choice" ||
+    existingQuestion.type === "multiple_choice"
+  ) {
+    const options = updateData.options || existingQuestion.options;
+    if (options && options.length > 0) {
+      if (options.length < 2) {
+        throw new BadRequestError(
+          "Les questions à choix multiples doivent avoir au moins 2 options"
+        );
+      }
+      if (options.length > 5) {
+        throw new BadRequestError("Maximum 5 options autorisées");
+      }
+    }
+  }
+
+  const question = await Question.findByIdAndUpdate(
+    questionId,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  )
+    .populate("subjectId", "name code")
+    .populate("topicId", "name");
+
+  logger.info("++++++✅ UPDATE QUESTION: Question updated successfully ++++++");
+  return question;
 };
 
 // =============== DELETE QUESTION ===============
-const deleteQuestion = async (req, res) => {
+const deleteQuestion = async (questionId) => {
   logger.info("===================deleteQuestion=======================");
 
-  try {
-    await questionService.deleteQuestion(req.params.id);
-
-    logger.info(
-      "++++++✅ DELETE QUESTION: Question deleted successfully ++++++"
-    );
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Question supprimée avec succès",
-    });
-  } catch (error) {
-    logger.error("❌ DELETE QUESTION ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message || "Erreur lors de la suppression de la question",
-    });
+  const question = await Question.findById(questionId);
+  if (!question) {
+    throw new NotFoundError("Question non trouvée");
   }
+
+  // Soft delete - just mark as inactive
+  await Question.findByIdAndUpdate(questionId, {
+    isActive: false,
+    status: "inactive",
+  });
+
+  logger.info("++++++✅ DELETE QUESTION: Question deleted successfully ++++++");
 };
 
 // =============== GET QUESTIONS BY SUBJECT ===============
-const getQuestionsBySubject = async (req, res) => {
+const getQuestionsBySubject = async (subjectId, filters = {}) => {
   logger.info(
     "===================getQuestionsBySubject======================="
   );
 
-  try {
-    const { subjectId } = req.params;
-    const filters = req.query;
-    const questions = await questionService.getQuestionsBySubject(
-      subjectId,
-      filters
-    );
-
-    logger.info(
-      "++++++✅ GET QUESTIONS BY SUBJECT: Questions retrieved ++++++"
-    );
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Questions récupérées avec succès",
-      data: { questions },
-    });
-  } catch (error) {
-    logger.error("❌ GET QUESTIONS BY SUBJECT ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message || "Erreur lors de la récupération des questions",
-    });
+  if (!subjectId) {
+    throw new BadRequestError("ID de matière requis");
   }
+
+  const query = {
+    subjectId,
+    isActive: true,
+    status: "active",
+  };
+
+  // Apply additional filters
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.type) query.type = filters.type;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
+
+  const limit = parseInt(filters.limit) || 20;
+
+  const questions = await Question.find(query)
+    .populate("topicId", "name")
+    .sort({ createdAt: -1 })
+    .limit(limit);
+
+  logger.info("++++++✅ GET QUESTIONS BY SUBJECT: Questions retrieved ++++++");
+  return questions;
 };
 
 // =============== GET QUESTIONS BY TOPIC ===============
-const getQuestionsByTopic = async (req, res) => {
+const getQuestionsByTopic = async (topicId, filters = {}) => {
   logger.info("===================getQuestionsByTopic=======================");
 
-  try {
-    const { topicId } = req.params;
-    const filters = req.query;
-    const questions = await questionService.getQuestionsByTopic(
-      topicId,
-      filters
-    );
-
-    logger.info("++++++✅ GET QUESTIONS BY TOPIC: Questions retrieved ++++++");
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Questions récupérées avec succès",
-      data: { questions },
-    });
-  } catch (error) {
-    logger.error("❌ GET QUESTIONS BY TOPIC ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message || "Erreur lors de la récupération des questions",
-    });
+  if (!topicId) {
+    throw new BadRequestError("ID de sujet requis");
   }
+
+  const query = {
+    topicId,
+    isActive: true,
+    status: "active",
+  };
+
+  // Apply additional filters
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.type) query.type = filters.type;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
+
+  const limit = parseInt(filters.limit) || 20;
+
+  const questions = await Question.find(query)
+    .populate("subjectId", "name code")
+    .sort({ createdAt: -1 })
+    .limit(limit);
+
+  logger.info("++++++✅ GET QUESTIONS BY TOPIC: Questions retrieved ++++++");
+  return questions;
 };
 
 // =============== GET RANDOM QUESTIONS ===============
-const getRandomQuestions = async (req, res) => {
+const getRandomQuestions = async (count = 10, filters = {}) => {
   logger.info("===================getRandomQuestions=======================");
 
-  try {
-    const { count = 10 } = req.query;
-    const filters = req.query;
-    const questions = await questionService.getRandomQuestions(
-      parseInt(count),
-      filters
-    );
+  const query = {
+    isActive: true,
+    status: "active",
+  };
 
-    logger.info(
-      "++++++✅ GET RANDOM QUESTIONS: Random questions retrieved ++++++"
-    );
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Questions aléatoires récupérées avec succès",
-      data: { questions },
-    });
-  } catch (error) {
-    logger.error("❌ GET RANDOM QUESTIONS ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message || "Erreur lors de la récupération des questions",
-    });
-  }
+  // Apply filters
+  if (filters.subjectId) query.subjectId = filters.subjectId;
+  if (filters.topicId) query.topicId = filters.topicId;
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.type) query.type = filters.type;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
+
+  const questions = await Question.aggregate([
+    { $match: query },
+    { $sample: { size: parseInt(count) } },
+    {
+      $lookup: {
+        from: "subjects",
+        localField: "subjectId",
+        foreignField: "_id",
+        as: "subjectId",
+        pipeline: [{ $project: { name: 1, code: 1 } }],
+      },
+    },
+    {
+      $lookup: {
+        from: "topics",
+        localField: "topicId",
+        foreignField: "_id",
+        as: "topicId",
+        pipeline: [{ $project: { name: 1 } }],
+      },
+    },
+    {
+      $addFields: {
+        subjectId: { $arrayElemAt: ["$subjectId", 0] },
+        topicId: { $arrayElemAt: ["$topicId", 0] },
+      },
+    },
+  ]);
+
+  logger.info(
+    "++++++✅ GET RANDOM QUESTIONS: Random questions retrieved ++++++"
+  );
+  return questions;
 };
 
 // =============== SEARCH QUESTIONS ===============
-const searchQuestions = async (req, res) => {
+const searchQuestions = async (searchTerm, filters = {}) => {
   logger.info("===================searchQuestions=======================");
 
-  try {
-    const { q: searchTerm } = req.query;
-    const filters = req.query;
-    const questions = await questionService.searchQuestions(
-      searchTerm,
-      filters
+  if (!searchTerm || searchTerm.trim().length < 2) {
+    throw new BadRequestError(
+      "Le terme de recherche doit contenir au moins 2 caractères"
     );
-
-    logger.info(
-      "++++++✅ SEARCH QUESTIONS: Search completed successfully ++++++"
-    );
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Recherche effectuée avec succès",
-      data: { questions },
-    });
-  } catch (error) {
-    logger.error("❌ SEARCH QUESTIONS ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message || "Erreur lors de la recherche",
-    });
   }
+
+  const query = {
+    $or: [
+      { question: { $regex: searchTerm.trim(), $options: "i" } },
+      { explanation: { $regex: searchTerm.trim(), $options: "i" } },
+      { tags: { $in: [new RegExp(searchTerm.trim(), "i")] } },
+    ],
+    isActive: true,
+    status: "active",
+  };
+
+  // Apply additional filters
+  if (filters.subjectId) query.subjectId = filters.subjectId;
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.type) query.type = filters.type;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
+
+  const questions = await Question.find(query)
+    .populate("subjectId", "name code")
+    .populate("topicId", "name")
+    .sort({ "stats.totalAttempts": -1, createdAt: -1 })
+    .limit(20);
+
+  logger.info(
+    "++++++✅ SEARCH QUESTIONS: Search completed successfully ++++++"
+  );
+  return questions;
 };
 
 // =============== UPDATE QUESTION STATS ===============
-const updateQuestionStats = async (req, res) => {
+const updateQuestionStats = async (questionId, isCorrect, timeSpent) => {
   logger.info("===================updateQuestionStats=======================");
 
-  try {
-    const { isCorrect, timeSpent } = req.body;
-    const question = await questionService.updateQuestionStats(
-      req.params.id,
-      isCorrect,
-      timeSpent
-    );
-
-    logger.info(
-      "++++++✅ UPDATE QUESTION STATS: Stats updated successfully ++++++"
-    );
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Statistiques mises à jour avec succès",
-      data: { question },
-    });
-  } catch (error) {
-    logger.error("❌ UPDATE QUESTION STATS ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message:
-        error.message || "Erreur lors de la mise à jour des statistiques",
-    });
+  const question = await Question.findById(questionId);
+  if (!question) {
+    throw new NotFoundError("Question non trouvée");
   }
+
+  await question.updateStats(isCorrect, timeSpent);
+
+  logger.info(
+    "++++++✅ UPDATE QUESTION STATS: Stats updated successfully ++++++"
+  );
+  return question;
 };
 
 // =============== CHECK ANSWER ===============
-const checkAnswer = async (req, res) => {
+const checkAnswer = async (questionId, userAnswer) => {
   logger.info("===================checkAnswer=======================");
 
-  try {
-    const { userAnswer } = req.body;
-    const result = await questionService.checkAnswer(req.params.id, userAnswer);
-
-    logger.info("++++++✅ CHECK ANSWER: Answer checked successfully ++++++");
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Réponse vérifiée avec succès",
-      data: result,
-    });
-  } catch (error) {
-    logger.error("❌ CHECK ANSWER ERROR:", error);
-    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message || "Erreur lors de la vérification de la réponse",
-    });
+  const question = await Question.findById(questionId);
+  if (!question) {
+    throw new NotFoundError("Question non trouvée");
   }
+
+  const isCorrect = question.checkAnswer(userAnswer);
+
+  logger.info("++++++✅ CHECK ANSWER: Answer checked successfully ++++++");
+  return {
+    isCorrect,
+    correctAnswer: question.correctAnswer,
+    explanation: question.explanation,
+  };
 };
 
 module.exports = {
