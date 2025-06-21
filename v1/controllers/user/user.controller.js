@@ -1,7 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const userService = require("../../services/user/user.service");
 const jwt = require("jsonwebtoken");
-const tokenBlacklist = require("../../services/token.blacklist.service");
+// const tokenBlacklist = require("../../services/token.blacklist.service");
 const createLogger = require("../../services/logging.service");
 
 const logger = createLogger("UserController");
@@ -159,7 +159,7 @@ const logOut = async (req, res) => {
       if (decoded && decoded.exp) {
         // Add token to blacklist until it expires
         const expiryMs = decoded.exp * 1000; // Convert to milliseconds
-        tokenBlacklist.addToBlacklist(token, expiryMs);
+        // tokenBlacklist.addToBlacklist(token, expiryMs);
       }
     }
 
