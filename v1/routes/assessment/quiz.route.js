@@ -9,14 +9,31 @@ const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
 const {
   createQuizSchema,
   updateQuizSchema,
-  getQuizzesSchema,
-  bulkUpdateQuizzesSchema,
+  getQuizzesQuerySchema,
 } = require("../../schemas/assessment/quiz.schema");
 
 const router = express.Router();
 
-// Public routes
-router.get("/popular", quizController.getPopularQuizzes);
+// Apply UTF-8 middleware to all routes
+router.use(utf8Middleware);
+
+// Apply rate limiting
+router.use(apiLimiter);
+
+// =============== PUBLIC ROUTES ===============
+
+// Get all quizzes with filtering and pagination
+router.get(
+  "/",
+  validateMiddleware(getQuizzesQuerySchema, "query"),
+  quizController.getQuizzes
+);
+
+// Get quiz by ID
+router.get("/:id", quizController.getQuizById);
+
+// Get popular quizzes
+router.get("/popular/list", quizController.getPopularQuizzes);
 
 // Protected routes
 router.use(authMiddleware);
