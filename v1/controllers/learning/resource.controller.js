@@ -183,55 +183,27 @@ const getResourcesByTopic = async (req, res) => {
   }
 };
 
-// Track download
-const trackDownload = async (req, res) => {
+// =============== SEARCH RESOURCES ===============
+const searchResources = async (req, res) => {
+  logger.info("===================searchResources=======================");
+
   try {
-    const { id } = req.params;
-    const resource = await resourceService.trackDownload(id);
+    const { q: searchTerm } = req.query;
+    const result = await resourceService.searchResources(searchTerm, req.query);
 
-    res.status(StatusCodes.OK).json({
-      message: "Download tracked successfully",
-      data: resource,
-    });
-  } catch (error) {
-    logger.error("Error tracking download:", error);
-    const statusCode =
-      error.message === "Resource not found"
-        ? StatusCodes.NOT_FOUND
-        : StatusCodes.INTERNAL_SERVER_ERROR;
-
-    res.status(statusCode).json({
-      message: error.message || "Error tracking download",
-      error: error.message,
-    });
-  }
-};
-
-// Get resources by subject
-const getResourcesBySubject = async (req, res) => {
-  try {
-    const { subjectId } = req.params;
-    const options = {
-      page: req.query.page,
-      limit: req.query.limit,
-      sortBy: req.query.sortBy,
-      sortOrder: req.query.sortOrder,
-    };
-
-    const result = await resourceService.getResourcesBySubject(
-      subjectId,
-      options
+    logger.info(
+      "++++++✅ SEARCH RESOURCES: Search completed successfully ++++++"
     );
-
     res.status(StatusCodes.OK).json({
-      message: "Resources retrieved successfully",
+      success: true,
+      message: "Recherche effectuée avec succès",
       data: result,
     });
   } catch (error) {
-    logger.error("Error getting resources by subject:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error retrieving resources",
-      error: error.message,
+    logger.error("❌ SEARCH RESOURCES ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la recherche",
     });
   }
 };
