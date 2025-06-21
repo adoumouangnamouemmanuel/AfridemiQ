@@ -26,8 +26,8 @@ const EXAM_TYPES = [
  * Niveaux d'éducation détaillés
  */
 const EDUCATION_LEVELS = [
-    "junior_secondary",    // JSS/Collège (Ages 12-15)
-    "senior_secondary"     // SSS/Lycée (Ages 15-18)
+  "junior_secondary", // JSS/Collège (Ages 12-15)
+  "senior_secondary", // SSS/Lycée (Ages 15-18)
   ];
   
   /**
