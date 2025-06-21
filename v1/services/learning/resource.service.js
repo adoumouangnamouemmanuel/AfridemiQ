@@ -426,26 +426,36 @@ const bulkCreateResources = async (resourcesData) => {
 
   // Validate each resource
       for (const resourceData of resourcesData) {
-        await this.validateReferences(resourceData);
+    // Validate subject exists
+    const subject = await Subject.findById(resourceData.subjectId);
+    if (!subject) {
+      throw new NotFoundError(`Matière non trouvée: ${resourceData.subjectId}`);
       }
 
-      const resources = await Resource.insertMany(resourcesData);
-
-      logger.info(`Bulk created ${resources.length} resources`);
-      return resources;
-    } catch (error) {
-      logger.error("Error bulk creating resources:", error);
-      throw error;
+    // Validate topic if provided
+    if (resourceData.topicId) {
+      const topic = await Topic.findById(resourceData.topicId);
+      if (!topic) {
+        throw new NotFoundError(`Sujet non trouvé: ${resourceData.topicId}`);
+      }
     }
   }
 
-  // Get admin analytics
-  async getAdminAnalytics() {
-    try {
-      const [basicStats, recentResources, feedbackStats, popularityTrends] =
-        await Promise.all([
-          this.getResourceStatistics(),
-          Resource.find()
+  const resources = await Resource.insertMany(resourcesData);
+
+  logger.info(
+    "++++++✅ BULK CREATE RESOURCES: Resources created successfully ++++++"
+  );
+  return resources;
+};
+
+// =============== GET ADMIN ANALYTICS ===============
+const getAdminAnalytics = async () => {
+  logger.info("===================getAdminAnalytics=======================");
+
+  const [basicStats, recentResources, trendingResources] = await Promise.all([
+    getResourceStatistics(),
+    Resource.find({ isActive: true })
             .sort({ createdAt: -1 })
             .limit(10)
             .populate("subjectId", "name")
