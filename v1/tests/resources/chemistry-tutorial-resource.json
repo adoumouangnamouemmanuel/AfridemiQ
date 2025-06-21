@@ -1,0 +1,23 @@
+{
+  "title": "Acids, Bases and Salts - Step-by-Step Tutorial",
+  "description": "Interactive tutorial covering pH calculations, neutralization reactions, and salt formation with practical examples from African contexts",
+  "type": "link",
+  "category": "tutorial",
+  "url": "https://tutorial.africaexamprep.com/chemistry/acids-bases-salts",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicId": "685709a221fff5da40b2f0f7",
+  "difficulty": "easy",
+  "targetLevel": "senior_secondary",
+  "tags": ["chemistry", "tutorial", "interactive", "ph"],
+  "keywords": ["acids", "bases", "neutralization", "ph-scale"],
+  "author": {
+    "name": "Dr. Kwame Asante",
+    "institution": "Ghana Institute of Science and Technology"
+  },
+  "source": "Interactive Chemistry Lab",
+  "isPublic": true,
+  "isPremium": true,
+  "requiresDownload": false,
+  "isFeatured": false,
+  "isVerified": true
+}
