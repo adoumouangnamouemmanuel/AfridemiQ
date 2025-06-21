@@ -87,7 +87,7 @@ const createQuestionSchema = Joi.object({
 
   isPremium: Joi.boolean().optional().default(false),
   isActive: Joi.boolean().optional().default(true),
-            });
+});
 
 // =============== UPDATE QUESTION SCHEMA ===============
 const updateQuestionSchema = Joi.object({
@@ -114,7 +114,7 @@ const updateQuestionSchema = Joi.object({
     .optional(),
   examType: Joi.string()
     .valid(...EXAM_TYPES)
-      .optional(),
+    .optional(),
   tags: Joi.array().items(Joi.string().trim().lowercase()).optional(),
   isPremium: Joi.boolean().optional(),
   isActive: Joi.boolean().optional(),
