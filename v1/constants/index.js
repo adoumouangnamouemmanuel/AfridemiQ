@@ -43,7 +43,7 @@ const EDUCATION_LEVELS = [
     lycee: ["2nde", "1ere", "terminale"],
     
     // Kenyan System
-    form: ["form1", "form2", "form3", "form4"]
+  form: ["form1", "form2", "form3", "form4"],
   };
 
 /**
