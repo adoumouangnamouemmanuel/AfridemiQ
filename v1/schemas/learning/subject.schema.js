@@ -155,68 +155,11 @@ const getSubjectsQuerySchema = Joi.object({
     .valid("name", "createdAt", "stats.totalStudents", "stats.averageScore")
     .optional()
     .default("name"),
-  sortOrder: Joi.string().valid("asc", "desc").default("asc"),
-});
-
-const addExamToSubjectSchema = Joi.object({
-  examId: Joi.string().required().messages({
-    "any.required": "L'ID de l'examen est requis",
-  }),
-});
-
-const rateSubjectSchema = Joi.object({
-  rating: Joi.number().min(1).max(5).required().messages({
-    "any.required": "La note est requise",
-    "number.min": "La note doit être au moins 1",
-    "number.max": "La note ne peut pas dépasser 5",
-  }),
-});
-
-const bulkCreateSchema = Joi.object({
-  subjects: Joi.array().items(createSubjectSchema).min(1).required().messages({
-    "any.required": "La liste des matières est requise",
-    "array.min": "Au moins une matière doit être fournie",
-  }),
-});
-
-const bulkUpdateSchema = Joi.object({
-  updates: Joi.array()
-    .items(
-      Joi.object({
-        id: Joi.string().required(),
-        data: updateSubjectSchema.required(),
-      })
-    )
-    .min(1)
-    .required()
-    .messages({
-      "any.required": "La liste des mises à jour est requise",
-      "array.min": "Au moins une mise à jour doit être fournie",
-    }),
-});
-
-const bulkDeleteSchema = Joi.object({
-  ids: Joi.array().items(Joi.string()).min(1).required().messages({
-    "any.required": "La liste des IDs est requise",
-    "array.min": "Au moins un ID doit être fourni",
-  }),
-});
-
-const compareSubjectsSchema = Joi.object({
-  ids: Joi.array().items(Joi.string()).min(2).required().messages({
-    "any.required": "La liste des IDs est requise",
-    "array.min": "Au moins 2 IDs doivent être fournis pour la comparaison",
-  }),
+  sortOrder: Joi.string().valid("asc", "desc").optional().default("asc"),
 });
 
 module.exports = {
   createSubjectSchema,
   updateSubjectSchema,
-  getSubjectsSchema,
-  addExamToSubjectSchema,
-  rateSubjectSchema,
-  bulkCreateSchema,
-  bulkUpdateSchema,
-  bulkDeleteSchema,
-  compareSubjectsSchema,
+  getSubjectsQuerySchema,
 };
