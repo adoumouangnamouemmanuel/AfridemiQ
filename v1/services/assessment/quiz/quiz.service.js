@@ -132,55 +132,35 @@ const updateQuiz = async (quizId, updateData) => {
     throw new NotFoundError("Quiz non trouvé");
   }
 
-  // Update quiz
-  async updateQuiz(quizId, updateData) {
-    try {
-      // Validate question count if updating questionIds
+  // Validate questionIds and totalQuestions match if being updated
       if (updateData.questionIds && updateData.totalQuestions) {
         if (updateData.questionIds.length !== updateData.totalQuestions) {
           updateData.totalQuestions = updateData.questionIds.length;
         }
+  } else if (updateData.questionIds) {
+    updateData.totalQuestions = updateData.questionIds.length;
       }
 
       const quiz = await Quiz.findByIdAndUpdate(
         quizId,
-        { ...updateData, updatedAt: new Date() },
+    { $set: updateData },
         { new: true, runValidators: true }
-      ).populate([
-        { path: "subjectId", select: "name code" },
-        { path: "topicIds", select: "name" },
-        { path: "createdBy", select: "name email" },
-      ]);
+  )
+    .populate("subjectId", "name code")
+    .populate("topicIds", "name")
+    .populate("questionIds", "question type difficulty");
 
-      if (!quiz) {
-        logger.warn(`Quiz not found for update: ${quizId}`);
-        throw new ApiError(404, "Quiz not found");
-      }
+  logger.info("++++++✅ UPDATE QUIZ: Quiz updated successfully ++++++");
+  return quiz;
+};
 
-      logger.info(`Quiz updated successfully: ${quizId}`);
-      return new ApiResponse(200, quiz, "Quiz updated successfully");
-    } catch (error) {
-      logger.error(`Error updating quiz ${quizId}:`, error);
-      if (error instanceof ApiError) throw error;
-      if (error.name === "ValidationError") {
-        throw new ApiError(
-          400,
-          "Validation failed",
-          Object.values(error.errors).map((e) => e.message)
-        );
-      }
-      throw new ApiError(500, "Failed to update quiz", error.message);
-    }
-  }
+// =============== DELETE QUIZ ===============
+const deleteQuiz = async (quizId) => {
+  logger.info("===================deleteQuiz=======================");
 
-  // Delete quiz
-  async deleteQuiz(quizId) {
-    try {
       const quiz = await Quiz.findById(quizId);
-
       if (!quiz) {
-        logger.warn(`Quiz not found for deletion: ${quizId}`);
-        throw new ApiError(404, "Quiz not found");
+    throw new NotFoundError("Quiz non trouvé");
       }
 
       // Check if quiz has results
