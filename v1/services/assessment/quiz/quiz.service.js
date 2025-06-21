@@ -5,44 +5,37 @@ const createLogger = require("../../logging.service");
 
 const logger = createLogger("QuizService");
 
-class QuizService {
-  // Create a new quiz
-  async createQuiz(quizData) {
-    try {
-      // Validate question count matches questionIds length
+// =============== CREATE QUIZ ===============
+const createQuiz = async (quizData) => {
+  logger.info("===================createQuiz=======================");
+
+  // Validate questionIds and totalQuestions match
       if (quizData.questionIds && quizData.totalQuestions) {
         if (quizData.questionIds.length !== quizData.totalQuestions) {
           quizData.totalQuestions = quizData.questionIds.length;
         }
+  } else if (quizData.questionIds) {
+    quizData.totalQuestions = quizData.questionIds.length;
       }
 
       const quiz = new Quiz(quizData);
       await quiz.save();
 
+  // Populate related fields
       await quiz.populate([
         { path: "subjectId", select: "name code" },
         { path: "topicIds", select: "name" },
-        { path: "createdBy", select: "name email" },
+    { path: "questionIds", select: "question type difficulty" },
       ]);
 
-      logger.info(`Quiz created successfully: ${quiz._id}`);
-      return new ApiResponse(201, quiz, "Quiz created successfully");
-    } catch (error) {
-      logger.error("Error creating quiz:", error);
-      if (error.name === "ValidationError") {
-        throw new ApiError(
-          400,
-          "Validation failed",
-          Object.values(error.errors).map((e) => e.message)
-        );
-      }
-      throw new ApiError(500, "Failed to create quiz", error.message);
-    }
-  }
+  logger.info("++++++✅ CREATE QUIZ: Quiz created successfully ++++++");
+  return quiz;
+};
 
-  // Get all quizzes with filters
-  async getAllQuizzes(filters = {}, options = {}) {
-    try {
+// =============== GET ALL QUIZZES ===============
+const getQuizzes = async (query) => {
+  logger.info("===================getQuizzes=======================");
+
       const {
         page = 1,
         limit = 10,
