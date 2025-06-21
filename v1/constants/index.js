@@ -122,6 +122,25 @@ const NOTIFICATION_TYPES = ["study_reminder", "exam_alert", "progress_update"];
 /**
  * Types de média
  */
+
+const LEARNING_OBJECTIVES = ["remember", "understand", "apply", "analyze"];
+
+const RESOURCE_CATEGORIES = [
+  "past_papers", // Sujets d'examens
+  "textbook", // Manuels scolaires
+  "exercise_book", // Livres d'exercices
+  "summary", // Résumés de cours
+  "video_lesson", // Cours vidéo
+  "audio_lesson", // Cours audio
+  "reference", // Documents de référence
+  "worksheet", // Feuilles de travail
+  "tutorial", // Tutoriels
+  "cheat_sheet", // Fiches de révision
+];
+
+const EXAM_SESSIONS = ["may_june", "november", "january", "march"];
+
+// Update MEDIA_TYPES
 const MEDIA_TYPES = ["image", "audio", "video", "document"];
 
 // =============== PAGINATION ===============
