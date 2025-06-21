@@ -146,7 +146,7 @@ const getSubjectsQuerySchema = Joi.object({
   educationLevel: Joi.string()
     .valid(...EDUCATION_LEVELS)
     .optional(),
-  series: Joi.string().valid("A", "C", "D", "ALL").optional(),
+  series: Joi.string().valid(...SERIES).optional(),
   isActive: Joi.boolean().optional(),
   isPremium: Joi.boolean().optional(),
   isFeatured: Joi.boolean().optional(),
