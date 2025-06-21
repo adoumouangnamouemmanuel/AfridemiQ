@@ -48,20 +48,29 @@ const getTopics = async (req, res) => {
     }
 };
 
-  // Get topic by ID
-  async getTopicById(req, res, next) {
+// =============== GET TOPIC BY ID ===============
+const getTopicById = async (req, res) => {
+  logger.info("===================getTopicById=======================");
+
     try {
       const topic = await topicService.getTopicById(req.params.id);
 
-      res.status(200).json({
+    logger.info(
+      "++++++✅ GET TOPIC BY ID: Topic retrieved successfully ++++++"
+    );
+    res.status(StatusCodes.OK).json({
         success: true,
-        message: "Topic retrieved successfully",
-        data: topic,
+      message: "Sujet récupéré avec succès",
+      data: { topic },
       });
     } catch (error) {
-      next(error);
+    logger.error("❌ GET TOPIC BY ID ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération du sujet",
+    });
     }
-  }
+};
 
   // Update topic
   async updateTopic(req, res, next) {
