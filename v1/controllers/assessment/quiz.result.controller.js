@@ -225,8 +225,11 @@ const getUserAverageScore = async (req, res) => {
       data: { averageScore },
     });
   } catch (error) {
-    logger.error("Error deleting quiz result:", error);
-    throw error;
+    logger.error("❌ GET USER AVERAGE SCORE ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération du score moyen",
+    });
   }
 };
 
