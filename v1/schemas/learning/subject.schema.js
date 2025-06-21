@@ -76,7 +76,7 @@ const createSubjectSchema = Joi.object({
     }),
 
   series: Joi.array()
-    .items(Joi.string().valid("A", "C", "D", "ALL"))
+    .items(Joi.string().valid(...SERIES))
     .optional(),
 
   icon: Joi.string().max(50).optional().default("📚"),
