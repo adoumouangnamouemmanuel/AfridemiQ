@@ -176,15 +176,15 @@ const updateResourceSchema = Joi.object({
   isActive: Joi.boolean().optional(),
 });
 
-// Add feedback schema
+// =============== ADD FEEDBACK SCHEMA ===============
 const addFeedbackSchema = Joi.object({
-  rating: Joi.number().min(0).max(10).required().messages({
-    "number.base": "La note doit être un nombre",
-    "number.min": "La note doit être au moins 0",
-    "number.max": "La note ne peut pas dépasser 10",
+  rating: Joi.number().min(1).max(5).required().messages({
     "any.required": "La note est requise",
+    "number.min": "La note doit être entre 1 et 5",
+    "number.max": "La note doit être entre 1 et 5",
   }),
-  comments: Joi.string().max(500).messages({
+
+  comments: Joi.string().max(500).optional().messages({
     "string.max": "Les commentaires ne peuvent pas dépasser 500 caractères",
   }),
 });
