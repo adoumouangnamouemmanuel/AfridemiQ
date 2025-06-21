@@ -1,0 +1,28 @@
+{
+  "title": "Cell Biology and Organization - Interactive Video Lesson",
+  "description": "Comprehensive video lesson covering cell structure, organelles, and cellular processes with animations and real microscope footage",
+  "type": "video",
+  "category": "video_lesson",
+  "url": "https://video.africaexamprep.com/biology/cell-biology-basics.mp4",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "easy",
+  "targetLevel": "both",
+  "fileInfo": {
+    "size": 157286400,
+    "mimeType": "video/mp4",
+    "duration": 1800
+  },
+  "tags": ["video", "cell-biology", "interactive", "microscopy"],
+  "keywords": ["organelles", "nucleus", "mitochondria", "cell-membrane"],
+  "author": {
+    "name": "Dr. Adaora Okafor",
+    "institution": "University of Lagos Biology Department"
+  },
+  "source": "Africa Exam Prep Video Series",
+  "isPublic": true,
+  "isPremium": true,
+  "requiresDownload": false,
+  "isFeatured": true,
+  "isVerified": true
+}
