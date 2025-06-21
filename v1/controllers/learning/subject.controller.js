@@ -188,30 +188,16 @@ const getSubjectsByEducationAndCountry = async (req, res) => {
       "++++++✅ GET SUBJECTS BY EDUCATION AND COUNTRY: Subjects retrieved ++++++"
     );
     res.status(StatusCodes.OK).json({
-      message: "Matières tendance récupérées avec succès",
-      data: trending,
+      success: true,
+      message: "Matières récupérées avec succès",
+      data: { subjects },
     });
   } catch (error) {
-    logger.error("Error in getTrendingSubjects controller", error, {
-      query: req.query,
+    logger.error("❌ GET SUBJECTS BY EDUCATION AND COUNTRY ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des matières",
     });
-    throw error;
-  }
-};
-
-// Analytics Controller
-const getSubjectAnalytics = async (req, res) => {
-  try {
-    const analytics = await analyticsService.getSubjectAnalytics(req.query);
-    res.status(StatusCodes.OK).json({
-      message: "Analyses des matières récupérées avec succès",
-      data: analytics,
-    });
-  } catch (error) {
-    logger.error("Error in getSubjectAnalytics controller", error, {
-      query: req.query,
-    });
-    throw error;
   }
 };
 
