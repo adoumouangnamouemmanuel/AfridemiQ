@@ -12,10 +12,15 @@ const {
   getQuestionsQuerySchema,
 } = require("../../schemas/assessment/question.schema");
 
-router.use(apiLimiter);
-router.use(authMiddleware);
+const router = express.Router();
 
-router.get("/:id", questionController.getQuestionById);
+// Apply UTF-8 middleware to all routes
+router.use(utf8Middleware);
+
+// Apply rate limiting
+router.use(apiLimiter);
+
+// =============== PUBLIC ROUTES ===============
 
 router.get(
   "/",
