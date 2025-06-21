@@ -49,28 +49,37 @@ router.get("/search/query", questionController.searchQuestions);
 // Create new question
 router.post(
   "/",
+  authMiddleware,
   roleMiddleware(["teacher", "admin"]),
-  validateMiddleware(createQuestionSchema),
+  validateMiddleware(createQuestionSchema, "body"),
   questionController.createQuestion
 );
 
+// Update question
 router.put(
   "/:id",
+  authMiddleware,
   roleMiddleware(["teacher", "admin"]),
-  validateMiddleware(updateQuestionSchema),
+  validateMiddleware(updateQuestionSchema, "body"),
   questionController.updateQuestion
 );
 
+// Delete question (soft delete)
 router.delete(
   "/:id",
+  authMiddleware,
   roleMiddleware(["admin"]),
   questionController.deleteQuestion
 );
 
+// Update question stats
 router.post(
-  "/:id/verify",
-  roleMiddleware(["admin"]),
-  questionController.verifyQuestion
+  "/:id/stats",
+  authMiddleware,
+  questionController.updateQuestionStats
 );
+
+// Check answer
+router.post("/:id/check", authMiddleware, questionController.checkAnswer);
 
 module.exports = router;
