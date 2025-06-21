@@ -286,67 +286,117 @@ const searchResources = async (searchTerm, filters = {}) => {
   return result;
 };
 
-  // Get resource statistics
-  async getResourceStatistics() {
-    try {
+// =============== GET RESOURCE STATISTICS ===============
+const getResourceStatistics = async () => {
+  logger.info(
+    "===================getResourceStatistics======================="
+  );
+
       const [
         totalResources,
         totalViews,
         totalDownloads,
         averageRating,
-        formatStats,
-        levelStats,
-        topRatedResources,
-        mostViewedResources,
+    categoryStats,
+    typeStats,
+    featuredResources,
+    popularResources,
       ] = await Promise.all([
-        Resource.countDocuments(),
+    Resource.countDocuments({ isActive: true }),
         Resource.aggregate([
-          { $group: { _id: null, total: { $sum: "$analytics.views" } } },
+      { $match: { isActive: true } },
+      { $group: { _id: null, total: { $sum: "$stats.views" } } },
         ]),
         Resource.aggregate([
-          { $group: { _id: null, total: { $sum: "$analytics.downloads" } } },
+      { $match: { isActive: true } },
+      { $group: { _id: null, total: { $sum: "$stats.downloads" } } },
         ]),
         Resource.aggregate([
-          {
-            $group: {
-              _id: null,
-              average: { $avg: "$analytics.averageRating" },
-            },
-          },
+      { $match: { isActive: true, "stats.rating.count": { $gt: 0 } } },
+      { $group: { _id: null, average: { $avg: "$stats.rating.average" } } },
         ]),
         Resource.aggregate([
-          { $group: { _id: "$format", count: { $sum: 1 } } },
+      { $match: { isActive: true } },
+      { $group: { _id: "$category", count: { $sum: 1 } } },
           { $sort: { count: -1 } },
         ]),
         Resource.aggregate([
-          { $group: { _id: "$level", count: { $sum: 1 } } },
+      { $match: { isActive: true } },
+      { $group: { _id: "$type", count: { $sum: 1 } } },
           { $sort: { count: -1 } },
         ]),
-        Resource.find()
-          .sort({ "analytics.averageRating": -1 })
+    Resource.find({ isFeatured: true, isActive: true })
+      .select("title stats.views stats.downloads")
           .limit(5)
-          .select("title analytics.averageRating")
           .lean(),
-        Resource.find()
-          .sort({ "analytics.views": -1 })
+    Resource.find({ isActive: true })
+      .sort({ "stats.views": -1, "stats.downloads": -1 })
+      .select("title stats.views stats.downloads")
           .limit(5)
-          .select("title analytics.views")
           .lean(),
       ]);
 
-      return {
+  const statistics = {
         totalResources,
         totalViews: totalViews[0]?.total || 0,
         totalDownloads: totalDownloads[0]?.total || 0,
         averageRating: averageRating[0]?.average || 0,
-        formatDistribution: formatStats,
-        levelDistribution: levelStats,
-        topRatedResources,
-        mostViewedResources,
-      };
-    } catch (error) {
-      logger.error("Error getting resource statistics:", error);
-      throw error;
+    categoryDistribution: categoryStats,
+    typeDistribution: typeStats,
+    featuredResources,
+    popularResources,
+  };
+
+  logger.info("++++++✅ GET RESOURCE STATISTICS: Statistics retrieved ++++++");
+  return statistics;
+};
+
+// =============== GET RESOURCE FORMATS ===============
+const getResourceFormats = async () => {
+  logger.info("===================getResourceFormats=======================");
+
+  const formats = [
+    { value: "pdf", label: "PDF Document" },
+    { value: "video", label: "Vidéo" },
+    { value: "audio", label: "Audio" },
+    { value: "image", label: "Image" },
+    { value: "document", label: "Document" },
+    { value: "link", label: "Lien externe" },
+    { value: "exercise", label: "Exercice" },
+  ];
+
+  logger.info("++++++✅ GET RESOURCE FORMATS: Formats retrieved ++++++");
+  return formats;
+};
+
+// =============== ADD FEEDBACK ===============
+const addFeedback = async (resourceId, userId, rating, comments) => {
+  logger.info("===================addFeedback=======================");
+
+  const resource = await Resource.findById(resourceId);
+  if (!resource) {
+    throw new NotFoundError("Ressource non trouvée");
+  }
+
+  // Update rating
+  await resource.addRating(rating);
+
+  // Reload resource with updated stats
+  const updatedResource = await Resource.findById(resourceId)
+    .populate("subjectId", "name code")
+    .populate("topicId", "name");
+
+  logger.info("++++++✅ ADD FEEDBACK: Feedback added successfully ++++++");
+  return updatedResource;
+};
+
+// =============== TRACK VIEW ===============
+const trackView = async (resourceId) => {
+  logger.info("===================trackView=======================");
+
+  const resource = await Resource.findById(resourceId);
+  if (!resource) {
+    throw new NotFoundError("Ressource non trouvée");
     }
   }
 
