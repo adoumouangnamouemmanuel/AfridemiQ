@@ -1,3 +1,4 @@
+const { StatusCodes } = require("http-status-codes");
 const quizService = require("../../services/assessment/quiz/quiz.service");
 const createLogger = require("../../services/logging.service");
 
@@ -88,7 +89,7 @@ const updateQuiz = async (req, res) => {
       success: false,
       message: error.message || "Erreur lors de la mise à jour du quiz",
     });
-    }
+  }
 };
 
 // =============== DELETE QUIZ ===============
@@ -242,7 +243,7 @@ const searchQuizzes = async (req, res) => {
       success: false,
       message: error.message || "Erreur lors de la recherche",
     });
-    }
+  }
 };
 
 // =============== UPDATE QUIZ STATS ===============
