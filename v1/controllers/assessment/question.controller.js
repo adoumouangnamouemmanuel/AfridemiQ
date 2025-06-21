@@ -28,16 +28,27 @@ const createQuestion = async (req, res) => {
   }
 };
 
-const getQuestionById = async (req, res) => {
+// =============== GET ALL QUESTIONS ===============
+const getQuestions = async (req, res) => {
+  logger.info("===================getQuestions=======================");
+
   try {
-    const question = await questionService.getQuestionById(req.params.id);
+    const result = await questionService.getQuestions(req.query);
+
+    logger.info(
+      "++++++✅ GET QUESTIONS: Questions retrieved successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Question récupérée avec succès",
-      data: question,
+      success: true,
+      message: "Questions récupérées avec succès",
+      data: result,
     });
   } catch (error) {
-    logger.error("Error retrieving question:", error);
-    throw error;
+    logger.error("❌ GET QUESTIONS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des questions",
+    });
   }
 };
 
