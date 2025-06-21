@@ -8,16 +8,16 @@ const logger = createLogger("TopicController");
 const createTopic = async (req, res) => {
   logger.info("===================createTopic=======================");
 
-    try {
-      const topic = await topicService.createTopic(req.body);
+  try {
+    const topic = await topicService.createTopic(req.body);
 
     logger.info("++++++✅ CREATE TOPIC: Topic created successfully ++++++");
     res.status(StatusCodes.CREATED).json({
-        success: true,
+      success: true,
       message: "Sujet créé avec succès",
       data: { topic },
-      });
-    } catch (error) {
+    });
+  } catch (error) {
     logger.error("❌ CREATE TOPIC ERROR:", error);
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
@@ -35,78 +35,78 @@ const getTopics = async (req, res) => {
 
     logger.info("++++++✅ GET TOPICS: Topics retrieved successfully ++++++");
     res.status(StatusCodes.OK).json({
-        success: true,
+      success: true,
       message: "Sujets récupérés avec succès",
       data: result,
-      });
-    } catch (error) {
+    });
+  } catch (error) {
     logger.error("❌ GET TOPICS ERROR:", error);
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: error.message || "Erreur lors de la récupération des sujets",
     });
-    }
+  }
 };
 
 // =============== GET TOPIC BY ID ===============
 const getTopicById = async (req, res) => {
   logger.info("===================getTopicById=======================");
 
-    try {
-      const topic = await topicService.getTopicById(req.params.id);
+  try {
+    const topic = await topicService.getTopicById(req.params.id);
 
     logger.info(
       "++++++✅ GET TOPIC BY ID: Topic retrieved successfully ++++++"
     );
     res.status(StatusCodes.OK).json({
-        success: true,
+      success: true,
       message: "Sujet récupéré avec succès",
       data: { topic },
-      });
-    } catch (error) {
+    });
+  } catch (error) {
     logger.error("❌ GET TOPIC BY ID ERROR:", error);
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: error.message || "Erreur lors de la récupération du sujet",
     });
-    }
+  }
 };
 
 // =============== UPDATE TOPIC ===============
 const updateTopic = async (req, res) => {
   logger.info("===================updateTopic=======================");
 
-    try {
-      const topic = await topicService.updateTopic(req.params.id, req.body);
+  try {
+    const topic = await topicService.updateTopic(req.params.id, req.body);
 
     logger.info("++++++✅ UPDATE TOPIC: Topic updated successfully ++++++");
     res.status(StatusCodes.OK).json({
-        success: true,
+      success: true,
       message: "Sujet mis à jour avec succès",
       data: { topic },
-      });
-    } catch (error) {
+    });
+  } catch (error) {
     logger.error("❌ UPDATE TOPIC ERROR:", error);
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: error.message || "Erreur lors de la mise à jour du sujet",
     });
-    }
   }
+};
 
 // =============== DELETE TOPIC ===============
 const deleteTopic = async (req, res) => {
   logger.info("===================deleteTopic=======================");
 
-    try {
+  try {
     await topicService.deleteTopic(req.params.id);
 
     logger.info("++++++✅ DELETE TOPIC: Topic deleted successfully ++++++");
     res.status(StatusCodes.OK).json({
-        success: true,
+      success: true,
       message: "Sujet supprimé avec succès",
-      });
-    } catch (error) {
+    });
+  } catch (error) {
     logger.error("❌ DELETE TOPIC ERROR:", error);
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
@@ -119,22 +119,22 @@ const deleteTopic = async (req, res) => {
 const getTopicsBySubject = async (req, res) => {
   logger.info("===================getTopicsBySubject=======================");
 
-    try {
+  try {
     const { subjectId } = req.params;
     const topics = await topicService.getTopicsBySubject(subjectId, req.query);
 
     logger.info("++++++✅ GET TOPICS BY SUBJECT: Topics retrieved ++++++");
     res.status(StatusCodes.OK).json({
-        success: true,
+      success: true,
       message: "Sujets récupérés avec succès",
       data: { topics },
-      });
-    } catch (error) {
+    });
+  } catch (error) {
     logger.error("❌ GET TOPICS BY SUBJECT ERROR:", error);
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: error.message || "Erreur lors de la récupération des sujets",
-      });
+    });
   }
 };
 
@@ -144,7 +144,7 @@ const getTopicsByDifficulty = async (req, res) => {
     "===================getTopicsByDifficulty======================="
   );
 
-    try {
+  try {
     const { difficulty } = req.params;
     const { subjectId } = req.query;
     const topics = await topicService.getTopicsByDifficulty(
@@ -154,17 +154,17 @@ const getTopicsByDifficulty = async (req, res) => {
 
     logger.info("++++++✅ GET TOPICS BY DIFFICULTY: Topics retrieved ++++++");
     res.status(StatusCodes.OK).json({
-        success: true,
+      success: true,
       message: "Sujets récupérés avec succès",
       data: { topics },
-      });
-    } catch (error) {
+    });
+  } catch (error) {
     logger.error("❌ GET TOPICS BY DIFFICULTY ERROR:", error);
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-          success: false,
+      success: false,
       message: error.message || "Erreur lors de la récupération des sujets",
-        });
-      }
+    });
+  }
 };
 
 // =============== GET POPULAR TOPICS ===============
@@ -178,17 +178,17 @@ const getPopularTopics = async (req, res) => {
 
     logger.info("++++++✅ GET POPULAR TOPICS: Popular topics retrieved ++++++");
     res.status(StatusCodes.OK).json({
-        success: true,
+      success: true,
       message: "Sujets populaires récupérés avec succès",
       data: { topics },
-      });
-    } catch (error) {
+    });
+  } catch (error) {
     logger.error("❌ GET POPULAR TOPICS ERROR:", error);
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message:
         error.message || "Erreur lors de la récupération des sujets populaires",
-      });
+    });
   }
 };
 
@@ -203,17 +203,17 @@ const searchTopics = async (req, res) => {
 
     logger.info("++++++✅ SEARCH TOPICS: Search completed successfully ++++++");
     res.status(StatusCodes.OK).json({
-        success: true,
+      success: true,
       message: "Recherche effectuée avec succès",
       data: { topics },
-      });
-    } catch (error) {
+    });
+  } catch (error) {
     logger.error("❌ SEARCH TOPICS ERROR:", error);
     res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
-          success: false,
+      success: false,
       message: error.message || "Erreur lors de la recherche",
-        });
-      }
+    });
+  }
 };
 
 module.exports = {
