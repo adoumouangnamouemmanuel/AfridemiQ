@@ -1,8 +1,13 @@
 const Joi = require("joi");
-Joi.objectId = require("joi-objectid")(Joi);
-const { DIFFICULTY_LEVELS } = require("../../constants/index");
-const { QUESTION_TYPES, MEDIA_TYPES } = require("../../constants/index");
+const {
+  QUESTION_TYPES,
+  DIFFICULTY_LEVELS,
+  EDUCATION_LEVELS,
+  EXAM_TYPES,
+  STATUSES,
+} = require("../../constants");
 
+// =============== CREATE QUESTION SCHEMA ===============
 const createQuestionSchema = Joi.object({
   topicId: Joi.objectId().required(),
   subjectId: Joi.objectId().required(),
