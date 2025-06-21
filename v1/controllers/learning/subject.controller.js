@@ -50,19 +50,27 @@ const getSubjects = async (req, res) => {
   }
 };
 
-// Get subject by ID
+// =============== GET SUBJECT BY ID ===============
 const getSubjectById = async (req, res) => {
+  logger.info("===================getSubjectById=======================");
+
   try {
-    const result = await subjectService.getSubjectById(req.params.id);
+    const subject = await subjectService.getSubjectById(req.params.id);
+
+    logger.info(
+      "++++++✅ GET SUBJECT BY ID: Subject retrieved successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
+      success: true,
       message: "Matière récupérée avec succès",
-      data: result.subject,
+      data: { subject },
     });
   } catch (error) {
-    logger.error("Error in getSubjectById controller", error, {
-      subjectId: req.params.id,
+    logger.error("❌ GET SUBJECT BY ID ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération de la matière",
     });
-    throw error;
   }
 };
 
