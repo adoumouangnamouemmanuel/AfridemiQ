@@ -94,22 +94,31 @@ const updateTopic = async (req, res) => {
     }
   }
 
-  // Delete topic
-  async deleteTopic(req, res, next) {
-    try {
-      const result = await topicService.deleteTopic(req.params.id);
+// =============== DELETE TOPIC ===============
+const deleteTopic = async (req, res) => {
+  logger.info("===================deleteTopic=======================");
 
-      res.status(200).json({
+    try {
+    await topicService.deleteTopic(req.params.id);
+
+    logger.info("++++++✅ DELETE TOPIC: Topic deleted successfully ++++++");
+    res.status(StatusCodes.OK).json({
         success: true,
-        message: result.message,
+      message: "Sujet supprimé avec succès",
       });
     } catch (error) {
-      next(error);
-    }
+    logger.error("❌ DELETE TOPIC ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la suppression du sujet",
+    });
   }
+};
 
-  // Get topics by subject
-  async getTopicsBySubject(req, res, next) {
+// =============== GET TOPICS BY SUBJECT ===============
+const getTopicsBySubject = async (req, res) => {
+  logger.info("===================getTopicsBySubject=======================");
+
     try {
       const { page, limit, sortBy, sortOrder } = req.query;
       const result = await topicService.getTopicsBySubject(
