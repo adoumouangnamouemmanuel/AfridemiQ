@@ -1,16 +1,23 @@
 const express = require("express");
-const router = express.Router();
 const quizResultController = require("../../controllers/results/quiz.result.controller");
+const validateMiddleware = require("../../middlewares/validate.middleware");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
-const validateMiddleware = require("../../middlewares/validate.middleware");
+const utf8Middleware = require("../../middlewares/utf8.middleware");
 const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
+
 const {
   createQuizResultSchema,
   updateQuizResultSchema,
-  getQuizResultSchema,
-} = require("../../schemas/results/quiz.result.schema");
+  getQuizResultsQuerySchema,
+} = require("../../schemas/assessment/quiz.result.schema");
 
+const router = express.Router();
+
+// Apply UTF-8 middleware to all routes
+router.use(utf8Middleware);
+
+// Apply rate limiting
 router.use(apiLimiter);
 router.use(authMiddleware);
 
