@@ -33,82 +33,70 @@ const createSubject = async (subjectData) => {
     return subject;
 };
 
-/**
- * Get all subjects with advanced filtering and pagination
- */
+// =============== GET ALL SUBJECTS ===============
 const getSubjects = async (query) => {
-  try {
+  logger.info("===================getSubjects=======================");
+
     const {
       page = 1,
       limit = 10,
+    category,
+    examType,
+    country,
+    educationLevel,
       series,
-      category,
-      difficulty,
       isActive,
+    isPremium,
+    isFeatured,
+    search,
       sortBy = "name",
       sortOrder = "asc",
     } = query;
 
-    const filter = {};
+  // Build filter object
+  const filter = { status: "active" };
 
-    if (isActive !== undefined) {
-      filter.isActive = isActive === "true" || isActive === true;
+  if (category) filter.category = category;
+  if (examType) filter.examTypes = examType;
+  if (country) filter.countries = country;
+  if (educationLevel) filter.educationLevels = educationLevel;
+  if (series) filter.series = series;
+  if (isActive !== undefined) filter.isActive = isActive === "true";
+  if (isPremium !== undefined) filter.isPremium = isPremium === "true";
+  if (isFeatured !== undefined) filter.isFeatured = isFeatured === "true";
+
+  // Add search functionality
+  if (search) {
+    filter.$or = [
+      { name: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
+      { code: { $regex: search, $options: "i" } },
+    ];
     }
 
-    if (series) {
-      // Handle case-insensitive series matching
-      const seriesValue = Array.isArray(series) ? series[0] : series;
-      const trimmedSeries = seriesValue.trim();
-
-      // Use case-insensitive regex that matches the series exactly
-      filter.series = {
-        $regex: new RegExp(`^${trimmedSeries}$`, "i"),
-      };
-    }
-
-    if (category) {
-      filter.category = category;
-    }
-
-    if (difficulty) {
-      filter.difficulty = difficulty;
-    }
-
+  // Build sort object
     const sort = {};
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
+  // Calculate pagination
     const skip = (page - 1) * limit;
 
-    const subjects = await Subject.find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(Number.parseInt(limit));
+  // Execute query with pagination
+  const [subjects, total] = await Promise.all([
+    Subject.find(filter).sort(sort).skip(skip).limit(parseInt(limit)).lean(),
+    Subject.countDocuments(filter),
+  ]);
 
-    const total = await Subject.countDocuments(filter);
-
-    logger.info(
-      `Query executed successfully: ${subjects.length} subjects found`,
-      {
-        filter: series
-          ? { series, category, difficulty }
-          : { category, difficulty },
-        total,
-      }
-    );
-
-    return {
-      subjects,
-      pagination: {
-        current: Number.parseInt(page),
-        pages: Math.ceil(total / limit),
-        total,
-        limit: Number.parseInt(limit),
-      },
+  const pagination = {
+    currentPage: parseInt(page),
+    totalPages: Math.ceil(total / limit),
+    totalCount: total,
+    hasNextPage: page < Math.ceil(total / limit),
+    hasPrevPage: page > 1,
     };
-  } catch (error) {
-    logger.error("Error getting subjects", error, { query });
-    throw error;
-  }
+
+  logger.info("++++++✅ GET SUBJECTS: Subjects retrieved successfully ++++++");
+  return { subjects, pagination };
 };
 
 /**
