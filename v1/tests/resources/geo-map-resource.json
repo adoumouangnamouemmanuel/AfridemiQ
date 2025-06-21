@@ -1,0 +1,27 @@
+{
+  "title": "Physical Geography of Chad - Detailed Reference Map",
+  "description": "Comprehensive physical geography map of Chad showing landforms, climate zones, rivers, and natural resources with educational annotations",
+  "type": "image",
+  "category": "reference",
+  "url": "https://maps.africaexamprep.com/chad/physical-geography-detailed.png",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "easy",
+  "targetLevel": "both",
+  "fileInfo": {
+    "size": 3145728,
+    "mimeType": "image/png"
+  },
+  "tags": ["geography", "chad", "map", "physical"],
+  "keywords": ["sahel", "landforms", "climate", "resources"],
+  "author": {
+    "name": "Institut Géographique du Tchad",
+    "institution": "Ministère de l'Aménagement du Territoire"
+  },
+  "source": "Atlas Géographique du Tchad",
+  "isPublic": true,
+  "isPremium": false,
+  "requiresDownload": false,
+  "isFeatured": true,
+  "isVerified": true
+}
