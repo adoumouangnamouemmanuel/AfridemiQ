@@ -2,65 +2,39 @@ const { StatusCodes } = require("http-status-codes");
 const topicService = require("../../services/learning/topic/topic.service");
 const createLogger = require("../../services/logging.service");
 
-class TopicController {
-  // Create topic
-  async createTopic(req, res, next) {
+const logger = createLogger("TopicController");
+
+// =============== CREATE TOPIC ===============
+const createTopic = async (req, res) => {
+  logger.info("===================createTopic=======================");
+
     try {
       const topic = await topicService.createTopic(req.body);
 
-      res.status(201).json({
+    logger.info("++++++✅ CREATE TOPIC: Topic created successfully ++++++");
+    res.status(StatusCodes.CREATED).json({
         success: true,
-        message: "Topic created successfully",
-        data: topic,
+      message: "Sujet créé avec succès",
+      data: { topic },
       });
     } catch (error) {
-      next(error);
-    }
+    logger.error("❌ CREATE TOPIC ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la création du sujet",
+    });
   }
+};
 
-  // Get all topics
-  async getAllTopics(req, res, next) {
-    try {
-      const {
-        page,
-        limit,
-        sortBy,
-        sortOrder,
-        search,
-        subjectId,
-        difficulty,
-        series,
-        hasPractice,
-        hasNote,
-        hasStudyMaterial,
-      } = req.query;
+// =============== GET ALL TOPICS ===============
+const getTopics = async (req, res) => {
+  logger.info("===================getTopics=======================");
 
-      const result = await topicService.getAllTopics({
-        page,
-        limit,
-        sortBy,
-        sortOrder,
-        search,
-        subjectId,
-        difficulty,
-        series,
-        hasPractice:
-          hasPractice === "true"
-            ? true
-            : hasPractice === "false"
-            ? false
-            : undefined,
-        hasNote:
-          hasNote === "true" ? true : hasNote === "false" ? false : undefined,
-        hasStudyMaterial:
-          hasStudyMaterial === "true"
-            ? true
-            : hasStudyMaterial === "false"
-            ? false
-            : undefined,
-      });
+  try {
+    const result = await topicService.getTopics(req.query);
 
-      res.status(200).json({
+    logger.info("++++++✅ GET TOPICS: Topics retrieved successfully ++++++");
+    res.status(StatusCodes.OK).json({
         success: true,
         message: "Topics retrieved successfully",
         data: result.topics,
