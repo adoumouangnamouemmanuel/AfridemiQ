@@ -112,45 +112,56 @@ const deleteQuiz = async (req, res) => {
   }
 };
 
-  // Delete quiz
-  deleteQuiz = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+// =============== GET POPULAR QUIZZES ===============
+const getPopularQuizzes = async (req, res) => {
+  logger.info("===================getPopularQuizzes=======================");
 
-    // Check if user owns the quiz or is admin
-    const quiz = await quizService.getQuizById(id);
-    if (
-      quiz.data.createdBy._id.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
-      throw new ApiError(403, "Not authorized to delete this quiz");
-    }
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const quizzes = await quizService.getPopularQuizzes(limit);
 
-    const result = await quizService.deleteQuiz(id);
-    res.status(result.statusCode).json(result);
-  });
+    logger.info(
+      "++++++✅ GET POPULAR QUIZZES: Popular quizzes retrieved ++++++"
+    );
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Quizzes populaires récupérés avec succès",
+      data: { quizzes },
+    });
+  } catch (error) {
+    logger.error("❌ GET POPULAR QUIZZES ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message:
+        error.message ||
+        "Erreur lors de la récupération des quizzes populaires",
+    });
+  }
+};
 
-  // Get quizzes by subject
-  getQuizzesBySubject = asyncHandler(async (req, res) => {
+// =============== GET QUIZZES BY SUBJECT ===============
+const getQuizzesBySubject = async (req, res) => {
+  logger.info("===================getQuizzesBySubject=======================");
+
+  try {
     const { subjectId } = req.params;
-    const options = {
-      page: Number.parseInt(req.query.page) || 1,
-      limit: Number.parseInt(req.query.limit) || 10,
-      sortBy: req.query.sortBy || "createdAt",
-      sortOrder: req.query.sortOrder || "desc",
-      level: req.query.level,
-      difficulty: req.query.difficulty,
-    };
+    const filters = req.query;
+    const quizzes = await quizService.getQuizzesBySubject(subjectId, filters);
 
-    const result = await quizService.getQuizzesBySubject(subjectId, options);
-    res.status(result.statusCode).json(result);
-  });
-
-  // Get popular quizzes
-  getPopularQuizzes = asyncHandler(async (req, res) => {
-    const limit = Number.parseInt(req.query.limit) || 10;
-    const result = await quizService.getPopularQuizzes(limit);
-    res.status(result.statusCode).json(result);
-  });
+    logger.info("++++++✅ GET QUIZZES BY SUBJECT: Quizzes retrieved ++++++");
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Quizzes récupérés avec succès",
+      data: { quizzes },
+    });
+  } catch (error) {
+    logger.error("❌ GET QUIZZES BY SUBJECT ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des quizzes",
+    });
+  }
+};
 
   // Check quiz eligibility
   checkQuizEligibility = asyncHandler(async (req, res) => {
