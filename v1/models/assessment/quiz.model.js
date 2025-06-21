@@ -151,8 +151,9 @@ QuizSchema.pre("validate", function (next) {
 // =============== INDEX ===============
 QuizSchema.index({ subjectId: 1, difficulty: 1 });
 QuizSchema.index({ examType: 1, educationLevel: 1 });
-QuizSchema.index({ createdBy: 1, status: 1 });
-QuizSchema.index({ format: 1, isActive: 1 });
+QuizSchema.index({ difficulty: 1, isActive: 1 });
+QuizSchema.index({ format: 1, status: 1 });
+QuizSchema.index({ createdAt: -1 });
 
 // =============== VIRTUELS ===============
 QuizSchema.virtual("estimatedDuration").get(function () {
