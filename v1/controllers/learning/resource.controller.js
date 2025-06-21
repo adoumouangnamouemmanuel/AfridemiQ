@@ -104,26 +104,25 @@ const updateResource = async (req, res) => {
   }
 };
 
-// Delete resource
+// =============== DELETE RESOURCE ===============
 const deleteResource = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await resourceService.deleteResource(id);
+  logger.info("===================deleteResource=======================");
 
+  try {
+    await resourceService.deleteResource(req.params.id);
+
+    logger.info(
+      "++++++✅ DELETE RESOURCE: Resource deleted successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: result.message,
-      data: null,
+      success: true,
+      message: "Ressource supprimée avec succès",
     });
   } catch (error) {
-    logger.error("Error deleting resource:", error);
-    const statusCode =
-      error.message === "Resource not found"
-        ? StatusCodes.NOT_FOUND
-        : StatusCodes.INTERNAL_SERVER_ERROR;
-
-    res.status(statusCode).json({
-      message: error.message || "Error deleting resource",
-      error: error.message,
+    logger.error("❌ DELETE RESOURCE ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la suppression de la ressource",
     });
   }
 };
