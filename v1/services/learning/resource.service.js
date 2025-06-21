@@ -250,35 +250,41 @@ const getResourcesBySubject = async (subjectId, options = {}) => {
   return result;
 };
 
-  // Get resources by topic
-  async getResourcesByTopic(topicId, options = {}) {
-    try {
-      return await this.getAllResources({ topicId }, options);
-    } catch (error) {
-      logger.error("Error getting resources by topic:", error);
-      throw error;
-    }
+// =============== GET RESOURCES BY TOPIC ===============
+const getResourcesByTopic = async (topicId, options = {}) => {
+  logger.info("===================getResourcesByTopic=======================");
+
+  // Verify topic exists
+  const topic = await Topic.findById(topicId);
+  if (!topic) {
+    throw new NotFoundError("Sujet non trouvé");
   }
 
-  // Get resources by exam
-  async getResourcesByExam(examId, options = {}) {
-    try {
-      return await this.getAllResources({ examId }, options);
-    } catch (error) {
-      logger.error("Error getting resources by exam:", error);
-      throw error;
-    }
+  const query = { topicId, ...options };
+  const result = await getAllResources(query);
+
+  logger.info("++++++✅ GET RESOURCES BY TOPIC: Resources retrieved ++++++");
+  return result;
+};
+
+// =============== SEARCH RESOURCES ===============
+const searchResources = async (searchTerm, filters = {}) => {
+  logger.info("===================searchResources=======================");
+
+  if (!searchTerm || searchTerm.trim().length < 2) {
+    throw new BadRequestError(
+      "Le terme de recherche doit contenir au moins 2 caractères"
+    );
   }
 
-  // Search resources
-  async searchResources(searchTerm, options = {}) {
-    try {
-      return await this.getAllResources({ search: searchTerm }, options);
-    } catch (error) {
-      logger.error("Error searching resources:", error);
-      throw error;
-    }
-  }
+  const query = { search: searchTerm.trim(), ...filters };
+  const result = await getAllResources(query);
+
+  logger.info(
+    "++++++✅ SEARCH RESOURCES: Search completed successfully ++++++"
+  );
+  return result;
+};
 
   // Get resource statistics
   async getResourceStatistics() {
