@@ -309,20 +309,27 @@ const trackView = async (req, res) => {
   }
 };
 
-// Get resource formats
-const getResourceFormats = async (req, res) => {
-  try {
-    const formats = ["document", "video", "audio", "interactive", "past_exam"];
+// =============== TRACK DOWNLOAD ===============
+const trackDownload = async (req, res) => {
+  logger.info("===================trackDownload=======================");
 
+  try {
+    const resource = await resourceService.trackDownload(req.params.id);
+
+    logger.info(
+      "++++++✅ TRACK DOWNLOAD: Download tracked successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Resource formats retrieved successfully",
-      data: formats,
+      success: true,
+      message: "Téléchargement enregistré avec succès",
+      data: { resource },
     });
   } catch (error) {
-    logger.error("Error getting resource formats:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error retrieving resource formats",
-      error: error.message,
+    logger.error("❌ TRACK DOWNLOAD ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message:
+        error.message || "Erreur lors de l'enregistrement du téléchargement",
     });
   }
 };
