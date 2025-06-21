@@ -148,6 +148,20 @@ QuizResultSchema.pre("validate", function (next) {
   next();
 });
 
+// =============== POST SAVE - Update Quiz Stats ===============
+QuizResultSchema.post("save", async function () {
+  try {
+    const Quiz = require("./quiz.model").Quiz;
+    const quiz = await Quiz.findById(this.quizId);
+    if (quiz) {
+      const completionTimeMinutes = Math.round(this.totalTimeSpent / 60);
+      await quiz.updateStats(this.score, completionTimeMinutes, this.isPassed);
+    }
+  } catch (error) {
+    console.error("Error updating quiz stats:", error);
+  }
+});
+
 // =============== INDEX ===============
 QuizResultSchema.index({ userId: 1, quizId: 1, createdAt: -1 });
 QuizResultSchema.index({ userId: 1, score: -1 });
