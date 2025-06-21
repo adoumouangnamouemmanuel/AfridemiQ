@@ -171,8 +171,26 @@ const SubjectSchema = new Schema(
 );
 
 // =============== INDEX ===============
-SubjectSchema.index({ examTypes: 1, countries: 1 });
+SubjectSchema.index({ examTypes: 1, countries: 1, educationLevels: 1 });
 SubjectSchema.index({ category: 1, isActive: 1 });
+SubjectSchema.index({ code: 1 }, { unique: true });
+SubjectSchema.index({ isFeatured: 1, isActive: 1 });
+SubjectSchema.index({ "stats.totalStudents": -1 });
+
+// =============== VALIDATION ===============
+SubjectSchema.pre("validate", function (next) {
+  // Au moins un niveau d'éducation requis
+  if (!this.educationLevels || this.educationLevels.length === 0) {
+    return next(new Error("Au moins un niveau d'éducation est requis"));
+  }
+
+  // Au moins un pays requis
+  if (!this.countries || this.countries.length === 0) {
+    return next(new Error("Au moins un pays est requis"));
+  }
+
+  next();
+});
 
 // =============== VIRTUELS ===============
 SubjectSchema.virtual("displayName").get(function () {
