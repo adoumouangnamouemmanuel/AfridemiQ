@@ -4,16 +4,27 @@ const createLogger = require("../../services/logging.service");
 
 const logger = createLogger("QuestionController");
 
+// =============== CREATE QUESTION ===============
 const createQuestion = async (req, res) => {
+  logger.info("===================createQuestion=======================");
+
   try {
     const question = await questionService.createQuestion(req.body);
+
+    logger.info(
+      "++++++✅ CREATE QUESTION: Question created successfully ++++++"
+    );
     res.status(StatusCodes.CREATED).json({
+      success: true,
       message: "Question créée avec succès",
-      data: question,
+      data: { question },
     });
   } catch (error) {
-    logger.error("Error creating question:", error);
-    throw error;
+    logger.error("❌ CREATE QUESTION ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la création de la question",
+    });
   }
 };
 
