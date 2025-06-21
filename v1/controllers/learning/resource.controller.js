@@ -257,28 +257,32 @@ const getResourceFormats = async (req, res) => {
   }
 };
 
-// Search resources
-const searchResources = async (req, res) => {
+// =============== ADD FEEDBACK ===============
+const addFeedback = async (req, res) => {
+  logger.info("===================addFeedback=======================");
+
   try {
-    const { q } = req.query;
-    const options = {
-      page: req.query.page,
-      limit: req.query.limit,
-      sortBy: req.query.sortBy,
-      sortOrder: req.query.sortOrder,
-    };
+    const { id } = req.params;
+    const { rating, comments } = req.body;
+    const userId = req.user.userId;
 
-    const result = await resourceService.searchResources(q, options);
+    const resource = await resourceService.addFeedback(
+      id,
+      userId,
+      rating,
+      comments
+    );
 
+    logger.info("++++++✅ ADD FEEDBACK: Feedback added successfully ++++++");
     res.status(StatusCodes.OK).json({
       message: "Search completed successfully",
       data: result,
     });
   } catch (error) {
-    logger.error("Error searching resources:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error searching resources",
-      error: error.message,
+    logger.error("❌ ADD FEEDBACK ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de l'ajout du commentaire",
     });
   }
 };
