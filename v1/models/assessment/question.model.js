@@ -156,7 +156,9 @@ QuestionSchema.pre("validate", function (next) {
 });
 
 // =============== INDEX ===============
-QuizSchema.index({ examType: 1, educationLevel: 1 });
+QuestionSchema.index({ subjectId: 1, difficulty: 1 });
+QuestionSchema.index({ examType: 1, educationLevel: 1 });
+QuestionSchema.index({ topicId: 1, isActive: 1 });
 QuizSchema.index({ difficulty: 1, type: 1 });
 QuizSchema.index({ tags: 1, isActive: 1 });
 QuizSchema.index({ createdAt: -1 });
