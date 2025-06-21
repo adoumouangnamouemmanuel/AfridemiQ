@@ -1,5 +1,14 @@
 const Joi = require("joi");
+const {
+  SUBJECT_CATEGORIES,
+  EXAM_TYPES,
+  COUNTRIES,
+  EDUCATION_LEVELS,
+  SERIES,
+  DIFFICULTY_LEVELS,
+} = require("../../constants");
 
+// =============== CREATE SUBJECT SCHEMA ===============
 const createSubjectSchema = Joi.object({
   name: Joi.string()
     .required()
