@@ -5,7 +5,6 @@ const {
   COUNTRIES,
   EDUCATION_LEVELS,
   SERIES,
-  DIFFICULTY_LEVELS,
 } = require("../../constants");
 
 // =============== CREATE SUBJECT SCHEMA ===============
