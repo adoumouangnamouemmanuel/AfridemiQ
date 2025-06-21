@@ -11,7 +11,7 @@ const subjectRoutes = require("./routes/learning/subject.route");
 const topicRoutes = require("./routes/learning/topic.route");
 const resourceRoutes = require("./routes/learning/resource.route");
 // assessment routes
-// const quizRoutes = require("./routes/assessment/quiz.route");
+const quizRoutes = require("./routes/assessment/quiz.route");
 const questionRoutes = require("./routes/assessment/question.route");
 
 // Results routes
@@ -115,7 +115,7 @@ app.use("/api/v1/subjects", subjectRoutes);
 app.use("/api/v1/topics", topicRoutes);
 app.use("/api/v1/resources", resourceRoutes);
 
-// app.use("/api/quizzes", quizRoutes);
+app.use("/api/v1/quizzes", quizRoutes);
 // app.use("/api/quiz-results", quizResultRoutes);
 app.use("/api/v1/questions", questionRoutes);
 
