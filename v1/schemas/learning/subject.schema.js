@@ -39,11 +39,7 @@ const createSubjectSchema = Joi.object({
       "any.required": "La description est requise",
       "string.max": "La description ne peut pas dépasser 500 caractères",
     }),
-  longDescription: Joi.string().trim().max(2000).optional(),
-  series: Joi.array().items(Joi.string().trim()).min(1).required().messages({
-    "any.required": "Au moins une série doit être spécifiée",
-    "array.min": "Au moins une série doit être spécifiée",
-  }),
+
   category: Joi.string()
     .valid(
       "sciences",
