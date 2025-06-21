@@ -143,6 +143,8 @@ const EXAM_SESSIONS = ["may_june", "november", "january", "march"];
 // Update MEDIA_TYPES
 const MEDIA_TYPES = ["image", "audio", "video", "document"];
 
+const SERIES = ["A", "C", "D", "ALL"]; // Series for BAC system
+
 // =============== PAGINATION ===============
 
 const PAGINATION = {
