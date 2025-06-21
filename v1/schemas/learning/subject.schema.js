@@ -15,9 +15,9 @@ const createSubjectSchema = Joi.object({
     .trim()
     .max(100)
     .messages({
-      "any.required": "Le nom de la matière est requis",
-      "string.max": "Le nom ne peut pas dépasser 100 caractères",
-    }),
+    "any.required": "Le nom de la matière est requis",
+    "string.max": "Le nom ne peut pas dépasser 100 caractères",
+  }),
 
   code: Joi.string()
     .required()
@@ -36,9 +36,9 @@ const createSubjectSchema = Joi.object({
     .trim()
     .max(500)
     .messages({
-      "any.required": "La description est requise",
-      "string.max": "La description ne peut pas dépasser 500 caractères",
-    }),
+    "any.required": "La description est requise",
+    "string.max": "La description ne peut pas dépasser 500 caractères",
+  }),
 
   category: Joi.string()
     .valid(...SUBJECT_CATEGORIES)
