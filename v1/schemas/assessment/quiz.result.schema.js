@@ -125,32 +125,28 @@ const updateQuizResultSchema = Joi.object({
     .optional(),
 });
 
-const updateQuizResultSchema = createQuizResultSchema
-  .fork(
-    [
-      "userId",
-      "quizId",
-      "series",
-      "questionIds",
-      "correctCount",
-      "score",
-      "timeTaken",
-      "completedAt",
-      "hintUsages",
-      "questionFeedback",
-      "feedback",
-    ],
-    (schema) => schema.optional()
-  )
-  .min(1);
-
-const getQuizResultSchema = Joi.object({
-  userId: Joi.objectId().optional(),
-  quizId: Joi.objectId().optional(),
+// =============== QUERY PARAMS SCHEMA ===============
+const getQuizResultsQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).optional().default(1),
+  limit: Joi.number().integer().min(1).max(100).optional().default(10),
+  userId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional(),
+  quizId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional(),
+  isPassed: Joi.boolean().optional(),
+  minScore: Joi.number().min(0).max(100).optional(),
+  maxScore: Joi.number().min(0).max(100).optional(),
+  sortBy: Joi.string()
+    .valid("score", "createdAt", "totalTimeSpent", "accuracy")
+    .optional()
+    .default("createdAt"),
+  sortOrder: Joi.string().valid("asc", "desc").optional().default("desc"),
 });
 
 module.exports = {
   createQuizResultSchema,
   updateQuizResultSchema,
-  getQuizResultSchema,
+  getQuizResultsQuerySchema,
 };
