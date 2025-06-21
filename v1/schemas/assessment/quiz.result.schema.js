@@ -1,10 +1,36 @@
 const Joi = require("joi");
-Joi.objectId = require("joi-objectid")(Joi);
 
-const feedbackSchema = Joi.object({
-  userId: Joi.objectId().required(),
-  rating: Joi.number().min(0).max(10).required(),
-  comments: Joi.string().max(1000).optional(),
+// =============== ANSWER SCHEMA ===============
+const answerSchema = Joi.object({
+  questionId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "any.required": "L'ID de la question est requis",
+      "string.pattern.base": "ID de question invalide",
+    }),
+
+  selectedAnswer: Joi.alternatives()
+    .try(Joi.string(), Joi.number(), Joi.boolean())
+    .required()
+    .messages({
+      "any.required": "La réponse sélectionnée est requise",
+    }),
+
+  correctAnswer: Joi.alternatives()
+    .try(Joi.string(), Joi.number(), Joi.boolean())
+    .required()
+    .messages({
+      "any.required": "La réponse correcte est requise",
+    }),
+
+  isCorrect: Joi.boolean().required().messages({
+    "any.required": "Le statut de correction est requis",
+  }),
+
+  timeSpent: Joi.number().min(0).optional().default(0).messages({
+    "number.min": "Le temps ne peut pas être négatif",
+  }),
 });
 
 const createQuizResultSchema = Joi.object({
