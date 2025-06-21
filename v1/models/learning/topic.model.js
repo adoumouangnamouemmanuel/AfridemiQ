@@ -232,4 +232,102 @@ TopicSchema.virtual("difficultyLevel").get(function () {
   return levels[this.difficulty] || 2;
 });
 
+TopicSchema.virtual("difficultyIcon").get(function () {
+  const icons = { easy: "🟢", medium: "🟡", hard: "🔴" };
+  return icons[this.difficulty] || "🟡";
+});
+
+TopicSchema.virtual("progress").get(function () {
+  if (this.stats.totalStudents === 0) return 0;
+  return Math.round(this.stats.completionRate);
+});
+
+TopicSchema.virtual("popularity").get(function () {
+  return this.stats.totalStudents * 0.7 + this.stats.averageScore * 0.3;
+});
+
+// =============== MÉTHODES ===============
+TopicSchema.methods.updateStats = function (field, increment = 1) {
+  if (this.stats[field] !== undefined) {
+    this.stats[field] += increment;
+  }
+  return this.save();
+};
+
+TopicSchema.methods.addStudent = function () {
+  this.stats.totalStudents += 1;
+  return this.save();
+};
+
+TopicSchema.methods.updateScore = function (newScore) {
+  const currentAverage = this.stats.averageScore;
+  const totalStudents = this.stats.totalStudents;
+
+  if (totalStudents === 0) {
+    this.stats.averageScore = newScore;
+  } else {
+    this.stats.averageScore = Math.round(
+      (currentAverage * totalStudents + newScore) / (totalStudents + 1)
+    );
+  }
+
+  return this.save();
+};
+
+// =============== MÉTHODES STATIQUES ===============
+TopicSchema.statics.findBySubject = function (subjectId, options = {}) {
+  const query = {
+    subjectId,
+    isActive: true,
+    status: "active",
+  };
+
+  if (options.difficulty) query.difficulty = options.difficulty;
+  if (options.hasQuestions) query.hasQuestions = true;
+  if (options.hasResources) query.hasResources = true;
+
+  return this.find(query).sort({ order: 1, name: 1 });
+};
+
+TopicSchema.statics.findByDifficulty = function (difficulty, subjectId) {
+  const query = {
+    difficulty,
+    isActive: true,
+    status: "active",
+  };
+
+  if (subjectId) query.subjectId = subjectId;
+
+  return this.find(query);
+};
+
+TopicSchema.statics.getPopular = function (limit = 10, subjectId) {
+  const query = {
+    isActive: true,
+    status: "active",
+  };
+
+  if (subjectId) query.subjectId = subjectId;
+
+  return this.find(query)
+    .sort({ "stats.totalStudents": -1, "stats.averageScore": -1 })
+    .limit(limit);
+};
+
+TopicSchema.statics.searchByKeyword = function (keyword, subjectId) {
+  const query = {
+    $or: [
+      { name: { $regex: keyword, $options: "i" } },
+      { description: { $regex: keyword, $options: "i" } },
+      { keywords: { $in: [keyword.toLowerCase()] } },
+    ],
+    isActive: true,
+    status: "active",
+  };
+
+  if (subjectId) query.subjectId = subjectId;
+
+  return this.find(query);
+};
+
 module.exports = { Topic: model("Topic", TopicSchema) };
