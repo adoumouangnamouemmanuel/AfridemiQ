@@ -208,28 +208,29 @@ const searchResources = async (req, res) => {
   }
 };
 
-// Get resources by topic
-const getResourcesByTopic = async (req, res) => {
+// =============== GET RESOURCE STATISTICS ===============
+const getResourceStatistics = async (req, res) => {
+  logger.info(
+    "===================getResourceStatistics======================="
+  );
+
   try {
-    const { topicId } = req.params;
-    const options = {
-      page: req.query.page,
-      limit: req.query.limit,
-      sortBy: req.query.sortBy,
-      sortOrder: req.query.sortOrder,
-    };
+    const statistics = await resourceService.getResourceStatistics();
 
-    const result = await resourceService.getResourcesByTopic(topicId, options);
-
+    logger.info(
+      "++++++✅ GET RESOURCE STATISTICS: Statistics retrieved ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Resources retrieved successfully",
-      data: result,
+      success: true,
+      message: "Statistiques récupérées avec succès",
+      data: { statistics },
     });
   } catch (error) {
-    logger.error("Error getting resources by topic:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error retrieving resources",
-      error: error.message,
+    logger.error("❌ GET RESOURCE STATISTICS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message:
+        error.message || "Erreur lors de la récupération des statistiques",
     });
   }
 };
