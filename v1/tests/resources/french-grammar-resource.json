@@ -1,0 +1,28 @@
+{
+  "title": "Exercices de Grammaire Française - Niveau Lycée",
+  "description": "Livre d'exercices complet pour la grammaire française avec corrections détaillées, spécialement conçu pour les élèves du Tchad et d'Afrique centrale",
+  "type": "pdf",
+  "category": "exercise_book",
+  "url": "https://resources.africaexamprep.com/french/grammar-exercises-lycee.pdf",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicId": "68570daa3fe73c7e9fe83892",
+  "difficulty": "medium",
+  "targetLevel": "senior_secondary",
+  "fileInfo": {
+    "size": 5242880,
+    "mimeType": "application/pdf",
+    "pages": 85
+  },
+  "tags": ["grammaire", "exercices", "français", "tchad"],
+  "keywords": ["conjugaison", "accord", "syntaxe", "orthographe"],
+  "author": {
+    "name": "Prof. Aminata Diallo",
+    "institution": "Ministère de l'Éducation du Tchad"
+  },
+  "source": "Éditions Pédagogiques Africaines",
+  "isPublic": true,
+  "isPremium": false,
+  "requiresDownload": true,
+  "isFeatured": false,
+  "isVerified": true
+}
