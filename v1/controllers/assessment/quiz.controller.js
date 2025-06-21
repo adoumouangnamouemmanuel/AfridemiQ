@@ -47,14 +47,27 @@ const getQuizzes = async (req, res) => {
   }
 };
 
-  // Get quiz by ID
-  getQuizById = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const includeQuestions = req.query.includeQuestions === "true";
+// =============== GET QUIZ BY ID ===============
+const getQuizById = async (req, res) => {
+  logger.info("===================getQuizById=======================");
 
-    const result = await quizService.getQuizById(id, includeQuestions);
-    res.status(result.statusCode).json(result);
-  });
+  try {
+    const quiz = await quizService.getQuizById(req.params.id);
+
+    logger.info("++++++✅ GET QUIZ BY ID: Quiz retrieved successfully ++++++");
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Quiz récupéré avec succès",
+      data: { quiz },
+    });
+  } catch (error) {
+    logger.error("❌ GET QUIZ BY ID ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération du quiz",
+    });
+  }
+};
 
   // Update quiz
   updateQuiz = asyncHandler(async (req, res) => {
