@@ -170,8 +170,8 @@ QuizResultSchema.index({ createdAt: -1, score: -1 });
 
 // =============== VIRTUELS ===============
 QuizResultSchema.virtual("completionTime").get(function () {
-  const minutes = Math.floor(this.timeSpent / 60);
-  const seconds = this.timeSpent % 60;
+  const minutes = Math.floor(this.totalTimeSpent / 60);
+  const seconds = this.totalTimeSpent % 60;
   return `${minutes}m ${seconds}s`;
 });
 
@@ -180,7 +180,7 @@ QuizResultSchema.virtual("accuracy").get(function () {
 });
 
 QuizResultSchema.virtual("averageTimePerQuestion").get(function () {
-  return Math.round(this.timeSpent / this.totalQuestions);
+  return Math.round(this.totalTimeSpent / this.totalQuestions);
 });
 
 QuizResultSchema.virtual("performance").get(function () {
