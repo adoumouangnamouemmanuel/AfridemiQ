@@ -52,17 +52,27 @@ const getQuizResults = async (req, res) => {
   }
 };
 
-const getQuizResults = async (req, res) => {
+// =============== GET QUIZ RESULT BY ID ===============
+const getQuizResultById = async (req, res) => {
+  logger.info("===================getQuizResultById=======================");
+
   try {
-    const result = await quizResultService.getQuizResults(req.query, req.query);
+    const quizResult = await quizResultService.getQuizResultById(req.params.id);
+
+    logger.info(
+      "++++++✅ GET QUIZ RESULT BY ID: Quiz result retrieved successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Résultats de quiz récupérés avec succès",
-      data: result.quizResults,
-      pagination: result.pagination,
+      success: true,
+      message: "Résultat de quiz récupéré avec succès",
+      data: { quizResult },
     });
   } catch (error) {
-    logger.error("Error retrieving quiz results:", error);
-    throw error;
+    logger.error("❌ GET QUIZ RESULT BY ID ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération du résultat",
+    });
   }
 };
 
