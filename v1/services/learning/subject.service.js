@@ -11,10 +11,10 @@ const createSubject = async (subjectData) => {
   logger.info("===================createSubject=======================");
 
   // Check if subject with same code already exists
-    const existingSubject = await Subject.findOne({
+  const existingSubject = await Subject.findOne({
     code: subjectData.code.toUpperCase(),
-    });
-    if (existingSubject) {
+  });
+  if (existingSubject) {
     throw new ConflictError("Une matière avec ce code existe déjà");
   }
 
@@ -24,34 +24,34 @@ const createSubject = async (subjectData) => {
   });
   if (existingName) {
     throw new ConflictError("Une matière avec ce nom existe déjà");
-    }
+  }
 
-    const subject = new Subject(subjectData);
-    await subject.save();
+  const subject = new Subject(subjectData);
+  await subject.save();
 
   logger.info("++++++✅ CREATE SUBJECT: Subject created successfully ++++++");
-    return subject;
+  return subject;
 };
 
 // =============== GET ALL SUBJECTS ===============
 const getSubjects = async (query) => {
   logger.info("===================getSubjects=======================");
 
-    const {
-      page = 1,
-      limit = 10,
+  const {
+    page = 1,
+    limit = 10,
     category,
     examType,
     country,
     educationLevel,
-      series,
-      isActive,
+    series,
+    isActive,
     isPremium,
     isFeatured,
     search,
-      sortBy = "name",
-      sortOrder = "asc",
-    } = query;
+    sortBy = "name",
+    sortOrder = "asc",
+  } = query;
 
   // Build filter object
   const filter = { status: "active" };
@@ -72,14 +72,14 @@ const getSubjects = async (query) => {
       { description: { $regex: search, $options: "i" } },
       { code: { $regex: search, $options: "i" } },
     ];
-    }
+  }
 
   // Build sort object
-    const sort = {};
-    sort[sortBy] = sortOrder === "desc" ? -1 : 1;
+  const sort = {};
+  sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
   // Calculate pagination
-    const skip = (page - 1) * limit;
+  const skip = (page - 1) * limit;
 
   // Execute query with pagination
   const [subjects, total] = await Promise.all([
@@ -93,7 +93,7 @@ const getSubjects = async (query) => {
     totalCount: total,
     hasNextPage: page < Math.ceil(total / limit),
     hasPrevPage: page > 1,
-    };
+  };
 
   logger.info("++++++✅ GET SUBJECTS: Subjects retrieved successfully ++++++");
   return { subjects, pagination };
@@ -104,9 +104,9 @@ const getSubjectById = async (subjectId) => {
   logger.info("===================getSubjectById=======================");
 
   const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      throw new NotFoundError("Matière non trouvée");
-    }
+  if (!subject) {
+    throw new NotFoundError("Matière non trouvée");
+  }
 
   logger.info(
     "++++++✅ GET SUBJECT BY ID: Subject retrieved successfully ++++++"
@@ -121,19 +121,19 @@ const updateSubject = async (subjectId, updateData) => {
   // Check if subject exists
   const existingSubject = await Subject.findById(subjectId);
   if (!existingSubject) {
-      throw new NotFoundError("Matière non trouvée");
-    }
+    throw new NotFoundError("Matière non trouvée");
+  }
 
   // Check for duplicate code if code is being updated
   if (updateData.code && updateData.code !== existingSubject.code) {
     const duplicateCode = await Subject.findOne({
       code: updateData.code.toUpperCase(),
-        _id: { $ne: subjectId },
-      });
+      _id: { $ne: subjectId },
+    });
     if (duplicateCode) {
       throw new ConflictError("Une matière avec ce code existe déjà");
-      }
     }
+  }
 
   // Check for duplicate name if name is being updated
   if (updateData.name && updateData.name !== existingSubject.name) {
@@ -160,10 +160,10 @@ const updateSubject = async (subjectId, updateData) => {
 const deleteSubject = async (subjectId) => {
   logger.info("===================deleteSubject=======================");
 
-    const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      throw new NotFoundError("Matière non trouvée");
-    }
+  const subject = await Subject.findById(subjectId);
+  if (!subject) {
+    throw new NotFoundError("Matière non trouvée");
+  }
 
   // Soft delete - just mark as inactive
   await Subject.findByIdAndUpdate(subjectId, {
@@ -206,7 +206,7 @@ const getSubjectsByEducationAndCountry = async (educationLevel, country) => {
 
   if (!educationLevel || !country) {
     throw new BadRequestError("Niveau d'éducation et pays requis");
-    }
+  }
 
   const subjects = await Subject.findByEducationAndCountry(
     educationLevel,
@@ -243,7 +243,7 @@ const searchSubjects = async (searchTerm, filters = {}) => {
     throw new BadRequestError(
       "Le terme de recherche doit contenir au moins 2 caractères"
     );
-    }
+  }
 
   const query = {
     $or: [
@@ -275,34 +275,34 @@ const searchSubjects = async (searchTerm, filters = {}) => {
 const updateSubjectStats = async (subjectId, field, increment = 1) => {
   logger.info("===================updateSubjectStats=======================");
 
-    const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      throw new NotFoundError("Matière non trouvée");
-    }
+  const subject = await Subject.findById(subjectId);
+  if (!subject) {
+    throw new NotFoundError("Matière non trouvée");
+  }
 
   await subject.updateStats(field, increment);
 
   logger.info(
     "++++++✅ UPDATE SUBJECT STATS: Stats updated successfully ++++++"
   );
-    return subject;
+  return subject;
 };
 
 // =============== ADD STUDENT TO SUBJECT ===============
 const addStudentToSubject = async (subjectId) => {
   logger.info("===================addStudentToSubject=======================");
 
-    const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      throw new NotFoundError("Matière non trouvée");
-    }
+  const subject = await Subject.findById(subjectId);
+  if (!subject) {
+    throw new NotFoundError("Matière non trouvée");
+  }
 
   await subject.addStudent();
 
   logger.info(
     "++++++✅ ADD STUDENT TO SUBJECT: Student added successfully ++++++"
   );
-    return subject;
+  return subject;
 };
 
 module.exports = {
