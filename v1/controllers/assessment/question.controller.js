@@ -247,16 +247,44 @@ const updateQuestionStats = async (req, res) => {
   logger.info("===================updateQuestionStats=======================");
 
   try {
-    const { verifierId, qualityScore, feedback } = req.body;
-    const question = await questionService.verifyQuestion(
+    const { isCorrect, timeSpent } = req.body;
+    const question = await questionService.updateQuestionStats(
       req.params.id,
-      verifierId,
-      qualityScore,
-      feedback
+      isCorrect,
+      timeSpent
+    );
+
+    logger.info(
+      "++++++✅ UPDATE QUESTION STATS: Stats updated successfully ++++++"
     );
     res.status(StatusCodes.OK).json({
-      message: "Question vérifiée avec succès",
-      data: question,
+      success: true,
+      message: "Statistiques mises à jour avec succès",
+      data: { question },
+    });
+  } catch (error) {
+    logger.error("❌ UPDATE QUESTION STATS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message:
+        error.message || "Erreur lors de la mise à jour des statistiques",
+    });
+  }
+};
+
+// =============== CHECK ANSWER ===============
+const checkAnswer = async (req, res) => {
+  logger.info("===================checkAnswer=======================");
+
+  try {
+    const { userAnswer } = req.body;
+    const result = await questionService.checkAnswer(req.params.id, userAnswer);
+
+    logger.info("++++++✅ CHECK ANSWER: Answer checked successfully ++++++");
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Réponse vérifiée avec succès",
+      data: result,
     });
   } catch (error) {
     logger.error("Error verifying question:", error);
