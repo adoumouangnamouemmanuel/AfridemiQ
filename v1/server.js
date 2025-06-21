@@ -15,7 +15,7 @@ const quizRoutes = require("./routes/assessment/quiz.route");
 const questionRoutes = require("./routes/assessment/question.route");
 
 // Results routes
-// const quizResultRoutes = require("./routes/assessment/quiz.result.route");
+const quizResultRoutes = require("./routes/assessment/quiz.result.route");
 
 const errorMiddleware = require("./middlewares/error.middleware");
 const dotenv = require("dotenv");
@@ -116,7 +116,7 @@ app.use("/api/v1/topics", topicRoutes);
 app.use("/api/v1/resources", resourceRoutes);
 
 app.use("/api/v1/quizzes", quizRoutes);
-// app.use("/api/quiz-results", quizResultRoutes);
+app.use("/api/v1/quiz-results", quizResultRoutes);
 app.use("/api/v1/questions", questionRoutes);
 
 // 404 handler
