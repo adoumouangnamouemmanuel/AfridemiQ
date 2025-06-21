@@ -1,18 +1,23 @@
 const express = require("express");
-const router = express.Router();
 const topicController = require("../../controllers/learning/topic.controller");
+const validateMiddleware = require("../../middlewares/validate.middleware");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
-const validateMiddleware = require("../../middlewares/validate.middleware");
+const utf8Middleware = require("../../middlewares/utf8.middleware");
 const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
+
 const {
   createTopicSchema,
   updateTopicSchema,
-  bulkCreateTopicsSchema,
-  bulkUpdateTopicsSchema,
+  getTopicsQuerySchema,
 } = require("../../schemas/learning/topic.schema");
 
-// Apply rate limiting to all routes
+const router = express.Router();
+
+// Apply UTF-8 middleware to all routes
+router.use(utf8Middleware);
+
+// Apply rate limiting
 router.use(apiLimiter);
 
 // Public routes
