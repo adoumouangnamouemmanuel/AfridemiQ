@@ -235,8 +235,12 @@ const getUserAverageScore = async (req, res) => {
 
 module.exports = {
   createQuizResult,
-  getQuizResultById,
   getQuizResults,
+  getQuizResultById,
   updateQuizResult,
   deleteQuizResult,
+  getUserQuizResults,
+  getUserBestScore,
+  getUserAttemptCount,
+  getUserAverageScore,
 };
