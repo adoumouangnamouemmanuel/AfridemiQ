@@ -152,14 +152,8 @@ const getSubjectsQuerySchema = Joi.object({
   isFeatured: Joi.boolean().optional(),
   search: Joi.string().trim().max(100).optional(),
   sortBy: Joi.string()
-    .valid(
-      "name",
-      "createdAt",
-      "difficulty",
-      "examCount",
-      "popularity",
-      "rating"
-    )
+    .valid("name", "createdAt", "stats.totalStudents", "stats.averageScore")
+    .optional()
     .default("name"),
   sortOrder: Joi.string().valid("asc", "desc").default("asc"),
 });
