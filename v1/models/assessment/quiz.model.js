@@ -110,7 +110,7 @@ const QuizSchema = new Schema(
     },
 
     // =============== STATISTIQUES SIMPLES ===============
-    progress: {
+    stats: {
       totalAttempts: { type: Number, default: 0 },
       averageScore: { type: Number, default: 0 },
       passRate: { type: Number, default: 0 }, // pourcentage
@@ -118,7 +118,6 @@ const QuizSchema = new Schema(
     },
 
     // =============== GESTION ===============
-
     status: {
       type: String,
       enum: {
