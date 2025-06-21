@@ -3,7 +3,8 @@ const subjectController = require("../../controllers/learning/subject.controller
 const validateMiddleware = require("../../middlewares/validate.middleware");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
-const utf8Middleware = require("../../middlewares/utf8.middleware"); // Add UTF-8 middleware
+const utf8Middleware = require("../../middlewares/utf8.middleware");
+const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
 
 const {
   createSubjectSchema,
