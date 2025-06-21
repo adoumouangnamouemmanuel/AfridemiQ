@@ -9,6 +9,7 @@ const userRoutes = require("./routes/user/user.route");
 // Learning routes
 const subjectRoutes = require("./routes/learning/subject.route");
 const topicRoutes = require("./routes/learning/topic.route");
+const resourceRoutes = require("./routes/learning/resource.route");
 // assessment routes
 // const quizRoutes = require("./routes/assessment/quiz.route");
 // const questionRoutes = require("./routes/assessment/question.route");
@@ -112,6 +113,7 @@ app.get("/health", (req, res) => {
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/subjects", subjectRoutes);
 app.use("/api/v1/topics", topicRoutes);
+app.use("/api/v1/resources", resourceRoutes);
 
 // app.use("/api/quizzes", quizRoutes);
 // app.use("/api/quiz-results", quizResultRoutes);
