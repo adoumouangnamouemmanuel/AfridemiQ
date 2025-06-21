@@ -36,14 +36,17 @@ const getTopics = async (req, res) => {
     logger.info("++++++✅ GET TOPICS: Topics retrieved successfully ++++++");
     res.status(StatusCodes.OK).json({
         success: true,
-        message: "Topics retrieved successfully",
-        data: result.topics,
-        pagination: result.pagination,
+      message: "Sujets récupérés avec succès",
+      data: result,
       });
     } catch (error) {
-      next(error);
+    logger.error("❌ GET TOPICS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des sujets",
+    });
     }
-  }
+};
 
   // Get topic by ID
   async getTopicById(req, res, next) {
