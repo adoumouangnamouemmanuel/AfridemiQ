@@ -191,4 +191,41 @@ QuestionSchema.methods.updateStats = function (isCorrect, timeSpent) {
   return this.save();
 };
 
+QuestionSchema.methods.checkAnswer = function (userAnswer) {
+  if (this.type === "multiple_choice") {
+    return parseInt(userAnswer) === parseInt(this.correctAnswer);
+  }
+
+  if (this.type === "true_false") {
+    return Boolean(userAnswer) === Boolean(this.correctAnswer);
+  }
+
+  if (this.type === "short_answer") {
+    return (
+      userAnswer.toLowerCase().trim() ===
+      this.correctAnswer.toLowerCase().trim()
+    );
+  }
+
+  return false;
+};
+
+// =============== MÉTHODES STATIQUES ===============
+QuestionSchema.statics.findByFilters = function (filters) {
+  const query = { isActive: true, status: "active" };
+
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.type) query.type = filters.type;
+  if (filters.tags) query.tags = { $in: filters.tags };
+
+  return this.find(query);
+};
+
+QuestionSchema.statics.getRandomQuestions = function (count, filters = {}) {
+  const query = { isActive: true, status: "active", ...filters };
+  return this.aggregate([{ $match: query }, { $sample: { size: count } }]);
+};
+
 module.exports = { Question: model("Question", QuestionSchema) };
