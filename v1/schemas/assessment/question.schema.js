@@ -167,5 +167,5 @@ const getQuestionsQuerySchema = Joi.object({
 module.exports = {
   createQuestionSchema,
   updateQuestionSchema,
-  getQuestionSchema,
+  getQuestionsQuerySchema,
 };
