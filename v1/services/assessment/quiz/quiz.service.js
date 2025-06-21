@@ -163,69 +163,66 @@ const deleteQuiz = async (quizId) => {
     throw new NotFoundError("Quiz non trouvé");
       }
 
-      // Check if quiz has results
-      const hasResults = await QuizResult.exists({ quizId });
-      if (hasResults) {
-        // Soft delete by setting isActive to false
-        quiz.isActive = false;
-        await quiz.save();
-        logger.info(`Quiz deactivated (has results): ${quizId}`);
-        return new ApiResponse(
-          200,
-          null,
-          "Quiz deactivated successfully (has existing results)"
-        );
-      }
+  // Soft delete - just mark as inactive
+  await Quiz.findByIdAndUpdate(quizId, {
+    isActive: false,
+    status: "inactive",
+  });
 
-      // Hard delete if no results
-      await Quiz.findByIdAndDelete(quizId);
-      logger.info(`Quiz deleted successfully: ${quizId}`);
-      return new ApiResponse(200, null, "Quiz deleted successfully");
-    } catch (error) {
-      logger.error(`Error deleting quiz ${quizId}:`, error);
-      if (error instanceof ApiError) throw error;
-      throw new ApiError(500, "Failed to delete quiz", error.message);
-    }
+  logger.info("++++++✅ DELETE QUIZ: Quiz deleted successfully ++++++");
+};
+
+// =============== GET POPULAR QUIZZES ===============
+const getPopularQuizzes = async (limit = 10) => {
+  logger.info("===================getPopularQuizzes=======================");
+
+  const quizzes = await Quiz.findPopular(limit)
+    .populate("subjectId", "name code")
+    .populate("topicIds", "name");
+
+  logger.info("++++++✅ GET POPULAR QUIZZES: Popular quizzes retrieved ++++++");
+  return quizzes;
+};
+
+// =============== GET QUIZZES BY SUBJECT ===============
+const getQuizzesBySubject = async (subjectId, filters = {}) => {
+  logger.info("===================getQuizzesBySubject=======================");
+
+  if (!subjectId) {
+    throw new BadRequestError("ID de matière requis");
   }
 
-  // Get quizzes by subject
-  async getQuizzesBySubject(subjectId, options = {}) {
-    try {
-      const filters = { subjectId, isActive: true };
-      return await this.getAllQuizzes(filters, options);
-    } catch (error) {
-      throw new ApiError(
-        500,
-        "Failed to retrieve quizzes by subject",
-        error.message
-      );
-    }
-  }
+  const query = {
+    subjectId,
+    isActive: true,
+    status: "active",
+  };
 
-  // Get popular quizzes
-  async getPopularQuizzes(limit = 10) {
-    try {
-      const quizzes = await Quiz.getPopularQuizzes(limit);
-      return new ApiResponse(
-        200,
-        quizzes,
-        "Popular quizzes retrieved successfully"
-      );
-    } catch (error) {
-      throw new ApiError(
-        500,
-        "Failed to retrieve popular quizzes",
-        error.message
-      );
-    }
-  }
+  // Apply additional filters
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.format) query.format = filters.format;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
 
-  // Check if user can take quiz
-  async canUserTakeQuiz(quizId, userId) {
-    try {
-      const quiz = await Quiz.findById(quizId);
-      if (!quiz) {
-        throw new ApiError(404, "Quiz not found");
+  const limit = parseInt(filters.limit) || 20;
+
+  const quizzes = await Quiz.find(query)
+    .populate("topicIds", "name")
+    .sort({ "stats.totalAttempts": -1, createdAt: -1 })
+    .limit(limit);
+
+  logger.info("++++++✅ GET QUIZZES BY SUBJECT: Quizzes retrieved ++++++");
+  return quizzes;
+};
+
+// =============== GET QUIZZES BY TOPIC ===============
+const getQuizzesByTopic = async (topicId, filters = {}) => {
+  logger.info("===================getQuizzesByTopic=======================");
+
+  if (!topicId) {
+    throw new BadRequestError("ID de sujet requis");
       }
 
       // Count user attempts
