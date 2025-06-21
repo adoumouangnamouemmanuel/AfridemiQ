@@ -164,107 +164,62 @@ const updateResource = async (resourceId, updateData) => {
     throw new NotFoundError("Ressource non trouvée");
       }
 
-      logger.info(`Resource updated: ${resource.title}`);
-      return resource;
-    } catch (error) {
-      logger.error("Error updating resource:", error);
-      throw error;
+  // Validate subject exists if being updated
+  if (updateData.subjectId) {
+    const subject = await Subject.findById(updateData.subjectId);
+    if (!subject) {
+      throw new NotFoundError("Matière non trouvée");
+      }
+  }
+
+  // Validate topic exists if being updated
+  if (updateData.topicId) {
+    const topic = await Topic.findById(updateData.topicId);
+    if (!topic) {
+      throw new NotFoundError("Sujet non trouvé");
+      }
+
+    // Verify topic belongs to the subject
+    const subjectId = updateData.subjectId || existingResource.subjectId;
+    if (topic.subjectId.toString() !== subjectId.toString()) {
+      throw new BadRequestError("Le sujet ne correspond pas à la matière");
     }
   }
 
-  // Delete resource
-  async deleteResource(id) {
-    try {
-      const resource = await Resource.findByIdAndDelete(id);
-
-      if (!resource) {
-        throw new Error("Resource not found");
-      }
-
-      logger.info(`Resource deleted: ${resource.title}`);
-      return { message: "Resource deleted successfully" };
-    } catch (error) {
-      logger.error("Error deleting resource:", error);
-      throw error;
-    }
-  }
-
-  // Add feedback to resource
-  async addFeedback(resourceId, userId, rating, comments) {
-    try {
-      const resource = await Resource.findById(resourceId);
-      if (!resource) {
-        throw new Error("Resource not found");
-      }
-
-      // Check if user already provided feedback
-      const existingFeedback = resource.analytics.userFeedback.find(
-        (feedback) => feedback.userId.toString() === userId.toString()
+  // Check for duplicate title if title is being updated
+  if (updateData.title && updateData.title !== existingResource.title) {
+    const subjectId = updateData.subjectId || existingResource.subjectId;
+    const duplicateTitle = await Resource.findOne({
+      title: { $regex: new RegExp(`^${updateData.title}$`, "i") },
+      subjectId: subjectId,
+      _id: { $ne: resourceId },
+    });
+    if (duplicateTitle) {
+      throw new ConflictError(
+        "Une ressource avec ce titre existe déjà pour cette matière"
       );
-
-      if (existingFeedback) {
-        // Update existing feedback
-        existingFeedback.rating = rating;
-        existingFeedback.comments = comments;
-        existingFeedback.createdAt = new Date();
-      } else {
-        // Add new feedback
-        resource.analytics.userFeedback.push({
-          userId,
-          rating,
-          comments,
-        });
-      }
-
-      // Recalculate average rating
-      const totalRatings = resource.analytics.userFeedback.reduce(
-        (sum, feedback) => sum + feedback.rating,
-        0
-      );
-      resource.analytics.averageRating =
-        totalRatings / resource.analytics.userFeedback.length;
-
-      await resource.save();
-
-      logger.info(`Feedback added to resource: ${resource.title}`);
-      return resource;
-    } catch (error) {
-      logger.error("Error adding feedback:", error);
-      throw error;
     }
   }
 
-  // Track resource view
-  async trackView(resourceId) {
-    try {
       const resource = await Resource.findByIdAndUpdate(
         resourceId,
-        { $inc: { "analytics.views": 1 } },
-        { new: true }
-      );
+    { $set: updateData },
+    { new: true, runValidators: true }
+  )
+    .populate("subjectId", "name code")
+    .populate("topicId", "name");
 
+  logger.info("++++++✅ UPDATE RESOURCE: Resource updated successfully ++++++");
+  return resource;
+};
+
+// =============== DELETE RESOURCE ===============
+const deleteResource = async (resourceId) => {
+  logger.info("===================deleteResource=======================");
+
+  const resource = await Resource.findById(resourceId);
       if (!resource) {
-        throw new Error("Resource not found");
-      }
-
-      return resource;
-    } catch (error) {
-      logger.error("Error tracking view:", error);
-      throw error;
-    }
-  }
-
-  // Track resource download
-  async trackDownload(resourceId) {
-    try {
-      const resource = await Resource.findByIdAndUpdate(
-        resourceId,
-        { $inc: { "analytics.downloads": 1 } },
-        { new: true }
-      );
-
-      if (!resource) {
-        throw new Error("Resource not found");
+    throw new NotFoundError("Ressource non trouvée");
       }
 
       return resource;
