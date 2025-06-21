@@ -17,13 +17,13 @@ const QuestionSchema = new Schema(
       maxlength: [1000, "La question ne peut pas dépasser 1000 caractères"],
     },
 
-    format: {
+    type: {
       type: String,
       enum: {
         values: QUESTION_TYPES,
-        message: "Format de question invalide",
+        message: "Type de question invalide",
       },
-      required: [true, "Le format est requis"],
+      required: [true, "Le type est requis"],
     },
 
     // Pour les questions à choix multiples
