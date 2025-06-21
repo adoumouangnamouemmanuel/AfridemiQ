@@ -72,18 +72,25 @@ const getTopicById = async (req, res) => {
     }
 };
 
-  // Update topic
-  async updateTopic(req, res, next) {
+// =============== UPDATE TOPIC ===============
+const updateTopic = async (req, res) => {
+  logger.info("===================updateTopic=======================");
+
     try {
       const topic = await topicService.updateTopic(req.params.id, req.body);
 
-      res.status(200).json({
+    logger.info("++++++✅ UPDATE TOPIC: Topic updated successfully ++++++");
+    res.status(StatusCodes.OK).json({
         success: true,
-        message: "Topic updated successfully",
-        data: topic,
+      message: "Sujet mis à jour avec succès",
+      data: { topic },
       });
     } catch (error) {
-      next(error);
+    logger.error("❌ UPDATE TOPIC ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la mise à jour du sujet",
+    });
     }
   }
 
