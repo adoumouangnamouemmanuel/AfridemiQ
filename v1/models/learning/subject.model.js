@@ -31,6 +31,7 @@ const SubjectSchema = new Schema(
 
     description: {
       type: String,
+      required: [true, "La description est requise"],
       maxlength: [500, "La description ne peut pas dépasser 500 caractères"],
     },
 
