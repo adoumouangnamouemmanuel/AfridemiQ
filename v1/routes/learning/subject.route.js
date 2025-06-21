@@ -35,39 +35,24 @@ router.get("/:id", subjectController.getSubjectById);
 // Get featured subjects
 router.get("/featured/list", subjectController.getFeaturedSubjects);
 
-// Export route - BEFORE /:id route
+// Get popular subjects
+router.get("/popular/list", subjectController.getPopularSubjects);
+
+// Get subjects by education level and country
 router.get(
-  "/export",
-  authMiddleware,
-  roleMiddleware(["teacher", "admin"]),
-  subjectController.exportSubjects
+  "/education/:educationLevel/country/:country",
+  subjectController.getSubjectsByEducationAndCountry
 );
 
-// Bulk operations (require admin/teacher role) - BEFORE /:id route
-router.post(
-  "/bulk",
-  authMiddleware,
-  roleMiddleware(["teacher", "admin"]),
-  validateMiddleware(bulkCreateSchema),
-  subjectController.bulkCreateSubjects
-);
-router.put(
-  "/bulk",
-  authMiddleware,
-  roleMiddleware(["teacher", "admin"]),
-  validateMiddleware(bulkUpdateSchema),
-  subjectController.bulkUpdateSubjects
-);
+// Get subjects by exam type
+router.get("/exam/:examType", subjectController.getSubjectsByExamType);
 
-// Comparison route - BEFORE /:id route
-router.post(
-  "/compare",
-  authMiddleware,
-  validateMiddleware(compareSubjectsSchema),
-  subjectController.compareSubjects
-);
+// Search subjects
+router.get("/search/query", subjectController.searchSubjects);
 
-// Subject CRUD operations
+// =============== PROTECTED ROUTES (Admin Only) ===============
+
+// Create new subject
 router.post(
   "/",
   authMiddleware,
