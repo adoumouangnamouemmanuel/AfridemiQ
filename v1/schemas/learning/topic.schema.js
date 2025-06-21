@@ -22,7 +22,7 @@ const createTopicSchema = Joi.object({
     .messages({
       "any.required": "La description est requise",
       "string.max": "La description ne peut pas dépasser 500 caractères",
-  }),
+    }),
 
   subjectId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
@@ -30,7 +30,7 @@ const createTopicSchema = Joi.object({
     .messages({
       "any.required": "L'ID de la matière est requis",
       "string.pattern.base": "Format d'ID de matière invalide",
-  }),
+    }),
 
   difficulty: Joi.string()
     .valid(...DIFFICULTY_LEVELS)
@@ -38,7 +38,7 @@ const createTopicSchema = Joi.object({
     .messages({
       "any.required": "La difficulté est requise",
       "any.only": "La difficulté doit être : easy, medium ou hard",
-  }),
+    }),
 
   estimatedTimeHours: Joi.number()
     .min(0.5)
@@ -65,9 +65,9 @@ const createTopicSchema = Joi.object({
           .valid(...LEARNING_OBJECTIVES)
           .optional()
           .default("understand")
-    .messages({
+          .messages({
             "any.only": "Niveau d'objectif invalide",
-    }),
+          }),
       })
     )
     .min(1)
@@ -82,7 +82,7 @@ const createTopicSchema = Joi.object({
     .optional()
     .messages({
       "string.max": "Le prérequis ne peut pas dépasser 100 caractères",
-      }),
+    }),
 
   keywords: Joi.array()
     .items(Joi.string().trim().max(50))
