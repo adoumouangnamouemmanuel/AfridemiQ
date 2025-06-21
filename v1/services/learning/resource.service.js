@@ -117,49 +117,51 @@ const createResource = async (resourceData) => {
     throw new NotFoundError("Matière non trouvée");
       }
 
-      return resource;
-    } catch (error) {
-      logger.error("Error getting resource by ID:", error);
-      throw error;
+  // Validate topic exists if provided
+  if (resourceData.topicId) {
+    const topic = await Topic.findById(resourceData.topicId);
+    if (!topic) {
+      throw new NotFoundError("Sujet non trouvé");
+    }
+
+    // Verify topic belongs to the subject
+    if (topic.subjectId.toString() !== resourceData.subjectId.toString()) {
+      throw new BadRequestError("Le sujet ne correspond pas à la matière");
     }
   }
 
-  // Create new resource
-  async createResource(resourceData) {
-    try {
-      // Validate references
-      await this.validateReferences(resourceData);
+  // Check for duplicate title within the same subject
+  const existingResource = await Resource.findOne({
+    title: { $regex: new RegExp(`^${resourceData.title}$`, "i") },
+    subjectId: resourceData.subjectId,
+  });
+  if (existingResource) {
+    throw new ConflictError(
+      "Une ressource avec ce titre existe déjà pour cette matière"
+    );
+  }
 
       const resource = new Resource(resourceData);
       await resource.save();
 
-      logger.info(`Resource created: ${resource.title}`);
-      return resource;
-    } catch (error) {
-      logger.error("Error creating resource:", error);
-      throw error;
-    }
+  // Populate before returning
+  await resource.populate("subjectId", "name code");
+  if (resource.topicId) {
+    await resource.populate("topicId", "name");
   }
 
-  // Update resource
-  async updateResource(id, updateData) {
-    try {
-      // Validate references if they're being updated
-      if (updateData.subjectId || updateData.topicIds || updateData.examIds) {
-        await this.validateReferences(updateData);
-      }
+  logger.info("++++++✅ CREATE RESOURCE: Resource created successfully ++++++");
+  return resource;
+};
 
-      const resource = await Resource.findByIdAndUpdate(
-        id,
-        { ...updateData, "metadata.lastUpdated": new Date() },
-        { new: true, runValidators: true }
-      )
-        .populate("subjectId", "name")
-        .populate("topicIds", "name")
-        .populate("examIds", "title");
+// =============== UPDATE RESOURCE ===============
+const updateResource = async (resourceId, updateData) => {
+  logger.info("===================updateResource=======================");
 
-      if (!resource) {
-        throw new Error("Resource not found");
+  // Check if resource exists
+  const existingResource = await Resource.findById(resourceId);
+  if (!existingResource) {
+    throw new NotFoundError("Ressource non trouvée");
       }
 
       logger.info(`Resource updated: ${resource.title}`);
