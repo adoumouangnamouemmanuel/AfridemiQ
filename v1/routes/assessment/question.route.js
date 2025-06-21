@@ -22,12 +22,31 @@ router.use(apiLimiter);
 
 // =============== PUBLIC ROUTES ===============
 
+// Get all questions with filtering and pagination
 router.get(
   "/",
-  validateMiddleware(getQuestionSchema),
+  validateMiddleware(getQuestionsQuerySchema, "query"),
   questionController.getQuestions
 );
 
+// Get question by ID
+router.get("/:id", questionController.getQuestionById);
+
+// Get questions by subject
+router.get("/subject/:subjectId", questionController.getQuestionsBySubject);
+
+// Get questions by topic
+router.get("/topic/:topicId", questionController.getQuestionsByTopic);
+
+// Get random questions
+router.get("/random/list", questionController.getRandomQuestions);
+
+// Search questions
+router.get("/search/query", questionController.searchQuestions);
+
+// =============== PROTECTED ROUTES (Teacher/Admin) ===============
+
+// Create new question
 router.post(
   "/",
   roleMiddleware(["teacher", "admin"]),
