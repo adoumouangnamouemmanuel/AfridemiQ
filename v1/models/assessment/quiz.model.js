@@ -161,33 +161,34 @@ QuizSchema.virtual("estimatedDuration").get(function () {
 });
 
 QuizSchema.virtual("popularityScore").get(function () {
-  return this.progress.totalAttempts * 0.7 + this.progress.averageScore * 0.3;
+  return this.stats.totalAttempts * 0.7 + this.stats.averageScore * 0.3;
 });
 
 // =============== MÉTHODES ===============
-QuizSchema.methods.updateStats = function (score, completionTime, passed) {
-  this.progress.totalAttempts += 1;
+QuizSchema.methods.updateStats = function (
+  score,
+  completionTimeMinutes,
+  passed
+) {
+  this.stats.totalAttempts += 1;
 
   // Mise à jour du score moyen
-  this.progress.averageScore = Math.round(
-    (this.progress.averageScore * (this.progress.totalAttempts - 1) + score) /
-      this.progress.totalAttempts
+  const prevTotal = this.stats.totalAttempts - 1;
+  this.stats.averageScore = Math.round(
+    (this.stats.averageScore * prevTotal + score) / this.stats.totalAttempts
   );
 
   // Mise à jour du temps moyen
-  this.progress.averageCompletionTime = Math.round(
-    (this.progress.averageCompletionTime * (this.progress.totalAttempts - 1) +
-      completionTime) /
-      this.progress.totalAttempts
+  this.stats.averageCompletionTime = Math.round(
+    (this.stats.averageCompletionTime * prevTotal + completionTimeMinutes) /
+      this.stats.totalAttempts
   );
 
   // Mise à jour du taux de réussite
-  const passedCount = Math.round(
-    (this.progress.passRate * (this.progress.totalAttempts - 1)) / 100
-  );
-  const newPassedCount = passedCount + (passed ? 1 : 0);
-  this.progress.passRate = Math.round(
-    (newPassedCount / this.progress.totalAttempts) * 100
+  const prevPassedCount = Math.round((this.stats.passRate * prevTotal) / 100);
+  const newPassedCount = prevPassedCount + (passed ? 1 : 0);
+  this.stats.passRate = Math.round(
+    (newPassedCount / this.stats.totalAttempts) * 100
   );
 
   return this.save();
