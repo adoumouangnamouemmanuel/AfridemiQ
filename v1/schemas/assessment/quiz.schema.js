@@ -24,7 +24,7 @@ const createQuizSchema = Joi.object({
     .default("practice")
     .messages({
       "any.only": "Format de quiz invalide",
-  }),
+    }),
 
   subjectId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
@@ -55,7 +55,7 @@ const createQuizSchema = Joi.object({
     "any.required": "La limite de temps est requise",
     "number.min": "Minimum 5 minutes",
     "number.max": "Maximum 3 heures",
-    }),
+  }),
 
   totalQuestions: Joi.number().min(1).max(50).required().messages({
     "any.required": "Le nombre de questions est requis",
@@ -87,7 +87,7 @@ const createQuizSchema = Joi.object({
     .messages({
       "any.required": "Le niveau d'éducation est requis",
       "any.only": "Niveau d'éducation invalide",
-  }),
+    }),
 
   examType: Joi.string()
     .valid(...EXAM_TYPES)
