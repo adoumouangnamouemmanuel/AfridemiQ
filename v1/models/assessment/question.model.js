@@ -94,7 +94,7 @@ const QuestionSchema = new Schema(
     ],
 
     // =============== STATISTIQUES SIMPLES ===============
-    progress: {
+    stats: {
       totalAttempts: { type: Number, default: 0 },
       correctAttempts: { type: Number, default: 0 },
       averageTimeSpent: { type: Number, default: 0 }, // en secondes
@@ -110,8 +110,8 @@ const QuestionSchema = new Schema(
       default: "active",
     },
 
-    isPremium: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    isPremium: { type: Boolean, default: false },
   },
   {
     timestamps: true,
