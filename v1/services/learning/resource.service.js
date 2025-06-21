@@ -8,10 +8,10 @@ const createLogger = require("../../logging.service");
 
 const logger = createLogger("ResourceService");
 
-class ResourceService {
-  // Get all resources with filtering and pagination
-  async getAllResources(filters = {}, options = {}) {
-    try {
+// =============== GET ALL RESOURCES ===============
+const getAllResources = async (query) => {
+  logger.info("===================getAllResources=======================");
+
       const {
         page = 1,
         limit = 10,
@@ -20,79 +20,101 @@ class ResourceService {
         search,
         subjectId,
         topicId,
-        examId,
-        format,
-        level,
-        series,
-        premiumOnly,
-        offlineAvailable,
-        minRating,
-      } = { ...filters, ...options };
+    category,
+    type,
+    difficulty,
+    targetLevel,
+    isPremium,
+    isFeatured,
+    isVerified,
+    examYear,
+    examSession,
+  } = query;
 
-      // Build query
-      const query = {};
+  // Build filter object
+  const filter = { isActive: true, status: "active" };
 
+  if (subjectId) filter.subjectId = subjectId;
+  if (topicId) filter.topicId = topicId;
+  if (category) filter.category = category;
+  if (type) filter.type = type;
+  if (difficulty) filter.difficulty = difficulty;
+  if (targetLevel) filter.targetLevel = targetLevel;
+  if (isPremium !== undefined) filter.isPremium = isPremium === "true";
+  if (isFeatured !== undefined) filter.isFeatured = isFeatured === "true";
+  if (isVerified !== undefined) filter.isVerified = isVerified === "true";
+  if (examYear) filter.examYear = parseInt(examYear);
+  if (examSession) filter.examSession = examSession;
+
+  // Add search functionality
       if (search) {
-        query.$or = [
+    filter.$or = [
           { title: { $regex: search, $options: "i" } },
           { description: { $regex: search, $options: "i" } },
-          { "metadata.tags": { $regex: search, $options: "i" } },
-        ];
-      }
+      { tags: { $in: [search.toLowerCase()] } },
+      { keywords: { $in: [search.toLowerCase()] } },
+    ];
+  }
 
-      if (subjectId) query.subjectId = subjectId;
-      if (topicId) query.topicIds = topicId;
-      if (examId) query.examIds = examId;
-      if (format) query.format = format;
-      if (level) query.level = level;
-      if (series) query.series = series;
-      if (premiumOnly !== undefined) query.premiumOnly = premiumOnly;
-      if (offlineAvailable !== undefined)
-        query.offlineAvailable = offlineAvailable;
-      if (minRating) query["analytics.averageRating"] = { $gte: minRating };
+  // Build sort object
+  const sort = {};
+  sort[sortBy] = sortOrder === "desc" ? -1 : 1;
+
+  // Calculate pagination
+  const skip = (page - 1) * limit;
 
       // Execute query with pagination
-      const skip = (page - 1) * limit;
-      const sortOptions = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
-
       const [resources, total] = await Promise.all([
-        Resource.find(query)
-          .populate("subjectId", "name")
-          .populate("topicIds", "name")
-          .populate("examIds", "title")
-          .sort(sortOptions)
+    Resource.find(filter)
+      .populate("subjectId", "name code")
+      .populate("topicId", "name")
+      .sort(sort)
           .skip(skip)
           .limit(parseInt(limit))
           .lean(),
-        Resource.countDocuments(query),
+    Resource.countDocuments(filter),
       ]);
 
-      return {
-        resources,
-        pagination: {
+  const pagination = {
           currentPage: parseInt(page),
           totalPages: Math.ceil(total / limit),
-          totalItems: total,
-          itemsPerPage: parseInt(limit),
-        },
+    totalCount: total,
+    hasNextPage: page < Math.ceil(total / limit),
+    hasPrevPage: page > 1,
       };
-    } catch (error) {
-      logger.error("Error getting resources:", error);
-      throw error;
-    }
+
+  logger.info(
+    "++++++✅ GET ALL RESOURCES: Resources retrieved successfully ++++++"
+  );
+  return { resources, pagination };
+};
+
+// =============== GET RESOURCE BY ID ===============
+const getResourceById = async (resourceId) => {
+  logger.info("===================getResourceById=======================");
+
+  const resource = await Resource.findById(resourceId)
+    .populate("subjectId", "name code")
+    .populate("topicId", "name");
+
+  if (!resource) {
+    throw new NotFoundError("Ressource non trouvée");
   }
 
-  // Get resource by ID
-  async getResourceById(id) {
-    try {
-      const resource = await Resource.findById(id)
-        .populate("subjectId", "name")
-        .populate("topicIds", "name")
-        .populate("examIds", "title")
-        .populate("analytics.userFeedback.userId", "name email");
+  logger.info(
+    "++++++✅ GET RESOURCE BY ID: Resource retrieved successfully ++++++"
+  );
+  return resource;
+};
 
-      if (!resource) {
-        throw new Error("Resource not found");
+// =============== CREATE RESOURCE ===============
+const createResource = async (resourceData) => {
+  logger.info("===================createResource=======================");
+
+  // Validate subject exists
+  const subject = await Subject.findById(resourceData.subjectId);
+  if (!subject) {
+    throw new NotFoundError("Matière non trouvée");
       }
 
       return resource;
