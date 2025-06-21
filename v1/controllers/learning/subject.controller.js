@@ -171,53 +171,21 @@ const getPopularSubjects = async (req, res) => {
   }
 };
 
-// Advanced Search Controller
-const advancedSearch = async (req, res) => {
-  try {
-    const result = await searchService.advancedSearch(req.query);
-    res.status(StatusCodes.OK).json({
-      message: "Recherche avancée exécutée avec succès",
-      data: result.subjects,
-      pagination: result.pagination,
-      facets: result.facets,
-      searchParams: result.searchParams,
-    });
-  } catch (error) {
-    logger.error("Error in advancedSearch controller", error, {
-      query: req.query,
-    });
-    throw error;
-  }
-};
+// =============== GET SUBJECTS BY EDUCATION AND COUNTRY ===============
+const getSubjectsByEducationAndCountry = async (req, res) => {
+  logger.info(
+    "===================getSubjectsByEducationAndCountry======================="
+  );
 
-// Search Suggestions Controller
-const getSearchSuggestions = async (req, res) => {
   try {
-    const { q, limit = 10 } = req.query;
-    // Convert limit to number
-    const limitNum = Number.parseInt(limit) || 10;
-    const suggestions = await searchService.getSearchSuggestions(q, limitNum);
-    res.status(StatusCodes.OK).json({
-      message: "Suggestions de recherche récupérées avec succès",
-      data: suggestions,
-    });
-  } catch (error) {
-    logger.error("Error in getSearchSuggestions controller", error, {
-      query: req.query,
-    });
-    throw error;
-  }
-};
+    const { educationLevel, country } = req.params;
+    const subjects = await subjectService.getSubjectsByEducationAndCountry(
+      educationLevel,
+      country
+    );
 
-// Trending Subjects Controller
-const getTrendingSubjects = async (req, res) => {
-  try {
-    const { period = "week", limit = 10 } = req.query;
-    // Convert limit to number
-    const limitNum = Number.parseInt(limit) || 10;
-    const trending = await analyticsService.getTrendingSubjects(
-      period,
-      limitNum
+    logger.info(
+      "++++++✅ GET SUBJECTS BY EDUCATION AND COUNTRY: Subjects retrieved ++++++"
     );
     res.status(StatusCodes.OK).json({
       message: "Matières tendance récupérées avec succès",
