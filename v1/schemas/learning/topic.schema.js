@@ -1,11 +1,25 @@
 const Joi = require("joi");
+const {
+  DIFFICULTY_LEVELS,
+  LEARNING_OBJECTIVES,
+} = require("../../constants");
 
-// Base topic schema
-const baseTopicSchema = {
-  name: Joi.string().trim().min(2).max(200).required().messages({
-    "string.empty": "Topic name is required",
-    "string.min": "Topic name must be at least 2 characters long",
-    "string.max": "Topic name cannot exceed 200 characters",
+// =============== CREATE TOPIC SCHEMA ===============
+const createTopicSchema = Joi.object({
+  name: {
+    type: String,
+    required: [true, "Le nom du sujet est requis"],
+    trim: true,
+    maxlength: [150, "Le nom ne peut pas dépasser 150 caractères"],
+  },
+
+  description: Joi.string()
+    .required()
+    .trim()
+    .max(500)
+    .messages({
+      "any.required": "La description est requise",
+      "string.max": "La description ne peut pas dépasser 500 caractères",
   }),
 
   subjectId: Joi.string()
