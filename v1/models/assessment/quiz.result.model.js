@@ -205,44 +205,8 @@ QuizResultSchema.statics.getUserAverageScore = function (userId) {
   ]);
 };
 
-QuizResultSchema.statics.getQuizStatistics = function (quizId) {
-  return this.aggregate([
-    { $match: { quizId } },
-    {
-      $group: {
-        _id: null,
-        totalAttempts: { $sum: 1 },
-        averageScore: { $avg: "$score" },
-        passRate: {
-          $avg: {
-            $cond: [{ $eq: ["$isPassed", true] }, 1, 0],
-          },
-        },
-        averageTime: { $avg: "$timeSpent" },
-      },
-    },
-  ]);
-};
-
-// =============== MÉTHODES D'INSTANCE ===============
-QuizResultSchema.methods.generateFeedback = function () {
-  const correctPercentage = (this.correctAnswers / this.totalQuestions) * 100;
-
-  // Analyse des forces et faiblesses basée sur les réponses par sujet
-  // (À implémenter selon la logique métier)
-
-  if (correctPercentage >= 80) {
-    this.feedback.strengths.push("Excellente maîtrise globale");
-  } else if (correctPercentage >= 60) {
-    this.feedback.strengths.push("Bonne compréhension de base");
-  }
-
-  if (correctPercentage < 60) {
-    this.feedback.weaknesses.push("Révision générale nécessaire");
-    this.feedback.recommendations.push("Reprendre les concepts fondamentaux");
-  }
-
-  return this.save();
+QuizResultSchema.statics.getUserAttemptCount = function (userId, quizId) {
+  return this.countDocuments({ userId, quizId });
 };
 
 module.exports = { QuizResult: model("QuizResult", QuizResultSchema) };
