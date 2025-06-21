@@ -99,34 +99,19 @@ const getSubjects = async (query) => {
   return { subjects, pagination };
 };
 
-/**
- * Get subject by ID with related data
- */
-const getSubjectById = async (subjectId, includeRelated = false) => {
-  try {
-    const subject = await Subject.findById(subjectId).populate(
-      "examIds",
-      "title description difficulty"
-    );
+// =============== GET SUBJECT BY ID ===============
+const getSubjectById = async (subjectId) => {
+  logger.info("===================getSubjectById=======================");
 
+  const subject = await Subject.findById(subjectId);
     if (!subject) {
       throw new NotFoundError("Matière non trouvée");
     }
 
-    // Increment popularity (view count)
-    subject.popularity += 1;
-    await subject.save();
-
-    const result = { subject };
-
-    return result;
-  } catch (error) {
-    if (error.name === "CastError") {
-      throw new BadRequestError("ID de matière invalide");
-    }
-    logger.error("Error getting subject by ID", error, { subjectId });
-    throw error;
-  }
+  logger.info(
+    "++++++✅ GET SUBJECT BY ID: Subject retrieved successfully ++++++"
+  );
+  return subject;
 };
 
 /**
