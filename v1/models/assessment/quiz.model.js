@@ -110,7 +110,7 @@ const QuizSchema = new Schema(
     },
 
     // =============== STATISTIQUES SIMPLES ===============
-    stats: {
+    progress: {
       totalAttempts: { type: Number, default: 0 },
       averageScore: { type: Number, default: 0 },
       passRate: { type: Number, default: 0 }, // pourcentage
@@ -118,11 +118,6 @@ const QuizSchema = new Schema(
     },
 
     // =============== GESTION ===============
-    createdBy: {
-      type: Types.ObjectId,
-      ref: "User",
-      required: [true, "L'ID du créateur est requis"],
-    },
 
     status: {
       type: String,
@@ -166,33 +161,33 @@ QuizSchema.virtual("estimatedDuration").get(function () {
 });
 
 QuizSchema.virtual("popularityScore").get(function () {
-  return this.stats.totalAttempts * 0.7 + this.stats.averageScore * 0.3;
+  return this.progress.totalAttempts * 0.7 + this.progress.averageScore * 0.3;
 });
 
 // =============== MÉTHODES ===============
 QuizSchema.methods.updateStats = function (score, completionTime, passed) {
-  this.stats.totalAttempts += 1;
+  this.progress.totalAttempts += 1;
 
   // Mise à jour du score moyen
-  this.stats.averageScore = Math.round(
-    (this.stats.averageScore * (this.stats.totalAttempts - 1) + score) /
-      this.stats.totalAttempts
+  this.progress.averageScore = Math.round(
+    (this.progress.averageScore * (this.progress.totalAttempts - 1) + score) /
+      this.progress.totalAttempts
   );
 
   // Mise à jour du temps moyen
-  this.stats.averageCompletionTime = Math.round(
-    (this.stats.averageCompletionTime * (this.stats.totalAttempts - 1) +
+  this.progress.averageCompletionTime = Math.round(
+    (this.progress.averageCompletionTime * (this.progress.totalAttempts - 1) +
       completionTime) /
-      this.stats.totalAttempts
+      this.progress.totalAttempts
   );
 
   // Mise à jour du taux de réussite
   const passedCount = Math.round(
-    (this.stats.passRate * (this.stats.totalAttempts - 1)) / 100
+    (this.progress.passRate * (this.progress.totalAttempts - 1)) / 100
   );
   const newPassedCount = passedCount + (passed ? 1 : 0);
-  this.stats.passRate = Math.round(
-    (newPassedCount / this.stats.totalAttempts) * 100
+  this.progress.passRate = Math.round(
+    (newPassedCount / this.progress.totalAttempts) * 100
   );
 
   return this.save();
