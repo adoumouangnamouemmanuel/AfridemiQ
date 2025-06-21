@@ -124,6 +124,16 @@ const updateSubjectSchema = Joi.object({
   color: Joi.string()
     .pattern(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)
     .optional(),
+  estimatedHours: Joi.number().min(1).max(500).optional(),
+  isPremium: Joi.boolean().optional(),
+  isFeatured: Joi.boolean().optional(),
+  isActive: Joi.boolean().optional(),
+});
+
+// =============== QUERY PARAMS SCHEMA ===============
+const getSubjectsQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).optional().default(1),
+  limit: Joi.number().integer().min(1).max(100).optional().default(10),
   category: Joi.string()
     .valid(...SUBJECT_CATEGORIES)
     .optional(),
