@@ -117,11 +117,36 @@ const TopicSchema = new Schema(
       },
     ],
 
-    // =============== STATISTIQUES SIMPLES ===============
+    // =============== STATISTIQUES ===============
     stats: {
-      totalQuestions: { type: Number, default: 0 },
-      averageDifficulty: { type: Number, default: 0, min: 0, max: 5 },
-      completionRate: { type: Number, default: 0, min: 0, max: 100 },
+      totalQuestions: {
+        type: Number,
+        default: 0,
+        min: [0, "Ne peut pas être négatif"],
+      },
+      totalResources: {
+        type: Number,
+        default: 0,
+        min: [0, "Ne peut pas être négatif"],
+      },
+      averageDifficulty: {
+        type: Number,
+        default: 0,
+        min: [0, "Minimum 0"],
+        max: [5, "Maximum 5"],
+      },
+      completionRate: {
+        type: Number,
+        default: 0,
+        min: [0, "Minimum 0"],
+        max: [100, "Maximum 100"],
+      },
+      averageScore: {
+        type: Number,
+        default: 0,
+        min: [0, "Score minimum 0"],
+        max: [100, "Score maximum 100"],
+      },
     },
 
     // =============== GESTION ===============
