@@ -107,11 +107,11 @@ const QuizResultSchema = new Schema(
       min: [1, "Le numéro de tentative doit être positif"],
     },
 
-    // =============== FEEDBACK SIMPLE ===============
-    feedback: {
-      strengths: [String], // Sujets bien maîtrisés
-      weaknesses: [String], // Sujets à améliorer
-      recommendations: [String], // Recommandations d'étude
+    // =============== MÉTHODE DE SOUMISSION ===============
+    submissionMethod: {
+      type: String,
+      enum: ["submitted", "time_expired", "auto_submit"],
+      default: "submitted",
     },
   },
   {
