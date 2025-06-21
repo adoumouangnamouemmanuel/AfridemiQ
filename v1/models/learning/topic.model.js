@@ -1,5 +1,9 @@
 const { Schema, model, Types } = require("mongoose");
-const { DIFFICULTY_LEVELS, LEARNING_OBJECTIVES } = require("../../constants");
+const {
+  DIFFICULTY_LEVELS,
+  LEARNING_OBJECTIVES,
+  STATUSES,
+} = require("../../constants");
 
 const TopicSchema = new Schema(
   {
