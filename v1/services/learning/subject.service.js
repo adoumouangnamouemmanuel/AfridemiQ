@@ -158,26 +158,32 @@ const updateSubject = async (subjectId, updateData) => {
 
 // =============== DELETE SUBJECT ===============
 const deleteSubject = async (subjectId) => {
-  try {
-    const subject = await Subject.findById(subjectId);
+  logger.info("===================deleteSubject=======================");
 
+    const subject = await Subject.findById(subjectId);
     if (!subject) {
       throw new NotFoundError("Matière non trouvée");
     }
 
-    subject.isActive = false;
-    await subject.save();
+  // Soft delete - just mark as inactive
+  await Subject.findByIdAndUpdate(subjectId, {
+    isActive: false,
+    status: "inactive",
+  });
 
-    logger.info(`Subject deleted: ${subject.name}`, { subjectId });
+  logger.info("++++++✅ DELETE SUBJECT: Subject deleted successfully ++++++");
+};
 
-    return { message: "Matière supprimée avec succès" };
-  } catch (error) {
-    if (error.name === "CastError") {
-      throw new BadRequestError("ID de matière invalide");
-    }
-    logger.error("Error deleting subject", error, { subjectId });
-    throw error;
-  }
+// =============== GET FEATURED SUBJECTS ===============
+const getFeaturedSubjects = async (limit = 6) => {
+  logger.info("===================getFeaturedSubjects=======================");
+
+  const subjects = await Subject.getFeatured(limit);
+
+  logger.info(
+    "++++++✅ GET FEATURED SUBJECTS: Featured subjects retrieved ++++++"
+  );
+  return subjects;
 };
 
 /**
