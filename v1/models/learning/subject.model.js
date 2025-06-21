@@ -35,7 +35,7 @@ const SubjectSchema = new Schema(
       maxlength: [500, "La description ne peut pas dépasser 500 caractères"],
     },
 
-    // =============== AFRIQUE-SPÉCIFIQUE ===============
+    // =============== CONTEXTE AFRICAIN ===============
     examTypes: [
       {
         type: String,
