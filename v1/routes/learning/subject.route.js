@@ -9,12 +9,7 @@ const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
 const {
   createSubjectSchema,
   updateSubjectSchema,
-  getSubjectsSchema,
-  addExamToSubjectSchema,
-  rateSubjectSchema,
-  bulkCreateSchema,
-  bulkUpdateSchema,
-  compareSubjectsSchema,
+  getSubjectsQuerySchema,
 } = require("../../schemas/learning/subject.schema");
 
 const router = express.Router();
