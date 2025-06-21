@@ -157,26 +157,28 @@ const getResourcesBySubject = async (req, res) => {
   }
 };
 
-// Track view
-const trackView = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const resource = await resourceService.trackView(id);
+// =============== GET RESOURCES BY TOPIC ===============
+const getResourcesByTopic = async (req, res) => {
+  logger.info("===================getResourcesByTopic=======================");
 
+  try {
+    const { topicId } = req.params;
+    const result = await resourceService.getResourcesByTopic(
+      topicId,
+      req.query
+    );
+
+    logger.info("++++++✅ GET RESOURCES BY TOPIC: Resources retrieved ++++++");
     res.status(StatusCodes.OK).json({
-      message: "View tracked successfully",
-      data: resource,
+      success: true,
+      message: "Ressources récupérées avec succès",
+      data: result,
     });
   } catch (error) {
-    logger.error("Error tracking view:", error);
-    const statusCode =
-      error.message === "Resource not found"
-        ? StatusCodes.NOT_FOUND
-        : StatusCodes.INTERNAL_SERVER_ERROR;
-
-    res.status(statusCode).json({
-      message: error.message || "Error tracking view",
-      error: error.message,
+    logger.error("❌ GET RESOURCES BY TOPIC ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des ressources",
     });
   }
 };
