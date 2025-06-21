@@ -122,7 +122,7 @@ const QuestionSchema = new Schema(
 // =============== VALIDATION ===============
 QuestionSchema.pre("validate", function (next) {
   // Validation pour choix multiples
-  if (this.format === "multiple_choice") {
+  if (this.type === "multiple_choice") {
     if (!this.options || this.options.length < 2) {
       return next(
         new Error(
