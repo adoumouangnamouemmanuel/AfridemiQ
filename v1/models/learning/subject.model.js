@@ -72,6 +72,8 @@ const SubjectSchema = new Schema(
         type: String,
         enum: SERIES, // A=Littéraire, C=Scientifique, D=Économique, ALL=Toutes séries
         uppercase: true,
+        default: "ALL",
+        required: [true, "La série est requise"],
       },
     ],
 
