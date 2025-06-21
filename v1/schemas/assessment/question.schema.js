@@ -108,101 +108,30 @@ const updateQuestionSchema = Joi.object({
     .optional(),
   difficulty: Joi.string()
     .valid(...DIFFICULTY_LEVELS)
-    .required(),
-  points: Joi.number().min(1).max(100).required(),
-  timeEstimate: Joi.number().min(10).max(3600).default(120),
-  steps: Joi.array().items(Joi.string().max(500)).optional(),
-  hints: Joi.array().items(Joi.string().max(500)).optional(),
-  tags: Joi.array().items(Joi.string().max(50)).optional(),
-  relatedQuestions: Joi.array().items(Joi.objectId()).optional(),
-  content: Joi.object({
-    media: Joi.array()
-      .items(
-        Joi.object({
-          mediaType: Joi.string().valid(...MEDIA_TYPES),
-          url: Joi.string().uri(),
-          altText: Joi.string().optional(),
-          caption: Joi.string().optional(),
-          size: Joi.number().optional(),
-          duration: Joi.number().optional(),
-        })
-      )
+    .optional(),
+  educationLevel: Joi.string()
+    .valid(...EDUCATION_LEVELS)
+    .optional(),
+  examType: Joi.string()
+    .valid(...EXAM_TYPES)
       .optional(),
-    formatting: Joi.object({
-      hasLatex: Joi.boolean().default(false),
-      hasCode: Joi.boolean().default(false),
-      hasTable: Joi.boolean().default(false),
-    }).optional(),
-    accessibility: Joi.object({
-      hasAudioVersion: Joi.boolean().default(false),
-      hasBrailleVersion: Joi.boolean().default(false),
-      hasSignLanguageVideo: Joi.boolean().default(false),
-      screenReaderFriendly: Joi.boolean().default(true),
-    }).optional(),
-  }).optional(),
-  validation: Joi.object({
-    isVerified: Joi.boolean().default(false),
-    verifiedBy: Joi.objectId().optional(),
-    verifiedAt: Joi.date().optional(),
-    qualityScore: Joi.number().min(0).max(10).optional(),
-    feedback: Joi.array().items(Joi.string().max(500)).optional(),
-  }).optional(),
-  usage: Joi.object({
-    assessmentCount: Joi.number().default(0),
-    lastUsed: Joi.date().optional(),
-    popularityScore: Joi.number().default(0),
-  }).optional(),
+  tags: Joi.array().items(Joi.string().trim().lowercase()).optional(),
+  isPremium: Joi.boolean().optional(),
+  isActive: Joi.boolean().optional(),
   status: Joi.string()
-    .valid("draft", "review", "approved", "rejected", "archived")
-    .default("draft"),
-  premiumOnly: Joi.boolean().default(false),
-  isActive: Joi.boolean().default(true),
+    .valid(...STATUSES)
+    .optional(),
 });
 
-const updateQuestionSchema = createQuestionSchema
-  .fork(
-    [
-      "topicId",
-      "subjectId",
-      "creatorId",
-      "series",
-      "level",
-      "question",
-      "format",
-      "options",
-      "correctAnswer",
-      "explanation",
-      "difficulty",
-      "points",
-      "timeEstimate",
-      "steps",
-      "hints",
-      "tags",
-      "relatedQuestions",
-      "content",
-      "validation",
-      "usage",
-      "status",
-      "premiumOnly",
-      "isActive",
-    ],
-    (schema) => schema.optional()
-  )
-  .min(1);
-
-const getQuestionSchema = Joi.object({
-  topicId: Joi.objectId().optional(),
-  subjectId: Joi.objectId().optional(),
-  creatorId: Joi.objectId().optional(),
-  series: Joi.string().optional(),
-  level: Joi.string()
-    .valid(
-      "primary",
-      "junior_secondary",
-      "senior_secondary",
-      "university",
-      "professional"
-    )
+// =============== QUERY PARAMS SCHEMA ===============
+const getQuestionsQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).optional().default(1),
+  limit: Joi.number().integer().min(1).max(100).optional().default(10),
+  subjectId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional(),
+  topicId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
     .optional(),
   format: Joi.string()
     .valid(...QUESTION_TYPES)
