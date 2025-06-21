@@ -190,9 +190,12 @@ module.exports = {
 
   // Media
   MEDIA_TYPES,
+  LEARNING_OBJECTIVES,
+  RESOURCE_CATEGORIES,
+  EXAM_SESSIONS,
+  SERIES,
 
   // Utils
   PAGINATION,
     VALIDATION_RANGES,
-  
 };
