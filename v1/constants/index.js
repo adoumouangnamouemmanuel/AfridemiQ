@@ -28,23 +28,23 @@ const EXAM_TYPES = [
 const EDUCATION_LEVELS = [
   "junior_secondary", // JSS/Collège (Ages 12-15)
   "senior_secondary", // SSS/Lycée (Ages 15-18)
-  ];
-  
-  /**
-   * Classes spécifiques par système
-   */
-  const GRADE_LEVELS = {
-    // Nigerian/West African System
-    junior_secondary: ["jss1", "jss2", "jss3"],
-    senior_secondary: ["sss1", "sss2", "sss3"],
-    
-    // Francophone System  
-    college: ["6eme", "5eme", "4eme", "3eme"],
-    lycee: ["2nde", "1ere", "terminale"],
-    
-    // Kenyan System
+];
+
+/**
+ * Classes spécifiques par système
+ */
+const GRADE_LEVELS = {
+  // Nigerian/West African System
+  junior_secondary: ["jss1", "jss2", "jss3"],
+  senior_secondary: ["sss1", "sss2", "sss3"],
+
+  // Francophone System
+  college: ["6eme", "5eme", "4eme", "3eme"],
+  lycee: ["2nde", "1ere", "terminale"],
+
+  // Kenyan System
   form: ["form1", "form2", "form3", "form4"],
-  };
+};
 
 /**
  * Langues supportées
@@ -197,5 +197,5 @@ module.exports = {
 
   // Utils
   PAGINATION,
-    VALIDATION_RANGES,
+  VALIDATION_RANGES,
 };
