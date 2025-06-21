@@ -276,46 +276,21 @@ const updateSubjectStats = async (subjectId, field, increment = 1) => {
   logger.info("===================updateSubjectStats=======================");
 
     const subject = await Subject.findById(subjectId);
-
     if (!subject) {
       throw new NotFoundError("Matière non trouvée");
     }
 
-    if (!subject.examIds.includes(examId)) {
-      throw new NotFoundError("Cet examen n'est pas associé à cette matière");
-    }
+  await subject.updateStats(field, increment);
 
-    subject.examIds = subject.examIds.filter((id) => id.toString() !== examId);
-    await subject.save();
-
-    await subject.populate("examIds", "title description difficulty");
-
-    logger.info(`Exam removed from subject: ${subject.name}`, {
-      subjectId,
-      examId,
-    });
-
+  logger.info(
+    "++++++✅ UPDATE SUBJECT STATS: Stats updated successfully ++++++"
+  );
     return subject;
-  } catch (error) {
-    if (error.name === "CastError") {
-      throw new BadRequestError("ID invalide");
-    }
-    logger.error("Error removing exam from subject", error, {
-      subjectId,
-      examId,
-    });
-    throw error;
-  }
 };
 
-/**
- * Rate a subject
- */
-const rateSubject = async (subjectId, rating) => {
-  try {
-    if (rating < 1 || rating > 5) {
-      throw new BadRequestError("La note doit être entre 1 et 5");
-    }
+// =============== ADD STUDENT TO SUBJECT ===============
+const addStudentToSubject = async (subjectId) => {
+  logger.info("===================addStudentToSubject=======================");
 
     const subject = await Subject.findById(subjectId);
 
