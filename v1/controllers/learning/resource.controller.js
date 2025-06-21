@@ -77,26 +77,29 @@ const createResource = async (req, res) => {
   }
 };
 
-// Update resource
+// =============== UPDATE RESOURCE ===============
 const updateResource = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const resource = await resourceService.updateResource(id, req.body);
+  logger.info("===================updateResource=======================");
 
+  try {
+    const resource = await resourceService.updateResource(
+      req.params.id,
+      req.body
+    );
+
+    logger.info(
+      "++++++✅ UPDATE RESOURCE: Resource updated successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Resource updated successfully",
-      data: resource,
+      success: true,
+      message: "Ressource mise à jour avec succès",
+      data: { resource },
     });
   } catch (error) {
-    logger.error("Error updating resource:", error);
-    const statusCode =
-      error.message === "Resource not found"
-        ? StatusCodes.NOT_FOUND
-        : StatusCodes.BAD_REQUEST;
-
-    res.status(statusCode).json({
-      message: error.message || "Error updating resource",
-      error: error.message,
+    logger.error("❌ UPDATE RESOURCE ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la mise à jour de la ressource",
     });
   }
 };
