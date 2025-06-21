@@ -45,6 +45,7 @@ const SubjectSchema = new Schema(
         },
       },
     ],
+
     countries: [
       {
         type: String,
@@ -54,6 +55,7 @@ const SubjectSchema = new Schema(
         },
       },
     ],
+
     educationLevels: [
       {
         type: String,
@@ -63,7 +65,15 @@ const SubjectSchema = new Schema(
         },
       },
     ],
-    series: [String], // ["A", "C", "D"] for BAC system
+
+    // Pour le système BAC francophone
+    series: [
+      {
+        type: String,
+        enum: ["A", "C", "D", "ALL"], // A=Littéraire, C=Scientifique, D=Économique, ALL=Toutes séries
+        uppercase: true,
+      },
+    ],
 
     // =============== ORGANISATION SIMPLE ===============
     category: {
