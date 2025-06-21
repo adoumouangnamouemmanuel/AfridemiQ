@@ -15,7 +15,7 @@ const createQuizResult = async (quizResultData) => {
     throw new BadRequestError(
       "Le nombre de réponses ne correspond pas au nombre de questions"
     );
-    }
+  }
 
   // Validate that correctAnswers + incorrectAnswers = totalQuestions
   if (
@@ -56,16 +56,16 @@ const createQuizResult = async (quizResultData) => {
 const getQuizResults = async (query) => {
   logger.info("===================getQuizResults=======================");
 
-      const {
-        page = 1,
-        limit = 10,
+  const {
+    page = 1,
+    limit = 10,
     userId,
     quizId,
     isPassed,
     minScore,
     maxScore,
-        sortBy = "createdAt",
-        sortOrder = "desc",
+    sortBy = "createdAt",
+    sortOrder = "desc",
   } = query;
 
   // Build filter object
@@ -84,27 +84,27 @@ const getQuizResults = async (query) => {
   sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
   // Calculate pagination
-      const skip = (page - 1) * limit;
+  const skip = (page - 1) * limit;
 
   // Execute query with pagination
-      const [quizResults, total] = await Promise.all([
+  const [quizResults, total] = await Promise.all([
     QuizResult.find(filter)
       .populate("userId", "firstName lastName email")
       .populate("quizId", "title format difficulty passingScore")
       .sort(sort)
-          .skip(skip)
-          .limit(parseInt(limit))
-          .lean(),
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean(),
     QuizResult.countDocuments(filter),
-      ]);
+  ]);
 
   const pagination = {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(total / limit),
+    currentPage: parseInt(page),
+    totalPages: Math.ceil(total / limit),
     totalCount: total,
     hasNextPage: page < Math.ceil(total / limit),
     hasPrevPage: page > 1,
-      };
+  };
 
   logger.info(
     "++++++✅ GET QUIZ RESULTS: Quiz results retrieved successfully ++++++"
@@ -167,11 +167,11 @@ const updateQuizResult = async (quizResultId, updateData) => {
     }
   }
 
-      const quizResult = await QuizResult.findByIdAndUpdate(
+  const quizResult = await QuizResult.findByIdAndUpdate(
     quizResultId,
     { $set: updateData },
-        { new: true, runValidators: true }
-      )
+    { new: true, runValidators: true }
+  )
     .populate("userId", "firstName lastName email")
     .populate("quizId", "title format difficulty passingScore")
     .populate("answers.questionId", "question type difficulty");
@@ -179,7 +179,7 @@ const updateQuizResult = async (quizResultId, updateData) => {
   logger.info(
     "++++++✅ UPDATE QUIZ RESULT: Quiz result updated successfully ++++++"
   );
-      return quizResult;
+  return quizResult;
 };
 
 // =============== DELETE QUIZ RESULT ===============
