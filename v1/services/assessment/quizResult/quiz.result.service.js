@@ -6,42 +6,56 @@ const createLogger = require("../../logging.service");
 
 const logger = createLogger("QuizResultService");
 
-class QuizResultService {
-  async createQuizResult(data) {
-    try {
-      const quizResult = new QuizResult(data);
-      await quizResult.save();
-      logger.info(`Created quiz result for user: ${data.userId}`);
-      return await this.getQuizResultById(quizResult._id);
-    } catch (error) {
-      logger.error("Error creating quiz result:", error);
-      throw error instanceof ApiError
-        ? error
-        : new ApiError(500, "Failed to create quiz result");
+// =============== CREATE QUIZ RESULT ===============
+const createQuizResult = async (quizResultData) => {
+  logger.info("===================createQuizResult=======================");
+
+  // Validate that answers array length matches totalQuestions
+  if (quizResultData.answers.length !== quizResultData.totalQuestions) {
+    throw new BadRequestError(
+      "Le nombre de réponses ne correspond pas au nombre de questions"
+    );
     }
+
+  // Validate that correctAnswers + incorrectAnswers = totalQuestions
+  if (
+    quizResultData.correctAnswers + quizResultData.incorrectAnswers !==
+    quizResultData.totalQuestions
+  ) {
+    throw new BadRequestError(
+      "Le total des réponses ne correspond pas au nombre de questions"
+    );
   }
 
-  async getQuizResultById(id) {
-    try {
-      const quizResult = await QuizResult.findById(id)
-        .populate("userId", "name email")
-        .populate("quizId", "name")
-        .populate("questionIds", "question")
-        .populate("hintUsages", "hintType stepsViewed usedAt")
-        .populate("questionFeedback.userId", "name");
-      if (!quizResult) throw new ApiError(404, "Quiz result not found");
-      logger.info(`Retrieved quiz result: ${id}`);
-      return quizResult;
-    } catch (error) {
-      logger.error("Error retrieving quiz result:", error);
-      throw error instanceof ApiError
-        ? error
-        : new ApiError(500, "Failed to retrieve quiz result");
-    }
+  // Validate that completedAt > startedAt
+  if (
+    new Date(quizResultData.completedAt) <= new Date(quizResultData.startedAt)
+  ) {
+    throw new BadRequestError(
+      "L'heure de fin doit être après l'heure de début"
+    );
   }
 
-  async getQuizResults(filters = {}, options = {}) {
-    try {
+  const quizResult = new QuizResult(quizResultData);
+  await quizResult.save();
+
+  // Populate related fields
+  await quizResult.populate([
+    { path: "userId", select: "firstName lastName email" },
+    { path: "quizId", select: "title format difficulty passingScore" },
+    { path: "answers.questionId", select: "question type difficulty" },
+  ]);
+
+  logger.info(
+    "++++++✅ CREATE QUIZ RESULT: Quiz result created successfully ++++++"
+  );
+  return quizResult;
+};
+
+// =============== GET ALL QUIZ RESULTS ===============
+const getQuizResults = async (query) => {
+  logger.info("===================getQuizResults=======================");
+
       const {
         page = 1,
         limit = 10,
