@@ -1,4 +1,11 @@
 const Joi = require("joi");
+const {
+  QUIZ_FORMATS,
+  DIFFICULTY_LEVELS,
+  EDUCATION_LEVELS,
+  EXAM_TYPES,
+  STATUSES,
+} = require("../../constants");
 
 // Create quiz schema
 const createQuizSchema = Joi.object({
