@@ -133,6 +133,16 @@ QuestionSchema.pre("validate", function (next) {
     if (this.options.length > 5) {
       return next(new Error("Maximum 5 options autorisées"));
     }
+
+    // Vérifier que correctAnswer est un index valide
+    const answerIndex = parseInt(this.correctAnswer);
+    if (
+      isNaN(answerIndex) ||
+      answerIndex < 0 ||
+      answerIndex >= this.options.length
+    ) {
+      return next(new Error("L'index de la réponse correcte est invalide"));
+    }
   }
 
   // Validation pour vrai/faux
