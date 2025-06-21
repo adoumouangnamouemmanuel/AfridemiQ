@@ -19,15 +19,7 @@ const registerSchema = Joi.object({
   password: Joi.string().min(8).required().messages({
     "string.min": "Mot de passe trop court",
     "any.required": "Mot de passe requis",
-  }),
-  phoneNumber: Joi.string()
-    .pattern(/^\+?[1-9]\d{1,14}$/)
-    .allow(null)
-    .messages({ "string.pattern.base": "Numéro de téléphone invalide" }),
-  role: Joi.string().valid("student", "teacher", "admin").default("student"),
-  gender: Joi.string().valid("male", "female"),
-  dateOfBirth: Joi.date(),
-  preferredLanguage: Joi.string(),
+  })
 });
 
 const loginSchema = Joi.object({
@@ -49,17 +41,9 @@ const updateProfileSchema = Joi.object({
     .pattern(/^\+?[1-9]\d{1,14}$/)
     .optional()
     .allow(null, ""),
-  country: Joi.string()
-    .valid(...COUNTRIES)
-    .optional(),
   preferredLanguage: Joi.string()
     .valid(...LANGUAGES)
     .optional(),
-  schoolName: Joi.string().max(200).optional().allow(null, ""),
-  gradeLevel: Joi.string()
-    .valid(...EDUCATION_LEVELS)
-    .optional(),
-  targetExamYear: Joi.number().integer().min(2024).max(2030).optional(),
 })
   .min(1)
   .messages({
@@ -103,22 +87,6 @@ const onboardingSchema = Joi.object({
       "any.required": "La langue préférée est requise",
       "any.only": "La langue préférée doit être : " + LANGUAGES.join(", "),
     }),
-
-  // Optional onboarding fields
-  schoolName: Joi.string().max(200).optional().allow(null, ""),
-  gradeLevel: Joi.string()
-    .valid(...EDUCATION_LEVELS)
-    .optional(),
-  targetExamYear: Joi.number().integer().min(2024).max(2030).optional(),
-});
-
-// Simple notification preferences
-const updateNotificationsSchema = Joi.object({
-  notifications: Joi.object({
-    dailyReminders: Joi.boolean().optional(),
-    progressUpdates: Joi.boolean().optional(),
-    examAlerts: Joi.boolean().optional(),
-  }).required(),
 });
 
 // Password management (keep simple)
@@ -205,7 +173,6 @@ module.exports = {
   // Profile management
   updateProfileSchema,
   updatePersonalInfoSchema,
-  updateNotificationsSchema,
 
   // Password management
   passwordResetRequestSchema,
