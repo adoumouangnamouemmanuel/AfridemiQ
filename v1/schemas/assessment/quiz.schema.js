@@ -144,36 +144,42 @@ const getQuizzesQuerySchema = Joi.object({
   subjectId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
     .optional(),
-  level: Joi.string().valid("Beginner", "Intermediate", "Advanced").optional(),
-  difficulty: Joi.string().valid("Easy", "Medium", "Hard").optional(),
-  premiumOnly: Joi.boolean().optional(),
-  isActive: Joi.boolean().default(true),
-});
-
-// Bulk update schema
-const bulkUpdateQuizzesSchema = Joi.object({
-  quizIds: Joi.array()
-    .items(Joi.string().pattern(/^[0-9a-fA-F]{24}$/))
-    .min(1)
-    .required()
-    .messages({
-      "array.min": "At least one quiz ID is required",
-      "string.pattern.base": "Invalid quiz ID format",
-    }),
-
-  updateData: Joi.object({
-    isActive: Joi.boolean(),
-    premiumOnly: Joi.boolean(),
-    difficulty: Joi.string().valid("Easy", "Medium", "Hard"),
-    tags: Joi.array().items(Joi.string().trim().lowercase()),
-  })
-    .min(1)
-    .required(),
+  topicId: Joi.string()
+    .pattern(/^[0-9a-fA-F]{24}$/)
+    .optional(),
+  format: Joi.string()
+    .valid(...QUIZ_FORMATS)
+    .optional(),
+  difficulty: Joi.string()
+    .valid(...DIFFICULTY_LEVELS, "mixed")
+    .optional(),
+  educationLevel: Joi.string()
+    .valid(...EDUCATION_LEVELS)
+    .optional(),
+  examType: Joi.string()
+    .valid(...EXAM_TYPES)
+    .optional(),
+  isActive: Joi.boolean().optional(),
+  isPremium: Joi.boolean().optional(),
+  status: Joi.string()
+    .valid(...STATUSES)
+    .optional(),
+  search: Joi.string().trim().max(100).optional(),
+  sortBy: Joi.string()
+    .valid(
+      "title",
+      "createdAt",
+      "difficulty",
+      "stats.totalAttempts",
+      "stats.averageScore"
+    )
+    .optional()
+    .default("createdAt"),
+  sortOrder: Joi.string().valid("asc", "desc").optional().default("desc"),
 });
 
 module.exports = {
   createQuizSchema,
   updateQuizSchema,
-  getQuizzesSchema,
-  bulkUpdateQuizzesSchema,
+  getQuizzesQuerySchema,
 };
