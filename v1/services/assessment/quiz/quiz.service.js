@@ -10,23 +10,23 @@ const createQuiz = async (quizData) => {
   logger.info("===================createQuiz=======================");
 
   // Validate questionIds and totalQuestions match
-      if (quizData.questionIds && quizData.totalQuestions) {
-        if (quizData.questionIds.length !== quizData.totalQuestions) {
-          quizData.totalQuestions = quizData.questionIds.length;
-        }
+  if (quizData.questionIds && quizData.totalQuestions) {
+    if (quizData.questionIds.length !== quizData.totalQuestions) {
+      quizData.totalQuestions = quizData.questionIds.length;
+    }
   } else if (quizData.questionIds) {
     quizData.totalQuestions = quizData.questionIds.length;
-      }
+  }
 
-      const quiz = new Quiz(quizData);
-      await quiz.save();
+  const quiz = new Quiz(quizData);
+  await quiz.save();
 
   // Populate related fields
-      await quiz.populate([
-        { path: "subjectId", select: "name code" },
-        { path: "topicIds", select: "name" },
+  await quiz.populate([
+    { path: "subjectId", select: "name code" },
+    { path: "topicIds", select: "name" },
     { path: "questionIds", select: "question type difficulty" },
-      ]);
+  ]);
 
   logger.info("++++++✅ CREATE QUIZ: Quiz created successfully ++++++");
   return quiz;
@@ -36,9 +36,9 @@ const createQuiz = async (quizData) => {
 const getQuizzes = async (query) => {
   logger.info("===================getQuizzes=======================");
 
-      const {
-        page = 1,
-        limit = 10,
+  const {
+    page = 1,
+    limit = 10,
     subjectId,
     topicId,
     format,
@@ -49,8 +49,8 @@ const getQuizzes = async (query) => {
     isPremium,
     status,
     search,
-        sortBy = "createdAt",
-        sortOrder = "desc",
+    sortBy = "createdAt",
+    sortOrder = "desc",
   } = query;
 
   // Build filter object
@@ -67,39 +67,39 @@ const getQuizzes = async (query) => {
   if (status) filter.status = status;
 
   // Add search functionality
-      if (search) {
+  if (search) {
     filter.$or = [
-          { title: { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } },
-        ];
-      }
+      { title: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
+    ];
+  }
 
   // Build sort object
   const sort = {};
   sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
   // Calculate pagination
-      const skip = (page - 1) * limit;
+  const skip = (page - 1) * limit;
 
   // Execute query with pagination
-      const [quizzes, total] = await Promise.all([
+  const [quizzes, total] = await Promise.all([
     Quiz.find(filter)
-          .populate("subjectId", "name code")
-          .populate("topicIds", "name")
+      .populate("subjectId", "name code")
+      .populate("topicIds", "name")
       .sort(sort)
-          .skip(skip)
+      .skip(skip)
       .limit(parseInt(limit))
       .lean(),
     Quiz.countDocuments(filter),
-      ]);
+  ]);
 
-      const pagination = {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(total / limit),
+  const pagination = {
+    currentPage: parseInt(page),
+    totalPages: Math.ceil(total / limit),
     totalCount: total,
     hasNextPage: page < Math.ceil(total / limit),
     hasPrevPage: page > 1,
-      };
+  };
 
   logger.info("++++++✅ GET QUIZZES: Quizzes retrieved successfully ++++++");
   return { quizzes, pagination };
@@ -114,9 +114,9 @@ const getQuizById = async (quizId) => {
     .populate("topicIds", "name")
     .populate("questionIds", "question type difficulty");
 
-      if (!quiz) {
+  if (!quiz) {
     throw new NotFoundError("Quiz non trouvé");
-      }
+  }
 
   logger.info("++++++✅ GET QUIZ BY ID: Quiz retrieved successfully ++++++");
   return quiz;
@@ -133,18 +133,18 @@ const updateQuiz = async (quizId, updateData) => {
   }
 
   // Validate questionIds and totalQuestions match if being updated
-      if (updateData.questionIds && updateData.totalQuestions) {
-        if (updateData.questionIds.length !== updateData.totalQuestions) {
-          updateData.totalQuestions = updateData.questionIds.length;
-        }
+  if (updateData.questionIds && updateData.totalQuestions) {
+    if (updateData.questionIds.length !== updateData.totalQuestions) {
+      updateData.totalQuestions = updateData.questionIds.length;
+    }
   } else if (updateData.questionIds) {
     updateData.totalQuestions = updateData.questionIds.length;
-      }
+  }
 
-      const quiz = await Quiz.findByIdAndUpdate(
-        quizId,
+  const quiz = await Quiz.findByIdAndUpdate(
+    quizId,
     { $set: updateData },
-        { new: true, runValidators: true }
+    { new: true, runValidators: true }
   )
     .populate("subjectId", "name code")
     .populate("topicIds", "name")
@@ -158,10 +158,10 @@ const updateQuiz = async (quizId, updateData) => {
 const deleteQuiz = async (quizId) => {
   logger.info("===================deleteQuiz=======================");
 
-      const quiz = await Quiz.findById(quizId);
-      if (!quiz) {
+  const quiz = await Quiz.findById(quizId);
+  if (!quiz) {
     throw new NotFoundError("Quiz non trouvé");
-      }
+  }
 
   // Soft delete - just mark as inactive
   await Quiz.findByIdAndUpdate(quizId, {
@@ -223,7 +223,7 @@ const getQuizzesByTopic = async (topicId, filters = {}) => {
 
   if (!topicId) {
     throw new BadRequestError("ID de sujet requis");
-      }
+  }
 
   const query = {
     topicIds: { $in: [topicId] },
@@ -263,7 +263,7 @@ const getQuizzesByEducationAndExam = async (
 
   if (!educationLevel || !examType) {
     throw new BadRequestError("Niveau d'éducation et type d'examen requis");
-      }
+  }
 
   const query = {
     educationLevel,
@@ -310,7 +310,7 @@ const searchQuizzes = async (searchTerm, filters = {}) => {
     ],
     isActive: true,
     status: "active",
-      };
+  };
 
   // Apply additional filters
   if (filters.subjectId) query.subjectId = filters.subjectId;
@@ -340,10 +340,10 @@ const updateQuizStats = async (
 ) => {
   logger.info("===================updateQuizStats=======================");
 
-      const quiz = await Quiz.findById(quizId);
-      if (!quiz) {
+  const quiz = await Quiz.findById(quizId);
+  if (!quiz) {
     throw new NotFoundError("Quiz non trouvé");
-      }
+  }
 
   await quiz.updateStats(score, completionTimeMinutes, passed);
 
