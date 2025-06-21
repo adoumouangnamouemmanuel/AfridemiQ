@@ -115,17 +115,21 @@ const getQuizById = async (quizId) => {
     .populate("questionIds", "question type difficulty");
 
       if (!quiz) {
-        logger.warn(`Quiz not found: ${quizId}`);
-        throw new ApiError(404, "Quiz not found");
+    throw new NotFoundError("Quiz non trouvé");
       }
 
-      logger.info(`Quiz retrieved successfully: ${quizId}`);
-      return new ApiResponse(200, quiz, "Quiz retrieved successfully");
-    } catch (error) {
-      logger.error(`Error retrieving quiz ${quizId}:`, error);
-      if (error instanceof ApiError) throw error;
-      throw new ApiError(500, "Failed to retrieve quiz", error.message);
-    }
+  logger.info("++++++✅ GET QUIZ BY ID: Quiz retrieved successfully ++++++");
+  return quiz;
+};
+
+// =============== UPDATE QUIZ ===============
+const updateQuiz = async (quizId, updateData) => {
+  logger.info("===================updateQuiz=======================");
+
+  // Check if quiz exists
+  const existingQuiz = await Quiz.findById(quizId);
+  if (!existingQuiz) {
+    throw new NotFoundError("Quiz non trouvé");
   }
 
   // Update quiz
