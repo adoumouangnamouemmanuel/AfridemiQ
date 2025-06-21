@@ -232,80 +232,29 @@ const getSubjectsByExamType = async (req, res) => {
   }
 };
 
-// Bulk Create Controller
-const bulkCreateSubjects = async (req, res) => {
-  try {
-    const { subjects } = req.body;
-    const result = await bulkService.bulkCreateSubjects(subjects);
-    res.status(StatusCodes.CREATED).json({
-      message: "Création en lot terminée",
-      data: result,
-    });
-  } catch (error) {
-    logger.error("Error in bulkCreateSubjects controller", error);
-    throw error;
-  }
-};
+// =============== SEARCH SUBJECTS ===============
+const searchSubjects = async (req, res) => {
+  logger.info("===================searchSubjects=======================");
 
-// Bulk Update Controller
-const bulkUpdateSubjects = async (req, res) => {
   try {
-    const { updates } = req.body;
-    const result = await bulkService.bulkUpdateSubjects(updates);
+    const { q: searchTerm } = req.query;
+    const filters = req.query;
+    const subjects = await subjectService.searchSubjects(searchTerm, filters);
+
+    logger.info(
+      "++++++✅ SEARCH SUBJECTS: Search completed successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Mise à jour en lot terminée",
-      data: result,
+      success: true,
+      message: "Recherche effectuée avec succès",
+      data: { subjects },
     });
   } catch (error) {
-    logger.error("Error in bulkUpdateSubjects controller", error);
-    throw error;
-  }
-};
-
-// Bulk Export Controller
-const exportSubjects = async (req, res) => {
-  try {
-    const { format = "json", ...filters } = req.query;
-    const result = await bulkService.bulkExportSubjects(filters, format);
-
-    if (format === "csv") {
-      // Set proper UTF-8 headers for CSV
-      res.setHeader("Content-Type", "text/csv; charset=utf-8");
-      res.setHeader("Content-Disposition", "attachment; filename=subjects.csv");
-
-      // Add UTF-8 BOM for proper Excel display
-      const BOM = "\uFEFF";
-
-      // Convert to CSV string with proper encoding
-      const csvContent =
-        BOM +
-        [
-          result.headers.join(","),
-          ...result.data.map((row) =>
-            row
-              .map((cell) => {
-                // Properly escape and encode French characters
-                const cellStr = String(cell || "");
-                return `"${cellStr.replace(/"/g, '""')}"`;
-              })
-              .join(",")
-          ),
-        ].join("\n");
-
-      res.send(csvContent);
-    } else {
-      res.status(StatusCodes.OK).json({
-        message: "Export des matières réussi",
-        data: result.data,
-        count: result.count,
-        format: result.format,
-      });
-    }
-  } catch (error) {
-    logger.error("Error in exportSubjects controller", error, {
-      query: req.query,
+    logger.error("❌ SEARCH SUBJECTS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la recherche",
     });
-    throw error;
   }
 };
 
