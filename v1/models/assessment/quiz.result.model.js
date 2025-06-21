@@ -67,7 +67,7 @@ const QuizResultSchema = new Schema(
     },
 
     // =============== TEMPS ===============
-    timeSpent: {
+    totalTimeSpent: {
       type: Number, // temps total en secondes
       required: [true, "Le temps passé est requis"],
       min: [0, "Le temps ne peut pas être négatif"],
