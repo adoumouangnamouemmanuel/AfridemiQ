@@ -84,6 +84,15 @@ const QuestionSchema = new Schema(
       },
     },
 
+    // =============== TAGS POUR ORGANISATION ===============
+    tags: [
+      {
+        type: String,
+        trim: true,
+        lowercase: true,
+      },
+    ],
+
     // =============== STATISTIQUES SIMPLES ===============
     progress: {
       totalAttempts: { type: Number, default: 0 },
