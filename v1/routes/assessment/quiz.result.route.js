@@ -1,5 +1,5 @@
 const express = require("express");
-const quizResultController = require("../../controllers/results/quiz.result.controller");
+const quizResultController = require("../../controllers/assessment/quiz.result.controller");
 const validateMiddleware = require("../../middlewares/validate.middleware");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const roleMiddleware = require("../../middlewares/role.middleware");
