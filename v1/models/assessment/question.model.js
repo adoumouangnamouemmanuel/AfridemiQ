@@ -178,13 +178,14 @@ QuestionSchema.virtual("difficultyScore").get(function () {
 
 // =============== MÉTHODES ===============
 QuestionSchema.methods.updateStats = function (isCorrect, timeSpent) {
-  this.progress.totalAttempts += 1;
-  if (isCorrect) this.progress.correctAttempts += 1;
+  this.stats.totalAttempts += 1;
+  if (isCorrect) this.stats.correctAttempts += 1;
 
   // Mise à jour du temps moyen
-  this.progress.averageTimeSpent = Math.round(
-    (this.progress.averageTimeSpent * (this.progress.totalAttempts - 1) + timeSpent) /
-      this.progress.totalAttempts
+  const prevTotal = this.stats.totalAttempts - 1;
+  this.stats.averageTimeSpent = Math.round(
+    (this.stats.averageTimeSpent * prevTotal + timeSpent) /
+      this.stats.totalAttempts
   );
 
   return this.save();
