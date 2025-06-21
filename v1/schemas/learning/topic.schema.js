@@ -2,6 +2,8 @@ const Joi = require("joi");
 const {
   DIFFICULTY_LEVELS,
   LEARNING_OBJECTIVES,
+  STATUSES,
+  SERIES
 } = require("../../constants");
 
 // =============== CREATE TOPIC SCHEMA ===============
