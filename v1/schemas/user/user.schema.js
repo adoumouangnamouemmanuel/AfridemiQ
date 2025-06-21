@@ -19,7 +19,8 @@ const registerSchema = Joi.object({
   password: Joi.string().min(8).required().messages({
     "string.min": "Mot de passe trop court",
     "any.required": "Mot de passe requis",
-  })
+  }),
+  role: Joi.string().valid("student", "admin").default("student"),
 });
 
 const loginSchema = Joi.object({
