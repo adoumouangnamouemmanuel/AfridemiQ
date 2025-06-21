@@ -165,68 +165,44 @@ const getTopicsByDifficulty = async (req, res) => {
       message: error.message || "Erreur lors de la récupération des sujets",
         });
       }
+};
 
-      const result = await topicService.searchTopics(searchTerm, {
-        page,
-        limit,
-        sortBy,
-        sortOrder,
-      });
+// =============== GET POPULAR TOPICS ===============
+const getPopularTopics = async (req, res) => {
+  logger.info("===================getPopularTopics=======================");
 
-      res.status(200).json({
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const { subjectId } = req.query;
+    const topics = await topicService.getPopularTopics(limit, subjectId);
+
+    logger.info("++++++✅ GET POPULAR TOPICS: Popular topics retrieved ++++++");
+    res.status(StatusCodes.OK).json({
         success: true,
-        message: "Search completed successfully",
-        data: result.topics,
-        pagination: result.pagination,
+      message: "Sujets populaires récupérés avec succès",
+      data: { topics },
       });
     } catch (error) {
-      next(error);
-    }
-  }
-
-  // Get topic statistics
-  async getTopicStatistics(req, res, next) {
-    try {
-      const stats = await topicService.getTopicStatistics();
-
-      res.status(200).json({
-        success: true,
-        message: "Statistics retrieved successfully",
-        data: stats,
+    logger.error("❌ GET POPULAR TOPICS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message:
+        error.message || "Erreur lors de la récupération des sujets populaires",
       });
-    } catch (error) {
-      next(error);
-    }
   }
+};
 
-  // Get difficulty levels
-  async getDifficultyLevels(req, res, next) {
-    try {
-      res.status(200).json({
-        success: true,
-        message: "Difficulty levels retrieved successfully",
-        data: DIFFICULTY_LEVELS,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+// =============== SEARCH TOPICS ===============
+const searchTopics = async (req, res) => {
+  logger.info("===================searchTopics=======================");
 
-  // Bulk create topics
-  async bulkCreateTopics(req, res, next) {
-    try {
-      const { topics } = req.body;
+  try {
+    const { q: searchTerm } = req.query;
+    const filters = req.query;
+    const topics = await topicService.searchTopics(searchTerm, filters);
 
-      if (!Array.isArray(topics) || topics.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Topics array is required and cannot be empty",
-        });
-      }
-
-      const result = await topicService.bulkCreateTopics(topics);
-
-      res.status(201).json({
+    logger.info("++++++✅ SEARCH TOPICS: Search completed successfully ++++++");
+    res.status(StatusCodes.OK).json({
         success: true,
         message: "Bulk create completed",
         data: result,
