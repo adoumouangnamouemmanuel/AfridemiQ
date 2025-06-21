@@ -76,19 +76,30 @@ const getQuizResultById = async (req, res) => {
   }
 };
 
+// =============== UPDATE QUIZ RESULT ===============
 const updateQuizResult = async (req, res) => {
+  logger.info("===================updateQuizResult=======================");
+
   try {
     const quizResult = await quizResultService.updateQuizResult(
       req.params.id,
       req.body
     );
+
+    logger.info(
+      "++++++✅ UPDATE QUIZ RESULT: Quiz result updated successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
+      success: true,
       message: "Résultat de quiz mis à jour avec succès",
-      data: quizResult,
+      data: { quizResult },
     });
   } catch (error) {
-    logger.error("Error updating quiz result:", error);
-    throw error;
+    logger.error("❌ UPDATE QUIZ RESULT ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la mise à jour du résultat",
+    });
   }
 };
 
