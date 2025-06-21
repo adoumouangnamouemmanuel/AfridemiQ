@@ -120,55 +120,30 @@ const getTopicsBySubject = async (req, res) => {
   logger.info("===================getTopicsBySubject=======================");
 
     try {
-      const { page, limit, sortBy, sortOrder } = req.query;
-      const result = await topicService.getTopicsBySubject(
-        req.params.subjectId,
-        {
-          page,
-          limit,
-          sortBy,
-          sortOrder,
-        }
-      );
+    const { subjectId } = req.params;
+    const topics = await topicService.getTopicsBySubject(subjectId, req.query);
 
-      res.status(200).json({
+    logger.info("++++++✅ GET TOPICS BY SUBJECT: Topics retrieved ++++++");
+    res.status(StatusCodes.OK).json({
         success: true,
-        message: "Topics retrieved successfully",
-        data: result.topics,
-        pagination: result.pagination,
+      message: "Sujets récupérés avec succès",
+      data: { topics },
       });
     } catch (error) {
-      next(error);
-    }
-  }
-
-  // Get topics by difficulty
-  async getTopicsByDifficulty(req, res, next) {
-    try {
-      const { page, limit, sortBy, sortOrder } = req.query;
-      const result = await topicService.getTopicsByDifficulty(
-        req.params.difficulty,
-        {
-          page,
-          limit,
-          sortBy,
-          sortOrder,
-        }
-      );
-
-      res.status(200).json({
-        success: true,
-        message: "Topics retrieved successfully",
-        data: result.topics,
-        pagination: result.pagination,
+    logger.error("❌ GET TOPICS BY SUBJECT ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des sujets",
       });
-    } catch (error) {
-      next(error);
-    }
   }
+};
 
-  // Get topics by series
-  async getTopicsBySeries(req, res, next) {
+// =============== GET TOPICS BY DIFFICULTY ===============
+const getTopicsByDifficulty = async (req, res) => {
+  logger.info(
+    "===================getTopicsByDifficulty======================="
+  );
+
     try {
       const { page, limit, sortBy, sortOrder } = req.query;
       const result = await topicService.getTopicsBySeries(req.params.series, {
