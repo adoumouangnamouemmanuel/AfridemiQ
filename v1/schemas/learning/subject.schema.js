@@ -100,38 +100,31 @@ const createSubjectSchema = Joi.object({
   isFeatured: Joi.boolean().optional().default(false),
 });
 
+// =============== UPDATE SUBJECT SCHEMA ===============
 const updateSubjectSchema = Joi.object({
-  name: Joi.string().trim().max(100),
-  icon: Joi.string().trim(),
-  color: Joi.string().pattern(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/),
-  description: Joi.string().trim().max(500),
-  longDescription: Joi.string().trim().max(2000),
-  series: Joi.array().items(Joi.string().trim()).min(1),
-  category: Joi.string().valid(
-    "sciences",
-    "litterature",
-    "langues",
-    "mathematiques",
-    "sciences-sociales",
-    "arts",
-    "technologie"
-  ),
-  subcategory: Joi.string().trim().max(50),
-  difficulty: Joi.string().valid("facile", "moyen", "difficile"),
-  estimatedHours: Joi.number().integer().min(1).max(1000),
-  tags: Joi.array().items(Joi.string().trim()),
-  keywords: Joi.array().items(Joi.string().trim()),
-  isActive: Joi.boolean(),
-});
-
-const getSubjectsSchema = Joi.object({
-  page: Joi.number().integer().min(1).default(1),
-  limit: Joi.number().integer().min(1).max(100).default(10),
-  series: Joi.alternatives()
-    .try(
-      Joi.string().trim().min(1),
-      Joi.array().items(Joi.string().trim().min(1))
-    )
+  name: Joi.string().trim().max(100).optional(),
+  description: Joi.string().trim().max(500).optional(),
+  category: Joi.string()
+    .valid(...SUBJECT_CATEGORIES)
+    .optional(),
+  examTypes: Joi.array()
+    .items(Joi.string().valid(...EXAM_TYPES))
+    .min(1)
+    .optional(),
+  countries: Joi.array()
+    .items(Joi.string().valid(...COUNTRIES))
+    .min(1)
+    .optional(),
+  educationLevels: Joi.array()
+    .items(Joi.string().valid(...EDUCATION_LEVELS))
+    .min(1)
+    .optional(),
+  series: Joi.array()
+    .items(Joi.string().valid("A", "C", "D", "ALL"))
+    .optional(),
+  icon: Joi.string().max(50).optional(),
+  color: Joi.string()
+    .pattern(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)
     .optional(),
   category: Joi.string()
     .valid(...SUBJECT_CATEGORIES)
