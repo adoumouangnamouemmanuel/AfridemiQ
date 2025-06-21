@@ -55,34 +55,30 @@ router.get("/search/query", quizController.searchQuizzes);
 // Create new quiz
 router.post(
   "/",
-  validateMiddleware(createQuizSchema),
+  authMiddleware,
+  roleMiddleware(["teacher", "admin"]),
+  validateMiddleware(createQuizSchema, "body"),
   quizController.createQuiz
 );
-router.get(
-  "/",
-  validateMiddleware(getQuizzesSchema, "query"),
-  quizController.getAllQuizzes
-);
-router.get("/my-quizzes", quizController.getMyQuizzes);
-router.get("/subject/:subjectId", quizController.getQuizzesBySubject);
-router.get("/:id", quizController.getQuizById);
+
+// Update quiz
 router.put(
   "/:id",
-  validateMiddleware(updateQuizSchema),
+  authMiddleware,
+  roleMiddleware(["teacher", "admin"]),
+  validateMiddleware(updateQuizSchema, "body"),
   quizController.updateQuiz
 );
-router.delete("/:id", quizController.deleteQuiz);
 
-// Quiz management
-router.get("/:id/eligibility", quizController.checkQuizEligibility);
-router.get("/:id/statistics", quizController.getQuizStatistics);
-router.post("/:id/update-analytics", quizController.updateQuizAnalytics);
-
-// Bulk operations
-router.post(
-  "/bulk/update",
-  validateMiddleware(bulkUpdateQuizzesSchema),
-  quizController.bulkUpdateQuizzes
+// Delete quiz (soft delete)
+router.delete(
+  "/:id",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  quizController.deleteQuiz
 );
+
+// Update quiz stats
+router.post("/:id/stats", authMiddleware, quizController.updateQuizStats);
 
 module.exports = router;
