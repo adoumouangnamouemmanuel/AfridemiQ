@@ -45,71 +45,67 @@ const getTopics = async (query) => {
       const {
         page = 1,
         limit = 10,
-        sortBy = "createdAt",
-        sortOrder = "desc",
-        search,
         subjectId,
         difficulty,
-        series,
-        hasPractice,
-        hasNote,
-        hasStudyMaterial,
-      } = { ...filters, ...options };
+    isActive,
+    isPremium,
+    isPopular,
+    hasQuestions,
+    hasResources,
+    search,
+    sortBy = "order",
+    sortOrder = "asc",
+  } = query;
 
-      // Build query
-      const query = {};
+  // Build filter object
+  const filter = { status: "active" };
 
+  if (subjectId) filter.subjectId = subjectId;
+  if (difficulty) filter.difficulty = difficulty;
+  if (isActive !== undefined) filter.isActive = isActive === "true";
+  if (isPremium !== undefined) filter.isPremium = isPremium === "true";
+  if (isPopular !== undefined) filter.isPopular = isPopular === "true";
+  if (hasQuestions !== undefined) filter.hasQuestions = hasQuestions === "true";
+  if (hasResources !== undefined) filter.hasResources = hasResources === "true";
+
+  // Add search functionality
       if (search) {
-        query.$or = [
+    filter.$or = [
           { name: { $regex: search, $options: "i" } },
           { description: { $regex: search, $options: "i" } },
-          {
-            learningObjectives: {
-              $elemMatch: { $regex: search, $options: "i" },
-            },
-          },
+      { keywords: { $in: [search.toLowerCase()] } },
         ];
       }
 
-      if (subjectId) query.subjectId = subjectId;
-      if (difficulty) query.difficulty = difficulty;
-      if (series)
-        query.series = { $in: Array.isArray(series) ? series : [series] };
-      if (hasPractice !== undefined) query.hasPractice = hasPractice;
-      if (hasNote !== undefined) query.hasNote = hasNote;
-      if (hasStudyMaterial !== undefined)
-        query.hasStudyMaterial = hasStudyMaterial;
+  // Build sort object
+  const sort = {};
+  sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
       // Calculate pagination
       const skip = (page - 1) * limit;
-      const sortOptions = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
 
-      // Execute query
+  // Execute query with pagination
       const [topics, total] = await Promise.all([
-        Topic.find(query)
-          .populate("subjectId", "name code description")
-          .sort(sortOptions)
+    Topic.find(filter)
+      .populate("subjectId", "name code")
+      .sort(sort)
           .skip(skip)
-          .limit(Number.parseInt(limit))
+      .limit(parseInt(limit))
           .lean(),
-        Topic.countDocuments(query),
+    Topic.countDocuments(filter),
       ]);
 
-      return {
-        topics,
-        pagination: {
-          currentPage: Number.parseInt(page),
+  const pagination = {
+    currentPage: parseInt(page),
           totalPages: Math.ceil(total / limit),
-          totalItems: total,
-          itemsPerPage: Number.parseInt(limit),
+    totalCount: total,
           hasNextPage: page < Math.ceil(total / limit),
           hasPrevPage: page > 1,
-        },
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
+  };
+
+  logger.info("++++++✅ GET TOPICS: Topics retrieved successfully ++++++");
+  return { topics, pagination };
+};
 
   // Get topic by ID
   async getTopicById(id) {
