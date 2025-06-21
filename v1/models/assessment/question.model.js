@@ -57,12 +57,6 @@ const QuestionSchema = new Schema(
       ref: "Topic",
     },
 
-    createdBy: {
-      type: Types.ObjectId,
-      ref: "User",
-      required: [true, "L'ID du créateur est requis"],
-    },
-
     // =============== CATÉGORISATION AFRIQUE ===============
     difficulty: {
       type: String,
@@ -90,14 +84,8 @@ const QuestionSchema = new Schema(
       },
     },
 
-    examYear: {
-      type: Number,
-      min: [2000, "Année d'examen invalide"],
-      max: [2030, "Année d'examen invalide"],
-    },
-
     // =============== STATISTIQUES SIMPLES ===============
-    stats: {
+    progress: {
       totalAttempts: { type: Number, default: 0 },
       correctAttempts: { type: Number, default: 0 },
       averageTimeSpent: { type: Number, default: 0 }, // en secondes
@@ -156,9 +144,9 @@ QuestionSchema.index({ createdBy: 1, status: 1 });
 
 // =============== VIRTUELS ===============
 QuestionSchema.virtual("successRate").get(function () {
-  if (this.stats.totalAttempts === 0) return 0;
+  if (this.progress.totalAttempts === 0) return 0;
   return Math.round(
-    (this.stats.correctAttempts / this.stats.totalAttempts) * 100
+    (this.progress.correctAttempts / this.progress.totalAttempts) * 100
   );
 });
 
@@ -169,13 +157,13 @@ QuestionSchema.virtual("difficultyScore").get(function () {
 
 // =============== MÉTHODES ===============
 QuestionSchema.methods.updateStats = function (isCorrect, timeSpent) {
-  this.stats.totalAttempts += 1;
-  if (isCorrect) this.stats.correctAttempts += 1;
+  this.progress.totalAttempts += 1;
+  if (isCorrect) this.progress.correctAttempts += 1;
 
   // Mise à jour du temps moyen
-  this.stats.averageTimeSpent = Math.round(
-    (this.stats.averageTimeSpent * (this.stats.totalAttempts - 1) + timeSpent) /
-      this.stats.totalAttempts
+  this.progress.averageTimeSpent = Math.round(
+    (this.progress.averageTimeSpent * (this.progress.totalAttempts - 1) + timeSpent) /
+      this.progress.totalAttempts
   );
 
   return this.save();
