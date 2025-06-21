@@ -1,0 +1,30 @@
+{
+  "title": "WAEC Mathematics Past Paper - May/June 2023",
+  "description": "Complete WAEC Mathematics examination paper from May/June 2023 session with detailed solutions and marking scheme",
+  "type": "pdf",
+  "category": "past_papers",
+  "url": "https://resources.africaexamprep.com/waec/math/2023/may-june.pdf",
+  "subjectId": "6856e110aff9659b6e3ec887",
+  "topicId": "6857074021fff5da40b2f036",
+  "difficulty": "medium",
+  "targetLevel": "senior_secondary",
+  "examYear": 2023,
+  "examSession": "may_june",
+  "fileInfo": {
+    "size": 2048000,
+    "mimeType": "application/pdf",
+    "pages": 12
+  },
+  "tags": ["waec", "past-paper", "2023", "solutions"],
+  "keywords": ["algebra", "geometry", "statistics", "calculus"],
+  "author": {
+    "name": "WAEC Council",
+    "institution": "West African Examinations Council"
+  },
+  "source": "Official WAEC Publications",
+  "isPublic": true,
+  "isPremium": false,
+  "requiresDownload": true,
+  "isFeatured": true,
+  "isVerified": true
+}
