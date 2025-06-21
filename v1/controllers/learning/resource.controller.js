@@ -287,20 +287,24 @@ const addFeedback = async (req, res) => {
   }
 };
 
-// Get resource statistics
-const getResourceStatistics = async (req, res) => {
-  try {
-    const statistics = await resourceService.getResourceStatistics();
+// =============== TRACK VIEW ===============
+const trackView = async (req, res) => {
+  logger.info("===================trackView=======================");
 
+  try {
+    const resource = await resourceService.trackView(req.params.id);
+
+    logger.info("++++++✅ TRACK VIEW: View tracked successfully ++++++");
     res.status(StatusCodes.OK).json({
-      message: "Statistics retrieved successfully",
-      data: statistics,
+      success: true,
+      message: "Vue enregistrée avec succès",
+      data: { resource },
     });
   } catch (error) {
-    logger.error("Error getting resource statistics:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error retrieving statistics",
-      error: error.message,
+    logger.error("❌ TRACK VIEW ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de l'enregistrement de la vue",
     });
   }
 };
