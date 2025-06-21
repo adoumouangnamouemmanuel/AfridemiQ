@@ -7,7 +7,7 @@ const compression = require("compression");
 // user routes
 const userRoutes = require("./routes/user/user.route");
 // Learning routes
-// const subjectRoutes = require("./routes/learning/subject.route");
+const subjectRoutes = require("./routes/learning/subject.route");
 // const topicRoutes = require("./src/routes/learning/topic.route");
 // assessment routes
 // const quizRoutes = require("./routes/assessment/quiz.route");
@@ -90,7 +90,7 @@ app.get("/health", (req, res) => {
 
 // API routes
 app.use("/api/v1/users", userRoutes);
-// app.use("/api/subjects", subjectRoutes);
+app.use("/api/v1/subjects", subjectRoutes);
 // app.use("/api/topics", topicRoutes);
 
 // app.use("/api/quizzes", quizRoutes);
