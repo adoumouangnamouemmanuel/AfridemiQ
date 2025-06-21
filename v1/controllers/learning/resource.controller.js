@@ -4,37 +4,26 @@ const createLogger = require("../../services/logging.service");
 
 const logger = createLogger("ResourceController");
 
-// Get all resources
+// =============== GET ALL RESOURCES ===============
 const getAllResources = async (req, res) => {
+  logger.info("===================getAllResources=======================");
+
   try {
-    const filters = {
-      page: req.query.page,
-      limit: req.query.limit,
-      sortBy: req.query.sortBy,
-      sortOrder: req.query.sortOrder,
-      search: req.query.search,
-      subjectId: req.query.subjectId,
-      topicId: req.query.topicId,
-      examId: req.query.examId,
-      format: req.query.format,
-      level: req.query.level,
-      series: req.query.series,
-      premiumOnly: req.query.premiumOnly,
-      offlineAvailable: req.query.offlineAvailable,
-      minRating: req.query.minRating,
-    };
+    const result = await resourceService.getAllResources(req.query);
 
-    const result = await resourceService.getAllResources(filters);
-
+    logger.info(
+      "++++++✅ GET ALL RESOURCES: Resources retrieved successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Resources retrieved successfully",
+      success: true,
+      message: "Ressources récupérées avec succès",
       data: result,
     });
   } catch (error) {
-    logger.error("Error getting all resources:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error retrieving resources",
-      error: error.message,
+    logger.error("❌ GET ALL RESOURCES ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des ressources",
     });
   }
 };
