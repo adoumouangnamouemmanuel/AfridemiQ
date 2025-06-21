@@ -133,17 +133,35 @@ const getQuestionsQuerySchema = Joi.object({
   topicId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
     .optional(),
-  format: Joi.string()
+  type: Joi.string()
     .valid(...QUESTION_TYPES)
     .optional(),
   difficulty: Joi.string()
     .valid(...DIFFICULTY_LEVELS)
     .optional(),
-  status: Joi.string()
-    .valid("draft", "review", "approved", "rejected", "archived")
+  educationLevel: Joi.string()
+    .valid(...EDUCATION_LEVELS)
     .optional(),
-  premiumOnly: Joi.boolean().optional(),
+  examType: Joi.string()
+    .valid(...EXAM_TYPES)
+    .optional(),
   isActive: Joi.boolean().optional(),
+  isPremium: Joi.boolean().optional(),
+  status: Joi.string()
+    .valid(...STATUSES)
+    .optional(),
+  search: Joi.string().trim().max(100).optional(),
+  sortBy: Joi.string()
+    .valid(
+      "question",
+      "createdAt",
+      "difficulty",
+      "stats.totalAttempts",
+      "stats.successRate"
+    )
+    .optional()
+    .default("createdAt"),
+  sortOrder: Joi.string().valid("asc", "desc").optional().default("desc"),
 });
 
 module.exports = {
