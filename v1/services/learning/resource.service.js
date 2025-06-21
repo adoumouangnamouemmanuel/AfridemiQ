@@ -222,22 +222,33 @@ const deleteResource = async (resourceId) => {
     throw new NotFoundError("Ressource non trouvée");
       }
 
-      return resource;
-    } catch (error) {
-      logger.error("Error tracking download:", error);
-      throw error;
-    }
+  // Soft delete - just mark as inactive
+  await Resource.findByIdAndUpdate(resourceId, {
+    isActive: false,
+    status: "inactive",
+  });
+
+  logger.info("++++++✅ DELETE RESOURCE: Resource deleted successfully ++++++");
+};
+
+// =============== GET RESOURCES BY SUBJECT ===============
+const getResourcesBySubject = async (subjectId, options = {}) => {
+  logger.info(
+    "===================getResourcesBySubject======================="
+  );
+
+  // Verify subject exists
+  const subject = await Subject.findById(subjectId);
+  if (!subject) {
+    throw new NotFoundError("Matière non trouvée");
   }
 
-  // Get resources by subject
-  async getResourcesBySubject(subjectId, options = {}) {
-    try {
-      return await this.getAllResources({ subjectId }, options);
-    } catch (error) {
-      logger.error("Error getting resources by subject:", error);
-      throw error;
-    }
-  }
+  const query = { subjectId, ...options };
+  const result = await getAllResources(query);
+
+  logger.info("++++++✅ GET RESOURCES BY SUBJECT: Resources retrieved ++++++");
+  return result;
+};
 
   // Get resources by topic
   async getResourcesByTopic(topicId, options = {}) {
