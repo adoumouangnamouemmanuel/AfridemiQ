@@ -127,34 +127,32 @@ const deleteResource = async (req, res) => {
   }
 };
 
-// Add feedback
-const addFeedback = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { rating, comments } = req.body;
-    const userId = req.user.userId;
+// =============== GET RESOURCES BY SUBJECT ===============
+const getResourcesBySubject = async (req, res) => {
+  logger.info(
+    "===================getResourcesBySubject======================="
+  );
 
-    const resource = await resourceService.addFeedback(
-      id,
-      userId,
-      rating,
-      comments
+  try {
+    const { subjectId } = req.params;
+    const result = await resourceService.getResourcesBySubject(
+      subjectId,
+      req.query
     );
 
+    logger.info(
+      "++++++✅ GET RESOURCES BY SUBJECT: Resources retrieved ++++++"
+    );
     res.status(StatusCodes.OK).json({
-      message: "Feedback added successfully",
-      data: resource,
+      success: true,
+      message: "Ressources récupérées avec succès",
+      data: result,
     });
   } catch (error) {
-    logger.error("Error adding feedback:", error);
-    const statusCode =
-      error.message === "Resource not found"
-        ? StatusCodes.NOT_FOUND
-        : StatusCodes.BAD_REQUEST;
-
-    res.status(statusCode).json({
-      message: error.message || "Error adding feedback",
-      error: error.message,
+    logger.error("❌ GET RESOURCES BY SUBJECT ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des ressources",
     });
   }
 };
