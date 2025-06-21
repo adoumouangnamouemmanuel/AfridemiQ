@@ -24,7 +24,7 @@ const createResourceSchema = Joi.object({
     .messages({
       "any.required": "Le type est requis",
       "any.only": "Type de ressource invalide",
-  }),
+    }),
 
   category: Joi.string()
     .valid(...RESOURCE_CATEGORIES)
@@ -45,12 +45,12 @@ const createResourceSchema = Joi.object({
     .messages({
       "any.required": "L'ID de la matière est requis",
       "string.pattern.base": "Format d'ID de matière invalide",
-  }),
+    }),
 
   topicId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+    .pattern(/^[0-9a-fA-F]{24}$/)
     .optional()
-        .messages({
+    .messages({
       "string.pattern.base": "Format d'ID de sujet invalide",
     }),
 
@@ -68,7 +68,7 @@ const createResourceSchema = Joi.object({
     .default("both")
     .messages({
       "any.only": "Niveau cible invalide",
-  }),
+    }),
 
   examYear: Joi.number()
     .min(2000)
@@ -82,7 +82,7 @@ const createResourceSchema = Joi.object({
       "number.min": "Année minimum 2000",
       "number.max": "Année maximum 2030",
       "any.required": "L'année d'examen est requise pour les sujets d'examens",
-  }),
+    }),
 
   examSession: Joi.string()
     .valid(...EXAM_SESSIONS)
@@ -90,7 +90,7 @@ const createResourceSchema = Joi.object({
       is: "past_papers",
       then: Joi.required(),
       otherwise: Joi.optional(),
-        })
+    })
     .messages({
       "any.only": "Session d'examen invalide",
       "any.required":
@@ -143,7 +143,7 @@ const updateResourceSchema = Joi.object({
     .pattern(/^[0-9a-fA-F]{24}$/)
     .optional(),
   topicId: Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
+    .pattern(/^[0-9a-fA-F]{24}$/)
     .optional(),
   difficulty: Joi.string()
     .valid(...DIFFICULTY_LEVELS)
