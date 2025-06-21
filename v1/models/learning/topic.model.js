@@ -60,11 +60,15 @@ const TopicSchema = new Schema(
         objective: {
           type: String,
           required: [true, "L'objectif d'apprentissage est requis"],
+          trim: true,
           maxlength: [200, "L'objectif ne peut pas dépasser 200 caractères"],
         },
         level: {
           type: String,
-          enum: LEARNING_OBJECTIVES,
+          enum: {
+            values: LEARNING_OBJECTIVES,
+            message: "Niveau d'objectif invalide",
+          },
           default: "understand",
         },
       },
