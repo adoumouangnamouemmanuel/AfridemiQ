@@ -457,86 +457,42 @@ const getAdminAnalytics = async () => {
     getResourceStatistics(),
     Resource.find({ isActive: true })
             .sort({ createdAt: -1 })
+      .populate("subjectId", "name")
+      .select("title category type stats.views createdAt")
             .limit(10)
+      .lean(),
+    Resource.find({ isActive: true })
+      .sort({ "stats.views": -1, "stats.downloads": -1 })
             .populate("subjectId", "name")
-            .select("title format level createdAt analytics.views")
+      .select("title category stats.views stats.downloads")
+      .limit(10)
             .lean(),
-          Resource.aggregate([
-            { $unwind: "$analytics.userFeedback" },
-            {
-              $group: {
-                _id: null,
-                totalFeedback: { $sum: 1 },
-                averageRating: { $avg: "$analytics.userFeedback.rating" },
-              },
-            },
-          ]),
-          Resource.aggregate([
-            {
-              $project: {
-                title: 1,
-                popularity: {
-                  $add: [
-                    "$analytics.views",
-                    { $multiply: ["$analytics.downloads", 2] },
-                  ],
-                },
-                createdAt: 1,
-              },
-            },
-            { $sort: { popularity: -1 } },
-            { $limit: 10 },
-          ]),
-        ]);
+  ]);
 
-      return {
+  const analytics = {
         ...basicStats,
         recentResources,
-        feedbackStats: feedbackStats[0] || {
-          totalFeedback: 0,
-          averageRating: 0,
-        },
-        popularityTrends,
+    trendingResources,
       };
-    } catch (error) {
-      logger.error("Error getting admin analytics:", error);
-      throw error;
-    }
-  }
 
-  // Validate references
-  async validateReferences(resourceData) {
-    try {
-      // Validate subject
-      if (resourceData.subjectId) {
-        const subject = await Subject.findById(resourceData.subjectId);
-        if (!subject) {
-          throw new Error("Invalid subject ID");
-        }
-      }
+  logger.info("++++++✅ GET ADMIN ANALYTICS: Analytics retrieved ++++++");
+  return analytics;
+};
 
-      // Validate topics
-      if (resourceData.topicIds && resourceData.topicIds.length > 0) {
-        const topics = await Topic.find({
-          _id: { $in: resourceData.topicIds },
-        });
-        if (topics.length !== resourceData.topicIds.length) {
-          throw new Error("One or more invalid topic IDs");
-        }
-      }
-
-      // Validate exams
-      if (resourceData.examIds && resourceData.examIds.length > 0) {
-        const exams = await Exam.find({ _id: { $in: resourceData.examIds } });
-        if (exams.length !== resourceData.examIds.length) {
-          throw new Error("One or more invalid exam IDs");
-        }
-      }
-    } catch (error) {
-      logger.error("Error validating references:", error);
-      throw error;
-    }
-  }
-}
-
-module.exports = new ResourceService();
+module.exports = {
+  getAllResources,
+  getResourceById,
+  createResource,
+  updateResource,
+  deleteResource,
+  getResourcesBySubject,
+  getResourcesByTopic,
+  searchResources,
+  getResourceStatistics,
+  getResourceFormats,
+  addFeedback,
+  trackView,
+  trackDownload,
+  bulkCreateResources,
+  getAdminAnalytics,
+};
