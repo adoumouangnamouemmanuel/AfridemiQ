@@ -189,7 +189,7 @@ const addFeedbackSchema = Joi.object({
   }),
 });
 
-// Bulk create resources schema
+// =============== BULK CREATE RESOURCES SCHEMA ===============
 const bulkCreateResourcesSchema = Joi.object({
   resources: Joi.array()
     .items(createResourceSchema)
@@ -197,10 +197,9 @@ const bulkCreateResourcesSchema = Joi.object({
     .max(50)
     .required()
     .messages({
-      "array.base": "Les ressources doivent être un tableau",
+      "any.required": "Les ressources sont requises",
       "array.min": "Au moins une ressource est requise",
       "array.max": "Maximum 50 ressources peuvent être créées à la fois",
-      "any.required": "Les ressources sont requises",
     }),
 });
 
