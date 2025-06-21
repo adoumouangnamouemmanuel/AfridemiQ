@@ -26,20 +26,27 @@ const createSubject = async (req, res) => {
   }
 };
 
-// Get all subjects with advanced search
+// =============== GET ALL SUBJECTS ===============
 const getSubjects = async (req, res) => {
+  logger.info("===================getSubjects=======================");
+
   try {
     const result = await subjectService.getSubjects(req.query);
+
+    logger.info(
+      "++++++✅ GET SUBJECTS: Subjects retrieved successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
+      success: true,
       message: "Matières récupérées avec succès",
-      data: result.subjects,
-      pagination: result.pagination,
+      data: result,
     });
   } catch (error) {
-    logger.error("Error in getSubjects controller", error, {
-      query: req.query,
+    logger.error("❌ GET SUBJECTS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des matières",
     });
-    throw error;
   }
 };
 
