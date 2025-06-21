@@ -2,13 +2,11 @@ const { Subject } = require("../../../models/learning/subject.model");
 const NotFoundError = require("../../../errors/notFoundError");
 const BadRequestError = require("../../../errors/badRequestError");
 const ConflictError = require("../../../errors/conflictError");
-const createLogger = require("../../../services/logging.service");
+const createLogger = require("../../logging.service");
 
 const logger = createLogger("SubjectService");
 
-/**
- * Create a new subject
- */
+// =============== CREATE SUBJECT ===============
 const createSubject = async (subjectData) => {
   try {
     // Check if subject with same name and series already exists
