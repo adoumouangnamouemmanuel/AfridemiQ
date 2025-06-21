@@ -297,9 +297,14 @@ const checkAnswer = async (req, res) => {
 
 module.exports = {
   createQuestion,
-  getQuestionById,
   getQuestions,
+  getQuestionById,
   updateQuestion,
   deleteQuestion,
-  verifyQuestion,
+  getQuestionsBySubject,
+  getQuestionsByTopic,
+  getRandomQuestions,
+  searchQuestions,
+  updateQuestionStats,
+  checkAnswer,
 };
