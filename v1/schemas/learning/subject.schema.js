@@ -89,8 +89,6 @@ const createSubjectSchema = Joi.object({
       "string.pattern.base": "Couleur hex invalide",
     }),
 
-  prerequisites: Joi.array().items(Joi.string().trim().max(100)).optional(),
-
   estimatedHours: Joi.number().min(1).max(500).optional().default(40).messages({
     "number.min": "Minimum 1 heure",
     "number.max": "Maximum 500 heures",
