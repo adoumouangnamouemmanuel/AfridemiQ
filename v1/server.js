@@ -111,12 +111,11 @@ app.get("/health", (req, res) => {
 // API routes
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/subjects", subjectRoutes);
-// app.use("/api/topics", topicRoutes);
+app.use("/api/v1/topics", topicRoutes);
 
 // app.use("/api/quizzes", quizRoutes);
 // app.use("/api/quiz-results", quizResultRoutes);
 // app.use("/api/questions", questionRoutes);
-
 
 // 404 handler
 app.use((req, res, next) => {
@@ -158,7 +157,7 @@ if (process.env.NODE_ENV !== "test") {
   }
 
   // Start server
-  HOST = '0.0.0.0';
+  HOST = "0.0.0.0";
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, HOST, () => {
     console.info(`Serveur en cours d'exécution sur le port ${PORT}`, {
