@@ -264,7 +264,7 @@ ResourceSchema.index({ subjectId: 1, topicId: 1 });
 ResourceSchema.index({ category: 1, type: 1 });
 ResourceSchema.index({ difficulty: 1, targetLevel: 1 });
 ResourceSchema.index({ examYear: 1, examSession: 1 });
-ResourceSchema.index({ tags: 1, keywords: 1 });
+// ResourceSchema.index({ tags: 1, keywords: 1 });
 ResourceSchema.index({ isFeatured: 1, isActive: 1 });
 ResourceSchema.index({ "stats.rating.average": -1 });
 ResourceSchema.index({ "stats.views": -1, "stats.downloads": -1 });
