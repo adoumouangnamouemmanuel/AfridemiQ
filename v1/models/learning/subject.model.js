@@ -173,9 +173,7 @@ const SubjectSchema = new Schema(
 );
 
 // =============== INDEX ===============
-SubjectSchema.index({ examTypes: 1, countries: 1, educationLevels: 1 });
 SubjectSchema.index({ category: 1, isActive: 1 });
-SubjectSchema.index({ code: 1 }, { unique: true });
 SubjectSchema.index({ isFeatured: 1, isActive: 1 });
 SubjectSchema.index({ "stats.totalStudents": -1 });
 
