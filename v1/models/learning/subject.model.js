@@ -6,7 +6,6 @@ const {
   EDUCATION_LEVELS,
   STATUSES,
   SERIES,
-  DIFFICULTY_LEVELS,
 } = require("../../constants");
 
 const SubjectSchema = new Schema(
