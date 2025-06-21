@@ -134,15 +134,16 @@ const getSubjectsSchema = Joi.object({
     )
     .optional(),
   category: Joi.string()
-    .valid(
-      "sciences",
-      "litterature",
-      "langues",
-      "mathematiques",
-      "sciences-sociales",
-      "arts",
-      "technologie"
-    )
+    .valid(...SUBJECT_CATEGORIES)
+    .optional(),
+  examType: Joi.string()
+    .valid(...EXAM_TYPES)
+    .optional(),
+  country: Joi.string()
+    .valid(...COUNTRIES)
+    .optional(),
+  educationLevel: Joi.string()
+    .valid(...EDUCATION_LEVELS)
     .optional(),
   difficulty: Joi.string().valid("facile", "moyen", "difficile").optional(),
   search: Joi.string().trim().optional(),
