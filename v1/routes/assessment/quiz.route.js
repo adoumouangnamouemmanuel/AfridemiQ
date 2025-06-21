@@ -1,9 +1,11 @@
 const express = require("express");
 const quizController = require("../../controllers/assessment/quiz.controller");
-const authMiddleware = require("../../middlewares/auth.middleware");
-// const roleMiddleware = require("../../middlewares/role.middleware");
 const validateMiddleware = require("../../middlewares/validate.middleware");
-// const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
+const authMiddleware = require("../../middlewares/auth.middleware");
+const roleMiddleware = require("../../middlewares/role.middleware");
+const utf8Middleware = require("../../middlewares/utf8.middleware");
+const { apiLimiter } = require("../../middlewares/rate.limit.middleware");
+
 const {
   createQuizSchema,
   updateQuizSchema,
