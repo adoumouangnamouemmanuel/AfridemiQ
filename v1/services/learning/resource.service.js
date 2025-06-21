@@ -1,7 +1,9 @@
 const { Resource } = require("../../../models/learning/resource.model");
 const { Subject } = require("../../../models/learning/subject.model");
 const { Topic } = require("../../../models/learning/topic.model");
-const { Exam } = require("../../../models/assessment/exam.model");
+const NotFoundError = require("../../../errors/notFoundError");
+const BadRequestError = require("../../../errors/badRequestError");
+const ConflictError = require("../../../errors/conflictError");
 const createLogger = require("../../logging.service");
 
 const logger = createLogger("ResourceService");
