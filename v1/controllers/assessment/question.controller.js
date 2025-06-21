@@ -287,8 +287,11 @@ const checkAnswer = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    logger.error("Error verifying question:", error);
-    throw error;
+    logger.error("❌ CHECK ANSWER ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la vérification de la réponse",
+    });
   }
 };
 
