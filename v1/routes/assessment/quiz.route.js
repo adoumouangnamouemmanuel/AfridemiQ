@@ -35,10 +35,24 @@ router.get("/:id", quizController.getQuizById);
 // Get popular quizzes
 router.get("/popular/list", quizController.getPopularQuizzes);
 
-// Protected routes
-router.use(authMiddleware);
+// Get quizzes by subject
+router.get("/subject/:subjectId", quizController.getQuizzesBySubject);
 
-// Quiz CRUD operations
+// Get quizzes by topic
+router.get("/topic/:topicId", quizController.getQuizzesByTopic);
+
+// Get quizzes by education level and exam type
+router.get(
+  "/education/:educationLevel/exam/:examType",
+  quizController.getQuizzesByEducationAndExam
+);
+
+// Search quizzes
+router.get("/search/query", quizController.searchQuizzes);
+
+// =============== PROTECTED ROUTES (Teacher/Admin) ===============
+
+// Create new quiz
 router.post(
   "/",
   validateMiddleware(createQuizSchema),
