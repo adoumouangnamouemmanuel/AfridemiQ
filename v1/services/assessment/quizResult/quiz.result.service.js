@@ -150,42 +150,109 @@ const updateQuizResult = async (quizResultId, updateData) => {
     }
   }
 
-  async updateQuizResult(id, data) {
-    try {
+  // Validate correct/incorrect answers sum if being updated
+  if (
+    updateData.correctAnswers !== undefined &&
+    updateData.incorrectAnswers !== undefined
+  ) {
+    const totalQuestions =
+      updateData.totalQuestions || existingQuizResult.totalQuestions;
+    if (
+      updateData.correctAnswers + updateData.incorrectAnswers !==
+      totalQuestions
+    ) {
+      throw new BadRequestError(
+        "Le total des réponses ne correspond pas au nombre de questions"
+      );
+    }
+  }
+
       const quizResult = await QuizResult.findByIdAndUpdate(
-        id,
-        { $set: data },
+    quizResultId,
+    { $set: updateData },
         { new: true, runValidators: true }
       )
-        .populate("userId", "name email")
-        .populate("quizId", "name")
-        .populate("questionIds", "question")
-        .populate("hintUsages", "hintType stepsViewed usedAt")
-        .populate("questionFeedback.userId", "name");
-      if (!quizResult) throw new ApiError(404, "Quiz result not found");
-      logger.info(`Updated quiz result: ${id}`);
+    .populate("userId", "firstName lastName email")
+    .populate("quizId", "title format difficulty passingScore")
+    .populate("answers.questionId", "question type difficulty");
+
+  logger.info(
+    "++++++✅ UPDATE QUIZ RESULT: Quiz result updated successfully ++++++"
+  );
       return quizResult;
-    } catch (error) {
-      logger.error("Error updating quiz result:", error);
-      throw error instanceof ApiError
-        ? error
-        : new ApiError(500, "Failed to update quiz result");
-    }
+};
+
+// =============== DELETE QUIZ RESULT ===============
+const deleteQuizResult = async (quizResultId) => {
+  logger.info("===================deleteQuizResult=======================");
+
+  const quizResult = await QuizResult.findById(quizResultId);
+  if (!quizResult) {
+    throw new NotFoundError("Résultat de quiz non trouvé");
   }
 
-  async deleteQuizResult(id) {
-    try {
-      const quizResult = await QuizResult.findByIdAndDelete(id);
-      if (!quizResult) throw new ApiError(404, "Quiz result not found");
-      logger.info(`Deleted quiz result: ${id}`);
-      return { message: "Quiz result deleted successfully" };
-    } catch (error) {
-      logger.error("Error deleting quiz result:", error);
-      throw error instanceof ApiError
-        ? error
-        : new ApiError(500, "Failed to delete quiz result");
-    }
-  }
-}
+  await QuizResult.findByIdAndDelete(quizResultId);
 
-module.exports = new QuizResultService();
+  logger.info(
+    "++++++✅ DELETE QUIZ RESULT: Quiz result deleted successfully ++++++"
+  );
+};
+
+// =============== GET USER BEST SCORE ===============
+const getUserBestScore = async (userId, quizId) => {
+  logger.info("===================getUserBestScore=======================");
+
+  if (!userId || !quizId) {
+    throw new BadRequestError("ID utilisateur et ID quiz requis");
+  }
+
+  const bestScore = await QuizResult.getUserBestScore(userId, quizId);
+
+  logger.info("++++++✅ GET USER BEST SCORE: User best score retrieved ++++++");
+  return bestScore;
+};
+
+// =============== GET USER ATTEMPT COUNT ===============
+const getUserAttemptCount = async (userId, quizId) => {
+  logger.info("===================getUserAttemptCount=======================");
+
+  if (!userId || !quizId) {
+    throw new BadRequestError("ID utilisateur et ID quiz requis");
+  }
+
+  const attemptCount = await QuizResult.getUserAttemptCount(userId, quizId);
+
+  logger.info(
+    "++++++✅ GET USER ATTEMPT COUNT: User attempt count retrieved ++++++"
+  );
+  return attemptCount;
+};
+
+// =============== GET USER AVERAGE SCORE ===============
+const getUserAverageScore = async (userId) => {
+  logger.info("===================getUserAverageScore=======================");
+
+  if (!userId) {
+    throw new BadRequestError("ID utilisateur requis");
+  }
+
+  const averageScoreResult = await QuizResult.getUserAverageScore(userId);
+  const averageScore =
+    averageScoreResult.length > 0 ? averageScoreResult[0].averageScore : 0;
+
+  logger.info(
+    "++++++✅ GET USER AVERAGE SCORE: User average score retrieved ++++++"
+  );
+  return Math.round(averageScore * 100) / 100; // Round to 2 decimal places
+};
+
+module.exports = {
+  createQuizResult,
+  getQuizResults,
+  getQuizResultById,
+  updateQuizResult,
+  deleteQuizResult,
+  getUserBestScore,
+  getUserAttemptCount,
+  getUserAverageScore,
+};
