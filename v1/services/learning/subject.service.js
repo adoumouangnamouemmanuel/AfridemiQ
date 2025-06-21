@@ -208,31 +208,73 @@ const getSubjectsByEducationAndCountry = async (educationLevel, country) => {
     throw new BadRequestError("Niveau d'éducation et pays requis");
     }
 
-    subject.examIds.push(examId);
-    await subject.save();
+  const subjects = await Subject.findByEducationAndCountry(
+    educationLevel,
+    country
+  );
 
-    await subject.populate("examIds", "title description difficulty");
-
-    logger.info(`Exam added to subject: ${subject.name}`, {
-      subjectId,
-      examId,
-    });
-
-    return subject;
-  } catch (error) {
-    if (error.name === "CastError") {
-      throw new BadRequestError("ID invalide");
-    }
-    logger.error("Error adding exam to subject", error, { subjectId, examId });
-    throw error;
-  }
+  logger.info(
+    "++++++✅ GET SUBJECTS BY EDUCATION AND COUNTRY: Subjects retrieved ++++++"
+  );
+  return subjects;
 };
 
-/**
- * Remove exam from subject
- */
-const removeExamFromSubject = async (subjectId, examId) => {
-  try {
+// =============== GET SUBJECTS BY EXAM TYPE ===============
+const getSubjectsByExamType = async (examType, educationLevel = null) => {
+  logger.info(
+    "===================getSubjectsByExamType======================="
+  );
+
+  if (!examType) {
+    throw new BadRequestError("Type d'examen requis");
+  }
+
+  const subjects = await Subject.findByExamType(examType, educationLevel);
+
+  logger.info("++++++✅ GET SUBJECTS BY EXAM TYPE: Subjects retrieved ++++++");
+  return subjects;
+};
+
+// =============== SEARCH SUBJECTS ===============
+const searchSubjects = async (searchTerm, filters = {}) => {
+  logger.info("===================searchSubjects=======================");
+
+  if (!searchTerm || searchTerm.trim().length < 2) {
+    throw new BadRequestError(
+      "Le terme de recherche doit contenir au moins 2 caractères"
+    );
+    }
+
+  const query = {
+    $or: [
+      { name: { $regex: searchTerm.trim(), $options: "i" } },
+      { description: { $regex: searchTerm.trim(), $options: "i" } },
+      { code: { $regex: searchTerm.trim(), $options: "i" } },
+    ],
+    isActive: true,
+    status: "active",
+  };
+
+  // Apply additional filters
+  if (filters.category) query.category = filters.category;
+  if (filters.examType) query.examTypes = filters.examType;
+  if (filters.country) query.countries = filters.country;
+  if (filters.educationLevel) query.educationLevels = filters.educationLevel;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
+
+  const subjects = await Subject.find(query)
+    .sort({ "stats.totalStudents": -1, name: 1 })
+    .limit(20);
+
+  logger.info("++++++✅ SEARCH SUBJECTS: Search completed successfully ++++++");
+  return subjects;
+};
+
+// =============== UPDATE SUBJECT STATS ===============
+const updateSubjectStats = async (subjectId, field, increment = 1) => {
+  logger.info("===================updateSubjectStats=======================");
+
     const subject = await Subject.findById(subjectId);
 
     if (!subject) {
