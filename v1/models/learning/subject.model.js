@@ -15,6 +15,7 @@ const SubjectSchema = new Schema(
       trim: true,
       maxlength: [100, "Le nom ne peut pas dépasser 100 caractères"],
     },
+
     code: {
       type: String,
       required: [true, "Le code de la matière est requis"],
@@ -22,7 +23,12 @@ const SubjectSchema = new Schema(
       uppercase: true,
       trim: true,
       maxlength: [10, "Le code ne peut pas dépasser 10 caractères"],
+      match: [
+        /^[A-Z0-9]+$/,
+        "Le code doit contenir uniquement des lettres majuscules et des chiffres",
+      ],
     },
+
     description: {
       type: String,
       maxlength: [500, "La description ne peut pas dépasser 500 caractères"],
