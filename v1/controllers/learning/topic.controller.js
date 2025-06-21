@@ -1,5 +1,6 @@
+const { StatusCodes } = require("http-status-codes");
 const topicService = require("../../services/learning/topic/topic.service");
-const { DIFFICULTY_LEVELS } = require("../../models/learning/topic.model");
+const createLogger = require("../../services/logging.service");
 
 class TopicController {
   // Create topic
