@@ -129,31 +129,6 @@ const updatePersonalInfo = async (userId, personalInfoData) => {
   return updatedUser;
 };
 
-// Update notification preferences
-const updateNotifications = async (userId, { notifications }) => {
-  console.log("===================updateNotifications=======================");
-
-  const user = await User.findById(userId);
-  if (!user) throw new NotFoundError("Utilisateur non trouvé");
-
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    {
-      $set: {
-        "notifications.dailyReminders": notifications.dailyReminders,
-        "notifications.progressUpdates": notifications.progressUpdates,
-        "notifications.examAlerts": notifications.examAlerts,
-      },
-    },
-    { new: true, runValidators: true }
-  ).select("-password -resetPasswordToken -resetPasswordExpires -refreshToken");
-
-  if (!updatedUser)
-    throw new NotFoundError("Utilisateur non trouvé après mise à jour");
-
-  console.log("++++++✅ UPDATE NOTIFICATIONS: Notifications updated ++++++");
-  return updatedUser;
-};
 
 // Delete user
 const deleteUser = async (userId) => {
@@ -462,7 +437,6 @@ module.exports = {
   getProfile,
   updateProfile,
   updatePersonalInfo,
-  updateNotifications,
   deleteUser,
 
   // Onboarding
