@@ -234,12 +234,18 @@ const searchQuestions = async (req, res) => {
       data: { questions },
     });
   } catch (error) {
-    logger.error("Error deleting question:", error);
-    throw error;
+    logger.error("❌ SEARCH QUESTIONS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la recherche",
+    });
   }
 };
 
-const verifyQuestion = async (req, res) => {
+// =============== UPDATE QUESTION STATS ===============
+const updateQuestionStats = async (req, res) => {
+  logger.info("===================updateQuestionStats=======================");
+
   try {
     const { verifierId, qualityScore, feedback } = req.body;
     const question = await questionService.verifyQuestion(
