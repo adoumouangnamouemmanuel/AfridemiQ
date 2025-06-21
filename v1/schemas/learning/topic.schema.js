@@ -28,177 +28,89 @@ const createTopicSchema = Joi.object({
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({
-      "string.pattern.base": "Invalid subject ID format",
-      "string.empty": "Subject ID is required",
-    }),
-
-  series: Joi.array()
-    .items(Joi.string().trim().min(1).max(50))
-    .default([])
-    .messages({
-      "array.base": "Series must be an array",
-      "string.min": "Series item must be at least 1 character long",
-      "string.max": "Series item cannot exceed 50 characters",
-    }),
-
-  description: Joi.string().trim().min(10).max(1000).required().messages({
-    "string.empty": "Description is required",
-    "string.min": "Description must be at least 10 characters long",
-    "string.max": "Description cannot exceed 1000 characters",
+      "any.required": "L'ID de la matière est requis",
+      "string.pattern.base": "Format d'ID de matière invalide",
   }),
 
   difficulty: Joi.string()
-    .valid("beginner", "intermediate", "advanced")
+    .valid(...DIFFICULTY_LEVELS)
     .required()
     .messages({
-      "any.only": "Difficulty must be one of: beginner, intermediate, advanced",
-      "string.empty": "Difficulty is required",
-    }),
-
-  estimatedTime: Joi.number().integer().min(1).max(10080).required().messages({
-    "number.base": "Estimated time must be a number",
-    "number.integer": "Estimated time must be an integer",
-    "number.min": "Estimated time must be at least 1 minute",
-    "number.max": "Estimated time cannot exceed 10080 minutes (1 week)",
-    "any.required": "Estimated time is required",
+      "any.required": "La difficulté est requise",
+      "any.only": "La difficulté doit être : easy, medium ou hard",
   }),
 
-  estimatedCompletionDate: Joi.date().iso().optional().messages({
-    "date.format": "Estimated completion date must be a valid ISO date",
-  }),
-
-  relatedTopics: Joi.array()
-    .items(Joi.string().trim().min(1).max(200))
-    .default([])
+  estimatedTimeHours: Joi.number()
+    .min(0.5)
+    .max(20)
+    .optional()
+    .default(2)
     .messages({
-      "array.base": "Related topics must be an array",
-      "string.min": "Related topic must be at least 1 character long",
-      "string.max": "Related topic cannot exceed 200 characters",
-    }),
-
-  hasPractice: Joi.boolean().default(false).messages({
-    "boolean.base": "Has practice must be a boolean",
-  }),
-
-  hasNote: Joi.boolean().default(false).messages({
-    "boolean.base": "Has note must be a boolean",
-  }),
-
-  hasStudyMaterial: Joi.boolean().default(false).messages({
-    "boolean.base": "Has study material must be a boolean",
-  }),
-
-  prerequisites: Joi.array()
-    .items(Joi.string().trim().min(1).max(200))
-    .default([])
-    .messages({
-      "array.base": "Prerequisites must be an array",
-      "string.min": "Prerequisite must be at least 1 character long",
-      "string.max": "Prerequisite cannot exceed 200 characters",
+      "number.min": "Minimum 30 minutes",
+      "number.max": "Maximum 20 heures",
     }),
 
   learningObjectives: Joi.array()
-    .items(Joi.string().trim().min(5).max(300))
-    .default([])
+    .items(
+      Joi.object({
+        objective: Joi.string()
+          .required()
+          .trim()
+          .max(200)
+          .messages({
+            "any.required": "L'objectif d'apprentissage est requis",
+            "string.max": "L'objectif ne peut pas dépasser 200 caractères",
+          }),
+        level: Joi.string()
+          .valid(...LEARNING_OBJECTIVES)
+          .optional()
+          .default("understand")
     .messages({
-      "array.base": "Learning objectives must be an array",
-      "string.min": "Learning objective must be at least 5 characters long",
-      "string.max": "Learning objective cannot exceed 300 characters",
+            "any.only": "Niveau d'objectif invalide",
     }),
-
-  estimatedTimeToMaster: Joi.number()
-    .integer()
+      })
+    )
     .min(1)
-    .max(43200)
     .required()
     .messages({
-      "number.base": "Estimated time to master must be a number",
-      "number.integer": "Estimated time to master must be an integer",
-      "number.min": "Estimated time to master must be at least 1 minute",
-      "number.max":
-        "Estimated time to master cannot exceed 43200 minutes (30 days)",
-      "any.required": "Estimated time to master is required",
+      "any.required": "Au moins un objectif d'apprentissage est requis",
+      "array.min": "Au moins un objectif d'apprentissage est requis",
     }),
 
-  resourceIds: Joi.array()
-    .items(
-      Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
-        .messages({
-          "string.pattern.base": "Invalid resource ID format",
-        })
-    )
-    .default([])
-    .messages({
-      "array.base": "Resource IDs must be an array",
-    }),
-
-  assessmentCriteria: Joi.object({
-    minimumScore: Joi.number().min(0).max(100).optional().messages({
-      "number.base": "Minimum score must be a number",
-      "number.min": "Minimum score cannot be negative",
-      "number.max": "Minimum score cannot exceed 100",
-    }),
-
-    requiredPracticeQuestions: Joi.number()
-      .integer()
-      .min(0)
-      .max(1000)
-      .optional()
-      .messages({
-        "number.base": "Required practice questions must be a number",
-        "number.integer": "Required practice questions must be an integer",
-        "number.min": "Required practice questions cannot be negative",
-        "number.max": "Required practice questions cannot exceed 1000",
-      }),
-
-    masteryThreshold: Joi.number().min(0).max(100).optional().messages({
-      "number.base": "Mastery threshold must be a number",
-      "number.min": "Mastery threshold cannot be negative",
-      "number.max": "Mastery threshold cannot exceed 100",
-    }),
-  })
+  prerequisites: Joi.array()
+    .items(Joi.string().trim().max(100))
     .optional()
     .messages({
-      "object.base": "Assessment criteria must be an object",
-    }),
-};
+      "string.max": "Le prérequis ne peut pas dépasser 100 caractères",
+      }),
 
-// Create topic schema
-const createTopicSchema = Joi.object(baseTopicSchema);
-
-// Update topic schema (all fields optional except validation rules)
-const updateTopicSchema = Joi.object({
-  ...Object.fromEntries(
-    Object.entries(baseTopicSchema).map(([key, schema]) => [
-      key,
-      key === "subjectId" ? schema.optional() : schema.optional(),
-    ])
-  ),
-})
-  .min(1)
-  .messages({
-    "object.min": "At least one field must be provided for update",
-  });
-
-// Bulk create topics schema
-const bulkCreateTopicsSchema = Joi.object({
-  topics: Joi.array()
-    .items(createTopicSchema)
-    .min(1)
-    .max(100)
-    .required()
+  keywords: Joi.array()
+    .items(Joi.string().trim().max(50))
+    .optional()
     .messages({
-      "array.base": "Topics must be an array",
-      "array.min": "At least one topic is required",
-      "array.max": "Cannot create more than 100 topics at once",
-      "any.required": "Topics array is required",
+      "string.max": "Le mot-clé ne peut pas dépasser 50 caractères",
     }),
+
+  order: Joi.number()
+    .min(0)
+    .optional()
+    .default(0)
+    .messages({
+      "number.min": "L'ordre ne peut pas être négatif",
+    }),
+
+  isPremium: Joi.boolean().optional().default(false),
+  isPopular: Joi.boolean().optional().default(false),
 });
 
-// Bulk update topics schema
-const bulkUpdateTopicsSchema = Joi.object({
-  updates: Joi.array()
+// =============== UPDATE TOPIC SCHEMA ===============
+const updateTopicSchema = Joi.object({
+  name: Joi.string().trim().max(150).optional(),
+  description: Joi.string().trim().max(500).optional(),
+  subjectId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).optional(),
+  difficulty: Joi.string().valid(...DIFFICULTY_LEVELS).optional(),
+  estimatedTimeHours: Joi.number().min(0.5).max(20).optional(),
+  learningObjectives: Joi.array()
     .items(
       Joi.object({
         id: Joi.string()
