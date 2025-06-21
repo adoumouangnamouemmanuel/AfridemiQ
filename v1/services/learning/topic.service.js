@@ -190,14 +190,16 @@ const getTopicsBySubject = async (subjectId, options = {}) => {
       // Verify subject exists
       const subject = await Subject.findById(subjectId);
       if (!subject) {
-        throw new NotFoundError("Subject not found");
+    throw new NotFoundError("Matière non trouvée");
       }
 
-      return await this.getAllTopics({ subjectId }, options);
-    } catch (error) {
-      throw error;
-    }
-  }
+  const topics = await Topic.findBySubject(subjectId, options);
+
+  logger.info(
+    "++++++✅ GET TOPICS BY SUBJECT: Topics retrieved successfully ++++++"
+  );
+  return topics;
+};
 
   // Get topics by difficulty
   async getTopicsByDifficulty(difficulty, options = {}) {
