@@ -2,11 +2,6 @@ const { StatusCodes } = require("http-status-codes");
 const subjectService = require("../../services/learning/subject/subject.service");
 const createLogger = require("../../services/logging.service");
 
-// Import additional services
-const searchService = require("../../services/learning/subject/search.service");
-const bulkService = require("../../services/learning/subject/bulk.service");
-const analyticsService = require("../../services/learning/subject/analytics.service");
-
 const logger = createLogger("SubjectController");
 
 // Create a new subject
