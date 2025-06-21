@@ -35,10 +35,10 @@ const app = express();
 // Security middleware
 app.use(
   helmet({
-  origin: process.env.ALLOWED_ORIGIN || "*", // Allow all origins by default, can be overridden
-  contentSecurityPolicy: false, // Disable CSP for simplicity, can be configured later
-  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resource sharing
-  referrerPolicy: { policy: "no-referrer" }, // Set referrer policy
+    origin: process.env.ALLOWED_ORIGIN || "*", // Allow all origins by default, can be overridden
+    contentSecurityPolicy: false, // Disable CSP for simplicity, can be configured later
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resource sharing
+    referrerPolicy: { policy: "no-referrer" }, // Set referrer policy
   })
 );
 app.use(cors());
