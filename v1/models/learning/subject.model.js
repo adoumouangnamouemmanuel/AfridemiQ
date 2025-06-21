@@ -135,11 +135,7 @@ const SubjectSchema = new Schema(
         min: [0, "Score minimum 0"],
         max: [100, "Score maximum 100"],
       },
-      totalStudents: {
-        type: Number,
-        default: 0,
-        min: [0, "Ne peut pas être négatif"],
-      },
+
     },
 
     // =============== GESTION ===============
