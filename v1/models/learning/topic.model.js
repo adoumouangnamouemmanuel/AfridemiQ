@@ -150,12 +150,34 @@ const TopicSchema = new Schema(
     },
 
     // =============== GESTION ===============
-    isActive: { type: Boolean, default: true },
-    isPremium: { type: Boolean, default: false },
+    status: {
+      type: String,
+      enum: {
+        values: STATUSES,
+        message: "Statut invalide",
+      },
+      default: "active",
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+
+    isPopular: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
