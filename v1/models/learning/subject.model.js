@@ -87,7 +87,32 @@ const SubjectSchema = new Schema(
       required: [true, "La catégorie est requise"],
     },
 
-    // =============== STATISTIQUES SIMPLES ===============
+    // Icône pour l'interface utilisateur
+    icon: {
+      type: String,
+      default: "📚",
+      maxlength: [50, "L'icône ne peut pas dépasser 50 caractères"],
+    },
+
+    // Couleur pour l'interface (code hex)
+    color: {
+      type: String,
+      match: [/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Couleur hex invalide"],
+      default: "#3B82F6",
+    },
+
+    // =============== MÉTADONNÉES ===============
+
+
+    // Estimation du temps d'étude total (en heures)
+    estimatedHours: {
+      type: Number,
+      min: [1, "Minimum 1 heure"],
+      max: [500, "Maximum 500 heures"],
+      default: 40,
+    },
+
+    // =============== STATISTIQUES ===============
     stats: {
       totalTopics: { type: Number, default: 0 },
       totalQuestions: { type: Number, default: 0 },
