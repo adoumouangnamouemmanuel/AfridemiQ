@@ -64,7 +64,7 @@ router.post(
 // Update subject
 router.put(
   "/:id",
-  authMiddleware.authenticateUser,
+  authMiddleware,
   roleMiddleware(["admin"]),
   validateMiddleware(updateSubjectSchema, "body"),
   subjectController.updateSubject
