@@ -36,7 +36,7 @@ const QuestionSchema = new Schema(
     ],
 
     correctAnswer: {
-      type: Schema.Types.Mixed, // String ou Number (index de l'option)
+      type: Schema.Types.Mixed, // String, Number, Boolean
       required: [true, "La réponse correcte est requise"],
     },
 
