@@ -49,11 +49,13 @@ router.get("/search/query", topicController.searchTopics);
 // Create new topic
 router.post(
   "/",
-  roleMiddleware(["admin"]),
-  validateMiddleware(createTopicSchema),
+  authMiddleware.authenticateUser,
+  roleMiddleware.checkRole(["admin"]),
+  validateMiddleware(createTopicSchema, "body"),
   topicController.createTopic
 );
 
+// Update topic
 router.put(
   "/:id",
   roleMiddleware(["admin"]),
@@ -61,20 +63,12 @@ router.put(
   topicController.updateTopic
 );
 
-router.delete("/:id", roleMiddleware(["admin"]), topicController.deleteTopic);
-
-router.post(
-  "/bulk/create",
+// Delete topic (soft delete)
+router.delete(
+  "/:id",
+  authMiddleware,
   roleMiddleware(["admin"]),
-  validateMiddleware(bulkCreateTopicsSchema),
-  topicController.bulkCreateTopics
-);
-
-router.put(
-  "/bulk/update",
-  roleMiddleware(["admin"]),
-  validateMiddleware(bulkUpdateTopicsSchema),
-  topicController.bulkUpdateTopics
+  topicController.deleteTopic
 );
 
 module.exports = router;
