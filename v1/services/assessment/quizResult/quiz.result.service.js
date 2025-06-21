@@ -59,40 +59,94 @@ const getQuizResults = async (query) => {
       const {
         page = 1,
         limit = 10,
+    userId,
+    quizId,
+    isPassed,
+    minScore,
+    maxScore,
         sortBy = "createdAt",
         sortOrder = "desc",
-      } = options;
-      const query = {};
-      if (filters.userId) query.userId = filters.userId;
-      if (filters.quizId) query.quizId = filters.quizId;
+  } = query;
 
+  // Build filter object
+  const filter = {};
+
+  if (userId) filter.userId = userId;
+  if (quizId) filter.quizId = quizId;
+  if (isPassed !== undefined) filter.isPassed = isPassed === "true";
+  if (minScore !== undefined) filter.score = { $gte: parseFloat(minScore) };
+  if (maxScore !== undefined) {
+    filter.score = { ...filter.score, $lte: parseFloat(maxScore) };
+  }
+
+  // Build sort object
+  const sort = {};
+  sort[sortBy] = sortOrder === "desc" ? -1 : 1;
+
+  // Calculate pagination
       const skip = (page - 1) * limit;
-      const sortOptions = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
 
+  // Execute query with pagination
       const [quizResults, total] = await Promise.all([
-        QuizResult.find(query)
-          .populate("userId", "name email")
-          .populate("quizId", "name")
-          .sort(sortOptions)
+    QuizResult.find(filter)
+      .populate("userId", "firstName lastName email")
+      .populate("quizId", "title format difficulty passingScore")
+      .sort(sort)
           .skip(skip)
           .limit(parseInt(limit))
           .lean(),
-        QuizResult.countDocuments(query),
+    QuizResult.countDocuments(filter),
       ]);
 
-      logger.info(`Retrieved ${quizResults.length} quiz results`);
-      return {
-        quizResults,
-        pagination: {
+  const pagination = {
           currentPage: parseInt(page),
           totalPages: Math.ceil(total / limit),
-          totalItems: total,
-          itemsPerPage: parseInt(limit),
-        },
+    totalCount: total,
+    hasNextPage: page < Math.ceil(total / limit),
+    hasPrevPage: page > 1,
       };
-    } catch (error) {
-      logger.error("Error retrieving quiz results:", error);
-      throw new ApiError(500, "Failed to retrieve quiz results");
+
+  logger.info(
+    "++++++✅ GET QUIZ RESULTS: Quiz results retrieved successfully ++++++"
+  );
+  return { quizResults, pagination };
+};
+
+// =============== GET QUIZ RESULT BY ID ===============
+const getQuizResultById = async (quizResultId) => {
+  logger.info("===================getQuizResultById=======================");
+
+  const quizResult = await QuizResult.findById(quizResultId)
+    .populate("userId", "firstName lastName email")
+    .populate("quizId", "title format difficulty passingScore")
+    .populate("answers.questionId", "question type difficulty");
+
+  if (!quizResult) {
+    throw new NotFoundError("Résultat de quiz non trouvé");
+  }
+
+  logger.info(
+    "++++++✅ GET QUIZ RESULT BY ID: Quiz result retrieved successfully ++++++"
+  );
+  return quizResult;
+};
+
+// =============== UPDATE QUIZ RESULT ===============
+const updateQuizResult = async (quizResultId, updateData) => {
+  logger.info("===================updateQuizResult=======================");
+
+  // Check if quiz result exists
+  const existingQuizResult = await QuizResult.findById(quizResultId);
+  if (!existingQuizResult) {
+    throw new NotFoundError("Résultat de quiz non trouvé");
+  }
+
+  // Validate answers array length if being updated
+  if (updateData.answers && updateData.totalQuestions) {
+    if (updateData.answers.length !== updateData.totalQuestions) {
+      throw new BadRequestError(
+        "Le nombre de réponses ne correspond pas au nombre de questions"
+      );
     }
   }
 
