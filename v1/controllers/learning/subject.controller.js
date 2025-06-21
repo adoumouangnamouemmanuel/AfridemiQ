@@ -74,19 +74,25 @@ const getSubjectById = async (req, res) => {
   }
 };
 
-// Update subject
+// =============== UPDATE SUBJECT ===============
 const updateSubject = async (req, res) => {
+  logger.info("===================updateSubject=======================");
+
   try {
     const subject = await subjectService.updateSubject(req.params.id, req.body);
+
+    logger.info("++++++✅ UPDATE SUBJECT: Subject updated successfully ++++++");
     res.status(StatusCodes.OK).json({
+      success: true,
       message: "Matière mise à jour avec succès",
-      data: subject,
+      data: { subject },
     });
   } catch (error) {
-    logger.error("Error in updateSubject controller", error, {
-      subjectId: req.params.id,
+    logger.error("❌ UPDATE SUBJECT ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la mise à jour de la matière",
     });
-    throw error;
   }
 };
 
