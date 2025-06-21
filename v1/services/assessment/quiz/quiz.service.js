@@ -312,42 +312,34 @@ const searchQuizzes = async (searchTerm, filters = {}) => {
     status: "active",
       };
 
-      await Quiz.findByIdAndUpdate(quizId, { analytics });
+  // Apply additional filters
+  if (filters.subjectId) query.subjectId = filters.subjectId;
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.format) query.format = filters.format;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
 
-      return new ApiResponse(
-        200,
-        analytics,
-        "Quiz analytics updated successfully"
-      );
-    } catch (error) {
-      throw new ApiError(500, "Failed to update quiz analytics", error.message);
-    }
-  }
+  const quizzes = await Quiz.find(query)
+    .populate("subjectId", "name code")
+    .populate("topicIds", "name")
+    .sort({ "stats.totalAttempts": -1, createdAt: -1 })
+    .limit(20);
 
-  // Bulk operations
-  async bulkUpdateQuizzes(quizIds, updateData) {
-    try {
-      const result = await Quiz.updateMany(
-        { _id: { $in: quizIds } },
-        { ...updateData, updatedAt: new Date() }
-      );
+  logger.info("++++++✅ SEARCH QUIZZES: Search completed successfully ++++++");
+  return quizzes;
+};
 
-      return new ApiResponse(
-        200,
-        {
-          matchedCount: result.matchedCount,
-          modifiedCount: result.modifiedCount,
-        },
-        "Bulk update completed successfully"
-      );
-    } catch (error) {
-      throw new ApiError(500, "Failed to bulk update quizzes", error.message);
-    }
-  }
+// =============== UPDATE QUIZ STATS ===============
+const updateQuizStats = async (
+  quizId,
+  score,
+  completionTimeMinutes,
+  passed
+) => {
+  logger.info("===================updateQuizStats=======================");
 
-  // Get quiz statistics
-  async getQuizStatistics(quizId) {
-    try {
       const quiz = await Quiz.findById(quizId);
       if (!quiz) {
         throw new ApiError(404, "Quiz not found");
