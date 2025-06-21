@@ -49,9 +49,9 @@ const createQuestion = async (questionData) => {
 const getQuestions = async (query) => {
   logger.info("===================getQuestions=======================");
 
-      const {
-        page = 1,
-        limit = 10,
+  const {
+    page = 1,
+    limit = 10,
     subjectId,
     topicId,
     type,
@@ -62,8 +62,8 @@ const getQuestions = async (query) => {
     isPremium,
     status,
     search,
-        sortBy = "createdAt",
-        sortOrder = "desc",
+    sortBy = "createdAt",
+    sortOrder = "desc",
   } = query;
 
   // Build filter object
@@ -93,27 +93,27 @@ const getQuestions = async (query) => {
   sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
   // Calculate pagination
-      const skip = (page - 1) * limit;
+  const skip = (page - 1) * limit;
 
   // Execute query with pagination
-      const [questions, total] = await Promise.all([
+  const [questions, total] = await Promise.all([
     Question.find(filter)
       .populate("subjectId", "name code")
-          .populate("topicId", "name")
+      .populate("topicId", "name")
       .sort(sort)
-          .skip(skip)
-          .limit(parseInt(limit))
-          .lean(),
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean(),
     Question.countDocuments(filter),
-      ]);
+  ]);
 
   const pagination = {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(total / limit),
+    currentPage: parseInt(page),
+    totalPages: Math.ceil(total / limit),
     totalCount: total,
     hasNextPage: page < Math.ceil(total / limit),
     hasPrevPage: page > 1,
-      };
+  };
 
   logger.info(
     "++++++✅ GET QUESTIONS: Questions retrieved successfully ++++++"
@@ -167,16 +167,16 @@ const updateQuestion = async (questionId, updateData) => {
     }
   }
 
-      const question = await Question.findByIdAndUpdate(
+  const question = await Question.findByIdAndUpdate(
     questionId,
     { $set: updateData },
-        { new: true, runValidators: true }
-      )
-        .populate("subjectId", "name code")
+    { new: true, runValidators: true }
+  )
+    .populate("subjectId", "name code")
     .populate("topicId", "name");
 
   logger.info("++++++✅ UPDATE QUESTION: Question updated successfully ++++++");
-      return question;
+  return question;
 };
 
 // =============== DELETE QUESTION ===============
@@ -374,7 +374,7 @@ const updateQuestionStats = async (questionId, isCorrect, timeSpent) => {
   logger.info(
     "++++++✅ UPDATE QUESTION STATS: Stats updated successfully ++++++"
   );
-      return question;
+  return question;
 };
 
 // =============== CHECK ANSWER ===============
