@@ -55,8 +55,8 @@ router.get("/search/query", subjectController.searchSubjects);
 // Create new subject
 router.post(
   "/",
-  authMiddleware.authenticateUser,
-  roleMiddleware.checkRole(["admin"]),
+  authMiddleware,
+  roleMiddleware(["admin"]),
   validateMiddleware(createSubjectSchema, "body"),
   subjectController.createSubject
 );
@@ -65,7 +65,7 @@ router.post(
 router.put(
   "/:id",
   authMiddleware.authenticateUser,
-  roleMiddleware.checkRole(["admin"]),
+  roleMiddleware(["admin"]),
   validateMiddleware(updateSubjectSchema, "body"),
   subjectController.updateSubject
 );
@@ -73,8 +73,8 @@ router.put(
 // Delete subject (soft delete)
 router.delete(
   "/:id",
-  authMiddleware.authenticateUser,
-  roleMiddleware.checkRole(["admin"]),
+  authMiddleware,
+  roleMiddleware(["admin"]),
   subjectController.deleteSubject
 );
 
