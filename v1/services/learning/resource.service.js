@@ -12,14 +12,14 @@ const logger = createLogger("ResourceService");
 const getAllResources = async (query) => {
   logger.info("===================getAllResources=======================");
 
-      const {
-        page = 1,
-        limit = 10,
-        sortBy = "createdAt",
-        sortOrder = "desc",
-        search,
-        subjectId,
-        topicId,
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+    search,
+    subjectId,
+    topicId,
     category,
     type,
     difficulty,
@@ -47,10 +47,10 @@ const getAllResources = async (query) => {
   if (examSession) filter.examSession = examSession;
 
   // Add search functionality
-      if (search) {
+  if (search) {
     filter.$or = [
-          { title: { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } },
+      { title: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
       { tags: { $in: [search.toLowerCase()] } },
       { keywords: { $in: [search.toLowerCase()] } },
     ];
@@ -63,25 +63,25 @@ const getAllResources = async (query) => {
   // Calculate pagination
   const skip = (page - 1) * limit;
 
-      // Execute query with pagination
-      const [resources, total] = await Promise.all([
+  // Execute query with pagination
+  const [resources, total] = await Promise.all([
     Resource.find(filter)
       .populate("subjectId", "name code")
       .populate("topicId", "name")
       .sort(sort)
-          .skip(skip)
-          .limit(parseInt(limit))
-          .lean(),
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean(),
     Resource.countDocuments(filter),
-      ]);
+  ]);
 
   const pagination = {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(total / limit),
+    currentPage: parseInt(page),
+    totalPages: Math.ceil(total / limit),
     totalCount: total,
     hasNextPage: page < Math.ceil(total / limit),
     hasPrevPage: page > 1,
-      };
+  };
 
   logger.info(
     "++++++✅ GET ALL RESOURCES: Resources retrieved successfully ++++++"
@@ -115,7 +115,7 @@ const createResource = async (resourceData) => {
   const subject = await Subject.findById(resourceData.subjectId);
   if (!subject) {
     throw new NotFoundError("Matière non trouvée");
-      }
+  }
 
   // Validate topic exists if provided
   if (resourceData.topicId) {
@@ -141,8 +141,8 @@ const createResource = async (resourceData) => {
     );
   }
 
-      const resource = new Resource(resourceData);
-      await resource.save();
+  const resource = new Resource(resourceData);
+  await resource.save();
 
   // Populate before returning
   await resource.populate("subjectId", "name code");
@@ -162,14 +162,14 @@ const updateResource = async (resourceId, updateData) => {
   const existingResource = await Resource.findById(resourceId);
   if (!existingResource) {
     throw new NotFoundError("Ressource non trouvée");
-      }
+  }
 
   // Validate subject exists if being updated
   if (updateData.subjectId) {
     const subject = await Subject.findById(updateData.subjectId);
     if (!subject) {
       throw new NotFoundError("Matière non trouvée");
-      }
+    }
   }
 
   // Validate topic exists if being updated
@@ -177,7 +177,7 @@ const updateResource = async (resourceId, updateData) => {
     const topic = await Topic.findById(updateData.topicId);
     if (!topic) {
       throw new NotFoundError("Sujet non trouvé");
-      }
+    }
 
     // Verify topic belongs to the subject
     const subjectId = updateData.subjectId || existingResource.subjectId;
@@ -201,8 +201,8 @@ const updateResource = async (resourceId, updateData) => {
     }
   }
 
-      const resource = await Resource.findByIdAndUpdate(
-        resourceId,
+  const resource = await Resource.findByIdAndUpdate(
+    resourceId,
     { $set: updateData },
     { new: true, runValidators: true }
   )
@@ -218,9 +218,9 @@ const deleteResource = async (resourceId) => {
   logger.info("===================deleteResource=======================");
 
   const resource = await Resource.findById(resourceId);
-      if (!resource) {
+  if (!resource) {
     throw new NotFoundError("Ressource non trouvée");
-      }
+  }
 
   // Soft delete - just mark as inactive
   await Resource.findByIdAndUpdate(resourceId, {
@@ -292,55 +292,55 @@ const getResourceStatistics = async () => {
     "===================getResourceStatistics======================="
   );
 
-      const [
-        totalResources,
-        totalViews,
-        totalDownloads,
-        averageRating,
+  const [
+    totalResources,
+    totalViews,
+    totalDownloads,
+    averageRating,
     categoryStats,
     typeStats,
     featuredResources,
     popularResources,
-      ] = await Promise.all([
+  ] = await Promise.all([
     Resource.countDocuments({ isActive: true }),
-        Resource.aggregate([
+    Resource.aggregate([
       { $match: { isActive: true } },
       { $group: { _id: null, total: { $sum: "$stats.views" } } },
-        ]),
-        Resource.aggregate([
+    ]),
+    Resource.aggregate([
       { $match: { isActive: true } },
       { $group: { _id: null, total: { $sum: "$stats.downloads" } } },
-        ]),
-        Resource.aggregate([
+    ]),
+    Resource.aggregate([
       { $match: { isActive: true, "stats.rating.count": { $gt: 0 } } },
       { $group: { _id: null, average: { $avg: "$stats.rating.average" } } },
-        ]),
-        Resource.aggregate([
+    ]),
+    Resource.aggregate([
       { $match: { isActive: true } },
       { $group: { _id: "$category", count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
-        ]),
-        Resource.aggregate([
+      { $sort: { count: -1 } },
+    ]),
+    Resource.aggregate([
       { $match: { isActive: true } },
       { $group: { _id: "$type", count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
-        ]),
+      { $sort: { count: -1 } },
+    ]),
     Resource.find({ isFeatured: true, isActive: true })
       .select("title stats.views stats.downloads")
-          .limit(5)
-          .lean(),
+      .limit(5)
+      .lean(),
     Resource.find({ isActive: true })
       .sort({ "stats.views": -1, "stats.downloads": -1 })
       .select("title stats.views stats.downloads")
-          .limit(5)
-          .lean(),
-      ]);
+      .limit(5)
+      .lean(),
+  ]);
 
   const statistics = {
-        totalResources,
-        totalViews: totalViews[0]?.total || 0,
-        totalDownloads: totalDownloads[0]?.total || 0,
-        averageRating: averageRating[0]?.average || 0,
+    totalResources,
+    totalViews: totalViews[0]?.total || 0,
+    totalDownloads: totalDownloads[0]?.total || 0,
+    averageRating: averageRating[0]?.average || 0,
     categoryDistribution: categoryStats,
     typeDistribution: typeStats,
     featuredResources,
@@ -397,7 +397,7 @@ const trackView = async (resourceId) => {
   const resource = await Resource.findById(resourceId);
   if (!resource) {
     throw new NotFoundError("Ressource non trouvée");
-    }
+  }
 
   await resource.incrementViews();
 
@@ -425,12 +425,12 @@ const bulkCreateResources = async (resourcesData) => {
   logger.info("===================bulkCreateResources=======================");
 
   // Validate each resource
-      for (const resourceData of resourcesData) {
+  for (const resourceData of resourcesData) {
     // Validate subject exists
     const subject = await Subject.findById(resourceData.subjectId);
     if (!subject) {
       throw new NotFoundError(`Matière non trouvée: ${resourceData.subjectId}`);
-      }
+    }
 
     // Validate topic if provided
     if (resourceData.topicId) {
@@ -456,24 +456,24 @@ const getAdminAnalytics = async () => {
   const [basicStats, recentResources, trendingResources] = await Promise.all([
     getResourceStatistics(),
     Resource.find({ isActive: true })
-            .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 })
       .populate("subjectId", "name")
       .select("title category type stats.views createdAt")
-            .limit(10)
+      .limit(10)
       .lean(),
     Resource.find({ isActive: true })
       .sort({ "stats.views": -1, "stats.downloads": -1 })
-            .populate("subjectId", "name")
+      .populate("subjectId", "name")
       .select("title category stats.views stats.downloads")
       .limit(10)
-            .lean(),
+      .lean(),
   ]);
 
   const analytics = {
-        ...basicStats,
-        recentResources,
+    ...basicStats,
+    recentResources,
     trendingResources,
-      };
+  };
 
   logger.info("++++++✅ GET ADMIN ANALYTICS: Analytics retrieved ++++++");
   return analytics;
