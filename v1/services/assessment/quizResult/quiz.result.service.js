@@ -1,6 +1,8 @@
-const { QuizResult } = require("../../models/results/quiz.result.model");
-const { ApiError } = require("../../utils/ApiError");
-const createLogger = require("../logging.service");
+const { QuizResult } = require("../../../models/assessment/quiz.result.model");
+const { Quiz } = require("../../../models/assessment/quiz.model");
+const NotFoundError = require("../../../errors/notFoundError");
+const BadRequestError = require("../../../errors/badRequestError");
+const createLogger = require("../../logging.service");
 
 const logger = createLogger("QuizResultService");
 
