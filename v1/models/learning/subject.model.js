@@ -70,7 +70,7 @@ const SubjectSchema = new Schema(
     series: [
       {
         type: String,
-        enum: ["A", "C", "D", "ALL"], // A=Littéraire, C=Scientifique, D=Économique, ALL=Toutes séries
+        enum: SERIES, // A=Littéraire, C=Scientifique, D=Économique, ALL=Toutes séries
         uppercase: true,
       },
     ],
