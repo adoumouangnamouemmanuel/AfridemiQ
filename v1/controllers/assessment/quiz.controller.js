@@ -243,35 +243,49 @@ const searchQuizzes = async (req, res) => {
       message: error.message || "Erreur lors de la recherche",
     });
     }
+};
 
-    // Only admin can perform bulk operations
-    if (req.user.role !== "admin") {
-      throw new ApiError(
-        403,
-        "Only administrators can perform bulk operations"
-      );
-    }
+// =============== UPDATE QUIZ STATS ===============
+const updateQuizStats = async (req, res) => {
+  logger.info("===================updateQuizStats=======================");
 
-    const result = await quizService.bulkUpdateQuizzes(quizIds, updateData);
-    res.status(result.statusCode).json(result);
-  });
+  try {
+    const { score, completionTimeMinutes, passed } = req.body;
+    const quiz = await quizService.updateQuizStats(
+      req.params.id,
+      score,
+      completionTimeMinutes,
+      passed
+    );
 
-  // Get my quizzes (created by current user)
-  getMyQuizzes = asyncHandler(async (req, res) => {
-    const filters = { createdBy: req.user.id };
-    const options = {
-      page: Number.parseInt(req.query.page) || 1,
-      limit: Number.parseInt(req.query.limit) || 10,
-      sortBy: req.query.sortBy || "createdAt",
-      sortOrder: req.query.sortOrder || "desc",
-      search: req.query.search,
-      level: req.query.level,
-      difficulty: req.query.difficulty,
-    };
+    logger.info(
+      "++++++✅ UPDATE QUIZ STATS: Stats updated successfully ++++++"
+    );
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Statistiques mises à jour avec succès",
+      data: { quiz },
+    });
+  } catch (error) {
+    logger.error("❌ UPDATE QUIZ STATS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message:
+        error.message || "Erreur lors de la mise à jour des statistiques",
+    });
+  }
+};
 
-    const result = await quizService.getAllQuizzes(filters, options);
-    res.status(result.statusCode).json(result);
-  });
-}
-
-module.exports = new QuizController();
+module.exports = {
+  createQuiz,
+  getQuizzes,
+  getQuizById,
+  updateQuiz,
+  deleteQuiz,
+  getPopularQuizzes,
+  getQuizzesBySubject,
+  getQuizzesByTopic,
+  getQuizzesByEducationAndExam,
+  searchQuizzes,
+  updateQuizStats,
+};
