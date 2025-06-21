@@ -15,17 +15,16 @@ const {
 // Apply rate limiting to all routes
 router.use(apiLimiter);
 
-// Public routes
+// =============== PUBLIC ROUTES ===============
 router.get("/", resourceController.getAllResources);
 router.get("/search", resourceController.searchResources);
 router.get("/statistics", resourceController.getResourceStatistics);
 router.get("/formats", resourceController.getResourceFormats);
 router.get("/subject/:subjectId", resourceController.getResourcesBySubject);
 router.get("/topic/:topicId", resourceController.getResourcesByTopic);
-router.get("/exam/:examId", resourceController.getResourcesByExam);
 router.get("/:id", resourceController.getResourceById);
 
-// User routes (authentication required)
+// =============== USER ROUTES (authentication required) ===============
 router.post(
   "/:id/feedback",
   authMiddleware,
@@ -35,7 +34,7 @@ router.post(
 router.put("/:id/view", authMiddleware, resourceController.trackView);
 router.put("/:id/download", authMiddleware, resourceController.trackDownload);
 
-// Admin routes (authentication + admin role required)
+// =============== ADMIN ROUTES (authentication + admin role required) ===============
 router.post(
   "/",
   authMiddleware,
