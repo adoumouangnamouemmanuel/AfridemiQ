@@ -5,42 +5,50 @@ const createLogger = require("../../logging.service");
 
 const logger = createLogger("QuestionService");
 
-class QuestionService {
-  async createQuestion(data) {
-    try {
-      const question = new Question(data);
-      await question.save();
-      logger.info(`Created question: ${question._id}`);
-      return question;
-    } catch (error) {
-      logger.error("Error creating question:", error);
-      throw error instanceof ApiError
-        ? error
-        : new ApiError(500, "Failed to create question");
+// =============== CREATE QUESTION ===============
+const createQuestion = async (questionData) => {
+  logger.info("===================createQuestion=======================");
+
+  // Validate options for multiple choice questions
+  if (questionData.type === "multiple_choice") {
+    if (!questionData.options || questionData.options.length < 2) {
+      throw new BadRequestError(
+        "Les questions à choix multiples doivent avoir au moins 2 options"
+      );
+    }
+    if (questionData.options.length > 5) {
+      throw new BadRequestError("Maximum 5 options autorisées");
+    }
+
+    // Validate correct answer index for multiple choice
+    const answerIndex = parseInt(questionData.correctAnswer);
+    if (
+      isNaN(answerIndex) ||
+      answerIndex < 0 ||
+      answerIndex >= questionData.options.length
+    ) {
+      throw new BadRequestError("L'index de la réponse correcte est invalide");
     }
   }
 
-  async getQuestionById(id) {
-    try {
-      const question = await Question.findById(id)
-        .populate("topicId", "name")
-        .populate("subjectId", "name code")
-        .populate("creatorId", "name")
-        .populate("validation.verifiedBy", "name")
-        .populate("relatedQuestions", "question");
-      if (!question) throw new ApiError(404, "Question not found");
-      logger.info(`Retrieved question: ${id}`);
-      return question;
-    } catch (error) {
-      logger.error("Error retrieving question:", error);
-      throw error instanceof ApiError
-        ? error
-        : new ApiError(500, "Failed to retrieve question");
+  // Validate true/false questions
+  if (questionData.type === "true_false") {
+    if (!["true", "false", true, false].includes(questionData.correctAnswer)) {
+      throw new BadRequestError("Réponse invalide pour une question vrai/faux");
     }
   }
 
-  async getQuestions(filters = {}, options = {}) {
-    try {
+  const question = new Question(questionData);
+  await question.save();
+
+  logger.info("++++++✅ CREATE QUESTION: Question created successfully ++++++");
+  return question;
+};
+
+// =============== GET ALL QUESTIONS ===============
+const getQuestions = async (query) => {
+  logger.info("===================getQuestions=======================");
+
       const {
         page = 1,
         limit = 10,
