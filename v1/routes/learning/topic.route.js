@@ -20,20 +20,33 @@ router.use(utf8Middleware);
 // Apply rate limiting
 router.use(apiLimiter);
 
-// Public routes
-router.get("/", topicController.getAllTopics);
-router.get("/search", topicController.searchTopics);
-router.get("/statistics", topicController.getTopicStatistics);
-router.get("/difficulty-levels", topicController.getDifficultyLevels);
-router.get("/subject/:subjectId", topicController.getTopicsBySubject);
-router.get("/difficulty/:difficulty", topicController.getTopicsByDifficulty);
-router.get("/series/:series", topicController.getTopicsBySeries);
+// =============== PUBLIC ROUTES ===============
+
+// Get all topics with filtering and pagination
+router.get(
+  "/",
+  validateMiddleware(getTopicsQuerySchema, "query"),
+  topicController.getTopics
+);
+
+// Get topic by ID
 router.get("/:id", topicController.getTopicById);
 
-// Protected routes (require authentication)
-router.use(authMiddleware);
+// Get topics by subject
+router.get("/subject/:subjectId", topicController.getTopicsBySubject);
 
-// Admin-only routes
+// Get topics by difficulty
+router.get("/difficulty/:difficulty", topicController.getTopicsByDifficulty);
+
+// Get popular topics
+router.get("/popular/list", topicController.getPopularTopics);
+
+// Search topics
+router.get("/search/query", topicController.searchTopics);
+
+// =============== PROTECTED ROUTES (Admin Only) ===============
+
+// Create new topic
 router.post(
   "/",
   roleMiddleware(["admin"]),
