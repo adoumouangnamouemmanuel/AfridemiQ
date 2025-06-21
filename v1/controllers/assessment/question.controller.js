@@ -103,10 +103,136 @@ const updateQuestion = async (req, res) => {
   }
 };
 
+// =============== DELETE QUESTION ===============
 const deleteQuestion = async (req, res) => {
+  logger.info("===================deleteQuestion=======================");
+
   try {
-    const result = await questionService.deleteQuestion(req.params.id);
-    res.status(StatusCodes.OK).json(result);
+    await questionService.deleteQuestion(req.params.id);
+
+    logger.info(
+      "++++++✅ DELETE QUESTION: Question deleted successfully ++++++"
+    );
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Question supprimée avec succès",
+    });
+  } catch (error) {
+    logger.error("❌ DELETE QUESTION ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la suppression de la question",
+    });
+  }
+};
+
+// =============== GET QUESTIONS BY SUBJECT ===============
+const getQuestionsBySubject = async (req, res) => {
+  logger.info(
+    "===================getQuestionsBySubject======================="
+  );
+
+  try {
+    const { subjectId } = req.params;
+    const filters = req.query;
+    const questions = await questionService.getQuestionsBySubject(
+      subjectId,
+      filters
+    );
+
+    logger.info(
+      "++++++✅ GET QUESTIONS BY SUBJECT: Questions retrieved ++++++"
+    );
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Questions récupérées avec succès",
+      data: { questions },
+    });
+  } catch (error) {
+    logger.error("❌ GET QUESTIONS BY SUBJECT ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des questions",
+    });
+  }
+};
+
+// =============== GET QUESTIONS BY TOPIC ===============
+const getQuestionsByTopic = async (req, res) => {
+  logger.info("===================getQuestionsByTopic=======================");
+
+  try {
+    const { topicId } = req.params;
+    const filters = req.query;
+    const questions = await questionService.getQuestionsByTopic(
+      topicId,
+      filters
+    );
+
+    logger.info("++++++✅ GET QUESTIONS BY TOPIC: Questions retrieved ++++++");
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Questions récupérées avec succès",
+      data: { questions },
+    });
+  } catch (error) {
+    logger.error("❌ GET QUESTIONS BY TOPIC ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des questions",
+    });
+  }
+};
+
+// =============== GET RANDOM QUESTIONS ===============
+const getRandomQuestions = async (req, res) => {
+  logger.info("===================getRandomQuestions=======================");
+
+  try {
+    const { count = 10 } = req.query;
+    const filters = req.query;
+    const questions = await questionService.getRandomQuestions(
+      parseInt(count),
+      filters
+    );
+
+    logger.info(
+      "++++++✅ GET RANDOM QUESTIONS: Random questions retrieved ++++++"
+    );
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Questions aléatoires récupérées avec succès",
+      data: { questions },
+    });
+  } catch (error) {
+    logger.error("❌ GET RANDOM QUESTIONS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des questions",
+    });
+  }
+};
+
+// =============== SEARCH QUESTIONS ===============
+const searchQuestions = async (req, res) => {
+  logger.info("===================searchQuestions=======================");
+
+  try {
+    const { q: searchTerm } = req.query;
+    const filters = req.query;
+    const questions = await questionService.searchQuestions(
+      searchTerm,
+      filters
+    );
+
+    logger.info(
+      "++++++✅ SEARCH QUESTIONS: Search completed successfully ++++++"
+    );
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Recherche effectuée avec succès",
+      data: { questions },
+    });
   } catch (error) {
     logger.error("Error deleting question:", error);
     throw error;
