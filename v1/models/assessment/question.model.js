@@ -146,7 +146,7 @@ QuestionSchema.pre("validate", function (next) {
   }
 
   // Validation pour vrai/faux
-  if (this.format === "true_false") {
+  if (this.type === "true_false") {
     if (!["true", "false", true, false].includes(this.correctAnswer)) {
       return next(new Error("Réponse invalide pour une question vrai/faux"));
     }
