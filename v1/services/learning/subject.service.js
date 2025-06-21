@@ -8,30 +8,29 @@ const logger = createLogger("SubjectService");
 
 // =============== CREATE SUBJECT ===============
 const createSubject = async (subjectData) => {
-  try {
-    // Check if subject with same name and series already exists
-    const existingSubject = await Subject.findOne({
-      name: subjectData.name,
-      series: { $in: subjectData.series },
-      isActive: true,
-    });
+  logger.info("===================createSubject=======================");
 
+  // Check if subject with same code already exists
+    const existingSubject = await Subject.findOne({
+    code: subjectData.code.toUpperCase(),
+    });
     if (existingSubject) {
-      throw new ConflictError(
-        "Une matière avec ce nom existe déjà pour cette série"
-      );
+    throw new ConflictError("Une matière avec ce code existe déjà");
+  }
+
+  // Check if subject with same name already exists
+  const existingName = await Subject.findOne({
+    name: { $regex: new RegExp(`^${subjectData.name}$`, "i") },
+  });
+  if (existingName) {
+    throw new ConflictError("Une matière avec ce nom existe déjà");
     }
 
     const subject = new Subject(subjectData);
     await subject.save();
 
-    logger.info(`Subject created: ${subject.name}`, { subjectId: subject._id });
-
+  logger.info("++++++✅ CREATE SUBJECT: Subject created successfully ++++++");
     return subject;
-  } catch (error) {
-    logger.error("Error creating subject", error, { subjectData });
-    throw error;
-  }
 };
 
 /**
