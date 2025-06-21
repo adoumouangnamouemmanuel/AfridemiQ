@@ -219,29 +219,29 @@ const getQuizzesByEducationAndExam = async (req, res) => {
   }
 };
 
-  // Update quiz analytics
-  updateQuizAnalytics = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+// =============== SEARCH QUIZZES ===============
+const searchQuizzes = async (req, res) => {
+  logger.info("===================searchQuizzes=======================");
 
-    // Check if user owns the quiz or is admin
-    const quiz = await quizService.getQuizById(id);
-    if (
-      quiz.data.createdBy._id.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
-      throw new ApiError(403, "Not authorized to update quiz analytics");
-    }
+  try {
+    const { q: searchTerm } = req.query;
+    const filters = req.query;
+    const quizzes = await quizService.searchQuizzes(searchTerm, filters);
 
-    const result = await quizService.updateQuizAnalytics(id);
-    res.status(result.statusCode).json(result);
-  });
-
-  // Bulk update quizzes
-  bulkUpdateQuizzes = asyncHandler(async (req, res) => {
-    const { quizIds, updateData } = req.body;
-
-    if (!Array.isArray(quizIds) || quizIds.length === 0) {
-      throw new ApiError(400, "Quiz IDs array is required");
+    logger.info(
+      "++++++✅ SEARCH QUIZZES: Search completed successfully ++++++"
+    );
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Recherche effectuée avec succès",
+      data: { quizzes },
+    });
+  } catch (error) {
+    logger.error("❌ SEARCH QUIZZES ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la recherche",
+    });
     }
 
     // Only admin can perform bulk operations
