@@ -41,15 +41,7 @@ const createSubjectSchema = Joi.object({
     }),
 
   category: Joi.string()
-    .valid(
-      "sciences",
-      "litterature",
-      "langues",
-      "mathematiques",
-      "sciences-sociales",
-      "arts",
-      "technologie"
-    )
+    .valid(...SUBJECT_CATEGORIES)
     .required()
     .messages({
       "any.required": "La catégorie est requise",
