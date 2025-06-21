@@ -12,7 +12,7 @@ const topicRoutes = require("./routes/learning/topic.route");
 const resourceRoutes = require("./routes/learning/resource.route");
 // assessment routes
 // const quizRoutes = require("./routes/assessment/quiz.route");
-// const questionRoutes = require("./routes/assessment/question.route");
+const questionRoutes = require("./routes/assessment/question.route");
 
 // Results routes
 // const quizResultRoutes = require("./routes/assessment/quiz.result.route");
@@ -117,7 +117,7 @@ app.use("/api/v1/resources", resourceRoutes);
 
 // app.use("/api/quizzes", quizRoutes);
 // app.use("/api/quiz-results", quizResultRoutes);
-// app.use("/api/questions", questionRoutes);
+app.use("/api/v1/questions", questionRoutes);
 
 // 404 handler
 app.use((req, res, next) => {
