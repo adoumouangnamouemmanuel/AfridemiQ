@@ -128,71 +128,52 @@ const createResourceSchema = Joi.object({
   isVerified: Joi.boolean().optional().default(false),
 });
 
-// Update resource schema
+// =============== UPDATE RESOURCE SCHEMA ===============
 const updateResourceSchema = Joi.object({
-  format: Joi.string()
-    .valid(...RESOURCE_TYPES)
-    .messages({
-      "any.only": `Le format doit être l'une des valeurs suivantes: ${RESOURCE_TYPES.join(
-        ", "
-      )}`,
-    }),
-  title: Joi.string().min(3).max(200).messages({
-    "string.min": "Le titre doit contenir au moins 3 caractères",
-    "string.max": "Le titre ne peut pas dépasser 200 caractères",
-  }),
+  title: Joi.string().trim().max(200).optional(),
+  description: Joi.string().trim().max(500).optional(),
+  type: Joi.string()
+    .valid(...MEDIA_TYPES, "pdf", "link", "exercise")
+    .optional(),
+  category: Joi.string()
+    .valid(...RESOURCE_CATEGORIES)
+    .optional(),
+  url: Joi.string().uri().optional(),
   subjectId: Joi.string()
     .pattern(/^[0-9a-fA-F]{24}$/)
-    .messages({
-      "string.pattern.base": "L'ID du sujet doit être un ObjectId valide",
-    }),
-  series: Joi.array().items(Joi.string().max(50)).messages({
-    "array.base": "Les séries doivent être un tableau",
-    "string.max": "Chaque série ne peut pas dépasser 50 caractères",
-  }),
-  topicIds: Joi.array()
-    .items(
-      Joi.string()
+    .optional(),
+  topicId: Joi.string()
         .pattern(/^[0-9a-fA-F]{24}$/)
-        .messages({
-          "string.pattern.base":
-            "Chaque ID de sujet doit être un ObjectId valide",
-        })
-    )
-    .messages({
-      "array.base": "Les IDs des sujets doivent être un tableau",
-    }),
-  url: Joi.string().uri().messages({
-    "string.uri": "L'URL doit être une URL valide",
-  }),
-  description: Joi.string().min(10).max(1000).messages({
-    "string.min": "La description doit contenir au moins 10 caractères",
-    "string.max": "La description ne peut pas dépasser 1000 caractères",
-  }),
-  level: Joi.string(),
-  examIds: Joi.array()
-    .items(
-      Joi.string()
-        .pattern(/^[0-9a-fA-F]{24}$/)
-        .messages({
-          "string.pattern.base":
-            "Chaque ID d'examen doit être un ObjectId valide",
-        })
-    )
-    .messages({
-      "array.base": "Les IDs des examens doivent être un tableau",
-    }),
-  thumbnail: Joi.string().uri().messages({
-    "string.uri": "La miniature doit être une URL valide",
-  }),
-  offlineAvailable: Joi.boolean().messages({
-    "boolean.base": "offlineAvailable doit être un booléen",
-  }),
-  premiumOnly: Joi.boolean().messages({
-    "boolean.base": "premiumOnly doit être un booléen",
-  }),
-  metadata: metadataSchema,
-  accessibility: accessibilitySchema,
+    .optional(),
+  difficulty: Joi.string()
+    .valid(...DIFFICULTY_LEVELS)
+    .optional(),
+  targetLevel: Joi.string()
+    .valid("junior_secondary", "senior_secondary", "both")
+    .optional(),
+  examYear: Joi.number().min(2000).max(2030).optional(),
+  examSession: Joi.string()
+    .valid(...EXAM_SESSIONS)
+    .optional(),
+  fileInfo: Joi.object({
+    size: Joi.number().min(0).optional(),
+    mimeType: Joi.string().trim().optional(),
+    duration: Joi.number().min(0).optional(),
+    pages: Joi.number().min(1).optional(),
+  }).optional(),
+  tags: Joi.array().items(Joi.string().trim().max(30)).optional(),
+  keywords: Joi.array().items(Joi.string().trim().max(50)).optional(),
+  author: Joi.object({
+    name: Joi.string().trim().max(100).optional(),
+    institution: Joi.string().trim().max(150).optional(),
+  }).optional(),
+  source: Joi.string().trim().max(200).optional(),
+  isPublic: Joi.boolean().optional(),
+  isPremium: Joi.boolean().optional(),
+  requiresDownload: Joi.boolean().optional(),
+  isFeatured: Joi.boolean().optional(),
+  isVerified: Joi.boolean().optional(),
+  isActive: Joi.boolean().optional(),
 });
 
 // Add feedback schema
