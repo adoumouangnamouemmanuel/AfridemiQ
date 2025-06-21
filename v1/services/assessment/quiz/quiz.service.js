@@ -265,43 +265,51 @@ const getQuizzesByEducationAndExam = async (
     throw new BadRequestError("Niveau d'éducation et type d'examen requis");
       }
 
-      return new ApiResponse(200, {
-        canTake: true,
-        attemptsUsed: userAttempts,
-        maxAttempts: quiz.retakePolicy.maxAttempts,
-      });
-    } catch (error) {
-      if (error instanceof ApiError) throw error;
-      throw new ApiError(
-        500,
-        "Failed to check quiz eligibility",
-        error.message
-      );
-    }
+  const query = {
+    educationLevel,
+    examType,
+    isActive: true,
+    status: "active",
+  };
+
+  // Apply additional filters
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.format) query.format = filters.format;
+  if (filters.subjectId) query.subjectId = filters.subjectId;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
+
+  const limit = parseInt(filters.limit) || 20;
+
+  const quizzes = await Quiz.find(query)
+    .populate("subjectId", "name code")
+    .populate("topicIds", "name")
+    .sort({ "stats.totalAttempts": -1, createdAt: -1 })
+    .limit(limit);
+
+  logger.info(
+    "++++++✅ GET QUIZZES BY EDUCATION AND EXAM: Quizzes retrieved ++++++"
+  );
+  return quizzes;
+};
+
+// =============== SEARCH QUIZZES ===============
+const searchQuizzes = async (searchTerm, filters = {}) => {
+  logger.info("===================searchQuizzes=======================");
+
+  if (!searchTerm || searchTerm.trim().length < 2) {
+    throw new BadRequestError(
+      "Le terme de recherche doit contenir au moins 2 caractères"
+    );
   }
 
-  // Update quiz analytics
-  async updateQuizAnalytics(quizId) {
-    try {
-      const results = await QuizResult.find({ quizId });
-
-      if (results.length === 0) return;
-
-      const totalAttempts = results.length;
-      const totalScore = results.reduce((sum, result) => sum + result.score, 0);
-      const totalTime = results.reduce(
-        (sum, result) => sum + result.timeTaken,
-        0
-      );
-      const completedResults = results.filter((result) => result.score > 0);
-
-      const analytics = {
-        totalAttempts,
-        averageScore: Math.round(totalScore / totalAttempts),
-        averageTime: Math.round(totalTime / totalAttempts),
-        completionRate: Math.round(
-          (completedResults.length / totalAttempts) * 100
-        ),
+  const query = {
+    $or: [
+      { title: { $regex: searchTerm.trim(), $options: "i" } },
+      { description: { $regex: searchTerm.trim(), $options: "i" } },
+    ],
+    isActive: true,
+    status: "active",
       };
 
       await Quiz.findByIdAndUpdate(quizId, { analytics });
