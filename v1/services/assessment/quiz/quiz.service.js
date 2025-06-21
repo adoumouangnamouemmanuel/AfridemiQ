@@ -225,23 +225,44 @@ const getQuizzesByTopic = async (topicId, filters = {}) => {
     throw new BadRequestError("ID de sujet requis");
       }
 
-      // Count user attempts
-      const userAttempts = await QuizResult.countDocuments({ quizId, userId });
+  const query = {
+    topicIds: { $in: [topicId] },
+    isActive: true,
+    status: "active",
+  };
 
-      if (!quiz.canUserRetake(userAttempts)) {
-        const lastAttempt = await QuizResult.findOne({ quizId, userId })
-          .sort({ createdAt: -1 })
-          .select("createdAt");
+  // Apply additional filters
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.format) query.format = filters.format;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
 
-        const nextRetakeTime = quiz.getNextRetakeTime(lastAttempt.createdAt);
+  const limit = parseInt(filters.limit) || 20;
 
-        return new ApiResponse(200, {
-          canTake: false,
-          reason: "Maximum attempts reached",
-          attemptsUsed: userAttempts,
-          maxAttempts: quiz.retakePolicy.maxAttempts,
-          nextRetakeTime: nextRetakeTime > new Date() ? nextRetakeTime : null,
-        });
+  const quizzes = await Quiz.find(query)
+    .populate("subjectId", "name code")
+    .populate("topicIds", "name")
+    .sort({ "stats.totalAttempts": -1, createdAt: -1 })
+    .limit(limit);
+
+  logger.info("++++++✅ GET QUIZZES BY TOPIC: Quizzes retrieved ++++++");
+  return quizzes;
+};
+
+// =============== GET QUIZZES BY EDUCATION AND EXAM ===============
+const getQuizzesByEducationAndExam = async (
+  educationLevel,
+  examType,
+  filters = {}
+) => {
+  logger.info(
+    "===================getQuizzesByEducationAndExam======================="
+  );
+
+  if (!educationLevel || !examType) {
+    throw new BadRequestError("Niveau d'éducation et type d'examen requis");
       }
 
       return new ApiResponse(200, {
