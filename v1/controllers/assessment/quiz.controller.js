@@ -69,17 +69,25 @@ const getQuizById = async (req, res) => {
   }
 };
 
-  // Update quiz
-  updateQuiz = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+// =============== UPDATE QUIZ ===============
+const updateQuiz = async (req, res) => {
+  logger.info("===================updateQuiz=======================");
 
-    // Check if user owns the quiz or is admin
-    const quiz = await quizService.getQuizById(id);
-    if (
-      quiz.data.createdBy._id.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
-      throw new ApiError(403, "Not authorized to update this quiz");
+  try {
+    const quiz = await quizService.updateQuiz(req.params.id, req.body);
+
+    logger.info("++++++✅ UPDATE QUIZ: Quiz updated successfully ++++++");
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Quiz mis à jour avec succès",
+      data: { quiz },
+    });
+  } catch (error) {
+    logger.error("❌ UPDATE QUIZ ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la mise à jour du quiz",
+    });
     }
 
     const result = await quizService.updateQuiz(id, req.body);
