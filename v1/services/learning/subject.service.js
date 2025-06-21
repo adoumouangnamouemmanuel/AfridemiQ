@@ -114,60 +114,49 @@ const getSubjectById = async (subjectId) => {
   return subject;
 };
 
-/**
- * Update subject
- */
+// =============== UPDATE SUBJECT ===============
 const updateSubject = async (subjectId, updateData) => {
-  try {
-    const subject = await Subject.findById(subjectId);
+  logger.info("===================updateSubject=======================");
 
-    if (!subject) {
+  // Check if subject exists
+  const existingSubject = await Subject.findById(subjectId);
+  if (!existingSubject) {
       throw new NotFoundError("Matière non trouvée");
     }
 
-    // Check for name/series conflict if name or series is being updated
-    if (updateData.name || updateData.series) {
-      const nameToCheck = updateData.name || subject.name;
-      const seriesToCheck = updateData.series || subject.series;
-
-      const existingSubject = await Subject.findOne({
+  // Check for duplicate code if code is being updated
+  if (updateData.code && updateData.code !== existingSubject.code) {
+    const duplicateCode = await Subject.findOne({
+      code: updateData.code.toUpperCase(),
         _id: { $ne: subjectId },
-        name: nameToCheck,
-        series: { $in: seriesToCheck },
-        isActive: true,
       });
-
-      if (existingSubject) {
-        throw new ConflictError(
-          "Une matière avec ce nom existe déjà pour cette série"
-        );
+    if (duplicateCode) {
+      throw new ConflictError("Une matière avec ce code existe déjà");
       }
     }
 
-    // Update fields
-    Object.keys(updateData).forEach((key) => {
-      if (key !== "_id") {
-        subject[key] = updateData[key];
-      }
+  // Check for duplicate name if name is being updated
+  if (updateData.name && updateData.name !== existingSubject.name) {
+    const duplicateName = await Subject.findOne({
+      name: { $regex: new RegExp(`^${updateData.name}$`, "i") },
+      _id: { $ne: subjectId },
     });
-
-    await subject.save();
-
-    logger.info(`Subject updated: ${subject.name}`, { subjectId });
-
-    return subject;
-  } catch (error) {
-    if (error.name === "CastError") {
-      throw new BadRequestError("ID de matière invalide");
+    if (duplicateName) {
+      throw new ConflictError("Une matière avec ce nom existe déjà");
     }
-    logger.error("Error updating subject", error, { subjectId, updateData });
-    throw error;
   }
+
+  const subject = await Subject.findByIdAndUpdate(
+    subjectId,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  );
+
+  logger.info("++++++✅ UPDATE SUBJECT: Subject updated successfully ++++++");
+  return subject;
 };
 
-/**
- * Delete subject (soft delete)
- */
+// =============== DELETE SUBJECT ===============
 const deleteSubject = async (subjectId) => {
   try {
     const subject = await Subject.findById(subjectId);
