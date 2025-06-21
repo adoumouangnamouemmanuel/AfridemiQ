@@ -146,6 +146,5 @@ const getTopicsQuerySchema = Joi.object({
 module.exports = {
   createTopicSchema,
   updateTopicSchema,
-  bulkCreateTopicsSchema,
-  bulkUpdateTopicsSchema,
+  getTopicsQuerySchema,
 };
