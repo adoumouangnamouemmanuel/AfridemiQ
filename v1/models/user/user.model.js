@@ -42,7 +42,6 @@ const UserSchema = new Schema(
         message:
           "Le pays doit être l'un des suivants : Nigeria, Ghana, Kenya, Cameroun, Sénégal, Tchad",
       },
-      required: [true, "Le pays est requis"],
     },
     examType: {
       type: String,
@@ -51,7 +50,6 @@ const UserSchema = new Schema(
         message:
           "Le type d'examen doit être l'un des suivants : WAEC, NECO, JAMB, KCSE, BAC, BEPC",
       },
-      required: [true, "Le type d'examen est requis"],
     },
     educationLevel: {
       type: String,
@@ -59,8 +57,31 @@ const UserSchema = new Schema(
         values: EDUCATION_LEVELS,
         message: "Le niveau d'éducation doit être : secondaire ou université",
       },
-      required: [true, "Le niveau d'éducation est requis"],
     },
+
+    // =============== INFORMATIONS PERSONNELLES OPTIONNELLES ===============
+    dateOfBirth: {
+      type: Date,
+      validate: {
+        validator: (v) => !v || v <= new Date(),
+        message: "La date de naissance ne peut pas être dans le futur",
+      },
+    },
+    gender: {
+      type: String,
+      enum: {
+        values: GENDERS,
+        message: "Le genre doit être : homme, femme ou préfère ne pas dire",
+      },
+    },
+    phoneNumber: {
+      type: String,
+      validate: {
+        validator: (v) => !v || /^\+?[1-9]\d{1,14}$/.test(v),
+        message: "Veuillez fournir un numéro de téléphone valide",
+      },
+    },
+
 
     // =============== ONBOARDING STATUS ===============
     onboardingCompleted: {
