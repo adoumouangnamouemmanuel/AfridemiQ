@@ -76,19 +76,30 @@ const getQuestionById = async (req, res) => {
   }
 };
 
+// =============== UPDATE QUESTION ===============
 const updateQuestion = async (req, res) => {
+  logger.info("===================updateQuestion=======================");
+
   try {
     const question = await questionService.updateQuestion(
       req.params.id,
       req.body
     );
+
+    logger.info(
+      "++++++✅ UPDATE QUESTION: Question updated successfully ++++++"
+    );
     res.status(StatusCodes.OK).json({
+      success: true,
       message: "Question mise à jour avec succès",
-      data: question,
+      data: { question },
     });
   } catch (error) {
-    logger.error("Error updating question:", error);
-    throw error;
+    logger.error("❌ UPDATE QUESTION ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la mise à jour de la question",
+    });
   }
 };
 
