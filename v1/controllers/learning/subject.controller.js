@@ -96,35 +96,24 @@ const updateSubject = async (req, res) => {
   }
 };
 
-// Delete subject
+// =============== DELETE SUBJECT ===============
 const deleteSubject = async (req, res) => {
-  try {
-    const result = await subjectService.deleteSubject(req.params.id);
-    res.status(StatusCodes.OK).json({
-      message: result.message,
-    });
-  } catch (error) {
-    logger.error("Error in deleteSubject controller", error, {
-      subjectId: req.params.id,
-    });
-    throw error;
-  }
-};
+  logger.info("===================deleteSubject=======================");
 
-// Rate subject
-const rateSubject = async (req, res) => {
   try {
-    const { rating } = req.body;
-    const subject = await subjectService.rateSubject(req.params.id, rating);
+    await subjectService.deleteSubject(req.params.id);
+
+    logger.info("++++++✅ DELETE SUBJECT: Subject deleted successfully ++++++");
     res.status(StatusCodes.OK).json({
-      message: "Note ajoutée avec succès",
-      data: subject,
+      success: true,
+      message: "Matière supprimée avec succès",
     });
   } catch (error) {
-    logger.error("Error in rateSubject controller", error, {
-      subjectId: req.params.id,
+    logger.error("❌ DELETE SUBJECT ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la suppression de la matière",
     });
-    throw error;
   }
 };
 
