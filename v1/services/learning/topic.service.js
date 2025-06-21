@@ -107,82 +107,71 @@ const getTopics = async (query) => {
   return { topics, pagination };
 };
 
-  // Get topic by ID
-  async getTopicById(id) {
-    try {
-      const topic = await Topic.findById(id)
-        .populate("subjectId", "name code description")
-        .lean();
+// =============== GET TOPIC BY ID ===============
+const getTopicById = async (topicId) => {
+  logger.info("===================getTopicById=======================");
 
+  const topic = await Topic.findById(topicId).populate(
+    "subjectId",
+    "name code"
+  );
       if (!topic) {
-        throw new NotFoundError("Topic not found");
+    throw new NotFoundError("Sujet non trouvé");
       }
 
+  logger.info("++++++✅ GET TOPIC BY ID: Topic retrieved successfully ++++++");
       return topic;
-    } catch (error) {
-      if (error.name === "CastError") {
-        throw new BadRequestError("Invalid topic ID format");
-      }
-      throw error;
-    }
+};
+
+// =============== UPDATE TOPIC ===============
+const updateTopic = async (topicId, updateData) => {
+  logger.info("===================updateTopic=======================");
+
+  // Check if topic exists
+  const existingTopic = await Topic.findById(topicId);
+  if (!existingTopic) {
+    throw new NotFoundError("Sujet non trouvé");
   }
 
-  // Update topic
-  async updateTopic(id, updateData) {
-    try {
       // If updating subjectId, verify it exists
       if (updateData.subjectId) {
         const subject = await Subject.findById(updateData.subjectId);
         if (!subject) {
-          throw new NotFoundError("Subject not found");
+      throw new NotFoundError("Matière non trouvée");
         }
       }
 
-      // If updating name, check for duplicates
-      if (updateData.name) {
-        const existingTopic = await Topic.findOne({
-          name: updateData.name,
-          subjectId: updateData.subjectId,
-          _id: { $ne: id },
+  // Check for duplicate name if name is being updated
+  if (updateData.name && updateData.name !== existingTopic.name) {
+    const duplicateName = await Topic.findOne({
+      name: { $regex: new RegExp(`^${updateData.name}$`, "i") },
+      subjectId: updateData.subjectId || existingTopic.subjectId,
+      _id: { $ne: topicId },
         });
-
-        if (existingTopic) {
-          throw new BadRequestError(
-            "Topic with this name already exists for this subject"
+    if (duplicateName) {
+      throw new ConflictError(
+        "Un sujet avec ce nom existe déjà pour cette matière"
           );
         }
       }
 
       const topic = await Topic.findByIdAndUpdate(
-        id,
+    topicId,
         { $set: updateData },
         { new: true, runValidators: true }
-      ).populate("subjectId", "name code description");
+  ).populate("subjectId", "name code");
 
-      if (!topic) {
-        throw new NotFoundError("Topic not found");
-      }
-
+  logger.info("++++++✅ UPDATE TOPIC: Topic updated successfully ++++++");
       return topic;
-    } catch (error) {
-      if (error.name === "ValidationError") {
-        const messages = Object.values(error.errors).map((err) => err.message);
-        throw new BadRequestError(`Validation failed: ${messages.join(", ")}`);
-      }
-      if (error.name === "CastError") {
-        throw new BadRequestError("Invalid topic ID format");
-      }
-      throw error;
-    }
-  }
+};
 
-  // Delete topic
-  async deleteTopic(id) {
-    try {
-      const topic = await Topic.findByIdAndDelete(id);
+// =============== DELETE TOPIC ===============
+const deleteTopic = async (topicId) => {
+  logger.info("===================deleteTopic=======================");
 
+  const topic = await Topic.findById(topicId);
       if (!topic) {
-        throw new NotFoundError("Topic not found");
+    throw new NotFoundError("Sujet non trouvé");
       }
 
       return { message: "Topic deleted successfully" };
