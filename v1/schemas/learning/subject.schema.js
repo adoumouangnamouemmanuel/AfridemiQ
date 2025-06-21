@@ -18,16 +18,18 @@ const createSubjectSchema = Joi.object({
       "any.required": "Le nom de la matière est requis",
       "string.max": "Le nom ne peut pas dépasser 100 caractères",
     }),
-  icon: Joi.string().required().trim().messages({
-    "any.required": "L'icône est requise",
-  }),
-  color: Joi.string()
+
+  code: Joi.string()
     .required()
-    .pattern(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)
+    .trim()
+    .uppercase()
+    .max(10)
+    .pattern(/^[A-Z0-9]+$/)
     .messages({
-      "any.required": "La couleur est requise",
+      "any.required": "Le code de la matière est requis",
+      "string.max": "Le code ne peut pas dépasser 10 caractères",
       "string.pattern.base":
-        "La couleur doit être un code hexadécimal valide (ex: #FF0000)",
+        "Le code doit contenir uniquement des lettres majuscules et des chiffres",
     }),
   description: Joi.string()
     .required()
