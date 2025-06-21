@@ -55,18 +55,24 @@ const getResourceById = async (req, res) => {
 
 // =============== CREATE RESOURCE ===============
 const createResource = async (req, res) => {
+  logger.info("===================createResource=======================");
+
   try {
     const resource = await resourceService.createResource(req.body);
 
+    logger.info(
+      "++++++✅ CREATE RESOURCE: Resource created successfully ++++++"
+    );
     res.status(StatusCodes.CREATED).json({
-      message: "Resource created successfully",
-      data: resource,
+      success: true,
+      message: "Ressource créée avec succès",
+      data: { resource },
     });
   } catch (error) {
-    logger.error("Error creating resource:", error);
-    res.status(StatusCodes.BAD_REQUEST).json({
-      message: "Error creating resource",
-      error: error.message,
+    logger.error("❌ CREATE RESOURCE ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la création de la ressource",
     });
   }
 };
