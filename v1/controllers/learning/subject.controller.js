@@ -117,23 +117,30 @@ const deleteSubject = async (req, res) => {
   }
 };
 
-// Add exam to subject
-const addExamToSubject = async (req, res) => {
+// =============== GET FEATURED SUBJECTS ===============
+const getFeaturedSubjects = async (req, res) => {
+  logger.info("===================getFeaturedSubjects=======================");
+
   try {
-    const subject = await subjectService.addExamToSubject(
-      req.params.id,
-      req.body.examId
+    const limit = parseInt(req.query.limit) || 6;
+    const subjects = await subjectService.getFeaturedSubjects(limit);
+
+    logger.info(
+      "++++++✅ GET FEATURED SUBJECTS: Featured subjects retrieved ++++++"
     );
     res.status(StatusCodes.OK).json({
-      message: "Examen ajouté à la matière avec succès",
-      data: subject,
+      success: true,
+      message: "Matières populaires récupérées avec succès",
+      data: { subjects },
     });
   } catch (error) {
-    logger.error("Error in addExamToSubject controller", error, {
-      subjectId: req.params.id,
-      examId: req.body.examId,
+    logger.error("❌ GET FEATURED SUBJECTS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message:
+        error.message ||
+        "Erreur lors de la récupération des matières populaires",
     });
-    throw error;
   }
 };
 
