@@ -87,7 +87,6 @@ const SubjectSchema = new Schema(
 // =============== INDEX ===============
 SubjectSchema.index({ examTypes: 1, countries: 1 });
 SubjectSchema.index({ category: 1, isActive: 1 });
-SubjectSchema.index({ code: 1 });
 
 // =============== VIRTUELS ===============
 SubjectSchema.virtual("displayName").get(function () {
