@@ -1,6 +1,7 @@
 const { Question } = require("../../../models/assessment/question.model");
-const { ApiError } = require("../../../utils/ApiError");
-const createLogger = require("../../../services/logging.service");
+const NotFoundError = require("../../../errors/notFoundError");
+const BadRequestError = require("../../../errors/badRequestError");
+const createLogger = require("../../logging.service");
 
 const logger = createLogger("QuestionService");
 
