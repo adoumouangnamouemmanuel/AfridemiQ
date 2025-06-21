@@ -204,37 +204,26 @@ const searchTopics = async (req, res) => {
     logger.info("++++++✅ SEARCH TOPICS: Search completed successfully ++++++");
     res.status(StatusCodes.OK).json({
         success: true,
-        message: "Bulk create completed",
-        data: result,
+      message: "Recherche effectuée avec succès",
+      data: { topics },
       });
     } catch (error) {
-      next(error);
-    }
-  }
-
-  // Bulk update topics
-  async bulkUpdateTopics(req, res, next) {
-    try {
-      const { updates } = req.body;
-
-      if (!Array.isArray(updates) || updates.length === 0) {
-        return res.status(400).json({
+    logger.error("❌ SEARCH TOPICS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
           success: false,
-          message: "Updates array is required and cannot be empty",
+      message: error.message || "Erreur lors de la recherche",
         });
       }
+};
 
-      const result = await topicService.bulkUpdateTopics(updates);
-
-      res.status(200).json({
-        success: true,
-        message: "Bulk update completed",
-        data: result,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-}
-
-module.exports = new TopicController();
+module.exports = {
+  createTopic,
+  getTopics,
+  getTopicById,
+  updateTopic,
+  deleteTopic,
+  getTopicsBySubject,
+  getTopicsByDifficulty,
+  getPopularTopics,
+  searchTopics,
+};
