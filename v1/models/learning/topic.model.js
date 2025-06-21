@@ -185,13 +185,41 @@ const TopicSchema = new Schema(
 TopicSchema.index({ subjectId: 1, order: 1 });
 TopicSchema.index({ difficulty: 1, isActive: 1 });
 TopicSchema.index({ prerequisites: 1 });
+TopicSchema.index({ keywords: 1 });
+TopicSchema.index({ isPopular: 1, "stats.totalStudents": -1 });
+TopicSchema.index({ "stats.averageScore": -1 });
 
 // =============== VALIDATION ===============
-TopicSchema.path("learningObjectives").validate({
-  validator: function (v) {
-    return v && v.length > 0;
-  },
-  message: "Au moins un objectif d'apprentissage est requis",
+TopicSchema.pre("validate", function (next) {
+  // Au moins un objectif d'apprentissage requis
+  if (!this.learningObjectives || this.learningObjectives.length === 0) {
+    return next(new Error("Au moins un objectif d'apprentissage est requis"));
+  }
+
+  // Vérifier que les mots-clés sont uniques
+  if (this.keywords) {
+    const uniqueKeywords = [...new Set(this.keywords)];
+    this.keywords = uniqueKeywords;
+  }
+
+  next();
+});
+
+// =============== MIDDLEWARE - UPDATE SUBJECT STATS ===============
+TopicSchema.post("save", async function () {
+  try {
+    const Subject = require("./subject.model").Subject;
+    const totalTopics = await this.constructor.countDocuments({
+      subjectId: this.subjectId,
+      isActive: true,
+    });
+
+    await Subject.findByIdAndUpdate(this.subjectId, {
+      "stats.totalTopics": totalTopics,
+    });
+  } catch (error) {
+    console.error("Error updating subject stats:", error);
+  }
 });
 
 // =============== VIRTUELS ===============
