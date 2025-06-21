@@ -186,19 +186,26 @@ const getFeaturedSubjects = async (limit = 6) => {
   return subjects;
 };
 
-/**
- * Add exam to subject
- */
-const addExamToSubject = async (subjectId, examId) => {
-  try {
-    const subject = await Subject.findById(subjectId);
+// =============== GET POPULAR SUBJECTS ===============
+const getPopularSubjects = async (limit = 10) => {
+  logger.info("===================getPopularSubjects=======================");
 
-    if (!subject) {
-      throw new NotFoundError("Matière non trouvée");
-    }
+  const subjects = await Subject.getPopular(limit);
 
-    if (subject.examIds.includes(examId)) {
-      throw new ConflictError("Cet examen est déjà associé à cette matière");
+  logger.info(
+    "++++++✅ GET POPULAR SUBJECTS: Popular subjects retrieved ++++++"
+  );
+  return subjects;
+};
+
+// =============== GET SUBJECTS BY EDUCATION AND COUNTRY ===============
+const getSubjectsByEducationAndCountry = async (educationLevel, country) => {
+  logger.info(
+    "===================getSubjectsByEducationAndCountry======================="
+  );
+
+  if (!educationLevel || !country) {
+    throw new BadRequestError("Niveau d'éducation et pays requis");
     }
 
     subject.examIds.push(examId);
