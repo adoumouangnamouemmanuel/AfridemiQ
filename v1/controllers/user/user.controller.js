@@ -68,15 +68,6 @@ const updatePersonalInfo = async (req, res) => {
   });
 };
 
-// Update notification preferences
-const updateNotifications = async (req, res) => {
-  const user = await userService.updateNotifications(req.user.userId, req.body);
-  res.status(StatusCodes.OK).json({
-    message: "Préférences de notification mises à jour avec succès",
-    data: user,
-  });
-};
-
 // Delete user
 const deleteUser = async (req, res) => {
   await userService.deleteUser(req.user.userId);
@@ -264,7 +255,6 @@ module.exports = {
   getProfile,
   updateProfile,
   updatePersonalInfo,
-  updateNotifications,
   deleteUser,
 
   // Onboarding
