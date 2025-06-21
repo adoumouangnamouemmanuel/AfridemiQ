@@ -163,31 +163,61 @@ const getQuizzesBySubject = async (req, res) => {
   }
 };
 
-  // Check quiz eligibility
-  checkQuizEligibility = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const userId = req.user.id;
+// =============== GET QUIZZES BY TOPIC ===============
+const getQuizzesByTopic = async (req, res) => {
+  logger.info("===================getQuizzesByTopic=======================");
 
-    const result = await quizService.canUserTakeQuiz(id, userId);
-    res.status(result.statusCode).json(result);
-  });
+  try {
+    const { topicId } = req.params;
+    const filters = req.query;
+    const quizzes = await quizService.getQuizzesByTopic(topicId, filters);
 
-  // Get quiz statistics
-  getQuizStatistics = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    logger.info("++++++✅ GET QUIZZES BY TOPIC: Quizzes retrieved ++++++");
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Quizzes récupérés avec succès",
+      data: { quizzes },
+    });
+  } catch (error) {
+    logger.error("❌ GET QUIZZES BY TOPIC ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des quizzes",
+    });
+  }
+};
 
-    // Check if user owns the quiz or is admin
-    const quiz = await quizService.getQuizById(id);
-    if (
-      quiz.data.createdBy._id.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
-      throw new ApiError(403, "Not authorized to view quiz statistics");
-    }
+// =============== GET QUIZZES BY EDUCATION AND EXAM ===============
+const getQuizzesByEducationAndExam = async (req, res) => {
+  logger.info(
+    "===================getQuizzesByEducationAndExam======================="
+  );
 
-    const result = await quizService.getQuizStatistics(id);
-    res.status(result.statusCode).json(result);
-  });
+  try {
+    const { educationLevel, examType } = req.params;
+    const filters = req.query;
+    const quizzes = await quizService.getQuizzesByEducationAndExam(
+      educationLevel,
+      examType,
+      filters
+    );
+
+    logger.info(
+      "++++++✅ GET QUIZZES BY EDUCATION AND EXAM: Quizzes retrieved ++++++"
+    );
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Quizzes récupérés avec succès",
+      data: { quizzes },
+    });
+  } catch (error) {
+    logger.error("❌ GET QUIZZES BY EDUCATION AND EXAM ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des quizzes",
+    });
+  }
+};
 
   // Update quiz analytics
   updateQuizAnalytics = asyncHandler(async (req, res) => {
