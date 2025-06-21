@@ -168,46 +168,212 @@ const updateQuestion = async (questionId, updateData) => {
   }
 
       const question = await Question.findByIdAndUpdate(
-        id,
-        { $set: data },
+    questionId,
+    { $set: updateData },
         { new: true, runValidators: true }
       )
-        .populate("topicId", "name")
         .populate("subjectId", "name code")
-        .populate("creatorId", "name")
-        .populate("validation.verifiedBy", "name")
-        .populate("relatedQuestions", "question");
-      if (!question) throw new ApiError(404, "Question not found");
-      logger.info(`Updated question: ${id}`);
+    .populate("topicId", "name");
+
+  logger.info("++++++✅ UPDATE QUESTION: Question updated successfully ++++++");
       return question;
-    } catch (error) {
-      logger.error("Error updating question:", error);
-      throw error instanceof ApiError
-        ? error
-        : new ApiError(500, "Failed to update question");
-    }
+};
+
+// =============== DELETE QUESTION ===============
+const deleteQuestion = async (questionId) => {
+  logger.info("===================deleteQuestion=======================");
+
+  const question = await Question.findById(questionId);
+  if (!question) {
+    throw new NotFoundError("Question non trouvée");
   }
 
-  async deleteQuestion(id) {
-    try {
-      const question = await Question.findByIdAndDelete(id);
-      if (!question) throw new ApiError(404, "Question not found");
-      logger.info(`Deleted question: ${id}`);
-      return { message: "Question deleted successfully" };
-    } catch (error) {
-      logger.error("Error deleting question:", error);
-      throw error instanceof ApiError
-        ? error
-        : new ApiError(500, "Failed to delete question");
-    }
+  // Soft delete - just mark as inactive
+  await Question.findByIdAndUpdate(questionId, {
+    isActive: false,
+    status: "inactive",
+  });
+
+  logger.info("++++++✅ DELETE QUESTION: Question deleted successfully ++++++");
+};
+
+// =============== GET QUESTIONS BY SUBJECT ===============
+const getQuestionsBySubject = async (subjectId, filters = {}) => {
+  logger.info(
+    "===================getQuestionsBySubject======================="
+  );
+
+  if (!subjectId) {
+    throw new BadRequestError("ID de matière requis");
   }
 
-  async verifyQuestion(id, verifierId, qualityScore, feedback = []) {
-    try {
-      const question = await Question.findById(id);
-      if (!question) throw new ApiError(404, "Question not found");
-      await question.verify(verifierId, qualityScore, feedback);
-      logger.info(`Verified question: ${id}`);
+  const query = {
+    subjectId,
+    isActive: true,
+    status: "active",
+  };
+
+  // Apply additional filters
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.type) query.type = filters.type;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
+
+  const limit = parseInt(filters.limit) || 20;
+
+  const questions = await Question.find(query)
+    .populate("topicId", "name")
+    .sort({ createdAt: -1 })
+    .limit(limit);
+
+  logger.info("++++++✅ GET QUESTIONS BY SUBJECT: Questions retrieved ++++++");
+  return questions;
+};
+
+// =============== GET QUESTIONS BY TOPIC ===============
+const getQuestionsByTopic = async (topicId, filters = {}) => {
+  logger.info("===================getQuestionsByTopic=======================");
+
+  if (!topicId) {
+    throw new BadRequestError("ID de sujet requis");
+  }
+
+  const query = {
+    topicId,
+    isActive: true,
+    status: "active",
+  };
+
+  // Apply additional filters
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.type) query.type = filters.type;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
+
+  const limit = parseInt(filters.limit) || 20;
+
+  const questions = await Question.find(query)
+    .populate("subjectId", "name code")
+    .sort({ createdAt: -1 })
+    .limit(limit);
+
+  logger.info("++++++✅ GET QUESTIONS BY TOPIC: Questions retrieved ++++++");
+  return questions;
+};
+
+// =============== GET RANDOM QUESTIONS ===============
+const getRandomQuestions = async (count = 10, filters = {}) => {
+  logger.info("===================getRandomQuestions=======================");
+
+  const query = {
+    isActive: true,
+    status: "active",
+  };
+
+  // Apply filters
+  if (filters.subjectId) query.subjectId = filters.subjectId;
+  if (filters.topicId) query.topicId = filters.topicId;
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.type) query.type = filters.type;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
+
+  const questions = await Question.aggregate([
+    { $match: query },
+    { $sample: { size: parseInt(count) } },
+    {
+      $lookup: {
+        from: "subjects",
+        localField: "subjectId",
+        foreignField: "_id",
+        as: "subjectId",
+        pipeline: [{ $project: { name: 1, code: 1 } }],
+      },
+    },
+    {
+      $lookup: {
+        from: "topics",
+        localField: "topicId",
+        foreignField: "_id",
+        as: "topicId",
+        pipeline: [{ $project: { name: 1 } }],
+      },
+    },
+    {
+      $addFields: {
+        subjectId: { $arrayElemAt: ["$subjectId", 0] },
+        topicId: { $arrayElemAt: ["$topicId", 0] },
+      },
+    },
+  ]);
+
+  logger.info(
+    "++++++✅ GET RANDOM QUESTIONS: Random questions retrieved ++++++"
+  );
+  return questions;
+};
+
+// =============== SEARCH QUESTIONS ===============
+const searchQuestions = async (searchTerm, filters = {}) => {
+  logger.info("===================searchQuestions=======================");
+
+  if (!searchTerm || searchTerm.trim().length < 2) {
+    throw new BadRequestError(
+      "Le terme de recherche doit contenir au moins 2 caractères"
+    );
+  }
+
+  const query = {
+    $or: [
+      { question: { $regex: searchTerm.trim(), $options: "i" } },
+      { explanation: { $regex: searchTerm.trim(), $options: "i" } },
+      { tags: { $in: [new RegExp(searchTerm.trim(), "i")] } },
+    ],
+    isActive: true,
+    status: "active",
+  };
+
+  // Apply additional filters
+  if (filters.subjectId) query.subjectId = filters.subjectId;
+  if (filters.difficulty) query.difficulty = filters.difficulty;
+  if (filters.type) query.type = filters.type;
+  if (filters.educationLevel) query.educationLevel = filters.educationLevel;
+  if (filters.examType) query.examType = filters.examType;
+  if (filters.isPremium !== undefined)
+    query.isPremium = filters.isPremium === "true";
+
+  const questions = await Question.find(query)
+    .populate("subjectId", "name code")
+    .populate("topicId", "name")
+    .sort({ "stats.totalAttempts": -1, createdAt: -1 })
+    .limit(20);
+
+  logger.info(
+    "++++++✅ SEARCH QUESTIONS: Search completed successfully ++++++"
+  );
+  return questions;
+};
+
+// =============== UPDATE QUESTION STATS ===============
+const updateQuestionStats = async (questionId, isCorrect, timeSpent) => {
+  logger.info("===================updateQuestionStats=======================");
+
+  const question = await Question.findById(questionId);
+  if (!question) {
+    throw new NotFoundError("Question non trouvée");
+  }
+
+  await question.updateStats(isCorrect, timeSpent);
+
+  logger.info(
+    "++++++✅ UPDATE QUESTION STATS: Stats updated successfully ++++++"
+  );
       return question;
     } catch (error) {
       logger.error("Error verifying question:", error);
