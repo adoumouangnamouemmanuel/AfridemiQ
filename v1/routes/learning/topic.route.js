@@ -49,8 +49,8 @@ router.get("/search/query", topicController.searchTopics);
 // Create new topic
 router.post(
   "/",
-  authMiddleware.authenticateUser,
-  roleMiddleware.checkRole(["admin"]),
+  authMiddleware,
+  roleMiddleware(["admin"]),
   validateMiddleware(createTopicSchema, "body"),
   topicController.createTopic
 );
