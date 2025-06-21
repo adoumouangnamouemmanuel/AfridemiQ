@@ -35,12 +35,14 @@ const TopicSchema = new Schema(
       default: 0,
       min: [0, "L'ordre ne peut pas être négatif"],
     },
+
     difficulty: {
       type: String,
       enum: {
         values: DIFFICULTY_LEVELS,
-        message: "La difficulté doit être : facile, moyen ou difficile",
+        message: "La difficulté doit être : easy, medium ou hard",
       },
+      required: [true, "La difficulté est requise"],
       default: "medium",
     },
 
