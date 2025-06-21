@@ -128,8 +128,8 @@ const QuizSchema = new Schema(
       default: "active",
     },
 
-    isPremium: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    isPremium: { type: Boolean, default: false },
   },
   {
     timestamps: true,
