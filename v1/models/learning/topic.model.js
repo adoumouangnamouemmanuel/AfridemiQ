@@ -46,7 +46,15 @@ const TopicSchema = new Schema(
       default: "medium",
     },
 
-    // =============== OBJECTIFS D'APPRENTISSAGE SIMPLES ===============
+    // Temps estimé pour maîtriser ce sujet (en heures)
+    estimatedTimeHours: {
+      type: Number,
+      min: [0.5, "Minimum 30 minutes"],
+      max: [20, "Maximum 20 heures"],
+      default: 2,
+    },
+
+    // =============== OBJECTIFS D'APPRENTISSAGE ===============
     learningObjectives: [
       {
         objective: {
