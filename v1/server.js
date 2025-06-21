@@ -8,7 +8,7 @@ const compression = require("compression");
 const userRoutes = require("./routes/user/user.route");
 // Learning routes
 const subjectRoutes = require("./routes/learning/subject.route");
-// const topicRoutes = require("./src/routes/learning/topic.route");
+const topicRoutes = require("./routes/learning/topic.route");
 // assessment routes
 // const quizRoutes = require("./routes/assessment/quiz.route");
 // const questionRoutes = require("./routes/assessment/question.route");
