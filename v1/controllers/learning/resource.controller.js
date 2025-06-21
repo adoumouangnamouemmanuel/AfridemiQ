@@ -359,20 +359,24 @@ const bulkCreateResources = async (req, res) => {
   }
 };
 
-// Get admin analytics
+// =============== GET ADMIN ANALYTICS ===============
 const getAdminAnalytics = async (req, res) => {
+  logger.info("===================getAdminAnalytics=======================");
+
   try {
     const analytics = await resourceService.getAdminAnalytics();
 
+    logger.info("++++++✅ GET ADMIN ANALYTICS: Analytics retrieved ++++++");
     res.status(StatusCodes.OK).json({
-      message: "Admin analytics retrieved successfully",
-      data: analytics,
+      success: true,
+      message: "Analyses administrateur récupérées avec succès",
+      data: { analytics },
     });
   } catch (error) {
-    logger.error("Error getting admin analytics:", error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Error retrieving admin analytics",
-      error: error.message,
+    logger.error("❌ GET ADMIN ANALYTICS ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la récupération des analyses",
     });
   }
 };
