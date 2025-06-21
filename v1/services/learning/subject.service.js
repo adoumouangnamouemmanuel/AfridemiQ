@@ -293,26 +293,16 @@ const addStudentToSubject = async (subjectId) => {
   logger.info("===================addStudentToSubject=======================");
 
     const subject = await Subject.findById(subjectId);
-
     if (!subject) {
       throw new NotFoundError("Matière non trouvée");
     }
 
-    await subject.updateRating(rating);
+  await subject.addStudent();
 
-    logger.info(`Subject rated: ${subject.name} - ${rating}/5`, {
-      subjectId,
-      rating,
-    });
-
+  logger.info(
+    "++++++✅ ADD STUDENT TO SUBJECT: Student added successfully ++++++"
+  );
     return subject;
-  } catch (error) {
-    if (error.name === "CastError") {
-      throw new BadRequestError("ID de matière invalide");
-    }
-    logger.error("Error rating subject", error, { subjectId, rating });
-    throw error;
-  }
 };
 
 module.exports = {
