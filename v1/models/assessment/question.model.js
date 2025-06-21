@@ -165,9 +165,9 @@ QuizSchema.index({ createdAt: -1 });
 
 // =============== VIRTUELS ===============
 QuestionSchema.virtual("successRate").get(function () {
-  if (this.progress.totalAttempts === 0) return 0;
+  if (this.stats.totalAttempts === 0) return 0;
   return Math.round(
-    (this.progress.correctAttempts / this.progress.totalAttempts) * 100
+    (this.stats.correctAttempts / this.stats.totalAttempts) * 100
   );
 });
 
