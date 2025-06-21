@@ -4,17 +4,25 @@ const createLogger = require("../../services/logging.service");
 
 const logger = createLogger("SubjectController");
 
-// Create a new subject
+// =============== CREATE SUBJECT ===============
 const createSubject = async (req, res) => {
+  logger.info("===================createSubject=======================");
+
   try {
     const subject = await subjectService.createSubject(req.body);
+
+    logger.info("++++++✅ CREATE SUBJECT: Subject created successfully ++++++");
     res.status(StatusCodes.CREATED).json({
+      success: true,
       message: "Matière créée avec succès",
-      data: subject,
+      data: { subject },
     });
   } catch (error) {
-    logger.error("Error in createSubject controller", error);
-    throw error;
+    logger.error("❌ CREATE SUBJECT ERROR:", error);
+    res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Erreur lors de la création de la matière",
+    });
   }
 };
 
