@@ -17,18 +17,23 @@ const router = express.Router();
 // Apply UTF-8 middleware to all routes
 router.use(utf8Middleware);
 
-// Search and analytics routes (public) - MUST BE FIRST
-router.get("/search", subjectController.advancedSearch);
-router.get("/search/suggestions", subjectController.getSearchSuggestions);
-router.get("/trending", subjectController.getTrendingSubjects);
+// Apply rate limiting
+router.use(apiLimiter);
 
-// Analytics routes (require authentication) - BEFORE /:id route
+// =============== PUBLIC ROUTES ===============
+
+// Get all subjects with filtering and pagination
 router.get(
-  "/analytics",
-  authMiddleware,
-  roleMiddleware(["teacher", "admin"]),
-  subjectController.getSubjectAnalytics
+  "/",
+  validateMiddleware(getSubjectsQuerySchema, "query"),
+  subjectController.getSubjects
 );
+
+// Get subject by ID
+router.get("/:id", subjectController.getSubjectById);
+
+// Get featured subjects
+router.get("/featured/list", subjectController.getFeaturedSubjects);
 
 // Export route - BEFORE /:id route
 router.get(
