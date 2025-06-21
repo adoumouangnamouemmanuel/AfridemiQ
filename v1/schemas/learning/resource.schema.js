@@ -1,14 +1,10 @@
 const Joi = require("joi");
-
-// Shared constants
-const DIFFICULTY_LEVELS = ["beginner", "intermediate", "advanced"];
-const RESOURCE_TYPES = [
-  "document",
-  "video",
-  "audio",
-  "interactive",
-  "past_exam",
-];
+const {
+  MEDIA_TYPES,
+  DIFFICULTY_LEVELS,
+  RESOURCE_CATEGORIES,
+  EXAM_SESSIONS,
+} = require("../../constants");
 
 // Feedback schema
 const feedbackSchema = Joi.object({
