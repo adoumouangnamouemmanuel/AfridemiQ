@@ -375,13 +375,37 @@ const updateQuestionStats = async (questionId, isCorrect, timeSpent) => {
     "++++++✅ UPDATE QUESTION STATS: Stats updated successfully ++++++"
   );
       return question;
-    } catch (error) {
-      logger.error("Error verifying question:", error);
-      throw error instanceof ApiError
-        ? error
-        : new ApiError(500, "Failed to verify question");
-    }
-  }
-}
+};
 
-module.exports = new QuestionService();
+// =============== CHECK ANSWER ===============
+const checkAnswer = async (questionId, userAnswer) => {
+  logger.info("===================checkAnswer=======================");
+
+  const question = await Question.findById(questionId);
+  if (!question) {
+    throw new NotFoundError("Question non trouvée");
+  }
+
+  const isCorrect = question.checkAnswer(userAnswer);
+
+  logger.info("++++++✅ CHECK ANSWER: Answer checked successfully ++++++");
+  return {
+    isCorrect,
+    correctAnswer: question.correctAnswer,
+    explanation: question.explanation,
+  };
+};
+
+module.exports = {
+  createQuestion,
+  getQuestions,
+  getQuestionById,
+  updateQuestion,
+  deleteQuestion,
+  getQuestionsBySubject,
+  getQuestionsByTopic,
+  getRandomQuestions,
+  searchQuestions,
+  updateQuestionStats,
+  checkAnswer,
+};
