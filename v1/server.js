@@ -5,27 +5,22 @@ const cors = require("cors");
 const compression = require("compression");
 
 // user routes
-const userRoutes = require("./src/routes/user/user.route");
+const userRoutes = require("./routes/user/user.route");
 // Learning routes
-const subjectRoutes = require("./src/routes/learning/subject.route");
-const topicRoutes = require("./src/routes/learning/topic.route");
+// const subjectRoutes = require("./routes/learning/subject.route");
+// const topicRoutes = require("./src/routes/learning/topic.route");
 // assessment routes
-const examRoutes = require("./src/routes/assessment/exam.route");
-const assessmentRoutes = require("./src/routes/assessment/assessment.route");
-const quizRoutes = require("./src/routes/assessment/quiz.route");
-const challengeRoutes = require("./src/routes/assessment/challenge.route");
-const examScheduleRoutes = require("./src/routes/assessment/exam.schedule.route");
-const questionRoutes = require("./src/routes/assessment/question.route");
-const exerciseRoutes = require("./src/routes/assessment/exercise.route");
+// const quizRoutes = require("./routes/assessment/quiz.route");
+// const questionRoutes = require("./routes/assessment/question.route");
 
 // Results routes
-const quizResultRoutes = require("./src/routes/assessment/quiz.result.route");
+// const quizResultRoutes = require("./routes/assessment/quiz.result.route");
 
-const errorMiddleware = require("./src/middlewares/error.middleware");
+const errorMiddleware = require("./middlewares/error.middleware");
 const dotenv = require("dotenv");
 
 // Import all models to register them with Mongoose
-require("./src/models");
+require("./models");
 
 // Load environment variables
 if (process.env.NODE_ENV === "test") {
@@ -94,54 +89,14 @@ app.get("/health", (req, res) => {
 });
 
 // API routes
-app.use("/api/users", userRoutes);
-app.use("/api/countries", countryRoutes);
-app.use("/api/subjects", subjectRoutes);
-app.use("/api/curricula", curriculumRoutes);
-app.use("/api/exams", examRoutes);
-app.use("/api/assessments", assessmentRoutes);
-app.use("/api/topics", topicRoutes);
-app.use("/api/user-analytics", userAnalyticsRoutes);
-app.use("/api/user-progress", userProgressRoutes);
-app.use("/api/course-contents", courseContentRoutes);
-app.use("/api/resources", resourceRoutes);
-app.use("/api/adaptive-learning", adaptiveLearningRoutes);
-app.use("/api/learning-paths", learningPathRoutes);
-app.use("/api/notes", noteRoutes);
-app.use("/api/bookmarks", bookmarkRoutes);
-app.use("/api/study-plans", studyPlanRoutes);
-app.use("/api/study-groups", studyGroupRoutes);
-app.use("/api/achievements", achievementRoutes);
-app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/onboarding-status", onboardingStatusRoutes);
-app.use("/api/feedback-loop", feedbackLoopRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/peer-tutor-profiles", peerTutorProfileRoutes);
-app.use("/api/tutoring-sessions", tutoringSessionRoutes);
-app.use("/api/progress/gamified", gamifiedProgressRoutes);
-app.use("/api/progress/leaderboard", leaderboardEntryRoutes);
-app.use("/api/progress/missions", missionRoutes);
-app.use("/api/progress/topic", topicProgressRoutes);
-app.use("/api/parent-access", parentAccessRoutes);
-app.use("/api/quizzes", quizRoutes);
-app.use("/api/hints", userHintRoutes);
-app.use("/api/quiz-results", quizResultRoutes);
-app.use("/api/challenges", challengeRoutes);
-app.use("/api/exam-schedules", examScheduleRoutes);
-app.use("/api/questions", questionRoutes);
-app.use("/api/exercises", exerciseRoutes);
+app.use("/api/v1/users", userRoutes);
+// app.use("/api/subjects", subjectRoutes);
+// app.use("/api/topics", topicRoutes);
 
-// Learning lesson routes
-app.use("/api/lessons", lessonRoutes);
-app.use("/api/biology-lessons", biologyLessonRoutes);
-app.use("/api/lessons/math", mathLessonRoutes);
-app.use("/api/english-lessons", englishLessonRoutes);
-app.use("/api/french-lessons", frenchLessonRoutes);
-app.use("/api/chemistry-lessons", chemistryLessonRoutes);
-app.use("/api/physics-lessons", physicsLessonRoutes);
-app.use("/api/geography-lessons", geographyLessonRoutes);
-app.use("/api/history-lessons", historyLessonRoutes);
-app.use("/api/philosophy-lessons", philosophyLessonRoutes);
+// app.use("/api/quizzes", quizRoutes);
+// app.use("/api/quiz-results", quizResultRoutes);
+// app.use("/api/questions", questionRoutes);
+
 
 // 404 handler
 app.use((req, res, next) => {
