@@ -56,6 +56,7 @@ const SubjectSchema = new Schema(
         },
       },
     ],
+    series: [String], // ["A", "C", "D"] for BAC system
 
     // =============== ORGANISATION SIMPLE ===============
     category: {
@@ -71,7 +72,6 @@ const SubjectSchema = new Schema(
     stats: {
       totalTopics: { type: Number, default: 0 },
       totalQuestions: { type: Number, default: 0 },
-      totalStudents: { type: Number, default: 0 },
     },
 
     // =============== GESTION ===============
