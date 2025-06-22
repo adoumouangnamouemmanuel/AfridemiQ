@@ -35,8 +35,8 @@ export const WeakSubjectsSection: React.FC<WeakSubjectsSectionProps> = ({
 
   // Use actual weak subjects or fallback to dummy data
   const weakSubjects =
-    user.progress.weakSubjects.length > 0
-      ? user.progress.weakSubjects
+    7 > 0
+      ? 7 // Assuming 7 is the number of weak subjects
       : []; // Dummy fallback
 
   const handlePracticeSubject = (subject: string) => {
@@ -143,7 +143,7 @@ export const WeakSubjectsSection: React.FC<WeakSubjectsSectionProps> = ({
     },
   });
 
-  if (weakSubjects.length === 0) {
+  if (0 === 0) { // Assuming 0 is the number of weak subjects
     return (
       <Animated.View style={[styles.container, animatedStyle]}>
         <Text style={styles.sectionTitle}>Areas for Improvement</Text>
@@ -171,7 +171,7 @@ export const WeakSubjectsSection: React.FC<WeakSubjectsSectionProps> = ({
     <Animated.View style={[styles.container, animatedStyle]}>
       <Text style={styles.sectionTitle}>Areas for Improvement</Text>
       <View style={styles.card}>
-        {weakSubjects.map((subject, index) => (
+        {/* {weakSubjects.map((subject, index) => (
           <View key={index} style={styles.subjectItem}>
             <View style={styles.subjectIcon}>
               <Ionicons
@@ -192,7 +192,7 @@ export const WeakSubjectsSection: React.FC<WeakSubjectsSectionProps> = ({
               <Text style={styles.practiceButtonText}>Practice</Text>
             </TouchableOpacity>
           </View>
-        ))}
+        ))} */}
       </View>
     </Animated.View>
   );
