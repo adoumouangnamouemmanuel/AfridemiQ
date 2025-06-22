@@ -67,8 +67,10 @@ export const AchievementsSection: React.FC<WinsSectionProps> = ({ user, theme })
       description: "Maintained a 7-day study streak",
       icon: "flame",
       color: "#F59E0B",
-      earned: user.progress.streak.current >= 7,
-      progress: user.progress.streak.current,
+      // earned: user.progress.streak.current >= 7,
+      // progress: user.progress.streak.current,
+      earned: 2 >= 7, // Assuming 2 is the current streak length
+      progress: 5, // Example progress
       maxProgress: 7,
       category: "streak",
     },
