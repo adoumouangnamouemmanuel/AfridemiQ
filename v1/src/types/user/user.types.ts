@@ -207,6 +207,18 @@ export interface RefreshTokenData {
 }
 
 /**
+ * User search parameters (MVP)
+ */
+export interface SearchUsersParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+  country?: Country;
+  examType?: ExamType;
+  educationLevel?: EducationLevel;
+}
+
+/**
  * Search results response structure
  */
 export interface SearchUsersResponse {
