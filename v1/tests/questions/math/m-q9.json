@@ -1,0 +1,15 @@
+{
+  "question": "Résolvez l'équation |x - 3| = 5. Combien de solutions cette équation a-t-elle ?",
+  "type": "multiple_choice",
+  "options": ["0 solution", "1 solution", "2 solutions", "3 solutions"],
+  "correctAnswer": 2,
+  "explanation": "|x - 3| = 5 donne x - 3 = 5 ou x - 3 = -5, donc x = 8 ou x = -2 (2 solutions)",
+  "subjectId": "684240c252d9942c908b8dad",
+  "topicId": "684ffc59063537d7df3eed95",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["valeur absolue", "équation", "solutions", "algèbre"],
+  "isPremium": false,
+  "isActive": true
+}

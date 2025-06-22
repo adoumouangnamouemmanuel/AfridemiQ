@@ -1,0 +1,15 @@
+{
+  "question": "Résolvez le système : 2x + y = 7 et x - y = 2. Quelle est la valeur de x ?",
+  "type": "multiple_choice",
+  "options": ["2", "3", "4", "5"],
+  "correctAnswer": 1,
+  "explanation": "En additionnant les deux équations : 3x = 9, donc x = 3",
+  "subjectId": "684240c252d9942c908b8dad",
+  "topicId": "684ffc59063537d7df3eed95",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["système", "équations", "linéaire", "substitution"],
+  "isPremium": false,
+  "isActive": true
+}

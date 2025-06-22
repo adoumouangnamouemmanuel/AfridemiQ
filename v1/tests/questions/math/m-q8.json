@@ -1,0 +1,20 @@
+{
+  "question": "Soit f(x) = 3x - 6. Quelle est la fonction inverse f⁻¹(x) ?",
+  "type": "multiple_choice",
+  "options": [
+    "f⁻¹(x) = (x + 6)/3",
+    "f⁻¹(x) = (x - 6)/3",
+    "f⁻¹(x) = 3x + 6",
+    "f⁻¹(x) = x/3 + 2"
+  ],
+  "correctAnswer": 0,
+  "explanation": "y = 3x - 6, donc x = (y + 6)/3. Ainsi f⁻¹(x) = (x + 6)/3",
+  "subjectId": "684240c252d9942c908b8dad",
+  "topicId": "684ffc59063537d7df3eed95",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["fonction", "inverse", "bijection", "calcul"],
+  "isPremium": true,
+  "isActive": true
+}

@@ -1,0 +1,15 @@
+{
+  "question": "Pour quelle valeur de x la fonction f(x) = (x² - 4)/(x - 2) n'est-elle pas définie ?",
+  "type": "multiple_choice",
+  "options": ["x = 2", "x = -2", "x = 4", "x = 0"],
+  "correctAnswer": 0,
+  "explanation": "La fonction n'est pas définie quand le dénominateur est nul, c'est-à-dire quand x - 2 = 0, donc x = 2",
+  "subjectId": "684240c252d9942c908b8dad",
+  "topicId": "684ffc59063537d7df3eed95",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["fonction", "rationnelle", "domaine", "définition"],
+  "isPremium": false,
+  "isActive": true
+}

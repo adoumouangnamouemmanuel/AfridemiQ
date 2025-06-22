@@ -1,0 +1,15 @@
+{
+  "question": "Soit f(x) = 2x + 3. Quelle est la valeur de f(5) ?",
+  "type": "multiple_choice",
+  "options": ["11", "13", "15", "17"],
+  "correctAnswer": 1,
+  "explanation": "f(5) = 2(5) + 3 = 10 + 3 = 13",
+  "subjectId": "684240c252d9942c908b8dad",
+  "topicId": "684ffc59063537d7df3eed95",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["fonction", "linéaire", "calcul", "substitution"],
+  "isPremium": false,
+  "isActive": true
+}

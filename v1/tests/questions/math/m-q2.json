@@ -1,0 +1,20 @@
+{
+  "question": "Résolvez l'équation x² - 5x + 6 = 0. Quelles sont les solutions ?",
+  "type": "multiple_choice",
+  "options": [
+    "x = 2 et x = 3",
+    "x = 1 et x = 6",
+    "x = -2 et x = -3",
+    "x = 0 et x = 5"
+  ],
+  "correctAnswer": 0,
+  "explanation": "En factorisant : (x - 2)(x - 3) = 0, donc x = 2 ou x = 3",
+  "subjectId": "684240c252d9942c908b8dad",
+  "topicId": "684ffc59063537d7df3eed95",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["équation", "quadratique", "factorisation", "solutions"],
+  "isPremium": false,
+  "isActive": true
+}

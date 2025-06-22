@@ -1,0 +1,15 @@
+{
+  "question": "Quel est le domaine de définition de la fonction f(x) = 1/(x - 4) ?",
+  "type": "multiple_choice",
+  "options": ["ℝ \\ {4}", "ℝ \\ {0}", "ℝ \\ {-4}", "ℝ"],
+  "correctAnswer": 0,
+  "explanation": "La fonction est définie pour tous les réels sauf x = 4 (division par zéro)",
+  "subjectId": "684240c252d9942c908b8dad",
+  "topicId": "684ffc59063537d7df3eed95",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["domaine", "définition", "fonction", "rationnelle"],
+  "isPremium": false,
+  "isActive": true
+}

@@ -1,0 +1,15 @@
+{
+  "question": "Soient f(x) = x + 2 et g(x) = 3x. Calculez (f ∘ g)(1).",
+  "type": "multiple_choice",
+  "options": ["5", "6", "7", "8"],
+  "correctAnswer": 0,
+  "explanation": "(f ∘ g)(1) = f(g(1)) = f(3×1) = f(3) = 3 + 2 = 5",
+  "subjectId": "684240c252d9942c908b8dad",
+  "topicId": "684ffc59063537d7df3eed95",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["composition", "fonction", "calcul", "opération"],
+  "isPremium": true,
+  "isActive": true
+}

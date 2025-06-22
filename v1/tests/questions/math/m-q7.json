@@ -1,0 +1,15 @@
+{
+  "question": "Résolvez l'équation 2^x = 8. Quelle est la valeur de x ?",
+  "type": "multiple_choice",
+  "options": ["2", "3", "4", "8"],
+  "correctAnswer": 1,
+  "explanation": "2^x = 8 = 2³, donc x = 3",
+  "subjectId": "684240c252d9942c908b8dad",
+  "topicId": "684ffc59063537d7df3eed95",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["exponentielle", "équation", "puissance", "logarithme"],
+  "isPremium": false,
+  "isActive": true
+}
