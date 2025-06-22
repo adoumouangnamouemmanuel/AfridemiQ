@@ -248,7 +248,7 @@ export interface ApiResponse<T> {
 }
 
 /**
- * User context type for React context
+ * User context type for React context (MVP)
  */
 export interface UserContextType {
   user: User | null;
@@ -264,14 +264,14 @@ export interface UserContextType {
 }
 
 /**
- * Friend object structure
+ * Form data for registration (matches your RegisterScreen)
  */
-export interface Friend {
-  id: string;
-  name: string;
-  avatar?: string;
-  level: number;
-  xp: number;
+export interface RegisterFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 }
 
 
