@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,14 @@ import {
 } from "react-native";
 import { useTheme } from "../../../utils/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import type { OnboardingData } from "../OnboardingCarousel";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+import type { OnboardingData, Country } from "../../../types/user/user.types";
+import { useCommonOnboarding } from "../../../styles/commonOnboarding";
 
 interface SlideProps {
   data: OnboardingData;
@@ -20,22 +27,12 @@ interface SlideProps {
 }
 
 const countries = [
-  { name: "Nigeria", flag: "🇳🇬" },
-  { name: "Ghana", flag: "🇬🇭" },
-  { name: "Kenya", flag: "🇰🇪" },
-  { name: "South Africa", flag: "🇿🇦" },
-  { name: "Egypt", flag: "🇪🇬" },
-  { name: "Morocco", flag: "🇲🇦" },
-  { name: "Tanzania", flag: "🇹🇿" },
-  { name: "Uganda", flag: "🇺🇬" },
-  { name: "Ethiopia", flag: "🇪🇹" },
-  { name: "Cameroon", flag: "🇨🇲" },
-  { name: "Zimbabwe", flag: "🇿🇼" },
-  { name: "Zambia", flag: "🇿🇲" },
-  { name: "Senegal", flag: "🇸🇳" },
-  { name: "Rwanda", flag: "🇷🇼" },
-  { name: "Botswana", flag: "🇧🇼" },
-//   { name: "Other", flag: "🌍" },
+  { code: "nigeria" as Country, name: "Nigeria", flag: "🇳🇬" },
+  { code: "ghana" as Country, name: "Ghana", flag: "🇬🇭" },
+  { code: "kenya" as Country, name: "Kenya", flag: "🇰🇪" },
+  { code: "cameroon" as Country, name: "Cameroon", flag: "🇨🇲" },
+  { code: "senegal" as Country, name: "Senegal", flag: "🇸🇳" },
+  { code: "chad" as Country, name: "Chad", flag: "🇹🇩" },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 export default function CountrySlide({
@@ -45,18 +42,32 @@ export default function CountrySlide({
 }: SlideProps) {
   const { theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
+  const containerOpacity = useSharedValue(0);
+  const containerTranslateY = useSharedValue(30);
+  const commonStyles = useCommonOnboarding();
+
+  useEffect(() => {
+    if (isActive) {
+      containerOpacity.value = withSpring(1, { damping: 20, stiffness: 100 });
+      containerTranslateY.value = withSpring(0, {
+        damping: 20,
+        stiffness: 100,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive]);
+
+  const animatedContainerStyle = useAnimatedStyle(() => ({
+    opacity: containerOpacity.value,
+    transform: [{ translateY: containerTranslateY.value }],
+  }));
 
   const filteredCountries = countries.filter((country) =>
     country.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCountryPress = (countryName: string) => {
-    // Toggle selection
-    if (data.country === countryName) {
-      updateData("country", "");
-    } else {
-      updateData("country", countryName);
-    }
+  const handleCountryPress = (countryCode: Country) => {
+    updateData("country", countryCode);
   };
 
   const styles = StyleSheet.create({
@@ -67,13 +78,13 @@ export default function CountrySlide({
     searchContainer: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: "#f8fafc",
-      borderRadius: 16,
-      paddingHorizontal: 16,
-      paddingVertical: 14,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 50,
+      paddingHorizontal: 20,
+      paddingVertical: 5,
       marginBottom: 24,
       borderWidth: 1,
-      borderColor: "rgba(0,0,0,0.1)",
+      borderColor: theme.colors.border,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
@@ -95,31 +106,29 @@ export default function CountrySlide({
     countryItem: {
       flexDirection: "row",
       alignItems: "center",
-      paddingVertical: 16,
+      paddingVertical: 10,
       paddingHorizontal: 20,
-      borderRadius: 16,
+      borderRadius: 20,
       marginBottom: 12,
-      borderWidth: 2,
-      borderColor: "rgba(0,0,0,0.1)",
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.surface,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 8,
       elevation: 2,
     },
-    countryItemDefault: {
-      backgroundColor: "#f8fafc",
-    },
     selectedCountry: {
       borderColor: theme.colors.primary,
-      backgroundColor: "#f8fafc",
+      backgroundColor: theme.colors.background,
     },
     countryFlag: {
-      fontSize: 24,
+      fontSize: 28,
       marginRight: 16,
     },
     countryName: {
-      fontSize: 16,
+      fontSize: 18,
       color: theme.colors.text,
       fontWeight: "600",
       flex: 1,
@@ -127,18 +136,22 @@ export default function CountrySlide({
     selectedText: {
       color: theme.colors.primary,
     },
-    checkIcon: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      backgroundColor: theme.colors.primary,
+    checkContainer: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
       justifyContent: "center",
       alignItems: "center",
     },
   });
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, animatedContainerStyle]}>
+      <Text style={commonStyles.title}>Select Your Country</Text>
+      <Text style={commonStyles.subtitle}>
+        Help us customize your learning experience
+      </Text>
+
       <View style={styles.searchContainer}>
         <Ionicons
           name="search"
@@ -148,7 +161,7 @@ export default function CountrySlide({
         />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search for your country..."
+          placeholder="Search countries..."
           placeholderTextColor={theme.colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -158,18 +171,16 @@ export default function CountrySlide({
       <View style={styles.countriesContainer}>
         <FlatList
           data={filteredCountries}
-          keyExtractor={(item) => item.name}
+          keyExtractor={(item) => item.code}
           renderItem={({ item }) => {
-            const isSelected = data.country === item.name;
+            const isSelected = data.country === item.code;
             return (
               <TouchableOpacity
                 style={[
                   styles.countryItem,
-                  isSelected
-                    ? styles.selectedCountry
-                    : styles.countryItemDefault,
+                  isSelected && styles.selectedCountry,
                 ]}
-                onPress={() => handleCountryPress(item.name)}
+                onPress={() => handleCountryPress(item.code)}
               >
                 <Text style={styles.countryFlag}>{item.flag}</Text>
                 <Text
@@ -180,18 +191,29 @@ export default function CountrySlide({
                 >
                   {item.name}
                 </Text>
-                {isSelected && (
-                  <View style={styles.checkIcon}>
-                    <Ionicons name="checkmark" size={16} color="white" />
-                  </View>
-                )}
+                <View style={styles.checkContainer}>
+                  {isSelected && (
+                    <LinearGradient
+                      colors={[theme.colors.primary, theme.colors.secondary]}
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 14,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Ionicons name="checkmark" size={16} color="white" />
+                    </LinearGradient>
+                  )}
+                </View>
               </TouchableOpacity>
             );
           }}
-          showsVerticalScrollIndicator={true}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
         />
       </View>
-    </View>
+    </Animated.View>
   );
 }
