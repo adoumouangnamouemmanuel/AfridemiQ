@@ -1,0 +1,20 @@
+{
+  "question": "The African continent is characterized by extensive plateau regions. What is the approximate average elevation of these plateaus?",
+  "type": "multiple_choice",
+  "options": [
+    "200-500 meters",
+    "500-1000 meters",
+    "1000-1500 meters",
+    "1500-2000 meters"
+  ],
+  "correctAnswer": 2,
+  "explanation": "African plateaus typically range from 1000-1500 meters above sea level, giving Africa its characteristic elevated landscape compared to other continents.",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["plateaus", "elevation", "topography", "africa"],
+  "isPremium": true,
+  "isActive": true
+}

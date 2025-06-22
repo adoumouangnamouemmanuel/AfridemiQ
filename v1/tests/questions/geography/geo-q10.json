@@ -1,0 +1,25 @@
+{
+  "question": "Lake Chad has significantly decreased in size over the past decades primarily due to:",
+  "type": "multiple_choice",
+  "options": [
+    "Volcanic activity",
+    "Climate change and human water use",
+    "Tectonic plate movement",
+    "Ocean level changes"
+  ],
+  "correctAnswer": 1,
+  "explanation": "Lake Chad has shrunk dramatically due to climate change (reduced rainfall), increased evaporation, and intensive human use of water for irrigation and domestic purposes.",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": [
+    "lake chad",
+    "climate change",
+    "environmental change",
+    "water resources"
+  ],
+  "isPremium": true,
+  "isActive": true
+}

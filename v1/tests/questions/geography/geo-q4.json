@@ -1,0 +1,20 @@
+{
+  "question": "Which mountain range is located in North Africa and extends across Morocco, Algeria, and Tunisia?",
+  "type": "multiple_choice",
+  "options": [
+    "Atlas Mountains",
+    "Drakensberg Mountains",
+    "Ethiopian Highlands",
+    "Cameroon Highlands"
+  ],
+  "correctAnswer": 0,
+  "explanation": "The Atlas Mountains extend across North Africa through Morocco, Algeria, and Tunisia, forming a barrier between the Mediterranean coast and the Sahara Desert.",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["atlas mountains", "north africa", "mountain ranges", "geology"],
+  "isPremium": true,
+  "isActive": true
+}

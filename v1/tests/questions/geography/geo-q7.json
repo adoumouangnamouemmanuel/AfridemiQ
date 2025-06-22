@@ -1,0 +1,15 @@
+{
+  "question": "Sand dunes in the Sahara Desert that are crescent-shaped and formed by unidirectional winds are called:",
+  "type": "multiple_choice",
+  "options": ["Barchans", "Seifs", "Star dunes", "Transverse dunes"],
+  "correctAnswer": 0,
+  "explanation": "Barchans are crescent-shaped sand dunes formed by consistent unidirectional winds, commonly found in the Sahara Desert including areas of northern Chad.",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["barchans", "sand dunes", "sahara", "wind erosion"],
+  "isPremium": true,
+  "isActive": true
+}

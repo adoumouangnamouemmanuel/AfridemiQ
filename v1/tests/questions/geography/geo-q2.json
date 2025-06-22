@@ -1,0 +1,20 @@
+{
+  "question": "The Great Rift Valley system in East Africa was formed primarily by:",
+  "type": "multiple_choice",
+  "options": [
+    "Volcanic activity",
+    "Tectonic plate movement",
+    "River erosion",
+    "Wind erosion"
+  ],
+  "correctAnswer": 1,
+  "explanation": "The Great Rift Valley was formed by tectonic plate movement, specifically the divergence of the African plate, creating a series of valleys and highlands.",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["great rift valley", "tectonic plates", "east africa", "geology"],
+  "isPremium": false,
+  "isActive": true
+}

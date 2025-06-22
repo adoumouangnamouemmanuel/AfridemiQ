@@ -1,0 +1,20 @@
+{
+  "question": "Which vegetation type is typically found in the savanna regions of central Africa, including parts of southern Chad?",
+  "type": "multiple_choice",
+  "options": [
+    "Dense evergreen forests",
+    "Grasslands with scattered trees",
+    "Thorny shrubs and cacti",
+    "Moss and lichens"
+  ],
+  "correctAnswer": 1,
+  "explanation": "Savanna vegetation consists of grasslands with scattered drought-resistant trees like baobabs and acacias, characteristic of central African regions including southern Chad.",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["savanna", "vegetation", "grasslands", "chad"],
+  "isPremium": false,
+  "isActive": true
+}

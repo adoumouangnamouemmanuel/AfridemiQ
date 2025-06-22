@@ -1,0 +1,20 @@
+{
+  "question": "The Sahel region, which includes southern Chad, is best described as:",
+  "type": "multiple_choice",
+  "options": [
+    "A dense tropical rainforest",
+    "A transitional zone between desert and savanna",
+    "A mountainous highland region",
+    "A coastal wetland area"
+  ],
+  "correctAnswer": 1,
+  "explanation": "The Sahel is a transitional semi-arid zone between the Sahara Desert to the north and the more humid savannas to the south, including much of central Chad.",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["sahel", "chad", "transitional zone", "semi-arid"],
+  "isPremium": false,
+  "isActive": true
+}

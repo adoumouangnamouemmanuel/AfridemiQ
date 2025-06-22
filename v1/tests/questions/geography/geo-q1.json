@@ -1,0 +1,20 @@
+{
+  "question": "Which climate zone is characterized by hot, dry conditions and is found in northern Africa including parts of Chad?",
+  "type": "multiple_choice",
+  "options": [
+    "Tropical rainforest",
+    "Mediterranean",
+    "Desert (Sahara)",
+    "Savanna"
+  ],
+  "correctAnswer": 2,
+  "explanation": "The Sahara Desert climate zone covers much of northern Africa, including northern Chad, and is characterized by extremely hot, dry conditions with minimal rainfall.",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["climate zones", "sahara desert", "africa", "chad"],
+  "isPremium": false,
+  "isActive": true
+}

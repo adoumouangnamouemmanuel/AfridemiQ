@@ -1,0 +1,20 @@
+{
+  "question": "The Chad Basin, which includes Lake Chad, is an example of which type of geological feature?",
+  "type": "multiple_choice",
+  "options": [
+    "Volcanic crater",
+    "Endorheic basin",
+    "River delta",
+    "Coastal plain"
+  ],
+  "correctAnswer": 1,
+  "explanation": "The Chad Basin is an endorheic basin (closed drainage system) where water collects but has no outlet to the sea, typical of many African inland water systems.",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["chad basin", "endorheic basin", "lake chad", "drainage"],
+  "isPremium": false,
+  "isActive": true
+}

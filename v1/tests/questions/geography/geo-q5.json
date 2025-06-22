@@ -1,0 +1,20 @@
+{
+  "question": "The Chari River, which flows through Chad, eventually drains into which water body?",
+  "type": "multiple_choice",
+  "options": [
+    "Atlantic Ocean",
+    "Lake Chad",
+    "Mediterranean Sea",
+    "Indian Ocean"
+  ],
+  "correctAnswer": 1,
+  "explanation": "The Chari River is the main river flowing through Chad and drains into Lake Chad, which is located in the Chad Basin on the edge of the Sahara Desert.",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicId": "6857096321fff5da40b2f0ca",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["chari river", "lake chad", "chad", "drainage systems"],
+  "isPremium": false,
+  "isActive": true
+}
