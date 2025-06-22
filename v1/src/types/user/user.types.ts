@@ -28,7 +28,7 @@ export type ExamType = "waec" | "neco" | "jamb" | "kcse" | "bac" | "bepc";
 /**
  * Education levels in MVP
  */
-export type EducationLevel = "secondary" | "university";
+export type EducationLevel = "junior_secondary" | "senior_secondary" // SSS/Lycée (Ages 15-18);
 
 /**
  * Languages supported in MVP
@@ -36,22 +36,9 @@ export type EducationLevel = "secondary" | "university";
 export type Language = "english" | "french";
 
 /**
- * Learning settings and preferences
+ * Gender options in MVP
  */
-export interface LearningSettings {
-  learningStyle: LearningStyle;
-  motivation?: string;
-  preferredStudySessionLength?: number;
-}
-
-/**
- * User streak information
- */
-export interface UserStreak {
-  current: number;
-  longest: number;
-  lastStudyDate?: string | Date;
-}
+export type Gender = "male" | "female" | "prefer_not_to_say";
 
 /**
  * Progress summary statistics
