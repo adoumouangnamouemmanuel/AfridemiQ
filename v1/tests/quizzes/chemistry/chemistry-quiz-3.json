@@ -1,0 +1,21 @@
+{
+  "title": "Advanced Chemical Analysis",
+  "description": "Complex chemistry concepts including limiting reagents, gas stoichiometry, and empirical formulas",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicIds": ["685709a221fff5da40b2f109"],
+  "format": "practice",
+  "timeLimit": 35,
+  "totalQuestions": 4,
+  "passingScore": 80,
+  "questionIds": [
+    "6857536e87dae510c8e46320",
+    "6857537087dae510c8e46328",
+    "6857537087dae510c8e4632a",
+    "6857536e87dae510c8e4631e"
+  ],
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "isPremium": true,
+  "isActive": true
+}
