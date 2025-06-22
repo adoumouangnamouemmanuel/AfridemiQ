@@ -1,0 +1,21 @@
+{
+  "title": "Expression française avancée",
+  "description": "Maîtrise avancée du subjonctif, des pronoms, du conditionnel et de l'expression culturelle",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicIds": ["68570e183fe73c7e9fe838a3"],
+  "format": "practice",
+  "timeLimit": 35,
+  "totalQuestions": 4,
+  "passingScore": 80,
+  "questionIds": [
+    "6857517487dae510c8e4630a",
+    "6857517587dae510c8e46310",
+    "6857517687dae510c8e46314",
+    "6857517687dae510c8e46316"
+  ],
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "isPremium": true,
+  "isActive": true
+}

@@ -1,0 +1,21 @@
+{
+  "title": "Fondamentaux de la langue française",
+  "description": "Concepts de base de la grammaire française, conjugaison et expression orale pour débutants",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicIds": ["68570e183fe73c7e9fe838a3"],
+  "format": "practice",
+  "timeLimit": 22,
+  "totalQuestions": 4,
+  "passingScore": 60,
+  "questionIds": [
+    "6857517387dae510c8e46304",
+    "6857517487dae510c8e46308",
+    "6857517587dae510c8e46312",
+    "6857517487dae510c8e4630c"
+  ],
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "isPremium": false,
+  "isActive": true
+}
