@@ -57,8 +57,7 @@ const createQuizSchema = Joi.object({
     "number.max": "Maximum 3 heures",
   }),
 
-  totalQuestions: Joi.number().min(1).max(50).required().messages({
-    "any.required": "Le nombre de questions est requis",
+  totalQuestions: Joi.number().min(1).max(50).optional().messages({
     "number.min": "Minimum 1 question",
     "number.max": "Maximum 50 questions",
   }),
