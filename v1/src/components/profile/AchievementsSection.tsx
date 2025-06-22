@@ -80,8 +80,11 @@ export const AchievementsSection: React.FC<WinsSectionProps> = ({ user, theme })
       description: "Completed 50 quizzes",
       icon: "trophy",
       color: "#8B5CF6",
-      earned: user.progress.totalQuizzes >= 50,
-      progress: user.progress.totalQuizzes,
+      // earned: user.progress.totalQuizzes >= 50,
+      // progress: user.progress.totalQuizzes,
+
+      earned: user.progress.totalQuizzesTaken >= 50,
+      progress: user.progress.totalQuizzesTaken,
       maxProgress: 50,
       category: "academic",
     },
