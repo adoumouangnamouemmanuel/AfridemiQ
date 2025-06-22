@@ -232,9 +232,17 @@ export interface SearchUsersResponse {
 }
 
 /**
+ * Onboarding check data
+ */
+export interface CheckOnboardingData {
+  userId: string;
+}
+
+/**
  * Generic API response wrapper
  */
 export interface ApiResponse<T> {
+  success: boolean;
   message: string;
   data: T;
 }
