@@ -24,7 +24,6 @@ export default function WelcomeSlide({ isActive }: SlideProps) {
   const logoRotation = useSharedValue(-180);
   const textOpacity = useSharedValue(0);
   const textTranslateY = useSharedValue(50);
-  const featuresOpacity = useSharedValue(0);
 
   useEffect(() => {
     if (isActive) {
@@ -41,7 +40,6 @@ export default function WelcomeSlide({ isActive }: SlideProps) {
         600,
         withSpring(0, { damping: 20, stiffness: 100 })
       );
-      featuresOpacity.value = withDelay(1000, withTiming(1, { duration: 600 }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive]);
@@ -58,20 +56,12 @@ export default function WelcomeSlide({ isActive }: SlideProps) {
     transform: [{ translateY: textTranslateY.value }],
   }));
 
-  const featuresAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: featuresOpacity.value,
-  }));
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingHorizontal: 20,
-    },
-    scrollContent: {
-      flexGrow: 1,
+      paddingHorizontal: 24,
       justifyContent: "center",
       alignItems: "center",
-      paddingVertical: 0,
     },
     logoContainer: {
       alignItems: "center",
