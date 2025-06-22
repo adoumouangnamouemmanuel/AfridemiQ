@@ -361,14 +361,14 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           theme={theme}
           rightElement={
             <Switch
-              value={user.preferences.notifications.general}
+              value={false}
               onValueChange={handleToggleNotifications}
               trackColor={{
                 false: theme.colors.border,
                 true: theme.colors.primary,
               }}
               thumbColor={
-                user.preferences.notifications.general
+                true
                   ? "white"
                   : theme.colors.textSecondary
               }
@@ -383,14 +383,14 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           theme={theme}
           rightElement={
             <Switch
-              value={user.preferences.autoPlayAudio}
+              value={false}
               onValueChange={handleToggleSoundEffects}
               trackColor={{
                 false: theme.colors.border,
                 true: theme.colors.primary,
               }}
               thumbColor={
-                user.preferences.autoPlayAudio
+                true
                   ? "white"
                   : theme.colors.textSecondary
               }
@@ -405,14 +405,14 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           theme={theme}
           rightElement={
             <Switch
-              value={user.preferences.enableHints}
+              value={false} // Replace with actual value from user preferences
               onValueChange={handleToggleHints}
               trackColor={{
                 false: theme.colors.border,
                 true: theme.colors.primary,
               }}
               thumbColor={
-                user.preferences.enableHints
+                true
                   ? "white"
                   : theme.colors.textSecondary
               }
