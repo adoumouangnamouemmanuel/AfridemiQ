@@ -35,9 +35,9 @@ export const ProgressSection: React.FC<ProgressSectionProps> = ({
 
   // TODO: Replace with actual API data when detailed analytics endpoint is ready
   const progressData = {
-    totalQuizzes: user.progress.totalQuizzes,
+    totalQuizzes: user.progress.totalQuizzesTaken,
     averageScore: Math.round(user.progress.averageScore),
-    subjectsMastered: Math.min(user.progress.completedTopics.length, 8), // Assuming 8 total subjects
+    // subjectsMastered: Math.min(user.progress.completedTopics.length, 8), // Assuming 8 total subjects
     totalSubjects: 8,
     weeklyGoal: 5, // Dummy data
     weeklyProgress: 3, // Dummy data
@@ -153,12 +153,12 @@ export const ProgressSection: React.FC<ProgressSectionProps> = ({
           </View>
           <View style={styles.progressItem}>
             <Text style={styles.progressValue}>
-              {progressData.subjectsMastered}/{progressData.totalSubjects}
+              100
             </Text>
             <Text style={styles.progressLabel}>Subjects Mastered</Text>
           </View>
           <View style={styles.progressItem}>
-            <Text style={styles.progressValue}>{user.progress.level}</Text>
+            <Text style={styles.progressValue}>1</Text>
             <Text style={styles.progressLabel}>Current Level</Text>
           </View>
         </View>
