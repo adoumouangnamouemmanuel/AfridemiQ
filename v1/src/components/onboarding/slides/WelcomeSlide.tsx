@@ -122,33 +122,8 @@ export default function WelcomeSlide({ isActive }: SlideProps) {
     },
   });
 
-  const features = [
-    {
-      icon: "school-outline",
-      title: "African Excellence",
-      description: "Exam preparation tailored for African educational systems",
-      gradient: ["#3b82f6", "#1d4ed8"] as const,
-    },
-    {
-      icon: "analytics-outline",
-      title: "Smart Analytics",
-      description: "Track your progress with intelligent performance insights",
-      gradient: ["#10b981", "#059669"] as const,
-    },
-    {
-      icon: "people-outline",
-      title: "Community Learning",
-      description: "Connect with ambitious students across Africa",
-      gradient: ["#f59e0b", "#d97706"] as const,
-    },
-  ];
-
   return (
     <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
         <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
           <View style={styles.logoImageContainer}>
             <Image
