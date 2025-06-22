@@ -202,15 +202,8 @@ class AuthService {
       dateOfBirth: backendUser.dateOfBirth
         ? new Date(backendUser.dateOfBirth)
         : undefined,
-      xp: backendUser.progress?.xp ?? 0,
-      level: backendUser.progress?.level ?? 1,
-      streak: backendUser.progress?.streak?.current ?? 0,
-      avatar: backendUser.avatar,
-      badges: backendUser.progress?.badges ?? [],
-      completedTopics: backendUser.progress?.completedTopics ?? [],
-      weakSubjects: backendUser.progress?.weakSubjects ?? [],
-      isPremium: backendUser.isPremium ?? false,
-      role: (backendUser.role as User["role"]) ?? "student",
+      gender: backendUser.gender as User["gender"],
+      phoneNumber: backendUser.phoneNumber,
     };
 
     // TODO: Remove detailed logging before production
