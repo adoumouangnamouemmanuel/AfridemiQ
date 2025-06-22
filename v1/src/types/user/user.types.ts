@@ -12,17 +12,13 @@ export type UserRole = "student" | "admin";
 /**
  * Countries supported in MVP (Africa-focused)
  */
-export type PaymentStatus =
-  | "active"
-  | "pending"
-  | "failed"
-  | "cancelled"
-  | "expired";
-
-/**
- * Access levels for users
- */
-export type AccessLevel = "basic" | "premium" | "unlimited";
+export type Country =
+  | "nigeria"
+  | "ghana"
+  | "kenya"
+  | "cameroon"
+  | "senegal"
+  | "chad";
 
 /**
  * Font size options
