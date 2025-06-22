@@ -162,10 +162,10 @@ export default function LoginScreen() {
     // Check user's onboarding status from the authenticated user data
     const currentUser = userRef.current || user;
     if (currentUser?.onboardingCompleted) {
-        router.replace("/(tabs)/home");
-      } else {
-        router.replace("/auth/onboarding");
-      }
+      router.replace("/(tabs)/home");
+    } else {
+      router.replace("/auth/onboarding");
+    }
   };
 
   // Handle login error
