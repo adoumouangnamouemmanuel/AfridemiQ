@@ -142,10 +142,7 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
-  gender?: string;
-  dateOfBirth?: string | Date;
-  preferredLanguage?: string;
-  role?: string;
+  role?: UserRole;
 }
 
 /**
