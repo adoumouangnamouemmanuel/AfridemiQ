@@ -1,0 +1,22 @@
+{
+  "title": "Fonctions intermédiaires et systèmes d'équations",
+  "description": "Quiz de niveau intermédiaire couvrant les fonctions composées et les systèmes d'équations",
+  "subjectId": "684240c252d9942c908b8dad",
+  "topicIds": ["684ffc59063537d7df3eed95"],
+  "format": "practice",
+  "timeLimit": 20,
+  "totalQuestions": 5,
+  "passingScore": 70,
+  "questionIds": [
+    "6857461087dae510c8e46288",
+    "6857461087dae510c8e4628a",
+    "6857461087dae510c8e4628c",
+    "6857461187dae510c8e4628e",
+    "6857461287dae510c8e46296"
+  ],
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "isPremium": false,
+  "isActive": true
+}
