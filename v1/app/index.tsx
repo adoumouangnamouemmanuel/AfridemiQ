@@ -7,56 +7,62 @@ import { View, ActivityIndicator } from "react-native";
 import { Redirect } from "expo-router";
 
 export default function Index() {
-  const { setUser, setToken } = useUser();
+  const { user, token, isLoading, isSessionHealthy } = useUser();
   const { theme } = useTheme();
-  const [isLoading, setIsLoading] = useState(true);
   const [authState, setAuthState] = useState<
     "loading" | "login" | "onboarding" | "home"
   >("loading");
 
   useEffect(() => {
-    const checkAuthState = async () => {
+    const determineAuthState = async () => {
       try {
-        // Check if user is logged in (persisted in storage)
-        const userData = await AsyncStorage.getItem("user");
-        const token = await AsyncStorage.getItem("token");
-        const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
+        console.log("🔍 INDEX: Determining auth state");
+        console.log("🔍 INDEX: User:", !!user);
+        console.log("🔍 INDEX: Token:", !!token);
+        console.log("🔍 INDEX: Session healthy:", isSessionHealthy);
+        console.log("🔍 INDEX: Context loading:", isLoading);
 
-        if (userData && token) {
-          // User is logged in
-          const parsedUser = JSON.parse(userData);
+        // Wait for UserContext to finish loading
+        if (isLoading) {
+          console.log("⏳ INDEX: Still loading, waiting...");
+          setAuthState("loading");
+          return;
+        }
 
-          // Convert goalDate back to Date object if it exists
-          if (parsedUser.goalDate) {
-            parsedUser.goalDate = new Date(parsedUser.goalDate);
-          }
+        // Check if user is authenticated and session is healthy
+        if (!user || !token || !isSessionHealthy) {
+          console.log("❌ INDEX: No valid session, redirecting to login");
+          setAuthState("login");
+          return;
+        }
 
-          setUser(parsedUser);
-          setToken(token);
+        // User is authenticated, check onboarding status
+        console.log("✅ INDEX: User authenticated, checking onboarding status");
+        console.log(
+          "🔍 INDEX: Onboarding completed:",
+          user.onboardingCompleted
+        );
 
-          if (hasOnboarded) {
-            // User is logged in and has completed onboarding
+        if (user.onboardingCompleted) {
+          console.log("✅ INDEX: Onboarding complete, redirecting to home");
             setAuthState("home");
           } else {
-            // User is logged in but hasn't completed onboarding
+          console.log(
+            "⚠️ INDEX: Onboarding incomplete, redirecting to onboarding"
+          );
             setAuthState("onboarding");
           }
-        } else {
-          // No user found, go to login
-          setAuthState("login");
-        }
       } catch (error) {
-        console.error("Error checking auth state:", error);
+        console.error("❌ INDEX: Error determining auth state:", error);
         setAuthState("login");
-      } finally {
-        setIsLoading(false);
       }
     };
 
-    checkAuthState();
-  }, [setUser, setToken]);
+    determineAuthState();
+  }, [user, token, isLoading, isSessionHealthy]);
 
-  if (isLoading) {
+  // Show loading while determining auth state
+  if (authState === "loading") {
     return (
       <View
         style={{
