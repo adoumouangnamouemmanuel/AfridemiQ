@@ -21,11 +21,6 @@ import type {
 import { API_BASE_URL } from "../constants/url";
 
 /**
- * API base URL
- * @constant
- */
-
-/**
  * Request queue item
  */
 interface QueuedApiRequest {
