@@ -26,7 +26,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   isDark = false,
 }) => {
   const router = useRouter();
-  const [bio] = useState(user.socialProfile?.bio || ""); // Changed from user.bio to user.socialProfile.bio
+  // const [bio] = useState(user.socialProfile?.bio || ""); // Changed from user.bio to user.socialProfile.bio
 
   // Animation values
   const slideUp = useSharedValue(50);
@@ -54,14 +54,10 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     country: user.country || "Not specified",
 
     // Education
-    educationLevel: user.gradeLevel || "Not specified",
-    schoolName: user.schoolName || "Not specified",
-    studyField: user.preferences.studyField || "Not specified",
+    educationLevel: user.educationLevel || "Not specified",
 
     // Exam Preparation
-    targetExam: user.progress?.selectedExam || "Not selected",
-    examYear: user.progress?.examYear || new Date().getFullYear().toString(),
-    targetUniversity: user.preferences?.targetUniversity || "Not specified",
+    targetExam: user.examType || "Not selected",
 
     // Personal
     dateOfBirth: user.dateOfBirth
@@ -71,13 +67,13 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     language: user.preferredLanguage || "French",
 
     // Academic Goals
-    careerGoal: user.preferences?.careerGoal || "Not specified",
-    favoriteSubjects: user.preferences?.favoriteSubjects?.length
-      ? user.preferences.favoriteSubjects
-      : user.progress?.weakSubjects?.length
-      ? user.progress.weakSubjects
-      : ["Not specified"],
-    studyHours: user.preferences?.studyHours || "Not tracked",
+    // careerGoal: user.preferences?.careerGoal || "Not specified",
+    // favoriteSubjects: user.preferences?.favoriteSubjects?.length
+    //   ? user.preferences.favoriteSubjects
+    //   : user.progress?.weakSubjects?.length
+    //   ? user.progress.weakSubjects
+    //   : ["Not specified"],
+    // studyHours: user.preferences?.studyHours || "Not tracked",
   };
 
   // Use the same blue color as in the ProfileHeader
@@ -219,7 +215,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         </View>
 
         <View style={styles.bioContent}>
-          <Text style={styles.bioText}>{bio}</Text>
+          <Text style={styles.bioText}>no bio</Text>
         </View>
       </View>
 
@@ -327,7 +323,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>School</Text>
-              <Text style={styles.infoValue}>{userData.schoolName}</Text>
+              <Text style={styles.infoValue}>no school name</Text>
             </View>
           </View>
 
@@ -347,7 +343,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Study Field</Text>
-              <Text style={styles.infoValue}>{userData.studyField}</Text>
+              <Text style={styles.infoValue}>No study field</Text>
             </View>
           </View>
 
@@ -358,7 +354,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Daily Study Hours</Text>
               <Text style={styles.infoValue}>
-                {String(userData.studyHours)}
+                {0}
               </Text>
             </View>
           </View>
@@ -399,7 +395,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Exam Year</Text>
-              <Text style={styles.infoValue}>{userData.examYear}</Text>
+              <Text style={styles.infoValue}>no exam year</Text>
             </View>
           </View>
 
@@ -409,7 +405,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Target University</Text>
-              <Text style={styles.infoValue}>{userData.targetUniversity}</Text>
+              <Text style={styles.infoValue}>no target university</Text>
             </View>
           </View>
 
@@ -419,7 +415,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Career Goal</Text>
-              <Text style={styles.infoValue}>{userData.careerGoal}</Text>
+              <Text style={styles.infoValue}>no career goal</Text>
             </View>
           </View>
 
@@ -430,7 +426,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Favorite Subjects</Text>
               <Text style={styles.infoValue}>
-                {userData.favoriteSubjects.join(", ")}
+                no favorite subjects
               </Text>
             </View>
           </View>
