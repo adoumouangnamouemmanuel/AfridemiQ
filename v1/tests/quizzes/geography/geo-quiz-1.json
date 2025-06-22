@@ -1,0 +1,21 @@
+{
+  "title": "African Landscapes and Climate",
+  "description": "Fundamental concepts of African physical geography including climate zones, rivers, and vegetation",
+  "subjectId": "6856e226aff9659b6e3ec89c",
+  "topicIds": ["6857096321fff5da40b2f0ca"],
+  "format": "practice",
+  "timeLimit": 20,
+  "totalQuestions": 4,
+  "passingScore": 60,
+  "questionIds": [
+    "68574faa87dae510c8e462f0",
+    "68574fab87dae510c8e462f4",
+    "68574fac87dae510c8e462f8",
+    "68574fad87dae510c8e46300"
+  ],
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "isPremium": false,
+  "isActive": true
+}
