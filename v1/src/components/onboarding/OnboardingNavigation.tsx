@@ -1,9 +1,21 @@
 "use client";
 
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { useTheme } from "../../utils/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+import { useEffect } from "react";
 
 interface OnboardingNavigationProps {
   currentIndex: number;
@@ -12,6 +24,7 @@ interface OnboardingNavigationProps {
   onNext: () => void;
   onPrev: () => void;
   onComplete: () => void;
+  isLoading?: boolean;
 }
 
 export default function OnboardingNavigation({
@@ -21,21 +34,31 @@ export default function OnboardingNavigation({
   onNext,
   onPrev,
   onComplete,
+  isLoading = false,
 }: OnboardingNavigationProps) {
   const { theme } = useTheme();
-  const insets = useSafeAreaInsets();
+  const buttonScale = useSharedValue(1);
 
   const isLastSlide = currentIndex === totalSlides - 1;
   const isFirstSlide = currentIndex === 0;
+
+  useEffect(() => {
+    buttonScale.value = withSpring(canProceed ? 1 : 0.95, {
+      damping: 15,
+      stiffness: 150,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canProceed]);
+
+  const animatedButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: buttonScale.value }],
+  }));
 
   const styles = StyleSheet.create({
     container: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingHorizontal: 24,
-      paddingBottom: Math.max(insets.bottom, 20),
-      paddingTop: 16,
     },
     backButton: {
       width: 48,
@@ -43,28 +66,39 @@ export default function OnboardingNavigation({
       justifyContent: "center",
       alignItems: "center",
       borderRadius: 24,
-      backgroundColor: isFirstSlide ? "transparent" : "rgba(255,255,255,0.2)",
+      backgroundColor: theme.colors.surface,
+      opacity: isFirstSlide ? 0.3 : 1,
+    },
+    nextButtonContainer: {
+      borderRadius: 28,
+      overflow: "hidden",
+      minWidth: 140,
+      height: 56,
     },
     nextButton: {
-      backgroundColor: canProceed ? "white" : "rgba(255,255,255,0.3)",
-      borderRadius: 24,
-      paddingHorizontal: 32,
-      paddingVertical: 14,
-      minWidth: 140,
+      flex: 1,
+      flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: canProceed ? 0.2 : 0,
-      shadowRadius: 8,
-      elevation: canProceed ? 4 : 0,
+      paddingHorizontal: 32,
+      gap: 8,
+    },
+    nextButtonDisabled: {
+      backgroundColor: theme.colors.border,
     },
     nextButtonText: {
-      color: canProceed ? theme.colors.primary : "rgba(255,255,255,0.6)",
       fontSize: 16,
       fontWeight: "700",
+      color: "white",
+    },
+    nextButtonTextDisabled: {
+      color: theme.colors.textSecondary,
     },
   });
+
+  const gradientColors = canProceed
+    ? [theme.colors.primary, theme.colors.secondary] as const
+    : [theme.colors.border, theme.colors.border] as const;
 
   return (
     <View style={styles.container}>
@@ -74,19 +108,44 @@ export default function OnboardingNavigation({
         disabled={isFirstSlide}
       >
         {!isFirstSlide && (
-          <Ionicons name="arrow-back" size={24} color="white" />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.nextButton}
-        onPress={isLastSlide ? onComplete : onNext}
-        disabled={!canProceed}
-      >
-        <Text style={styles.nextButtonText}>
-          {isLastSlide ? "Get Started" : "Continue"}
-        </Text>
-      </TouchableOpacity>
+      <Animated.View style={[styles.nextButtonContainer, animatedButtonStyle]}>
+        <LinearGradient
+          colors={gradientColors}
+          style={styles.nextButtonContainer}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <TouchableOpacity
+            style={styles.nextButton}
+            onPress={isLastSlide ? onComplete : onNext}
+            disabled={!canProceed || isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <>
+                <Text
+                  style={[
+                    styles.nextButtonText,
+                    !canProceed && styles.nextButtonTextDisabled,
+                  ]}
+                >
+                  {isLastSlide ? "Complete" : "Continue"}
+                </Text>
+                <Ionicons
+                  name={isLastSlide ? "checkmark" : "arrow-forward"}
+                  size={20}
+                  color={canProceed ? "white" : theme.colors.textSecondary}
+                />
+              </>
+            )}
+          </TouchableOpacity>
+        </LinearGradient>
+      </Animated.View>
     </View>
   );
 }
