@@ -26,15 +26,7 @@ export type Country =
 export type ExamType = "waec" | "neco" | "jamb" | "kcse" | "bac" | "bepc";
 
 /**
- * Trial period information
- */
-export interface TrialPeriod {
-  startDate?: Date;
-  endDate?: Date;
-}
-
-/**
- * Social media link structure
+ * Education levels in MVP
  */
 export interface SocialLink {
   platform: "twitter" | "linkedin" | "github"; // Extend as needed
