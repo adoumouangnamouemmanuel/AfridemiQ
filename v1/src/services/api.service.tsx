@@ -345,6 +345,7 @@ class ApiService {
     try {
       await this.makeRequest("/users/logout", {
         method: "POST",
+        requiresAuth: true,
       });
     } catch (error) {
       console.error("Logout API call failed:", error);
