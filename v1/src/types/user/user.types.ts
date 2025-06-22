@@ -282,31 +282,82 @@ export interface ValidationState {
   error?: string;
 }
 
-export interface UpdatePersonalInfoData {
-  name?: string;
-  email?: string;
-  phoneNumber?: string;
-  country?: string;
-  timeZone?: string;
-  preferredLanguage?: string;
-  dateOfBirth?: Date;
-  gender?: string;
+/**
+ * Password strength indicator
+ */
+export interface PasswordStrength {
+  text: "Weak" | "Good" | "Strong";
+  color: string;
 }
 
-export interface UpdateEducationData {
-  schoolName?: string;
-  gradeLevel?: string;
-  parentEmail?: string;
-  studyField?: string;
-  studyHours?: number;
+/**
+ * User stats for progress tracking
+ */
+export interface UserStats {
+  totalQuizzes: number;
+  averageScore: number;
+  totalQuestions: number;
+  accuracy: number;
 }
 
-export interface UpdateExamPreparationData {
-  selectedExam?: string;
-  examYear?: number;
+/**
+ * User preferences (minimal for MVP)
+ */
+export interface UserPreferences {
+  language: Language;
+  notifications: boolean;
 }
 
-export interface UpdateSinglePreferenceData {
-  key: string;
-  value: any;
-}
+// =============== CONSTANTS FOR TYPE CHECKING ===============
+
+export const COUNTRIES: Country[] = [
+  "nigeria",
+  "ghana",
+  "kenya",
+  "cameroon",
+  "senegal",
+  "chad",
+];
+export const EXAM_TYPES: ExamType[] = [
+  "waec",
+  "neco",
+  "jamb",
+  "kcse",
+  "bac",
+  "bepc",
+];
+export const EDUCATION_LEVELS: EducationLevel[] = [
+  "junior_secondary",
+  "senior_secondary",
+];
+export const LANGUAGES: Language[] = ["english", "french"];
+export const GENDERS: Gender[] = ["male", "female", "prefer_not_to_say"];
+export const USER_ROLES: UserRole[] = ["student", "admin"];
+
+// =============== TYPE GUARDS ===============
+
+export const isValidCountry = (country: string): country is Country => {
+  return COUNTRIES.includes(country as Country);
+};
+
+export const isValidExamType = (examType: string): examType is ExamType => {
+  return EXAM_TYPES.includes(examType as ExamType);
+};
+
+export const isValidEducationLevel = (
+  level: string
+): level is EducationLevel => {
+  return EDUCATION_LEVELS.includes(level as EducationLevel);
+};
+
+export const isValidLanguage = (language: string): language is Language => {
+  return LANGUAGES.includes(language as Language);
+};
+
+export const isValidGender = (gender: string): gender is Gender => {
+  return GENDERS.includes(gender as Gender);
+};
+
+export const isValidUserRole = (role: string): role is UserRole => {
+  return USER_ROLES.includes(role as UserRole);
+};
