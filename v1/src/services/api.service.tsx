@@ -10,6 +10,12 @@ import type {
   RegisterData,
   LoginData,
   RefreshTokenData,
+  OnboardingData,
+  UpdateProfileData,
+  UpdatePersonalInfoData,
+  ChangePasswordData,
+  PasswordResetRequestData,
+  PasswordResetData,
 } from "../types/user/user.types";
 
 import { API_BASE_URL } from "../constants/url";
