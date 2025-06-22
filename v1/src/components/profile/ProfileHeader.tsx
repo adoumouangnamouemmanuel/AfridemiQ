@@ -437,7 +437,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               </View>
 
               <View style={styles.levelBadge}>
-                <Text style={styles.levelText}>Lvl {user.progress.level}</Text>
+                <Text style={styles.levelText}>Lvl 1</Text>
               </View>
 
               <TouchableOpacity
@@ -455,13 +455,13 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <View style={styles.profileInfo}>
               <Text style={styles.userName}>
                 {user.name}{"  "}
-                {user.isPhoneVerified && (
+                {/* {user.isPhoneVerified && (
                     <Ionicons
                       name="shield-checkmark"
                       size={16}
                       color={isDark ? "#34D399" : "#10B981"}
                     />
-                )}
+                )} */}
               </Text>
               <View style={styles.userDetailsRow}>
                 <Text style={styles.userDetails}>
@@ -469,7 +469,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 </Text>
                 <Text style={styles.separator}>•</Text>
                 <Text style={styles.userDetails}>
-                  {user.progress.xp.toLocaleString()} XP
+                 1000 XP
                 </Text>
               </View>
 
@@ -499,25 +499,25 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {user.progress.streak.current}
+                  10
                 </Text>
                 <Text style={styles.statLabel}>Day Streak</Text>
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {user.progress.badges.length}
+                  5
                 </Text>
                 <Text style={styles.statLabel}>Badges</Text>
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {user.progress.completedTopics.length}
+                  10
                 </Text>
                 <Text style={styles.statLabel}>Completed</Text>
               </View>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>
-                  {user.progress.weakSubjects.length}
+                  5
                 </Text>
                 <Text style={styles.statLabel}>Focus Areas</Text>
               </View>
