@@ -136,64 +136,7 @@ export interface AuthResponse {
 }
 
 /**
- * Data structure for updating basic profile information
- */
-export interface UpdateProfileData {
-  name?: string;
-  email?: string;
-  phoneNumber?: string;
-  country?: string;
-  timeZone?: string;
-  preferredLanguage?: string;
-  schoolName?: string;
-  gradeLevel?: string;
-  parentEmail?: string;
-  avatar?: string;
-  gender?: string;
-  dateOfBirth?: Date;
-  selectedExam?: string;
-  learningStyle?: string;
-  bio?: string;
-}
-
-/**
- * Data structure for updating user preferences
- */
-export interface UpdatePreferencesData {
-  preferences: Partial<UserPreferences>;
-}
-
-/**
- * Data structure for updating user progress
- */
-export interface UpdateProgressData {
-  selectedExam?: string;
-  selectedSeries?: string;
-  selectedLevel?: string;
-  xp?: number;
-  level?: number;
-  streak?: Partial<UserStreak>;
-  goalDate?: string | Date;
-  totalQuizzes?: number;
-  averageScore?: number;
-  completedTopics?: string[];
-  weakSubjects?: string[];
-  badges?: string[];
-  achievements?: string[];
-}
-
-/**
- * Data structure for updating social profile
- */
-export interface UpdateSocialProfileData {
-  bio?: string;
-  publicAchievements?: string[];
-  visibility?: ProfileVisibility;
-  socialLinks?: SocialLink[];
-}
-
-/**
- * User registration data
+ * User registration data (MVP)
  */
 export interface RegisterData {
   name: string;
