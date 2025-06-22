@@ -94,19 +94,17 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  bio?: string;
-  country?: string;
-  selectedExam?: string;
-  goalDate?: Date;
-  xp: number;
-  level: number;
-  streak: number;
-  avatar?: string;
-  badges: string[];
-  completedTopics: string[];
-  weakSubjects: string[];
+  country?: Country;
+  examType?: ExamType;
+  educationLevel?: EducationLevel;
+  preferredLanguage: Language;
+  onboardingCompleted: boolean;
+  progress: UserProgress;
   isPremium: boolean;
   role: UserRole;
+  dateOfBirth?: Date;
+  gender?: Gender;
+  phoneNumber?: string;
 }
 
 /**
