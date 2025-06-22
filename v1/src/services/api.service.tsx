@@ -138,8 +138,6 @@ class ApiService {
     } catch (error) {
       // TODO: Remove all console.log statements before production deployment
       console.error("❌ REFRESH: Token refresh failed:", error);
-
-      console.error("Token refresh failed:", error);
       await this.clearStoredTokens();
       throw error;
     }
