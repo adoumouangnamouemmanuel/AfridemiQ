@@ -21,28 +21,9 @@ export type Country =
   | "chad";
 
 /**
- * Font size options
+ * Exam types supported in MVP
  */
-export type FontSize = "small" | "medium" | "large";
-
-/**
- * Content format preferences
- */
-export type ContentFormat =
-  | "video"
-  | "text"
-  | "audio"
-  | "mixed";
-
-/**
- * Learning style preferences
- */
-export type LearningStyle = "visual" | "auditory" | "kinesthetic" | "mixed";
-
-/**
- * Profile visibility options
- */
-export type ProfileVisibility = "public" | "friends" | "private";
+export type ExamType = "waec" | "neco" | "jamb" | "kcse" | "bac" | "bepc";
 
 /**
  * Trial period information
