@@ -1,0 +1,20 @@
+{
+  "question": "Which of the following is NOT part of the cell theory?",
+  "type": "multiple_choice",
+  "options": [
+    "All living things are made of one or more cells",
+    "The cell is the basic unit of life",
+    "All cells come from pre-existing cells",
+    "All cells contain a nucleus"
+  ],
+  "correctAnswer": 3,
+  "explanation": "Not all cells contain a nucleus. Prokaryotic cells (bacteria) lack a membrane-bound nucleus, while eukaryotic cells have one.",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["cell theory", "prokaryotic", "eukaryotic", "nucleus"],
+  "isPremium": false,
+  "isActive": true
+}

@@ -1,0 +1,15 @@
+{
+  "question": "During which phase of mitosis do chromosomes align at the center of the cell?",
+  "type": "multiple_choice",
+  "options": ["Prophase", "Metaphase", "Anaphase", "Telophase"],
+  "correctAnswer": 1,
+  "explanation": "During metaphase, chromosomes align at the cell's equator (metaphase plate) before being separated to opposite poles of the cell.",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["mitosis", "metaphase", "chromosomes", "cell division"],
+  "isPremium": false,
+  "isActive": true
+}

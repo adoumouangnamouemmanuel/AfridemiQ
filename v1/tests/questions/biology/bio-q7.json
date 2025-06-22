@@ -1,0 +1,20 @@
+{
+  "question": "What is the main difference between rough and smooth endoplasmic reticulum?",
+  "type": "multiple_choice",
+  "options": [
+    "Rough ER is larger than smooth ER",
+    "Rough ER has ribosomes attached, smooth ER does not",
+    "Smooth ER is found only in plant cells",
+    "Rough ER produces lipids, smooth ER produces proteins"
+  ],
+  "correctAnswer": 1,
+  "explanation": "Rough ER has ribosomes attached to its surface (making it appear 'rough'), while smooth ER lacks ribosomes. Rough ER synthesizes proteins, smooth ER synthesizes lipids.",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["endoplasmic reticulum", "rough ER", "smooth ER", "ribosomes"],
+  "isPremium": true,
+  "isActive": true
+}

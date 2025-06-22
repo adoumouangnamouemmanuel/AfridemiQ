@@ -1,0 +1,25 @@
+{
+  "question": "Active transport differs from passive transport because active transport:",
+  "type": "multiple_choice",
+  "options": [
+    "Moves substances down their concentration gradient",
+    "Requires energy (ATP) to move substances",
+    "Only occurs in plant cells",
+    "Moves only water molecules"
+  ],
+  "correctAnswer": 1,
+  "explanation": "Active transport requires energy (usually ATP) to move substances against their concentration gradient, from low to high concentration.",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": [
+    "active transport",
+    "passive transport",
+    "ATP",
+    "concentration gradient"
+  ],
+  "isPremium": true,
+  "isActive": true
+}

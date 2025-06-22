@@ -1,0 +1,20 @@
+{
+  "question": "The large central vacuole in plant cells serves primarily to:",
+  "type": "multiple_choice",
+  "options": [
+    "Produce ATP for cellular energy",
+    "Synthesize proteins for the cell",
+    "Maintain turgor pressure and store water",
+    "Control what enters and leaves the cell"
+  ],
+  "correctAnswer": 2,
+  "explanation": "The large central vacuole in plant cells stores water and maintains turgor pressure, which helps keep the plant rigid and upright.",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["vacuole", "turgor pressure", "plant cells", "water storage"],
+  "isPremium": true,
+  "isActive": true
+}

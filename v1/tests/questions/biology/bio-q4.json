@@ -1,0 +1,15 @@
+{
+  "question": "The inner membrane of mitochondria is folded into structures called:",
+  "type": "multiple_choice",
+  "options": ["Cristae", "Thylakoids", "Cisternae", "Ribosomes"],
+  "correctAnswer": 0,
+  "explanation": "Cristae are the folded inner membranes of mitochondria that increase surface area for ATP production during cellular respiration.",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["mitochondria", "cristae", "cellular respiration", "ATP"],
+  "isPremium": true,
+  "isActive": true
+}

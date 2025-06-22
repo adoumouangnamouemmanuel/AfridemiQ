@@ -1,0 +1,20 @@
+{
+  "question": "Chloroplasts are important in plant cells because they:",
+  "type": "multiple_choice",
+  "options": [
+    "Store water for the plant",
+    "Provide structural support",
+    "Conduct photosynthesis to make glucose",
+    "Break down waste materials"
+  ],
+  "correctAnswer": 2,
+  "explanation": "Chloroplasts contain chlorophyll and are the sites of photosynthesis, where light energy is converted into chemical energy (glucose).",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["chloroplasts", "photosynthesis", "glucose", "chlorophyll"],
+  "isPremium": false,
+  "isActive": true
+}

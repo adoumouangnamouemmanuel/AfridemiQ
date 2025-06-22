@@ -1,0 +1,25 @@
+{
+  "question": "The cell membrane is described as selectively permeable because it:",
+  "type": "multiple_choice",
+  "options": [
+    "Allows all substances to pass through freely",
+    "Prevents all substances from entering the cell",
+    "Allows only certain substances to pass through",
+    "Only allows water to pass through"
+  ],
+  "correctAnswer": 2,
+  "explanation": "The cell membrane is selectively permeable, meaning it controls which substances can enter or leave the cell based on size, charge, and other factors.",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": [
+    "cell membrane",
+    "selective permeability",
+    "transport",
+    "membrane function"
+  ],
+  "isPremium": false,
+  "isActive": true
+}

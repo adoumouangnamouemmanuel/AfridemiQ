@@ -1,0 +1,15 @@
+{
+  "question": "Which organelle is responsible for protein synthesis in the cell?",
+  "type": "multiple_choice",
+  "options": ["Mitochondria", "Ribosomes", "Golgi apparatus", "Lysosomes"],
+  "correctAnswer": 1,
+  "explanation": "Ribosomes are the cellular structures responsible for protein synthesis. They can be found free in the cytoplasm or attached to the endoplasmic reticulum.",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["organelles", "ribosomes", "protein synthesis", "translation"],
+  "isPremium": false,
+  "isActive": true
+}

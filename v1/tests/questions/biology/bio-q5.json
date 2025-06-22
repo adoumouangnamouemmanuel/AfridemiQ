@@ -1,0 +1,15 @@
+{
+  "question": "Which of the following structures is found in plant cells but NOT in animal cells?",
+  "type": "multiple_choice",
+  "options": ["Nucleus", "Cell wall", "Mitochondria", "Cytoplasm"],
+  "correctAnswer": 1,
+  "explanation": "Cell walls are rigid structures made of cellulose found only in plant cells. They provide structural support and protection.",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicId": "685708be21fff5da40b2f082",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["plant cells", "animal cells", "cell wall", "cellulose"],
+  "isPremium": false,
+  "isActive": true
+}
