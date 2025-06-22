@@ -1,0 +1,20 @@
+{
+  "question": "Dans la phrase 'Marie étudie le français depuis trois ans', que signifie l'expression 'depuis trois ans' ?",
+  "type": "multiple_choice",
+  "options": [
+    "Elle a commencé il y a trois ans et continue encore",
+    "Elle a étudié pendant exactement trois ans et a arrêté",
+    "Elle va étudier pendant trois ans dans le futur",
+    "Elle étudie seulement trois heures par semaine"
+  ],
+  "correctAnswer": 0,
+  "explanation": "'Depuis trois ans' indique une action qui a commencé dans le passé (il y a trois ans) et qui continue jusqu'au présent.",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicId": "68570e183fe73c7e9fe838a3",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["compréhension", "temps", "durée", "depuis"],
+  "isPremium": false,
+  "isActive": true
+}

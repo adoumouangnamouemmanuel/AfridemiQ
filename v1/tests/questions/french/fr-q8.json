@@ -1,0 +1,20 @@
+{
+  "question": "Quelle est la forme interrogative correcte de 'Tu viens avec nous' ?",
+  "type": "multiple_choice",
+  "options": [
+    "Tu viens avec nous ?",
+    "Viens-tu avec nous ?",
+    "Est-ce que tu viens avec nous ?",
+    "Toutes les réponses sont correctes"
+  ],
+  "correctAnswer": 3,
+  "explanation": "En français, il existe trois façons de former une question : l'intonation montante, l'inversion du sujet, et 'est-ce que'. Toutes sont grammaticalement correctes.",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicId": "68570e183fe73c7e9fe838a3",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["interrogation", "intonation", "inversion", "est-ce que"],
+  "isPremium": false,
+  "isActive": true
+}

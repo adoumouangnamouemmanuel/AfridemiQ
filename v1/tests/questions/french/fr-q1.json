@@ -1,0 +1,15 @@
+{
+  "question": "Conjuguez le verbe 'avoir' à la première personne du singulier au présent de l'indicatif.",
+  "type": "multiple_choice",
+  "options": ["j'ai", "je suis", "j'aie", "je dois"],
+  "correctAnswer": 0,
+  "explanation": "Le verbe 'avoir' se conjugue 'j'ai' à la première personne du singulier au présent de l'indicatif.",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicId": "68570e183fe73c7e9fe838a3",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["conjugaison", "présent", "avoir", "auxiliaire"],
+  "isPremium": false,
+  "isActive": true
+}

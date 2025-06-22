@@ -1,0 +1,20 @@
+{
+  "question": "Quelle est la formule de politesse la plus appropriée pour terminer une lettre formelle en français ?",
+  "type": "multiple_choice",
+  "options": [
+    "À bientôt",
+    "Veuillez agréer, Monsieur, l'expression de mes sentiments distingués",
+    "Bisous",
+    "Cordialement"
+  ],
+  "correctAnswer": 1,
+  "explanation": "Dans une lettre formelle, on utilise des formules de politesse soutenues comme 'Veuillez agréer, Monsieur/Madame, l'expression de mes sentiments distingués'.",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicId": "68570e183fe73c7e9fe838a3",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["politesse", "correspondance", "formel", "expression"],
+  "isPremium": false,
+  "isActive": true
+}

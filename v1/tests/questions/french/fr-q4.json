@@ -1,0 +1,15 @@
+{
+  "question": "Complétez la phrase : 'Il faut que tu _____ tes devoirs avant de sortir.'",
+  "type": "multiple_choice",
+  "options": ["finis", "finisses", "finiras", "finissais"],
+  "correctAnswer": 1,
+  "explanation": "Après l'expression 'il faut que', on utilise le subjonctif présent. 'Finir' au subjonctif présent à la 2e personne du singulier donne 'finisses'.",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicId": "68570e183fe73c7e9fe838a3",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["subjonctif", "il faut que", "conjugaison", "grammaire"],
+  "isPremium": true,
+  "isActive": true
+}

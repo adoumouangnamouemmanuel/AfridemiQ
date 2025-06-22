@@ -1,0 +1,15 @@
+{
+  "question": "Choisissez la forme correcte : 'Hier, pendant que je _____ , le téléphone a sonné.'",
+  "type": "multiple_choice",
+  "options": ["lisais", "ai lu", "lus", "lirai"],
+  "correctAnswer": 0,
+  "explanation": "On utilise l'imparfait 'lisais' pour exprimer une action en cours dans le passé, interrompue par une autre action (passé composé 'a sonné').",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicId": "68570e183fe73c7e9fe838a3",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["imparfait", "passé composé", "temps du passé", "simultanéité"],
+  "isPremium": false,
+  "isActive": true
+}

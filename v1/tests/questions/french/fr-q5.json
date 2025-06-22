@@ -1,0 +1,15 @@
+{
+  "question": "Quel mot désigne une période de sécheresse prolongée, particulièrement fréquente au Sahel ?",
+  "type": "multiple_choice",
+  "options": ["la mousson", "la sécheresse", "l'harmattan", "la tornade"],
+  "correctAnswer": 2,
+  "explanation": "L'harmattan est un vent sec et chaud qui souffle du Sahara vers le golfe de Guinée, caractéristique du climat sahélien, notamment au Tchad.",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicId": "68570e183fe73c7e9fe838a3",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["vocabulaire", "afrique", "climat", "harmattan"],
+  "isPremium": false,
+  "isActive": true
+}

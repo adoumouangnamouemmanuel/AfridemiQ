@@ -1,0 +1,20 @@
+{
+  "question": "Remplacez les mots soulignés par le pronom approprié : 'Je donne *le livre* à *ma sœur*.'",
+  "type": "multiple_choice",
+  "options": [
+    "Je le lui donne",
+    "Je la lui donne",
+    "Je lui le donne",
+    "Je le la donne"
+  ],
+  "correctAnswer": 0,
+  "explanation": "Le pronom 'le' remplace 'le livre' (COD masculin singulier) et 'lui' remplace 'à ma sœur' (COI). L'ordre est : je + le + lui + verbe.",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicId": "68570e183fe73c7e9fe838a3",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["pronoms", "COD", "COI", "ordre des pronoms"],
+  "isPremium": true,
+  "isActive": true
+}

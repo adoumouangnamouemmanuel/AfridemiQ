@@ -1,0 +1,20 @@
+{
+  "question": "Quelle expression française signifie 'avoir beaucoup de chance' ?",
+  "type": "multiple_choice",
+  "options": [
+    "Avoir du pain sur la planche",
+    "Avoir une chance de cocu",
+    "Avoir le beurre et l'argent du beurre",
+    "Avoir un chat dans la gorge"
+  ],
+  "correctAnswer": 1,
+  "explanation": "L'expression 'avoir une chance de cocu' (bien que familière) signifie avoir énormément de chance. Les autres expressions ont des sens différents.",
+  "subjectId": "6856e1edaff9659b6e3ec898",
+  "topicId": "68570e183fe73c7e9fe838a3",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "BAC",
+  "tags": ["expressions", "idiomatique", "culture", "français familier"],
+  "isPremium": true,
+  "isActive": true
+}
