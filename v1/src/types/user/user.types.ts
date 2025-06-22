@@ -154,6 +154,52 @@ export interface LoginData {
 }
 
 /**
+ * Onboarding data (Africa-specific, required after registration)
+ */
+export interface OnboardingData {
+  country: Country;
+  examType: ExamType;
+  educationLevel: EducationLevel;
+  preferredLanguage: Language;
+}
+
+/**
+ * Basic profile update data (MVP)
+ */
+export interface UpdateProfileData {
+  name?: string;
+  phoneNumber?: string;
+  preferredLanguage?: Language;
+}
+
+/**
+ * Personal information update data
+ */
+export interface UpdatePersonalInfoData {
+  name?: string;
+  dateOfBirth?: Date;
+  gender?: Gender;
+  phoneNumber?: string;
+}
+
+/**
+ * Password management schemas
+ */
+export interface PasswordResetRequestData {
+  email: string;
+}
+
+export interface PasswordResetData {
+  token: string;
+  password: string;
+}
+
+export interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/**
  * Refresh token data
  */
 export interface RefreshTokenData {
