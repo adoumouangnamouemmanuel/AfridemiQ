@@ -373,6 +373,111 @@ class ApiService {
   }
 
   /**
+   * Completes user onboarding with Africa-specific data.
+   * @param onboardingData - Onboarding data with African context.
+   * @returns {Promise<any>} The updated user data.
+   */
+  async completeOnboarding(onboardingData: OnboardingData): Promise<any> {
+    const response = await this.makeRequest<any>("/users/onboarding", {
+      method: "POST",
+      body: JSON.stringify(onboardingData),
+      requiresAuth: true,
+    });
+    return response.data;
+  }
+
+  /**
+   * Checks onboarding status for the current user.
+   * @returns {Promise<any>} The onboarding status.
+   */
+  async checkOnboardingStatus(): Promise<any> {
+    const response = await this.makeRequest<any>("/users/onboarding/status", {
+      method: "GET",
+      requiresAuth: true,
+    });
+    return response.data;
+  }
+
+  /**
+   * Updates user profile information.
+   * @param profileData - Profile update data.
+   * @returns {Promise<any>} The updated user data.
+   */
+  async updateProfile(profileData: UpdateProfileData): Promise<any> {
+    const response = await this.makeRequest<any>("/users/profile", {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+      requiresAuth: true,
+    });
+    return response.data;
+  }
+
+  /**
+   * Updates user personal information.
+   * @param personalData - Personal information update data.
+   * @returns {Promise<any>} The updated user data.
+   */
+  async updatePersonalInfo(personalData: UpdatePersonalInfoData): Promise<any> {
+    const response = await this.makeRequest<any>("/users/personal-info", {
+      method: "PUT",
+      body: JSON.stringify(personalData),
+      requiresAuth: true,
+    });
+    return response.data;
+  }
+
+  /**
+   * Changes user password.
+   * @param passwordData - Current and new password data.
+   * @returns {Promise<void>} Resolves when password is changed.
+   */
+  async changePassword(passwordData: ChangePasswordData): Promise<void> {
+    await this.makeRequest<void>("/users/change-password", {
+      method: "PUT",
+      body: JSON.stringify(passwordData),
+      requiresAuth: true,
+    });
+  }
+
+  /**
+   * Requests a password reset for the given email.
+   * @param resetData - Email for password reset.
+   * @returns {Promise<void>} Resolves when reset email is sent.
+   */
+  async requestPasswordReset(
+    resetData: PasswordResetRequestData
+  ): Promise<void> {
+    await this.makeRequest<void>("/users/request-password-reset", {
+      method: "POST",
+      body: JSON.stringify(resetData),
+    });
+  }
+
+  /**
+   * Resets password using reset token.
+   * @param resetData - Reset token and new password.
+   * @returns {Promise<void>} Resolves when password is reset.
+   */
+  async resetPassword(resetData: PasswordResetData): Promise<void> {
+    await this.makeRequest<void>("/users/reset-password", {
+      method: "POST",
+      body: JSON.stringify(resetData),
+    });
+  }
+
+  /**
+   * Gets current user profile.
+   * @returns {Promise<any>} The user profile data.
+   */
+  async getProfile(): Promise<any> {
+    const response = await this.makeRequest<any>("/users/profile", {
+      method: "GET",
+      requiresAuth: true,
+    });
+    return response.data;
+  }
+
+  /**
    * Checks if the user is authenticated by verifying stored tokens.
    * @returns {Promise<boolean>} True if both access and refresh tokens exist, false otherwise.
    */
