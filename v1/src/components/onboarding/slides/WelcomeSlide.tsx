@@ -124,23 +124,23 @@ export default function WelcomeSlide({ isActive }: SlideProps) {
 
   return (
     <View style={styles.container}>
-        <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
-          <View style={styles.logoImageContainer}>
-            <Image
-              source={require("../../../assets/logo.png")}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-          </View>
-        </Animated.View>
+      <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
+        <View style={styles.logoImageContainer}>
+          <Image
+            source={require("../../../assets/logo.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+        </View>
+      </Animated.View>
 
-        <Animated.View style={[styles.textContainer, textAnimatedStyle]}>
-          <Text style={styles.welcomeText}>Welcome to</Text>
-          <Text style={styles.title}>AfridemiQ</Text>
-          <Text style={styles.subtitle}>
+      <Animated.View style={[styles.textContainer, textAnimatedStyle]}>
+        <Text style={styles.welcomeText}>Welcome to</Text>
+        <Text style={styles.title}>AfridemiQ</Text>
+        <Text style={styles.subtitle}>
           Where African Academic Intelligence Meets Excellence
-          </Text>
-        </Animated.View>
+        </Text>
+      </Animated.View>
     </View>
   );
 }
