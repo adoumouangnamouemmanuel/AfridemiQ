@@ -274,10 +274,12 @@ export interface RegisterFormData {
   confirmPassword: string;
 }
 
-
-// New TypeScript interfaces for modular update payloads
-export interface UpdateBioData {
-  bio?: string;
+/**
+ * Validation states for forms
+ */
+export interface ValidationState {
+  isValid: boolean;
+  error?: string;
 }
 
 export interface UpdatePersonalInfoData {
