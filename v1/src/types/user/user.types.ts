@@ -5,9 +5,9 @@
  */
 
 /**
- * User roles available in the system
+ * User roles available in the system (MVP)
  */
-export type UserRole = "student" | "teacher" | "admin";
+export type UserRole = "student" | "admin";
 
 /**
  * Subscription types available
