@@ -50,39 +50,39 @@ export interface UserProgress {
 }
 
 /**
- * Complete user profile interface matching the MongoDB model
+ * Complete user profile interface matching the MVP MongoDB model
  */
 export interface UserProfile {
   _id: string;
   name: string;
   email: string;
-  phoneNumber?: string;
-  isPhoneVerified: boolean;
-  avatar?: string;
+
+  // Africa-specific onboarding fields
+  country?: Country;
+  examType?: ExamType;
+  educationLevel?: EducationLevel;
+
+  // Optional personal information
   dateOfBirth?: string | Date;
-  gender?: string;
-  country?: string;
-  timeZone?: string;
-  preferredLanguage?: string;
-  schoolName?: string;
-  gradeLevel?: string;
-  parentEmail?: string;
-  role: UserRole;
-  lastLogin?: string | Date;
-  isPremium: boolean;
-  subscription: UserSubscription;
-  preferences: UserPreferences;
-  settings: LearningSettings;
+  gender?: Gender;
+  phoneNumber?: string;
+
+  // Onboarding status
+  onboardingCompleted: boolean;
+
+  // Basic preferences
+  preferredLanguage: Language;
+
+  // Simplified progress tracking
   progress: UserProgress;
-  analyticsId?: string;
-  notes: string[];
-  hintsUsed: string[];
-  bookmarks: string[];
-  friends: string[];
-  blockedUsers: string[];
-  tutorId?: string;
-  socialProfile: SocialProfile;
-  onboardingStatusId?: string;
+
+  // User management
+  role: UserRole;
+  isPremium: boolean;
+  isActive: boolean;
+  lastLogin?: string | Date;
+
+  // Timestamps
   createdAt: string | Date;
   updatedAt: string | Date;
 }
