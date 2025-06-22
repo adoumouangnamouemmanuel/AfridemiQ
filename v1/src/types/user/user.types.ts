@@ -108,31 +108,28 @@ export interface User {
 }
 
 /**
- * Authentication response from backend
+ * Authentication response from backend (MVP)
  */
 export interface AuthResponse {
   user: {
     _id: string;
     name: string;
     email: string;
-    country: string;
+    country?: string;
+    examType?: string;
+    educationLevel?: string;
+    preferredLanguage: string;
+    onboardingCompleted: boolean;
     progress: {
-      selectedExam: string;
-      goalDate: string;
-      xp: number;
-      level: number;
-      streak: {
-        current: number;
-        longest: number;
-        lastStudyDate?: string;
-      };
-      badges: string[];
-      completedTopics: string[];
-      weakSubjects: string[];
+      totalQuizzesTaken: number;
+      totalQuestionsAnswered: number;
+      averageScore: number;
     };
-    avatar?: string;
     isPremium: boolean;
     role: string;
+    dateOfBirth?: string;
+    gender?: string;
+    phoneNumber?: string;
   };
   token: string;
   refreshToken?: string;
