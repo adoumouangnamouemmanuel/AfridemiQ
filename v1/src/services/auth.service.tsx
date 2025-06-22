@@ -185,10 +185,22 @@ class AuthService {
       id: backendUser._id,
       name: backendUser.name,
       email: backendUser.email,
-      country: backendUser.country,
-      selectedExam: backendUser.progress?.selectedExam ?? "",
-      goalDate: backendUser.progress?.goalDate
-        ? new Date(backendUser.progress.goalDate)
+      country: backendUser.country as User["country"],
+      examType: backendUser.examType as User["examType"],
+      educationLevel: backendUser.educationLevel as User["educationLevel"],
+      preferredLanguage:
+        (backendUser.preferredLanguage as User["preferredLanguage"]) ||
+        "french",
+      onboardingCompleted: backendUser.onboardingCompleted || false,
+      progress: backendUser.progress || {
+        totalQuizzesTaken: 0,
+        totalQuestionsAnswered: 0,
+        averageScore: 0,
+      },
+      isPremium: backendUser.isPremium || false,
+      role: (backendUser.role as User["role"]) || "student",
+      dateOfBirth: backendUser.dateOfBirth
+        ? new Date(backendUser.dateOfBirth)
         : undefined,
       xp: backendUser.progress?.xp ?? 0,
       level: backendUser.progress?.level ?? 1,
