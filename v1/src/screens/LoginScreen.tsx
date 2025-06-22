@@ -159,14 +159,13 @@ export default function LoginScreen() {
   // Handle successful login
   const handleSuccessHide = () => {
     setShowSuccess(false);
-    // Check if user has completed onboarding
-    AsyncStorage.getItem("hasOnboarded").then((hasOnboarded) => {
-      if (hasOnboarded) {
+    // Check user's onboarding status from the authenticated user data
+    const currentUser = userRef.current || user;
+    if (currentUser?.onboardingCompleted) {
         router.replace("/(tabs)/home");
       } else {
         router.replace("/auth/onboarding");
       }
-    });
   };
 
   // Handle login error
