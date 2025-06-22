@@ -1,0 +1,21 @@
+{
+  "title": "Basic Cell Biology Concepts",
+  "description": "Fundamental concepts of cell theory, cell types, and basic organelle identification",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicIds": ["685708be21fff5da40b2f082"],
+  "format": "practice",
+  "timeLimit": 18,
+  "totalQuestions": 4,
+  "passingScore": 60,
+  "questionIds": [
+    "68574e0d87dae510c8e462dc",
+    "68574e0e87dae510c8e462de",
+    "68574e0e87dae510c8e462e4",
+    "68574e0f87dae510c8e462e6"
+  ],
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "isPremium": false,
+  "isActive": true
+}

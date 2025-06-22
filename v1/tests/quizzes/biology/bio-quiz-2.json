@@ -1,0 +1,21 @@
+{
+  "title": "Cell Structure and Function",
+  "description": "Intermediate concepts covering cell membrane, organelles, and cellular processes",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicIds": ["685708be21fff5da40b2f082"],
+  "format": "practice",
+  "timeLimit": 25,
+  "totalQuestions": 4,
+  "passingScore": 70,
+  "questionIds": [
+    "68574e0e87dae510c8e462e0",
+    "68574e0e87dae510c8e462e2",
+    "68574e0f87dae510c8e462ea",
+    "68574e1087dae510c8e462ee"
+  ],
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "isPremium": false,
+  "isActive": true
+}

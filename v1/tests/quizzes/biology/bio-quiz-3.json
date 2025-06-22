@@ -1,0 +1,21 @@
+{
+  "title": "Advanced Cellular Biology",
+  "description": "Complex cellular processes including endoplasmic reticulum function and cellular transport mechanisms",
+  "subjectId": "6856e1c3aff9659b6e3ec894",
+  "topicIds": ["685708be21fff5da40b2f082"],
+  "format": "practice",
+  "timeLimit": 30,
+  "totalQuestions": 4,
+  "passingScore": 80,
+  "questionIds": [
+    "68574e0f87dae510c8e462e8",
+    "68574e1087dae510c8e462ec",
+    "68574e0e87dae510c8e462e2",
+    "68574e1087dae510c8e462ee"
+  ],
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "isPremium": true,
+  "isActive": true
+}
