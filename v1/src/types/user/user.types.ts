@@ -31,24 +31,9 @@ export type ExamType = "waec" | "neco" | "jamb" | "kcse" | "bac" | "bepc";
 export type EducationLevel = "secondary" | "university";
 
 /**
- * User preferences and settings
+ * Languages supported in MVP
  */
-export interface UserPreferences {
-  notifications: NotificationPreferences;
-  darkMode: boolean;
-  fontSize: FontSize;
-  preferredContentFormat: ContentFormat;
-  enableHints: boolean;
-  autoPlayAudio: boolean;
-  showStepSolutions: boolean;
-  leaderboardVisibility: boolean;
-  allowFriendRequests: boolean;
-  studyField?: string;
-  targetUniversity?: string;
-  studyHours?: number;
-  favoriteSubjects?: string[];
-  careerGoal?: string;
-}
+export type Language = "english" | "french";
 
 /**
  * Learning settings and preferences
