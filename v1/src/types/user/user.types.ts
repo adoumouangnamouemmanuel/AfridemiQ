@@ -28,20 +28,7 @@ export type ExamType = "waec" | "neco" | "jamb" | "kcse" | "bac" | "bepc";
 /**
  * Education levels in MVP
  */
-export interface SocialLink {
-  platform: "twitter" | "linkedin" | "github"; // Extend as needed
-  url: string;
-}
-
-/**
- * Notification preferences
- */
-export interface NotificationPreferences {
-  general: boolean;
-  dailyReminderTime?: string;
-  challengeNotifications: boolean;
-  progressUpdates: boolean;
-}
+export type EducationLevel = "secondary" | "university";
 
 /**
  * User preferences and settings
