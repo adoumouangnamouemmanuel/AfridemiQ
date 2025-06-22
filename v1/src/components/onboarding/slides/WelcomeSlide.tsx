@@ -1,9 +1,8 @@
 "use client";
-
-import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image } from "react-native";
 import { useTheme } from "../../../utils/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,7 +10,8 @@ import Animated, {
   withDelay,
   withTiming,
 } from "react-native-reanimated";
-import type { OnboardingData } from "../OnboardingCarousel";
+import type { OnboardingData } from "../../../types/user/user.types";
+import { useEffect } from "react";
 
 interface SlideProps {
   data: OnboardingData;
@@ -22,134 +22,138 @@ interface SlideProps {
 export default function WelcomeSlide({ isActive }: SlideProps) {
   const { theme } = useTheme();
 
-  const logoOpacity = useSharedValue(0);
-  const logoScale = useSharedValue(0.8);
+  const logoScale = useSharedValue(0);
+  const logoRotation = useSharedValue(-180);
   const textOpacity = useSharedValue(0);
-  const featureOpacity1 = useSharedValue(0);
-  const featureOpacity2 = useSharedValue(0);
-  const featureOpacity3 = useSharedValue(0);
+  const textTranslateY = useSharedValue(50);
+  const featuresOpacity = useSharedValue(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isActive) {
-      // Logo animation
-      logoOpacity.value = withTiming(1, { duration: 800 });
-      logoScale.value = withSpring(1, { damping: 15, stiffness: 100 });
-
-      // Text animation
-      textOpacity.value = withDelay(300, withTiming(1, { duration: 800 }));
-
-      // Feature animations with staggered delay
-      featureOpacity1.value = withDelay(600, withTiming(1, { duration: 500 }));
-      featureOpacity2.value = withDelay(800, withTiming(1, { duration: 500 }));
-      featureOpacity3.value = withDelay(1000, withTiming(1, { duration: 500 }));
+      logoScale.value = withDelay(
+        200,
+        withSpring(1, { damping: 15, stiffness: 100 })
+      );
+      logoRotation.value = withDelay(
+        400,
+        withSpring(0, { damping: 20, stiffness: 80 })
+      );
+      textOpacity.value = withDelay(600, withTiming(1, { duration: 800 }));
+      textTranslateY.value = withDelay(
+        600,
+        withSpring(0, { damping: 20, stiffness: 100 })
+      );
+      featuresOpacity.value = withDelay(1000, withTiming(1, { duration: 600 }));
     }
-  }, [
-    isActive,
-    logoOpacity,
-    logoScale,
-    textOpacity,
-    featureOpacity1,
-    featureOpacity2,
-    featureOpacity3,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive]);
 
   const logoAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: logoOpacity.value,
-    transform: [{ scale: logoScale.value }],
+    transform: [
+      { scale: logoScale.value },
+      { rotate: `${logoRotation.value}deg` },
+    ],
   }));
 
   const textAnimatedStyle = useAnimatedStyle(() => ({
     opacity: textOpacity.value,
+    transform: [{ translateY: textTranslateY.value }],
   }));
 
-  const featureAnimatedStyle1 = useAnimatedStyle(() => ({
-    opacity: featureOpacity1.value,
-  }));
-
-  const featureAnimatedStyle2 = useAnimatedStyle(() => ({
-    opacity: featureOpacity2.value,
-  }));
-
-  const featureAnimatedStyle3 = useAnimatedStyle(() => ({
-    opacity: featureOpacity3.value,
+  const featuresAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: featuresOpacity.value,
   }));
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingHorizontal: 24,
+      paddingHorizontal: 20,
     },
     scrollContent: {
       flexGrow: 1,
       justifyContent: "center",
       alignItems: "center",
-      paddingVertical: 20,
+      paddingVertical: 0,
     },
     logoContainer: {
       alignItems: "center",
-      marginBottom: 40,
+      marginBottom: 24,
     },
-    logo: {
+    logoImageContainer: {
+      width: 130,
+      height: 130,
+      borderRadius: 35,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.colors.surface,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.1,
+      shadowRadius: 20,
+      elevation: 8,
+    },
+    logoImage: {
       width: 120,
       height: 120,
       borderRadius: 30,
-      backgroundColor: theme.colors.primary,
-      justifyContent: "center",
-      alignItems: "center",
-      shadowColor: theme.colors.primary,
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.3,
-      shadowRadius: 20,
-      elevation: 10,
-    },
-    logoIcon: {
-      fontSize: 60,
-      color: "white",
     },
     textContainer: {
       alignItems: "center",
-      marginBottom: 40,
+      marginBottom: 24,
+    },
+    welcomeText: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: theme.colors.primary,
+      textAlign: "center",
+      marginBottom: 8,
+      letterSpacing: 1.2,
+      textTransform: "uppercase",
     },
     title: {
-      fontSize: 32,
-      fontWeight: "800",
+      fontSize: 35,
+      fontWeight: "900",
       color: theme.colors.text,
       textAlign: "center",
-      marginBottom: 16,
+      marginBottom: 15,
+      letterSpacing: -1.5,
+      lineHeight: 48,
     },
     subtitle: {
-      fontSize: 16,
+      fontSize: 14,
       color: theme.colors.textSecondary,
       textAlign: "center",
-      lineHeight: 24,
-      paddingHorizontal: 20,
+      lineHeight: 22,
+      fontWeight: "500",
+      paddingHorizontal: 10,
+      fontStyle: "italic",
     },
     featuresContainer: {
       width: "100%",
+      gap: 14,
     },
     featureItem: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: theme.colors.background,
-      paddingVertical: 16,
-      paddingHorizontal: 20,
-      borderRadius: 16,
-      marginBottom: 12,
+      backgroundColor: theme.colors.surface,
+      paddingVertical: 15,
+      paddingHorizontal: 24,
+      borderRadius: 20,
       shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      elevation: 2,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      elevation: 4,
       borderWidth: 1,
-      borderColor: "rgba(0,0,0,0.05)",
+      borderColor: theme.colors.border,
     },
     featureIconContainer: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
+      width: 50,
+      height: 50,
+      borderRadius: 28,
       justifyContent: "center",
       alignItems: "center",
-      marginRight: 16,
+      marginRight: 20,
     },
     featureContent: {
       flex: 1,
@@ -158,36 +162,34 @@ export default function WelcomeSlide({ isActive }: SlideProps) {
       fontSize: 16,
       fontWeight: "700",
       color: theme.colors.text,
-      marginBottom: 4,
+      marginBottom: 6,
     },
     featureDescription: {
-      fontSize: 14,
+      fontSize: 13,
       color: theme.colors.textSecondary,
-      lineHeight: 20,
+      lineHeight: 22,
+      fontWeight: "500",
     },
   });
 
   const features = [
     {
-      icon: "school",
-      color: "#3b82f6",
-      title: "Personalized Learning",
-      description: "Study plans tailored to your needs",
-      style: featureAnimatedStyle1,
+      icon: "school-outline",
+      title: "African Excellence",
+      description: "Exam preparation tailored for African educational systems",
+      gradient: ["#3b82f6", "#1d4ed8"] as const,
     },
     {
-      icon: "trophy",
-      color: "#10b981",
-      title: "Track Your Progress",
-      description: "See your improvement over time",
-      style: featureAnimatedStyle2,
+      icon: "analytics-outline",
+      title: "Smart Analytics",
+      description: "Track your progress with intelligent performance insights",
+      gradient: ["#10b981", "#059669"] as const,
     },
     {
-      icon: "people",
-      color: "#f59e0b",
-      title: "Study Together",
-      description: "Connect with other students",
-      style: featureAnimatedStyle3,
+      icon: "people-outline",
+      title: "Community Learning",
+      description: "Connect with ambitious students across Africa",
+      gradient: ["#f59e0b", "#d97706"] as const,
     },
   ];
 
@@ -198,46 +200,45 @@ export default function WelcomeSlide({ isActive }: SlideProps) {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
-          <View style={styles.logo}>
-            <Text style={styles.logoIcon}>📚</Text>
+          <View style={styles.logoImageContainer}>
+            <Image
+              source={require("../../../assets/logo.png")}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           </View>
         </Animated.View>
 
         <Animated.View style={[styles.textContainer, textAnimatedStyle]}>
-          <Text style={styles.title}>Welcome to StudyPro</Text>
+          <Text style={styles.welcomeText}>Welcome to</Text>
+          <Text style={styles.title}>AfridemiQ</Text>
           <Text style={styles.subtitle}>
-            Your personalized exam preparation journey starts here. Let&apos;s set up
-            your profile to get started!
+            &quot;Where African Academic Intelligence Meets Excellence&quot;
+            {"\n"}
+            Unlock your potential. Master your exams.
           </Text>
         </Animated.View>
 
-        <View style={styles.featuresContainer}>
+        <Animated.View
+          style={[styles.featuresContainer, featuresAnimatedStyle]}
+        >
           {features.map((feature, index) => (
-            <Animated.View
-              key={index}
-              style={[styles.featureItem, feature.style]}
-            >
-              <View
-                style={[
-                  styles.featureIconContainer,
-                  { backgroundColor: `${feature.color}20` },
-                ]}
+            <View key={index} style={styles.featureItem}>
+              <LinearGradient
+                colors={feature.gradient}
+                style={styles.featureIconContainer}
               >
-                <Ionicons
-                  name={feature.icon as any}
-                  size={24}
-                  color={feature.color}
-                />
-              </View>
+                <Ionicons name={feature.icon as any} size={28} color="white" />
+              </LinearGradient>
               <View style={styles.featureContent}>
                 <Text style={styles.featureTitle}>{feature.title}</Text>
                 <Text style={styles.featureDescription}>
                   {feature.description}
                 </Text>
               </View>
-            </Animated.View>
+            </View>
           ))}
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );
