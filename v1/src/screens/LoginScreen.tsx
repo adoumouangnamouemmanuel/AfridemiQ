@@ -33,6 +33,7 @@ import {
 import { apiService } from "../services/api.service";
 import { authService } from "../services/auth.service";
 import { useUser } from "../utils/UserContext";
+import type { User } from "../types/user/user.types";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
