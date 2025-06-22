@@ -1,0 +1,20 @@
+{
+  "question": "At STP, what volume of CO₂ gas is produced when 44 g of CO₂ is formed? (Molar volume at STP = 22.4 L/mol)",
+  "type": "multiple_choice",
+  "options": ["11.2 L", "22.4 L", "44.8 L", "89.6 L"],
+  "correctAnswer": 1,
+  "explanation": "44 g de CO₂ = 1 mole (masse molaire = 44 g/mol). À CNTP: 1 mole de gaz = 22.4 L",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicId": "685709a221fff5da40b2f109",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": [
+    "stœchiométrie des gaz",
+    "CNTP",
+    "volume molaire",
+    "dioxyde de carbone"
+  ],
+  "isPremium": false,
+  "isActive": true
+}

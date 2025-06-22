@@ -1,0 +1,20 @@
+{
+  "question": "Balance the following chemical equation: ___Al + ___O₂ → ___Al₂O₃",
+  "type": "multiple_choice",
+  "options": [
+    "2Al + 3O₂ → 2Al₂O₃",
+    "4Al + 3O₂ → 2Al₂O₃",
+    "2Al + O₂ → Al₂O₃",
+    "Al + O₂ → Al₂O₃"
+  ],
+  "correctAnswer": 1,
+  "explanation": "Pour équilibrer: 4Al + 3O₂ → 2Al₂O₃. Il faut 4 atomes d'aluminium et 6 atomes d'oxygène de chaque côté de l'équation.",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicId": "685709a221fff5da40b2f109",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["équilibrage", "équations chimiques", "aluminium", "oxygène"],
+  "isPremium": false,
+  "isActive": true
+}

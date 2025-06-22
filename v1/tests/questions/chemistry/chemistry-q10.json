@@ -1,0 +1,20 @@
+{
+  "question": "A compound contains 40% carbon, 6.7% hydrogen, and 53.3% oxygen by mass. What is its empirical formula?",
+  "type": "multiple_choice",
+  "options": ["CHO", "CH₂O", "C₂H₄O₂", "C₃H₆O₃"],
+  "correctAnswer": 1,
+  "explanation": "C: 40/12 = 3.33, H: 6.7/1 = 6.7, O: 53.3/16 = 3.33. Rapport molaire C:H:O = 1:2:1, donc CH₂O",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicId": "685709a221fff5da40b2f109",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": [
+    "formule empirique",
+    "composition",
+    "pourcentage massique",
+    "calculs"
+  ],
+  "isPremium": true,
+  "isActive": true
+}

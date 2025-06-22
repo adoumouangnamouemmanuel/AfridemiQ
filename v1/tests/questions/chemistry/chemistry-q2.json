@@ -1,0 +1,15 @@
+{
+  "question": "What is the molar mass of calcium carbonate (CaCO₃)? (Ca = 40 g/mol, C = 12 g/mol, O = 16 g/mol)",
+  "type": "multiple_choice",
+  "options": ["68 g/mol", "100 g/mol", "112 g/mol", "128 g/mol"],
+  "correctAnswer": 1,
+  "explanation": "Molar mass of CaCO₃ = 40 + 12 + (3 × 16) = 40 + 12 + 48 = 100 g/mol",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicId": "685709a221fff5da40b2f109",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["masse molaire", "carbonate de calcium", "calculs", "stœchiométrie"],
+  "isPremium": false,
+  "isActive": true
+}

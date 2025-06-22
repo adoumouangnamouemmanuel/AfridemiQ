@@ -1,0 +1,15 @@
+{
+  "question": "In the reaction N₂ + 3H₂ → 2NH₃, how many moles of NH₃ can be produced from 4 moles of H₂?",
+  "type": "multiple_choice",
+  "options": ["2.67 moles", "4 moles", "6 moles", "12 moles"],
+  "correctAnswer": 0,
+  "explanation": "D'après la stœchiométrie: 3 moles H₂ → 2 moles NH₃, donc 4 moles H₂ → (4 × 2)/3 = 2.67 moles NH₃",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicId": "685709a221fff5da40b2f109",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["stœchiométrie", "proportions", "ammoniac", "calculs molaires"],
+  "isPremium": true,
+  "isActive": true
+}

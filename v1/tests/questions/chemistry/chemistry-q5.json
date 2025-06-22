@@ -1,0 +1,20 @@
+{
+  "question": "In the reaction 2Al + 3CuSO₄ → Al₂(SO₄)₃ + 3Cu, if 2 moles of Al react with 2 moles of CuSO₄, which is the limiting reagent?",
+  "type": "multiple_choice",
+  "options": ["Al", "CuSO₄", "Both are limiting", "Cannot be determined"],
+  "correctAnswer": 1,
+  "explanation": "Il faut 3 moles de CuSO₄ pour 2 moles d'Al. Avec seulement 2 moles de CuSO₄ disponibles, CuSO₄ est le réactif limitant.",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicId": "685709a221fff5da40b2f109",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": [
+    "réactif limitant",
+    "stœchiométrie",
+    "aluminium",
+    "sulfate de cuivre"
+  ],
+  "isPremium": true,
+  "isActive": true
+}

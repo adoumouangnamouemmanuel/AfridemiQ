@@ -1,0 +1,15 @@
+{
+  "question": "What is the oxidation number of sulfur in H₂SO₄?",
+  "type": "multiple_choice",
+  "options": ["+2", "+4", "+6", "+8"],
+  "correctAnswer": 2,
+  "explanation": "Dans H₂SO₄: H = +1, O = -2. Pour que la molécule soit neutre: 2(+1) + S + 4(-2) = 0, donc S = +6",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicId": "685709a221fff5da40b2f109",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["nombre d'oxydation", "acide sulfurique", "soufre", "calculs"],
+  "isPremium": true,
+  "isActive": true
+}

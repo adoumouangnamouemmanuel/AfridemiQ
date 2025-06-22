@@ -1,0 +1,25 @@
+{
+  "question": "What type of reaction is represented by: 2H₂O₂ → 2H₂O + O₂?",
+  "type": "multiple_choice",
+  "options": [
+    "Synthesis",
+    "Decomposition",
+    "Single displacement",
+    "Double displacement"
+  ],
+  "correctAnswer": 1,
+  "explanation": "This is a decomposition reaction where hydrogen peroxide breaks down into water and oxygen gas.",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicId": "685709a221fff5da40b2f109",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": [
+    "types de réactions",
+    "décomposition",
+    "peroxyde d'hydrogène",
+    "classification"
+  ],
+  "isPremium": false,
+  "isActive": true
+}

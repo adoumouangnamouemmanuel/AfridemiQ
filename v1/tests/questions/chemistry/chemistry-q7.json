@@ -1,0 +1,15 @@
+{
+  "question": "What are the products of complete combustion of methane (CH₄)?",
+  "type": "multiple_choice",
+  "options": ["CO + H₂O", "CO₂ + H₂O", "C + H₂O", "CO₂ + H₂"],
+  "correctAnswer": 1,
+  "explanation": "La combustion complète du méthane produit: CH₄ + 2O₂ → CO₂ + 2H₂O (dioxyde de carbone et eau)",
+  "subjectId": "6856e253aff9659b6e3ec8a0",
+  "topicId": "685709a221fff5da40b2f109",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["combustion", "méthane", "produits", "oxydation"],
+  "isPremium": false,
+  "isActive": true
+}
