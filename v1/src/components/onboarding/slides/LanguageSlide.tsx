@@ -9,6 +9,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import type { OnboardingData, Language } from "../../../types/user/user.types";
+import { useCommonOnboarding } from "../../../styles/commonOnboarding";
 import { useEffect } from "react";
 
 interface SlideProps {
@@ -42,6 +43,7 @@ export default function LanguageSlide({
   const { theme } = useTheme();
   const containerOpacity = useSharedValue(0);
   const containerTranslateY = useSharedValue(30);
+  const commonStyles = useCommonOnboarding();
 
   useEffect(() => {
     if (isActive) {
@@ -69,27 +71,7 @@ export default function LanguageSlide({
       paddingHorizontal: 24,
       justifyContent: "center",
     },
-    // Replace the title and subtitle styles in your StyleSheet:
-    title: {
-      fontSize: 36,
-      fontWeight: "900",
-      color: theme.colors.text,
-      textAlign: "center",
-      marginBottom: 8,
-      letterSpacing: -1,
-      lineHeight: 42,
-    },
-    subtitle: {
-      fontSize: 18,
-      color: theme.colors.textSecondary,
-      textAlign: "center",
-      lineHeight: 26,
-      fontWeight: "500",
-      marginBottom: 48,
-      paddingHorizontal: 20,
-      opacity: 0.9,
-      letterSpacing: 0.3,
-    },
+
     languagesContainer: {
       gap: 20,
     },
@@ -97,20 +79,20 @@ export default function LanguageSlide({
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: theme.colors.surface,
-      paddingVertical: 24,
-      paddingHorizontal: 24,
+      paddingVertical: 20,
+      paddingHorizontal: 20,
       borderRadius: 20,
-      borderWidth: 3,
+      borderWidth: 1,
       borderColor: "transparent",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.08,
-      shadowRadius: 12,
+      shadowRadius: 10,
       elevation: 4,
     },
     selectedLanguage: {
       borderColor: theme.colors.primary,
-      backgroundColor: theme.colors.primary + "08",
+      backgroundColor: theme.colors.background,
     },
     languageFlag: {
       fontSize: 32,
@@ -150,8 +132,8 @@ export default function LanguageSlide({
 
   return (
     <Animated.View style={[styles.container, animatedContainerStyle]}>
-      <Text style={styles.title}>Choose Your Language</Text>
-      <Text style={styles.subtitle}>
+      <Text style={commonStyles.title}>Choose Your Language</Text>
+      <Text style={commonStyles.subtitle}>
         Select your preferred language for the best learning experience with
         AfridemiQ
       </Text>
