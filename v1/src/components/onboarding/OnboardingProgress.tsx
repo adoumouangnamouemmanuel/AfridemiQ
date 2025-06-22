@@ -1,7 +1,13 @@
-import React from "react";
+"use client";
+
+import { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { useTheme } from "../../utils/ThemeContext";
 import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 
 interface OnboardingProgressProps {
@@ -9,25 +15,37 @@ interface OnboardingProgressProps {
   totalSlides: number;
 }
 
-export default function OnboardingProgress({
+// Separate component for each animated dot to avoid hook issues
+const AnimatedDot = ({
+  isActive,
   currentIndex,
-  totalSlides,
-}: OnboardingProgressProps) {
-  const { theme } = useTheme();
+  index,
+  theme,
+}: {
+  isActive: boolean;
+  currentIndex: number;
+  index: number;
+  theme: any;
+}) => {
+  const dotScale = useSharedValue(1);
+
+  useEffect(() => {
+    dotScale.value = withSpring(index === currentIndex ? 1.2 : 1, {
+      damping: 15,
+      stiffness: 150,
+    });
+  }, [currentIndex, index, dotScale]);
+
+  const animatedDotStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: dotScale.value }],
+  }));
 
   const styles = StyleSheet.create({
-    container: {
-      flexDirection: "row",
-      justifyContent: "center",
-      alignItems: "center",
-      paddingVertical: theme.spacing.md,
-    },
     dot: {
       width: 8,
       height: 8,
       borderRadius: 4,
       backgroundColor: theme.colors.border,
-      marginHorizontal: 4,
     },
     activeDot: {
       backgroundColor: theme.colors.primary,
@@ -36,13 +54,67 @@ export default function OnboardingProgress({
   });
 
   return (
-    <View style={styles.container}>
-      {Array.from({ length: totalSlides }).map((_, index) => (
-        <Animated.View
-          key={index}
-          style={[styles.dot, index === currentIndex && styles.activeDot]}
-        />
-      ))}
+    <Animated.View
+      style={[styles.dot, isActive && styles.activeDot, animatedDotStyle]}
+    />
+  );
+};
+
+export default function OnboardingProgress({
+  currentIndex,
+  totalSlides,
+}: OnboardingProgressProps) {
+  const { theme } = useTheme();
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withTiming((currentIndex / (totalSlides - 1)) * 100, {
+      duration: 600,
+    });
+  }, [currentIndex, totalSlides, progress]);
+
+  const animatedProgressStyle = useAnimatedStyle(() => ({
+    width: `${progress.value}%`,
+  }));
+
+  const styles = StyleSheet.create({
+    container: {
+      height: 4,
+      backgroundColor: theme.colors.border,
+      borderRadius: 2,
+      overflow: "hidden",
+    },
+    progressBar: {
+      height: "100%",
+      backgroundColor: theme.colors.primary,
+      borderRadius: 2,
+    },
+    dotsContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 16,
+      gap: 8,
+    },
+  });
+
+  return (
+    <View>
+      <View style={styles.container}>
+        <Animated.View style={[styles.progressBar, animatedProgressStyle]} />
+      </View>
+
+      <View style={styles.dotsContainer}>
+        {Array.from({ length: totalSlides }).map((_, index) => (
+          <AnimatedDot
+            key={index}
+            isActive={index === currentIndex}
+            currentIndex={currentIndex}
+            index={index}
+            theme={theme}
+          />
+        ))}
+      </View>
     </View>
   );
 }
