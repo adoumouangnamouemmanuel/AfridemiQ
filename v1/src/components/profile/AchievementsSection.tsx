@@ -103,8 +103,11 @@ export const AchievementsSection: React.FC<WinsSectionProps> = ({ user, theme })
       description: "Reached level 10",
       icon: "trending-up",
       color: "#3B82F6",
-      earned: user.progress.level >= 10,
-      progress: user.progress.level,
+      // earned: user.progress.level >= 10,
+      // progress: user.progress.level,
+
+      earned: 1 >= 10,
+      progress: 1,
       maxProgress: 10,
       category: "milestone",
     },
