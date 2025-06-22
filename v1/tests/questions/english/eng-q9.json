@@ -1,0 +1,20 @@
+{
+  "question": "Which sentence has a correctly placed modifier?",
+  "type": "multiple_choice",
+  "options": [
+    "Walking to school, the heavy rain soaked the students.",
+    "The students were soaked by the heavy rain walking to school.",
+    "Walking to school, the students were soaked by the heavy rain.",
+    "The heavy rain walking to school soaked the students."
+  ],
+  "correctAnswer": 2,
+  "explanation": "The modifier 'Walking to school' correctly modifies 'the students' and is placed next to what it modifies.",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicId": "6857082921fff5da40b2f05a",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["modifiers", "dangling modifiers", "sentence structure"],
+  "isPremium": false,
+  "isActive": true
+}

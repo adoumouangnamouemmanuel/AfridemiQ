@@ -1,0 +1,20 @@
+{
+  "question": "Which sentence uses commas correctly?",
+  "type": "multiple_choice",
+  "options": [
+    "The teacher who is very experienced, helps struggling students.",
+    "The teacher, who is very experienced helps struggling students.",
+    "The teacher, who is very experienced, helps struggling students.",
+    "The teacher who is very experienced helps, struggling students."
+  ],
+  "correctAnswer": 2,
+  "explanation": "The relative clause 'who is very experienced' is non-restrictive and should be set off by commas on both sides.",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicId": "6857082921fff5da40b2f05a",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["punctuation", "commas", "relative clauses"],
+  "isPremium": true,
+  "isActive": true
+}

@@ -1,0 +1,15 @@
+{
+  "question": "Choose the correct pronoun: 'The committee will announce _____ decision tomorrow.'",
+  "type": "multiple_choice",
+  "options": ["their", "its", "his", "her"],
+  "correctAnswer": 1,
+  "explanation": "'Committee' is a collective noun treated as singular, so it takes the singular pronoun 'its'.",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicId": "6857082921fff5da40b2f05a",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["pronoun agreement", "collective nouns", "singular pronouns"],
+  "isPremium": true,
+  "isActive": true
+}

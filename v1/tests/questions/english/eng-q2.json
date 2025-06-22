@@ -1,0 +1,15 @@
+{
+  "question": "Choose the correct verb form: 'Each of the students _____ responsible for their own success.'",
+  "type": "multiple_choice",
+  "options": ["are", "is", "were", "have been"],
+  "correctAnswer": 1,
+  "explanation": "'Each' is a singular pronoun, so it takes the singular verb 'is' regardless of the plural noun that follows.",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicId": "6857082921fff5da40b2f05a",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["subject-verb agreement", "singular", "grammar rules"],
+  "isPremium": false,
+  "isActive": true
+}

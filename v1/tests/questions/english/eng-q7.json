@@ -1,0 +1,20 @@
+{
+  "question": "Convert this sentence to passive voice: 'The principal announced the new school policy.'",
+  "type": "multiple_choice",
+  "options": [
+    "The new school policy was announced by the principal.",
+    "The new school policy is announced by the principal.",
+    "The principal was announced by the new school policy.",
+    "The new school policy announced the principal."
+  ],
+  "correctAnswer": 0,
+  "explanation": "In passive voice, the object becomes the subject, and we use 'was announced' (past tense) with 'by' to show the agent.",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicId": "6857082921fff5da40b2f05a",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["voice", "passive voice", "transformation"],
+  "isPremium": false,
+  "isActive": true
+}

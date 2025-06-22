@@ -1,0 +1,15 @@
+{
+  "question": "Complete the conditional sentence: 'If I _____ harder last term, I would have passed the examination.'",
+  "type": "multiple_choice",
+  "options": ["study", "studied", "had studied", "will study"],
+  "correctAnswer": 2,
+  "explanation": "This is a third conditional sentence (unreal past condition), requiring 'had studied' in the if-clause.",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicId": "6857082921fff5da40b2f05a",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["conditionals", "third conditional", "past perfect"],
+  "isPremium": true,
+  "isActive": true
+}

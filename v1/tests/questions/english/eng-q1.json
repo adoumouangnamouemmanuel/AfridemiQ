@@ -1,0 +1,15 @@
+{
+  "question": "Identify the part of speech of the underlined word in this sentence: 'The students study *diligently* for their WAEC examinations.'",
+  "type": "multiple_choice",
+  "options": ["Noun", "Verb", "Adjective", "Adverb"],
+  "correctAnswer": 3,
+  "explanation": "'Diligently' modifies the verb 'study' and describes how the action is performed, making it an adverb.",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicId": "6857082921fff5da40b2f05a",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["parts of speech", "adverb", "grammar", "identification"],
+  "isPremium": false,
+  "isActive": true
+}

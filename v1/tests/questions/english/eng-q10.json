@@ -1,0 +1,20 @@
+{
+  "question": "Convert to reported speech: 'I will submit my assignment tomorrow,' said the student.",
+  "type": "multiple_choice",
+  "options": [
+    "The student said that he will submit his assignment tomorrow.",
+    "The student said that he would submit his assignment the next day.",
+    "The student said that I will submit my assignment tomorrow.",
+    "The student said that he will submit his assignment the next day."
+  ],
+  "correctAnswer": 1,
+  "explanation": "In reported speech, 'will' changes to 'would', 'I' changes to 'he', 'my' changes to 'his', and 'tomorrow' changes to 'the next day'.",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicId": "6857082921fff5da40b2f05a",
+  "difficulty": "hard",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["reported speech", "indirect speech", "tense changes"],
+  "isPremium": true,
+  "isActive": true
+}

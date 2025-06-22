@@ -1,0 +1,20 @@
+{
+  "question": "Identify the type of sentence: 'Although it was raining heavily, the students continued their outdoor activities.'",
+  "type": "multiple_choice",
+  "options": [
+    "Simple sentence",
+    "Compound sentence",
+    "Complex sentence",
+    "Compound-complex sentence"
+  ],
+  "correctAnswer": 2,
+  "explanation": "This is a complex sentence because it contains one independent clause and one dependent clause (starting with 'Although').",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicId": "6857082921fff5da40b2f05a",
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["sentence types", "complex sentence", "clauses"],
+  "isPremium": false,
+  "isActive": true
+}

@@ -1,0 +1,20 @@
+{
+  "question": "Which sentence demonstrates correct tense consistency?",
+  "type": "multiple_choice",
+  "options": [
+    "Yesterday, I go to the market and bought some vegetables.",
+    "Yesterday, I went to the market and buy some vegetables.",
+    "Yesterday, I went to the market and bought some vegetables.",
+    "Yesterday, I will go to the market and bought some vegetables."
+  ],
+  "correctAnswer": 2,
+  "explanation": "Both verbs 'went' and 'bought' are in the past tense, maintaining consistency in the sentence.",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicId": "6857082921fff5da40b2f05a",
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "tags": ["tense consistency", "past tense", "verb forms"],
+  "isPremium": false,
+  "isActive": true
+}
