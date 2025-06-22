@@ -138,33 +138,9 @@ export default function WelcomeSlide({ isActive }: SlideProps) {
           <Text style={styles.welcomeText}>Welcome to</Text>
           <Text style={styles.title}>AfridemiQ</Text>
           <Text style={styles.subtitle}>
-            &quot;Where African Academic Intelligence Meets Excellence&quot;
-            {"\n"}
-            Unlock your potential. Master your exams.
+          Where African Academic Intelligence Meets Excellence
           </Text>
         </Animated.View>
-
-        <Animated.View
-          style={[styles.featuresContainer, featuresAnimatedStyle]}
-        >
-          {features.map((feature, index) => (
-            <View key={index} style={styles.featureItem}>
-              <LinearGradient
-                colors={feature.gradient}
-                style={styles.featureIconContainer}
-              >
-                <Ionicons name={feature.icon as any} size={28} color="white" />
-              </LinearGradient>
-              <View style={styles.featureContent}>
-                <Text style={styles.featureTitle}>{feature.title}</Text>
-                <Text style={styles.featureDescription}>
-                  {feature.description}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </Animated.View>
-      </ScrollView>
     </View>
   );
 }
