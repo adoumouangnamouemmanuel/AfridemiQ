@@ -41,55 +41,12 @@ export type Language = "english" | "french";
 export type Gender = "male" | "female" | "prefer_not_to_say";
 
 /**
- * Progress summary statistics
- */
-export interface ProgressSummary {
-  completedPercentage?: number;
-  remainingTopics?: number;
-}
-
-/**
- * User progress and learning data
+ * User progress tracking (simplified for MVP)
  */
 export interface UserProgress {
-  selectedExam?: string;
-  selectedSeries?: string;
-  selectedLevel?: string;
-  xp: number;
-  level: number;
-  streak: UserStreak;
-  goalDate?: string | Date;
-  totalQuizzes: number;
+  totalQuizzesTaken: number;
+  totalQuestionsAnswered: number;
   averageScore: number;
-  completedTopics: string[];
-  weakSubjects: string[];
-  badges: string[];
-  achievements: string[];
-  examYear?: string;
-  progressSummary?: ProgressSummary;
-}
-
-/**
- * User subscription details
- */
-export interface UserSubscription {
-  type: SubscriptionType;
-  startDate: string | Date;
-  expiresAt?: string | Date;
-  paymentStatus: PaymentStatus;
-  trialPeriod?: TrialPeriod;
-  features: string[];
-  accessLevel: AccessLevel;
-}
-
-/**
- * Social profile information
- */
-export interface SocialProfile {
-  bio?: string;
-  publicAchievements: string[];
-  visibility: ProfileVisibility;
-  socialLinks: SocialLink[];
 }
 
 /**
