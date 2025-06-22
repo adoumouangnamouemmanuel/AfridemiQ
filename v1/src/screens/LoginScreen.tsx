@@ -67,6 +67,11 @@ export default function LoginScreen() {
   const fadeIn = useSharedValue(0);
   const scaleIn = useSharedValue(0.8);
 
+  // Keep userRef updated
+  React.useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
   // Initialize animations and keyboard listeners
   React.useEffect(() => {
     slideUp.value = withDelay(300, withSpring(0, { damping: 20 }));
