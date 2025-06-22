@@ -1,0 +1,21 @@
+{
+  "title": "Basic Grammar Foundations",
+  "description": "Fundamental grammar concepts including parts of speech, tenses, and sentence structure",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicIds": ["6857082921fff5da40b2f05a"],
+  "format": "practice",
+  "timeLimit": 20,
+  "totalQuestions": 4,
+  "passingScore": 60,
+  "questionIds": [
+    "68574bb887dae510c8e462c8",
+    "68574bb887dae510c8e462cc",
+    "68574bb987dae510c8e462d0",
+    "68574bba87dae510c8e462d4"
+  ],
+  "difficulty": "easy",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "isPremium": false,
+  "isActive": true
+}

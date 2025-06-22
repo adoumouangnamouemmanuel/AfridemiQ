@@ -1,0 +1,21 @@
+{
+  "title": "Intermediate Grammar and Syntax",
+  "description": "Advanced grammar concepts including subject-verb agreement, modifiers, and pronoun usage",
+  "subjectId": "6856e19caff9659b6e3ec890",
+  "topicIds": ["6857082921fff5da40b2f05a"],
+  "format": "practice",
+  "timeLimit": 25,
+  "totalQuestions": 4,
+  "passingScore": 70,
+  "questionIds": [
+    "68574bb887dae510c8e462ca",
+    "68574bb987dae510c8e462ce",
+    "68574bb987dae510c8e462d0",
+    "68574bba87dae510c8e462d8"
+  ],
+  "difficulty": "medium",
+  "educationLevel": "senior_secondary",
+  "examType": "WAEC",
+  "isPremium": false,
+  "isActive": true
+}
