@@ -23,7 +23,7 @@ export type Country =
 /**
  * Exam types supported in MVP
  */
-export type ExamType = "waec" | "neco" | "jamb" | "kcse" | "bac" | "bepc";
+export type ExamType = "WAEC" | "NECO" | "JAMB" | "KCSE" | "BAC" | "BEPC";
 
 /**
  * Education levels in MVP
@@ -319,12 +319,12 @@ export const COUNTRIES: Country[] = [
   "chad",
 ];
 export const EXAM_TYPES: ExamType[] = [
-  "waec",
-  "neco",
-  "jamb",
-  "kcse",
-  "bac",
-  "bepc",
+  "WAEC",
+  "NECO",
+  "JAMB",
+  "KCSE",
+  "BAC",
+  "BEPC",
 ];
 export const EDUCATION_LEVELS: EducationLevel[] = [
   "junior_secondary",
