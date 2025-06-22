@@ -100,7 +100,7 @@ const StatCard: React.FC<StatCardProps> = ({
 
 export const StatsGrid: React.FC<StatsGridProps> = ({ user, theme }) => {
   // TODO: Replace with actual API data when analytics endpoint is ready
-  const studyTimeHours = user.preferences.studyHours; // Dummy data
+  const studyTimeHours = 10; // Dummy data study time in hours
   const averageScore = Math.round(user.progress.averageScore); // Use actual data or fallback
 
   const styles = StyleSheet.create({
@@ -116,7 +116,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ user, theme }) => {
     <View style={styles.container}>
       <StatCard
         icon="flame"
-        value={user.progress.streak.current}
+        value={5} // Dummy data for day streak
         label="Day Streak"
         color={theme.colors.warning}
         delay={100}
@@ -124,7 +124,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ user, theme }) => {
       />
       <StatCard
         icon="trophy"
-        value={user.progress.badges.length}
+        value={10} // Dummy data for badges earned
         label="Badges Earned"
         color={theme.colors.success}
         delay={200}
