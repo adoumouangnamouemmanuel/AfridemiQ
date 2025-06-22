@@ -10,12 +10,7 @@
 export type UserRole = "student" | "admin";
 
 /**
- * Subscription types available
- */
-export type SubscriptionType = "free" | "premium" | "pro";
-
-/**
- * Payment status options
+ * Countries supported in MVP (Africa-focused)
  */
 export type PaymentStatus =
   | "active"
