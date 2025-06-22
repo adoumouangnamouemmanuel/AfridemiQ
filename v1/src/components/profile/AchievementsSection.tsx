@@ -118,7 +118,7 @@ export const AchievementsSection: React.FC<WinsSectionProps> = ({ user, theme })
       icon: "medal",
       color: "#F97316",
       // earned: user.progress.badges.length >= 15,
-// progress: user.progress.badges.length,
+      // progress: user.progress.badges.length,
 
       earned: 16 >= 15, // Assuming 16 is the number of badges earned
       // Assuming user.progress.badges is an array of earned badges
