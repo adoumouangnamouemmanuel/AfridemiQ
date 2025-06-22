@@ -28,7 +28,7 @@ export type ExamType = "waec" | "neco" | "jamb" | "kcse" | "bac" | "bepc";
 /**
  * Education levels in MVP
  */
-export type EducationLevel = "junior_secondary" | "senior_secondary" // SSS/Lycée (Ages 15-18);
+export type EducationLevel = "junior_secondary" | "senior_secondary";
 
 /**
  * Languages supported in MVP
