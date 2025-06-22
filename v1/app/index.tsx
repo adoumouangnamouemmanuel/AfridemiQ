@@ -45,13 +45,13 @@ export default function Index() {
 
         if (user.onboardingCompleted) {
           console.log("✅ INDEX: Onboarding complete, redirecting to home");
-            setAuthState("home");
-          } else {
+          setAuthState("home");
+        } else {
           console.log(
             "⚠️ INDEX: Onboarding incomplete, redirecting to onboarding"
           );
-            setAuthState("onboarding");
-          }
+          setAuthState("onboarding");
+        }
       } catch (error) {
         console.error("❌ INDEX: Error determining auth state:", error);
         setAuthState("login");
