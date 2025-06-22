@@ -42,8 +42,9 @@ const isSmallScreen = SCREEN_HEIGHT < 700;
 const isMediumScreen = SCREEN_HEIGHT >= 700 && SCREEN_HEIGHT < 850;
 
 export default function LoginScreen() {
-  const { setUser, setToken } = useUser();
+  const { user, setUser, setToken } = useUser();
   const router = useRouter();
+  const userRef = useRef<User | null>(null);
 
   // Form state
   const [email, setEmail] = useState("");
