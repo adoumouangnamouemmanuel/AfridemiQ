@@ -93,12 +93,6 @@ export default function ProfileScreen() {
           name: profile.name,
           email: profile.email,
           country: profile.country,
-          xp: profile.progress.xp,
-          level: profile.progress.level,
-          streak: profile.progress.streak.current,
-          badges: profile.progress.badges,
-          completedTopics: profile.progress.completedTopics,
-          weakSubjects: profile.progress.weakSubjects,
           isPremium: profile.isPremium,
         };
         setUser(updatedContextUser);
@@ -170,12 +164,6 @@ export default function ProfileScreen() {
         name: updatedUser.name,
         email: updatedUser.email,
         country: updatedUser.country,
-        xp: updatedUser.progress.xp,
-        level: updatedUser.progress.level,
-        streak: updatedUser.progress.streak.current,
-        badges: updatedUser.progress.badges,
-        completedTopics: updatedUser.progress.completedTopics,
-        weakSubjects: updatedUser.progress.weakSubjects,
         isPremium: updatedUser.isPremium,
       };
       setUser(updatedContextUser);
