@@ -1,6 +1,6 @@
 /**
- * @file User Type Definitions
- * @description Centralized type definitions for user-related data structures matching the MongoDB user model
+ * @file User Type Definitions - MVP Version
+ * @description Simplified type definitions for user-related data structures matching the MVP MongoDB user model
  * @module types/user/user.types
  */
 
