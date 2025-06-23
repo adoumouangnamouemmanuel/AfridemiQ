@@ -1,28 +1,24 @@
 "use client";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Share,
-  StyleSheet,
-} from "react-native";
+
+import { View, Text, TouchableOpacity, Share, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
+// Use the provided hook
+// import { useQuizResult } from "../../../src/hooks/assessment/useQuizResult"
+
 export default function ResultsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { score, correctAnswers, totalQuestions, timeSpent, hearts, streak } =
+  const { score, correctAnswers, totalQuestions, timeSpent, streak } =
     useLocalSearchParams();
 
   const scoreValue = Number.parseInt(score as string) || 0;
   const correctCount = Number.parseInt(correctAnswers as string) || 0;
   const totalCount = Number.parseInt(totalQuestions as string) || 0;
   const timeValue = Number.parseInt(timeSpent as string) || 0;
-  // const heartsLeft = Number.parseInt(hearts as string) || 0;
   const streakValue = Number.parseInt(streak as string) || 0;
 
   const getPerformanceData = () => {
@@ -100,10 +96,8 @@ export default function ResultsScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      > */}
+      {/* Main Content - Scrollable */}
+      <View style={styles.content}>
         {/* Score Circle */}
         <View style={styles.scoreSection}>
           <View style={styles.scoreCircle}>
@@ -136,13 +130,13 @@ export default function ResultsScreen() {
         <View style={styles.statsContainer}>
           <View style={styles.statsRow}>
             <View style={[styles.statCard, styles.statCardLeft]}>
-              <Ionicons name="checkmark-circle" size={28} color="#10B981" />
+              <Ionicons name="checkmark-circle" size={24} color="#10B981" />
               <Text style={styles.statValue}>{correctCount}</Text>
               <Text style={styles.statLabel}>Correct</Text>
             </View>
 
             <View style={[styles.statCard, styles.statCardRight]}>
-              <Ionicons name="close-circle" size={28} color="#EF4444" />
+              <Ionicons name="close-circle" size={24} color="#EF4444" />
               <Text style={styles.statValue}>{totalCount - correctCount}</Text>
               <Text style={styles.statLabel}>Incorrect</Text>
             </View>
@@ -150,47 +144,25 @@ export default function ResultsScreen() {
 
           <View style={styles.statsRow}>
             <View style={[styles.statCard, styles.statCardLeft]}>
-              <Ionicons name="time" size={28} color="#6366F1" />
+              <Ionicons name="time" size={24} color="#6366F1" />
               <Text style={styles.statValue}>{formatTime(timeValue)}</Text>
               <Text style={styles.statLabel}>Time</Text>
             </View>
 
             <View style={[styles.statCard, styles.statCardRight]}>
-              <Ionicons name="flame" size={28} color="#F59E0B" />
+              <Ionicons name="flame" size={24} color="#F59E0B" />
               <Text style={styles.statValue}>{streakValue}</Text>
               <Text style={styles.statLabel}>Best Streak</Text>
             </View>
           </View>
         </View>
+      </View>
 
-        {/* Hearts Status */}
-        {/* <View style={styles.heartsCard}>
-          <View style={styles.heartsRow}>
-            <Text style={styles.heartsTitle}>Hearts Remaining</Text>
-            <View style={styles.heartsContainer}>
-              {[...Array(3)].map((_, index) => (
-                <Ionicons
-                  key={index}
-                  name={index < heartsLeft ? "heart" : "heart-outline"}
-                  size={24}
-                  color={index < heartsLeft ? "#EF4444" : "#D1D5DB"}
-                  style={{ marginLeft: index > 0 ? 4 : 0 }}
-                />
-              ))}
-            </View>
-          </View>
-        </View> */}
-
-      {/* Action Buttons */}
-      <View
-        style={[
-          styles.footer,
-          { paddingBottom: Math.max(insets.bottom + 20, 40) },
-        ]}
-      >
+      {/* Fixed Footer */}
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
         <TouchableOpacity
           style={styles.primaryButton}
-          onPress={() => router.push("/(tabs)/study")}
+          onPress={() => router.push("/(routes)/assessments")}
         >
           <Text style={styles.primaryButtonText}>Continue Learning</Text>
         </TouchableOpacity>
@@ -198,7 +170,7 @@ export default function ResultsScreen() {
         <View style={styles.secondaryButtonsRow}>
           <TouchableOpacity
             style={styles.secondaryButton}
-            onPress={() => router.push("/(routes)/assessments/quiz")}
+            onPress={() => router.back()}
           >
             <Text style={styles.secondaryButtonText}>Retake Quiz</Text>
           </TouchableOpacity>
@@ -224,12 +196,17 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "white",
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
     borderBottomColor: "#F3F4F6",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   headerTitle: {
     fontSize: 18,
@@ -244,157 +221,146 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  // Content area - flexible
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
   // Score section styles
   scoreSection: {
     alignItems: "center",
-    paddingVertical: 20,
+    paddingVertical: 24,
   },
   scoreCircle: {
     width: 100,
     height: 100,
-    borderRadius: 100,
+    borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
+    marginBottom: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
-    shadowRadius: 16,
+    shadowRadius: 12,
     elevation: 8,
   },
   scoreText: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: "900",
     color: "white",
   },
   scoreLabel: {
     color: "white",
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
     opacity: 0.9,
   },
   performanceEmoji: {
-    fontSize: 40,
-    marginBottom: 0,
+    fontSize: 36,
+    marginBottom: 8,
   },
   performanceTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 4,
+    textAlign: "center",
   },
   performanceSubtitle: {
     color: "#6B7280",
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: 8,
+    textAlign: "center",
   },
   performanceMessage: {
     color: "#374151",
     textAlign: "center",
-    paddingHorizontal: 32,
-    lineHeight: 24,
+    paddingHorizontal: 16,
+    lineHeight: 20,
+    fontSize: 14,
   },
   // Achievement badge styles
   achievementBadge: {
-    marginHorizontal: 20,
     marginBottom: 16,
     backgroundColor: "#FFFBEB",
     borderWidth: 2,
     borderColor: "#FDE68A",
-    borderRadius: 16,
-    padding: 10,
+    borderRadius: 12,
+    padding: 12,
     alignItems: "center",
   },
   badgeEmoji: {
-    fontSize: 30,
-    marginBottom: 8,
+    fontSize: 24,
+    marginBottom: 4,
   },
   badgeText: {
     color: "#B45309",
     fontWeight: "600",
     textAlign: "center",
+    fontSize: 14,
   },
   // Stats grid styles
   statsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 10,
+    flex: 1,
+    justifyContent: "center",
   },
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   statCard: {
     backgroundColor: "white",
-    borderRadius: 16,
-    padding: 8,
+    borderRadius: 12,
+    padding: 16,
     alignItems: "center",
     flex: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 3,
   },
   statCardLeft: {
-    marginRight: 8,
+    marginRight: 6,
   },
   statCardRight: {
-    marginLeft: 8,
+    marginLeft: 6,
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#111827",
-    marginTop: 8,
+    marginTop: 6,
+    marginBottom: 2,
   },
   statLabel: {
     color: "#6B7280",
     fontSize: 12,
     fontWeight: "500",
   },
-  // Hearts status styles
-  heartsCard: {
-    marginHorizontal: 20,
-    marginBottom: 8,
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  heartsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  heartsTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  heartsContainer: {
-    flexDirection: "row",
-  },
-  // Footer styles
+  // Footer styles - fixed at bottom
   footer: {
-    padding: 16,
     backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: "#F3F4F6",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 5,
   },
   primaryButton: {
     backgroundColor: "#3B82F6",
-    borderRadius: 16,
-    paddingVertical: 10,
+    borderRadius: 12,
+    paddingVertical: 14,
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   primaryButtonText: {
     color: "white",
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "bold",
   },
   secondaryButtonsRow: {
@@ -404,15 +370,13 @@ const styles = StyleSheet.create({
   secondaryButton: {
     flex: 1,
     backgroundColor: "#F3F4F6",
-    borderRadius: 16,
-    paddingVertical: 10,
+    borderRadius: 12,
+    paddingVertical: 12,
     alignItems: "center",
   },
   secondaryButtonText: {
     color: "#374151",
     fontWeight: "600",
-  },
-  scrollView: {
-    flex: 1,
+    fontSize: 14,
   },
 });
