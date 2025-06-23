@@ -233,15 +233,17 @@ class QuizApiService {
         : "";
       const response = await this.makeRequest<any>(`/${endpoint}`);
 
+      // Fixed: Handle nested data structure correctly
       return {
-        quizzes: response.data?.quizzes || response.data || [],
-        pagination: response.pagination || {
-          currentPage: 1,
-          totalPages: 0,
-          totalCount: 0,
-          hasNextPage: false,
-          hasPrevPage: false,
-        },
+        quizzes: response.data?.data?.quizzes || response.data?.quizzes || [],
+        pagination: response.data?.data?.pagination ||
+          response.data?.pagination || {
+            currentPage: 1,
+            totalPages: 0,
+            totalCount: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
+          },
       };
     } catch (error) {
       console.error(`🧩 QuizAPI - Error getting quizzes:`, error);
@@ -258,11 +260,16 @@ class QuizApiService {
     try {
       const response = await this.makeRequest<any>(`/${id}`);
 
-      if (!response.data) {
+      if (
+        !response.data?.data?.quiz &&
+        !response.data?.quiz &&
+        !response.data
+      ) {
         throw new Error("No quiz data received");
       }
 
-      return response.data;
+      // Fixed: Handle nested data structure correctly
+      return response.data?.data?.quiz || response.data?.quiz || response.data;
     } catch (error) {
       console.error(`🔍 QuizAPI - Error getting quiz by ID:`, error);
       throw error;
@@ -291,7 +298,8 @@ class QuizApiService {
         : "/popular/list";
       const response = await this.makeRequest<any>(endpoint);
 
-      return response.data?.quizzes || response.data || [];
+      // Fixed: Handle nested data structure correctly
+      return response.data?.data?.quizzes || response.data?.quizzes || [];
     } catch (error) {
       console.error(`📈 QuizAPI - Error getting popular quizzes:`, error);
       throw error;
@@ -323,7 +331,8 @@ class QuizApiService {
         : `/subject/${subjectId}`;
       const response = await this.makeRequest<any>(endpoint);
 
-      return response.data?.quizzes || response.data || [];
+      // Fixed: Handle nested data structure correctly
+      return response.data?.data?.quizzes || response.data?.quizzes || [];
     } catch (error) {
       console.error(`📋 QuizAPI - Error getting quizzes by subject:`, error);
       throw error;
@@ -355,48 +364,10 @@ class QuizApiService {
         : `/topic/${topicId}`;
       const response = await this.makeRequest<any>(endpoint);
 
-      return response.data?.quizzes || response.data || [];
+      // Fixed: Handle nested data structure correctly
+      return response.data?.data?.quizzes || response.data?.quizzes || [];
     } catch (error) {
       console.error(`📖 QuizAPI - Error getting quizzes by topic:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get quizzes by education level and exam type
-   */
-  async getQuizzesByEducationAndExam(
-    educationLevel: string,
-    examType: string,
-    filters?: QuizFilters
-  ): Promise<Quiz[]> {
-    console.log(`🎓 QuizAPI - Getting quizzes by education and exam:`, {
-      educationLevel,
-      examType,
-    });
-
-    try {
-      const queryParams = new URLSearchParams();
-
-      if (filters) {
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            queryParams.append(key, String(value));
-          }
-        });
-      }
-
-      const endpoint = queryParams.toString()
-        ? `/education/${educationLevel}/exam/${examType}?${queryParams.toString()}`
-        : `/education/${educationLevel}/exam/${examType}`;
-      const response = await this.makeRequest<any>(endpoint);
-
-      return response.data?.quizzes || response.data || [];
-    } catch (error) {
-      console.error(
-        `🎓 QuizAPI - Error getting quizzes by education and exam:`,
-        error
-      );
       throw error;
     }
   }
@@ -426,15 +397,17 @@ class QuizApiService {
         `/search/query?${queryParams.toString()}`
       );
 
+      // Fixed: Handle nested data structure correctly
       return {
-        quizzes: response.data?.quizzes || response.data || [],
-        pagination: response.pagination || {
-          currentPage: 1,
-          totalPages: 0,
-          totalCount: 0,
-          hasNextPage: false,
-          hasPrevPage: false,
-        },
+        quizzes: response.data?.data?.quizzes || response.data?.quizzes || [],
+        pagination: response.data?.data?.pagination ||
+          response.data?.pagination || {
+            currentPage: 1,
+            totalPages: 0,
+            totalCount: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
+          },
         searchTerm,
       };
     } catch (error) {
@@ -458,11 +431,16 @@ class QuizApiService {
         body: JSON.stringify(statsData),
       });
 
-      if (!response.data) {
+      if (
+        !response.data?.data?.quiz &&
+        !response.data?.quiz &&
+        !response.data
+      ) {
         throw new Error("No quiz data received after stats update");
       }
 
-      return response.data;
+      // Fixed: Handle nested data structure correctly
+      return response.data?.data?.quiz || response.data?.quiz || response.data;
     } catch (error) {
       console.error(`📊 QuizAPI - Error updating quiz stats:`, error);
       throw error;
@@ -481,11 +459,16 @@ class QuizApiService {
         body: JSON.stringify(quizData),
       });
 
-      if (!response.data) {
+      if (
+        !response.data?.data?.quiz &&
+        !response.data?.quiz &&
+        !response.data
+      ) {
         throw new Error("No quiz data received after creation");
       }
 
-      return response.data;
+      // Fixed: Handle nested data structure correctly
+      return response.data?.data?.quiz || response.data?.quiz || response.data;
     } catch (error) {
       console.error(`➕ QuizAPI - Error creating quiz:`, error);
       throw error;
@@ -504,11 +487,16 @@ class QuizApiService {
         body: JSON.stringify(updateData),
       });
 
-      if (!response.data) {
+      if (
+        !response.data?.data?.quiz &&
+        !response.data?.quiz &&
+        !response.data
+      ) {
         throw new Error("No quiz data received after update");
       }
 
-      return response.data;
+      // Fixed: Handle nested data structure correctly
+      return response.data?.data?.quiz || response.data?.quiz || response.data;
     } catch (error) {
       console.error(`✏️ QuizAPI - Error updating quiz:`, error);
       throw error;
@@ -557,7 +545,9 @@ class QuizApiService {
         : "/analytics";
       const response = await this.makeRequest<any>(endpoint);
 
+      // Fixed: Handle nested data structure correctly
       return (
+        response.data?.data ||
         response.data || {
           overview: {
             totalQuizzes: 0,
@@ -590,11 +580,12 @@ class QuizApiService {
         body: JSON.stringify({ ids: quizIds }),
       });
 
-      if (!response.data) {
+      if (!response.data?.data && !response.data) {
         throw new Error("No comparison data received");
       }
 
-      return response.data;
+      // Fixed: Handle nested data structure correctly
+      return response.data?.data || response.data;
     } catch (error) {
       console.error(`🔄 QuizAPI - Error comparing quizzes:`, error);
       throw error;
