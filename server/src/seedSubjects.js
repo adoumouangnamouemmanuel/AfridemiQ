@@ -3,8 +3,6 @@ const { Subject } = require("./models/learning/subject.model");
 
 // Connect to MongoDB
 // const MONGO_URI = "mongodb://localhost:27017/AfricaExamPrep";
-MONGO_URI =
-  "mongodb+srv://adoumouangnamouemmanuel:adoum9006@africa-exam-prep.rcj7p7m.mongodb.net/AfricaExamPrep";
 mongoose
   .connect(MONGO_URI, {
     useNewUrlParser: true,
