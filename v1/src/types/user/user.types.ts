@@ -252,15 +252,20 @@ export interface ApiResponse<T> {
  */
 export interface UserContextType {
   user: User | null;
-  setUser: (user: User | null) => void;
   token: string | null;
+  isLoading: boolean;
+  isSessionHealthy: boolean;
+  lastRefreshTime: Date | null;
+  setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   handleTokenExpiration: () => Promise<void>;
   refreshUserSession: () => Promise<void>;
   gracefulLogout: () => Promise<void>;
-  isLoading: boolean;
-  isSessionHealthy: boolean;
-  lastRefreshTime: Date | null;
+  updateUserProgress: (quizResult: {
+    score: number;
+    totalQuestions: number;
+    correctAnswers: number;
+  }) => Promise<void>; // Add this
 }
 
 /**
