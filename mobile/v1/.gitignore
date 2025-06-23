@@ -3,6 +3,7 @@
 # dependencies
 node_modules/
 .vscode/
+com.facebook.react.modules.core.ReactChoreographer
 
 # Expo
 .expo/
