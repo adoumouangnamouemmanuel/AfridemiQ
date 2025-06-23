@@ -93,23 +93,34 @@ export interface QuizResult {
 }
 
 /**
- * Create quiz result data
+ * Answer interface for quiz creation (simplified)
  */
-export interface CreateQuizResultData {
-  userId: string;
-  quizId: string;
-  score: number;
-  totalQuestions: number;
-  correctAnswers: number;
-  incorrectAnswers: number;
-  totalTimeSpent: number;
-  startedAt: string | Date;
-  completedAt: string | Date;
-  answers: Omit<QuizAnswer, "questionId"> & { questionId: string }[];
-  isPassed: boolean;
-  attemptNumber?: number;
-  submissionMethod?: SubmissionMethod;
-}
+export interface CreateQuizAnswer {
+    questionId: string;
+    selectedAnswer: string | number | boolean;
+    correctAnswer: string | number | boolean;
+    isCorrect: boolean;
+    timeSpent: number;
+  }
+  
+  /**
+   * Create quiz result data (fixed)
+   */
+  export interface CreateQuizResultData {
+    userId: string;
+    quizId: string;
+    score: number;
+    totalQuestions: number;
+    correctAnswers: number;
+    incorrectAnswers: number;
+    totalTimeSpent: number;
+    startedAt: string | Date;
+    completedAt: string | Date;
+    answers: CreateQuizAnswer[]; // Fixed: Use simple interface
+    isPassed: boolean;
+    attemptNumber?: number;
+    submissionMethod?: SubmissionMethod;
+  }
 
 /**
  * Update quiz result data
