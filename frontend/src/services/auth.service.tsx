@@ -230,8 +230,25 @@ class AuthService {
         return { user: null, token: null, refreshToken: null };
       }
 
+      // FIXED: Transform user data if it has _id instead of id
+      let transformedUser = authData.user;
+      if (!authData.user.id && (authData.user as any)._id) {
+        console.log("🔄 SESSION: Transforming stored user data from _id to id");
+        transformedUser = this.transformUserData(authData.user as any);
+
+        // Update stored user with transformed data for future use
+        await AsyncStorage.setItem(
+          this.STORAGE_KEYS.USER,
+          JSON.stringify(transformedUser)
+        );
+        console.log(
+          "✅ SESSION: User data updated in storage with proper id field"
+        );
+      }
+
       // TODO: Remove detailed logging before production
       console.log("🔍 SESSION: Validating token");
+      console.log("🔍 SESSION: User ID after transform:", transformedUser.id);
 
       // Check if token is still valid
       const isValid = await apiService.checkTokenValidity();
@@ -266,7 +283,12 @@ class AuthService {
                 Date.now().toString()
               );
 
-              return { ...authData, token: newToken };
+              // Return with transformed user and new token
+              return {
+                user: transformedUser,
+                token: newToken,
+                refreshToken: authData.refreshToken,
+              };
             }
 
             refreshAttempts++;
@@ -306,7 +328,14 @@ class AuthService {
 
       // TODO: Remove detailed logging before production
       console.log("✅ SESSION: Session restored successfully");
-      return authData;
+      console.log("✅ SESSION: Final user ID:", transformedUser.id);
+
+      // Return with transformed user
+      return {
+        user: transformedUser,
+        token: authData.token,
+        refreshToken: authData.refreshToken,
+      };
     } catch (error) {
       // TODO: Remove detailed logging before production
       console.error("❌ SESSION: Session restoration failed:", error);
