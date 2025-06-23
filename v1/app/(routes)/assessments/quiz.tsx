@@ -1,97 +1,29 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-// Mock data based on the models
-const mockQuiz = {
-  id: "1",
-  title: "Mathematics Quiz",
-  description: "Test your algebra skills",
-  timeLimit: 900, // 15 minutes in seconds
-  totalQuestions: 5,
-  questions: [
-    {
-      id: "1",
-      question: "What is the value of x in the equation 2x + 5 = 13?",
-      format: "multiple_choice",
-      options: ["x = 3", "x = 4", "x = 5", "x = 6"],
-      correctAnswer: "x = 4",
-      explanation:
-        "To solve 2x + 5 = 13, subtract 5 from both sides: 2x = 8, then divide by 2: x = 4",
-      points: 10,
-      difficulty: "medium",
-      hints: [
-        "Start by isolating the term with x",
-        "Subtract 5 from both sides of the equation",
-        "Divide both sides by the coefficient of x",
-      ],
-    },
-    {
-      id: "2",
-      question: "What is the derivative of x²?",
-      format: "multiple_choice",
-      options: ["x", "2x", "x²", "2x²"],
-      correctAnswer: "2x",
-      explanation: "The derivative of x² is 2x using the power rule",
-      points: 10,
-      difficulty: "easy",
-      hints: [
-        "Use the power rule for derivatives",
-        "Bring down the exponent and subtract 1 from it",
-      ],
-    },
-    {
-      id: "3",
-      question: "Solve for y: 3y - 7 = 14",
-      format: "multiple_choice",
-      options: ["y = 5", "y = 7", "y = 9", "y = 11"],
-      correctAnswer: "y = 7",
-      explanation: "Add 7 to both sides: 3y = 21, then divide by 3: y = 7",
-      points: 10,
-      difficulty: "easy",
-      hints: [
-        "Add 7 to both sides first",
-        "Then divide by the coefficient of y",
-      ],
-    },
-    {
-      id: "4",
-      question: "What is the area of a circle with radius 5?",
-      format: "multiple_choice",
-      options: ["25π", "10π", "5π", "15π"],
-      correctAnswer: "25π",
-      explanation: "Area = πr² = π(5)² = 25π",
-      points: 15,
-      difficulty: "medium",
-      hints: ["Use the formula A = πr²", "Square the radius first"],
-    },
-    {
-      id: "5",
-      question: "Factor: x² - 9",
-      format: "multiple_choice",
-      options: ["(x-3)(x-3)", "(x+3)(x+3)", "(x-3)(x+3)", "Cannot be factored"],
-      correctAnswer: "(x-3)(x+3)",
-      explanation:
-        "This is a difference of squares: x² - 9 = x² - 3² = (x-3)(x+3)",
-      points: 15,
-      difficulty: "hard",
-      hints: [
-        "This is a difference of squares pattern",
-        "Use the formula a² - b² = (a-b)(a+b)",
-      ],
-    },
-  ],
-};
+// Use the provided hooks
+import { useQuiz } from "../../../src/hooks/assessment/useQuiz";
+import { useCreateQuizResult } from "../../../src/hooks/assessment/useQuizResult";
+import { useUser } from "../../../src/utils/UserContext";
+import type { Question } from "../../../src/types/assessment/question.types";
+import type {
+  CreateQuizResultData,
+  QuizAnswer,
+  CreateQuizAnswer,
+} from "../../../src/types/assessment/quiz.result.types";
 
 interface QuizHeaderProps {
   hearts: number;
@@ -122,7 +54,20 @@ function QuizHeader({
     <View style={styles.header}>
       <View style={styles.headerTopRow}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => {
+            Alert.alert(
+              "Exit Quiz",
+              "Are you sure you want to exit? Your progress will be lost.",
+              [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Exit",
+                  style: "destructive",
+                  onPress: () => router.back(),
+                },
+              ]
+            );
+          }}
           style={styles.closeButton}
         >
           <Ionicons name="close" size={20} color="#374151" />
@@ -167,258 +112,516 @@ function QuizHeader({
   );
 }
 
-interface QuestionCardProps {
-  question: string;
-  questionNumber: number;
-  onHintPress: () => void;
-}
-
-function QuestionCard({
-  question,
-  questionNumber,
-  onHintPress,
-}: QuestionCardProps) {
-  return (
-    <View style={styles.questionCard}>
-      <View style={styles.questionHeader}>
-        <View style={styles.questionNumber}>
-          <Text style={styles.questionNumberText}>Q{questionNumber}</Text>
-        </View>
-        <TouchableOpacity onPress={onHintPress} style={styles.hintButton}>
-          <Ionicons name="bulb-outline" size={20} color="#F59E0B" />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.questionText}>{question}</Text>
-    </View>
-  );
-}
-
-interface HintModalProps {
-  visible: boolean;
-  hints: string[];
-  currentHint: number;
-  onNextHint: () => void;
-  onClose: () => void;
-}
-
-function HintModal({
-  visible,
-  hints,
-  currentHint,
-  onNextHint,
-  onClose,
-}: HintModalProps) {
-  if (!visible) return null;
-
-  const isLastHint = currentHint >= hints.length - 1;
-
-  return (
-    <View style={styles.modalOverlay}>
-      <View style={styles.modalContent}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>💡 Hint</Text>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={24} color="#6B7280" />
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.modalText}>{hints[currentHint]}</Text>
-
-        <View style={styles.modalButtons}>
-          <TouchableOpacity
-            onPress={onClose}
-            style={[styles.modalButton, styles.modalCloseButton]}
-          >
-            <Text style={styles.modalCloseButtonText}>Close</Text>
-          </TouchableOpacity>
-
-          {!isLastHint && (
-            <TouchableOpacity
-              onPress={onNextHint}
-              style={[styles.modalButton, styles.modalNextButton]}
-            >
-              <Text style={styles.modalNextButtonText}>Next Hint</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <Text style={styles.hintCounter}>
-          Hint {currentHint + 1} of {hints.length}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
 export default function QuizScreen() {
+  // FIXED: ALL HOOKS DECLARED FIRST - BEFORE ANY CONDITIONALS
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { quizId } = useLocalSearchParams<{ quizId: string }>();
+  const { user, updateUserProgress } = useUser();
 
+  // Use provided hooks - MUST be called unconditionally
+  const { quiz, isLoading: quizLoading, error: quizError } = useQuiz(quizId);
+  const { createQuizResult, isCreating } = useCreateQuizResult();
+
+  // Quiz state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [answers, setAnswers] = useState<(number | null)[]>([]);
+  const [answers, setAnswers] = useState<QuizAnswer[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [hearts, setHearts] = useState(3);
   const [streak, setStreak] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(mockQuiz.timeLimit);
-  const [showHintModal, setShowHintModal] = useState(false);
-  const [currentHint, setCurrentHint] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(0);
   const [score, setScore] = useState(0);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isQuizStarted, setIsQuizStarted] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
 
-  const currentQuestion = mockQuiz.questions[currentQuestionIndex];
+  // FIXED: Use useRef to prevent recreation and stable references
+  const startedAt = useRef(new Date());
+  const questionStartTime = useRef(new Date());
 
-  // Timer effect
+  // FIXED: Memoize userId to prevent re-calculation on every render
+  const userId = useMemo(() => {
+    return user?.id || (user as any)?._id || user?.email;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, (user as any)?._id, user?.email]);
+
+  // FIXED: Memoize current question to prevent unnecessary recalculations
+  const currentQuestion = useMemo(() => {
+    return questions[currentQuestionIndex];
+  }, [questions, currentQuestionIndex]);
+
+  // FIXED: Only log once when user changes, not on every render
   useEffect(() => {
-    if (timeRemaining > 0) {
-      const timer = setTimeout(() => {
-        setTimeRemaining(timeRemaining - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else {
-      handleQuizComplete();
+    console.log("🎯 QuizScreen - User Debug:", {
+      userObject: user,
+      userId,
+      hasId: !!user?.id,
+      has_id: !!(user as any)?._id,
+      email: user?.email,
+    });
+  }, [userId]);
+
+  // FIXED: Stable handleQuizComplete with proper user ID handling
+  const handleQuizComplete = useCallback(async () => {
+    if (
+      !quiz ||
+      !userId ||
+      !isQuizStarted ||
+      questions.length === 0 ||
+      isCompleting
+    ) {
+      console.log("❌ Cannot complete quiz:", {
+        hasQuiz: !!quiz,
+        userId,
+        isStarted: isQuizStarted,
+        questionsCount: questions.length,
+        isCompleting,
+      });
+      return;
     }
-  }, [timeRemaining]);
 
-  // Initialize answers array
-  useEffect(() => {
-    setAnswers(Array(mockQuiz.questions.length).fill(null));
-  }, []);
+    setIsCompleting(true);
 
-  const handleOptionSelect = (optionIndex: number) => {
-    if (showFeedback) return;
+    try {
+      const completedAt = new Date();
+      const correctAnswers = answers.filter(
+        (answer) => answer.isCorrect
+      ).length;
+      const incorrectAnswers = answers.length - correctAnswers;
+      const finalScore = Math.round((correctAnswers / questions.length) * 100);
+      const totalTimeSpent = Math.floor(
+        (completedAt.getTime() - startedAt.current.getTime()) / 1000
+      );
 
-    setSelectedOption(optionIndex);
+      console.log("🎯 Completing quiz:", {
+        correctAnswers,
+        totalQuestions: questions.length,
+        finalScore,
+        totalTimeSpent,
+        userId,
+      });
 
-    setTimeout(() => {
-      const newAnswers = [...answers];
-      newAnswers[currentQuestionIndex] = optionIndex;
-      setAnswers(newAnswers);
+      // Submit to backend if we have a proper user ID
+      if (userId && userId !== user?.email) {
+        try {
+          const quizResultData: CreateQuizResultData = {
+            userId,
+            quizId: quiz._id,
+            score: finalScore,
+            totalQuestions: questions.length,
+            correctAnswers,
+            incorrectAnswers,
+            totalTimeSpent,
+            startedAt: startedAt.current,
+            completedAt,
+            answers: answers.map(
+              (answer): CreateQuizAnswer => ({
+                questionId:
+                  typeof answer.questionId === "string"
+                    ? answer.questionId
+                    : answer.questionId?._id ||
+                      answer.questionId?.toString() ||
+                      "",
+                selectedAnswer: String(answer.selectedAnswer),
+                correctAnswer: String(answer.correctAnswer),
+                isCorrect: answer.isCorrect,
+                timeSpent: answer.timeSpent,
+              })
+            ),
+            isPassed: finalScore >= (quiz.passingScore || 60),
+            submissionMethod:
+              timeRemaining === 0 ? "time_expired" : "submitted",
+          };
 
-      const selectedAnswer = currentQuestion.options[optionIndex];
-      const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
-      setShowFeedback(true);
+          console.log("📤 Submitting quiz result:", quizResultData);
+          const result = await createQuizResult(quizResultData);
+          console.log("✅ Quiz result submitted:", result);
 
-      if (isCorrect) {
-        setStreak(streak + 1);
-        setScore(score + currentQuestion.points);
-      } else {
-        setHearts(Math.max(0, hearts - 1));
-        setStreak(0);
-
-        if (hearts <= 1) {
-          setTimeout(() => handleQuizComplete(), 1500);
+          // FIXED: Update user progress after successful submission
+          await updateUserProgress({
+            score: finalScore,
+            totalQuestions: questions.length,
+            correctAnswers,
+          });
+        } catch (error) {
+          console.error("❌ Error submitting quiz:", error);
         }
+      } else {
+        console.warn("⚠️ Using email as user ID, skipping backend submission");
+
+        // FIXED: Still update progress even if backend submission is skipped
+        await updateUserProgress({
+          score: finalScore,
+          totalQuestions: questions.length,
+          correctAnswers,
+        });
       }
-    }, 200);
-  };
 
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < mockQuiz.questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedOption(null);
-      setShowFeedback(false);
-      setCurrentHint(0);
-    } else {
-      handleQuizComplete();
+      // Navigate to results screen
+      router.push({
+        pathname: "/(routes)/assessments/results",
+        params: {
+          score: finalScore.toString(),
+          correctAnswers: correctAnswers.toString(),
+          totalQuestions: questions.length.toString(),
+          timeSpent: totalTimeSpent.toString(),
+          hearts: hearts.toString(),
+          streak: streak.toString(),
+        },
+      });
+    } catch (error) {
+      console.error("❌ Error completing quiz:", error);
+
+      // Still navigate to results even if submission fails
+      const correctAnswers = answers.filter(
+        (answer) => answer.isCorrect
+      ).length;
+      const finalScore = Math.round((correctAnswers / questions.length) * 100);
+      const totalTimeSpent = Math.floor(
+        (new Date().getTime() - startedAt.current.getTime()) / 1000
+      );
+
+      // FIXED: Update progress even on error (local progress)
+      try {
+        await updateUserProgress({
+          score: finalScore,
+          totalQuestions: questions.length,
+          correctAnswers,
+        });
+      } catch (progressError) {
+        console.error("❌ Error updating progress:", progressError);
+      }
+
+      router.push({
+        pathname: "/(routes)/assessments/results",
+        params: {
+          score: finalScore.toString(),
+          correctAnswers: correctAnswers.toString(),
+          totalQuestions: questions.length.toString(),
+          timeSpent: totalTimeSpent.toString(),
+          hearts: hearts.toString(),
+          streak: streak.toString(),
+        },
+      });
+    } finally {
+      setIsCompleting(false);
     }
-  };
+  }, [
+    quiz,
+    userId,
+    isQuizStarted,
+    questions.length,
+    answers,
+    timeRemaining,
+    hearts,
+    streak,
+    createQuizResult,
+    router,
+    isCompleting,
+    user?.email,
+    updateUserProgress, // Add this dependency
+  ]);
 
-  const handleQuizComplete = useCallback(() => {
-    const correctAnswers = answers.reduce((total, answer, index) => {
-      if (answer === null) return total;
-      const selectedAnswer = mockQuiz.questions[index]?.options[answer];
-      const correctAnswer = mockQuiz.questions[index]?.correctAnswer;
-      return (total || 0) + (selectedAnswer === correctAnswer ? 1 : 0);
-    }, 0);
+  // FIXED: Initialize quiz data only once when quiz loads
+  useEffect(() => {
+    if (!quiz || isQuizStarted) return;
 
-    const finalScore = Math.round(
-      ((correctAnswers || 0) / mockQuiz.questions.length) * 100
+    console.log("🎯 Initializing quiz:", quiz.title);
+
+    // Set timer
+    const totalTimeSeconds = quiz.timeLimit * 60;
+    setTimeRemaining(totalTimeSeconds);
+
+    // Create mock questions - FIXED: Ensure proper string IDs
+    const mockQuestions: Question[] = Array.from(
+      { length: quiz.totalQuestions },
+      (_, index) => {
+        const questionId = quiz.questionIds[index];
+        const id =
+          typeof questionId === "string"
+            ? questionId
+            : questionId?._id || questionId?.toString() || `question_${index}`;
+
+        return {
+          _id: id,
+          question: `Question ${index + 1}: Soit f(x) = ${index + 1}x² - ${
+            index + 2
+          }x + ${index + 1}. Quelle est la dérivée de f(x)?`,
+          type: "multiple_choice",
+          options: [
+            `f'(x) = ${2 * (index + 1)}x - ${index + 2}`,
+            `f'(x) = ${index + 1}x² - ${index + 2}`,
+            `f'(x) = ${index + 1}x - ${index + 2}`,
+            `f'(x) = ${2 * (index + 1)}x + ${index + 2}`,
+          ],
+          correctAnswer: `f'(x) = ${2 * (index + 1)}x - ${index + 2}`,
+          explanation: `Pour une fonction f(x) = ax² + bx + c, la dérivée est f'(x) = 2ax + b.`,
+          subjectId: quiz.subjectId,
+          difficulty: "medium",
+          educationLevel: quiz.educationLevel,
+          tags: ["dérivée", "fonction_polynôme"],
+          stats: {
+            totalAttempts: 0,
+            correctAttempts: 0,
+            averageTimeSpent: 0,
+          },
+          status: "active",
+          isActive: true,
+          isPremium: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+      }
     );
 
-    router.push({
-      pathname: "/(routes)/assessments/results",
-      params: {
-        score: finalScore.toString(),
-        correctAnswers: (correctAnswers || 0).toString(),
-        totalQuestions: mockQuiz.questions.length.toString(),
-        timeSpent: (mockQuiz.timeLimit - timeRemaining).toString(),
-        hearts: hearts.toString(),
-        streak: streak.toString(),
-      },
+    setQuestions(mockQuestions);
+
+    // Initialize answers array - FIXED: Use string IDs
+    const initialAnswers: QuizAnswer[] = mockQuestions.map((question) => ({
+      questionId: question._id,
+      selectedAnswer: "",
+      correctAnswer: "",
+      isCorrect: false,
+      timeSpent: 0,
+    }));
+
+    setAnswers(initialAnswers);
+    questionStartTime.current = new Date();
+    setIsQuizStarted(true);
+
+    console.log("🎯 Quiz initialized:", {
+      questionsCount: mockQuestions.length,
+      timeLimit: totalTimeSeconds,
+      answersCount: initialAnswers.length,
     });
-  }, [answers, hearts, router, streak, timeRemaining]);
+  }, [quiz, isQuizStarted]);
 
-  const handleHintPress = () => {
-    setShowHintModal(true);
-  };
-
-  const handleNextHint = () => {
-    if (currentHint < currentQuestion.hints.length - 1) {
-      setCurrentHint(currentHint + 1);
-
-      if (currentHint === 0) {
-        setScore(Math.max(0, score - 2));
-      } else if (currentHint === 1) {
-        setScore(Math.max(0, score - 3));
-      } else {
-        setHearts(Math.max(0, hearts - 1));
-        setShowHintModal(false);
-      }
+  // FIXED: Timer effect with proper dependencies and no infinite loops
+  useEffect(() => {
+    if (
+      !isQuizStarted ||
+      timeRemaining <= 0 ||
+      showFeedback ||
+      quizLoading ||
+      isCompleting
+    ) {
+      return;
     }
-  };
 
-  const getOptionStyle = (index: number) => {
-    if (selectedOption === index && !showFeedback) {
-      return [styles.option, styles.selectedOption];
-    } else if (showFeedback) {
-      const selectedAnswer = currentQuestion.options[index];
-      if (selectedAnswer === currentQuestion.correctAnswer) {
-        return [styles.option, styles.correctOption];
-      } else if (index === selectedOption) {
-        return [styles.option, styles.incorrectOption];
-      }
+    const timer = setTimeout(() => {
+      setTimeRemaining((prev) => {
+        const newTime = prev - 1;
+        if (newTime <= 0) {
+          console.log("⏰ Time expired, completing quiz");
+          // Use setTimeout to avoid calling handleQuizComplete during render
+          setTimeout(() => handleQuizComplete(), 0);
+          return 0;
+        }
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [
+    timeRemaining,
+    isQuizStarted,
+    showFeedback,
+    quizLoading,
+    isCompleting,
+    handleQuizComplete,
+  ]);
+
+  // FIXED: Memoized option handlers to prevent recreation on every render
+  const handleOptionSelect = useCallback(
+    (optionIndex: number) => {
+      if (showFeedback || !currentQuestion) return;
+
+      setSelectedOption(optionIndex);
+
+      setTimeout(() => {
+        const selectedAnswer = currentQuestion.options?.[optionIndex] || "";
+        const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+
+        // Calculate time spent on this question
+        const timeSpent = Math.floor(
+          (new Date().getTime() - questionStartTime.current.getTime()) / 1000
+        );
+
+        // Update answers array
+        setAnswers((prevAnswers) => {
+          const newAnswers = [...prevAnswers];
+          newAnswers[currentQuestionIndex] = {
+            questionId: currentQuestion._id,
+            selectedAnswer,
+            correctAnswer: currentQuestion.correctAnswer as string,
+            isCorrect,
+            timeSpent,
+          };
+          return newAnswers;
+        });
+
+        setShowFeedback(true);
+
+        if (isCorrect) {
+          setStreak((prev) => prev + 1);
+          setScore((prev) => prev + 10);
+        } else {
+          setHearts((prev) => Math.max(0, prev - 1));
+          setStreak(0);
+
+          if (hearts <= 1) {
+            setTimeout(() => handleQuizComplete(), 1500);
+          }
+        }
+      }, 200);
+    },
+    [
+      showFeedback,
+      currentQuestion,
+      currentQuestionIndex,
+      hearts,
+      handleQuizComplete,
+    ]
+  );
+
+  const handleNextQuestion = useCallback(() => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+      setSelectedOption(null);
+      setShowFeedback(false);
+      questionStartTime.current = new Date();
+    } else {
+      handleQuizComplete();
     }
-    return styles.option;
-  };
+  }, [currentQuestionIndex, questions.length, handleQuizComplete]);
 
-  const getOptionTextStyle = (index: number) => {
-    if (selectedOption === index && !showFeedback) {
-      return [styles.optionText, styles.selectedOptionText];
-    } else if (showFeedback) {
-      const selectedAnswer = currentQuestion.options[index];
-      if (selectedAnswer === currentQuestion.correctAnswer) {
-        return [styles.optionText, styles.correctOptionText];
-      } else if (index === selectedOption) {
-        return [styles.optionText, styles.incorrectOptionText];
+  // FIXED: Memoized utility functions for styling
+  const getOptionStyle = useCallback(
+    (index: number) => {
+      if (selectedOption === index && !showFeedback) {
+        return [styles.option, styles.selectedOption];
+      } else if (showFeedback && currentQuestion) {
+        const selectedAnswer = currentQuestion.options?.[index];
+        if (selectedAnswer === currentQuestion.correctAnswer) {
+          return [styles.option, styles.correctOption];
+        } else if (index === selectedOption) {
+          return [styles.option, styles.incorrectOption];
+        }
       }
-    }
-    return styles.optionText;
-  };
+      return styles.option;
+    },
+    [selectedOption, showFeedback, currentQuestion]
+  );
 
-  const getOptionIndicatorStyle = (index: number) => {
-    if (selectedOption === index && !showFeedback) {
-      return [styles.optionIndicator, styles.selectedIndicator];
-    } else if (showFeedback) {
-      const selectedAnswer = currentQuestion.options[index];
-      if (selectedAnswer === currentQuestion.correctAnswer) {
-        return [styles.optionIndicator, styles.correctIndicator];
-      } else if (index === selectedOption) {
-        return [styles.optionIndicator, styles.incorrectIndicator];
+  const getOptionTextStyle = useCallback(
+    (index: number) => {
+      if (selectedOption === index && !showFeedback) {
+        return [styles.optionText, styles.selectedOptionText];
+      } else if (showFeedback && currentQuestion) {
+        const selectedAnswer = currentQuestion.options?.[index];
+        if (selectedAnswer === currentQuestion.correctAnswer) {
+          return [styles.optionText, styles.correctOptionText];
+        } else if (index === selectedOption) {
+          return [styles.optionText, styles.incorrectOptionText];
+        }
       }
-    }
-    return styles.optionIndicator;
-  };
+      return styles.optionText;
+    },
+    [selectedOption, showFeedback, currentQuestion]
+  );
 
-  const selectedAnswer =
-    selectedOption !== null ? currentQuestion.options[selectedOption] : null;
-  const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+  // FIXED: Memoized computed values
+  const selectedAnswer = useMemo(() => {
+    return (
+      selectedOption !== null && currentQuestion?.options?.[selectedOption]
+    );
+  }, [selectedOption, currentQuestion?.options]);
 
+  const isCorrect = useMemo(() => {
+    return selectedAnswer === currentQuestion?.correctAnswer;
+  }, [selectedAnswer, currentQuestion?.correctAnswer]);
+
+  // NOW ALL CONDITIONALS COME AFTER ALL HOOKS
+
+  // Check for user authentication
+  if (!user || (!user.id && !(user as any)._id && !user.email)) {
+    console.error("❌ No user available:", user);
+    return (
+      <View
+        style={[
+          styles.container,
+          styles.centerContent,
+          { paddingTop: insets.top },
+        ]}
+      >
+        <Ionicons name="person-circle" size={64} color="#EF4444" />
+        <Text style={styles.errorTitle}>Authentication Required</Text>
+        <Text style={styles.errorMessage}>Please log in to take the quiz</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.retryButtonText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Loading state
+  if (quizLoading || isCreating || !isQuizStarted || isCompleting) {
+    return (
+      <View
+        style={[
+          styles.container,
+          styles.centerContent,
+          { paddingTop: insets.top },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#3B82F6" />
+        <Text style={styles.loadingText}>
+          {isCreating || isCompleting
+            ? "Submitting results..."
+            : !isQuizStarted
+            ? "Preparing quiz..."
+            : "Loading quiz..."}
+        </Text>
+      </View>
+    );
+  }
+
+  // Error state
+  if (quizError || !quiz || questions.length === 0) {
+    return (
+      <View
+        style={[
+          styles.container,
+          styles.centerContent,
+          { paddingTop: insets.top },
+        ]}
+      >
+        <Ionicons name="alert-circle" size={64} color="#EF4444" />
+        <Text style={styles.errorTitle}>Unable to load quiz</Text>
+        <Text style={styles.errorMessage}>
+          {quizError || "Quiz data is not available"}
+        </Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.retryButtonText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Main quiz interface
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <QuizHeader
         hearts={hearts}
         currentQuestion={currentQuestionIndex + 1}
-        totalQuestions={mockQuiz.questions.length}
+        totalQuestions={questions.length}
         timeRemaining={timeRemaining}
         streak={streak}
       />
@@ -427,21 +630,28 @@ export default function QuizScreen() {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        <QuestionCard
-          question={currentQuestion.question}
-          questionNumber={currentQuestionIndex + 1}
-          onHintPress={handleHintPress}
-        />
+        {/* Question Card */}
+        <View style={styles.questionCard}>
+          <View style={styles.questionHeader}>
+            <View style={styles.questionNumber}>
+              <Text style={styles.questionNumberText}>
+                Q{currentQuestionIndex + 1}
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.questionText}>{currentQuestion?.question}</Text>
+        </View>
 
+        {/* Options */}
         <View style={styles.optionsContainer}>
-          {currentQuestion.options.map((option, index) => (
+          {currentQuestion?.options?.map((option, index) => (
             <TouchableOpacity
               key={index}
               style={getOptionStyle(index)}
               onPress={() => handleOptionSelect(index)}
               disabled={showFeedback}
             >
-              <View style={getOptionIndicatorStyle(index)}>
+              <View style={styles.optionIndicator}>
                 <Text style={styles.optionIndicatorText}>
                   {String.fromCharCode(65 + index)}
                 </Text>
@@ -450,13 +660,13 @@ export default function QuizScreen() {
               <Text style={getOptionTextStyle(index)}>{option}</Text>
 
               {showFeedback &&
-                currentQuestion.options[index] ===
+                currentQuestion.options?.[index] ===
                   currentQuestion.correctAnswer && (
                   <Ionicons name="checkmark-circle" size={24} color="#10B981" />
                 )}
               {showFeedback &&
                 index === selectedOption &&
-                currentQuestion.options[index] !==
+                currentQuestion.options?.[index] !==
                   currentQuestion.correctAnswer && (
                   <Ionicons name="close-circle" size={24} color="#EF4444" />
                 )}
@@ -464,7 +674,8 @@ export default function QuizScreen() {
           ))}
         </View>
 
-        {showFeedback && (
+        {/* Feedback */}
+        {showFeedback && currentQuestion?.explanation && (
           <View style={styles.feedbackContainer}>
             <View
               style={[
@@ -500,6 +711,7 @@ export default function QuizScreen() {
         )}
       </ScrollView>
 
+      {/* Footer */}
       <View
         style={[
           styles.footer,
@@ -517,20 +729,12 @@ export default function QuizScreen() {
           disabled={selectedOption === null}
         >
           <Text style={styles.continueButtonText}>
-            {currentQuestionIndex === mockQuiz.questions.length - 1
+            {currentQuestionIndex === questions.length - 1
               ? "Complete Quiz"
               : "Continue"}
           </Text>
         </TouchableOpacity>
       </View>
-
-      <HintModal
-        visible={showHintModal}
-        hints={currentQuestion.hints}
-        currentHint={currentHint}
-        onNextHint={handleNextHint}
-        onClose={() => setShowHintModal(false)}
-      />
     </View>
   );
 }
@@ -540,10 +744,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F9FAFB",
   },
+  centerContent: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#EF4444",
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: "#3B82F6",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  retryButtonText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 16,
+  },
   scrollView: {
     flex: 1,
   },
-  // Header styles
   header: {
     backgroundColor: "white",
     paddingHorizontal: 20,
@@ -622,7 +862,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#3B82F6",
     borderRadius: 4,
   },
-  // Question card styles
   questionCard: {
     backgroundColor: "white",
     borderRadius: 16,
@@ -654,21 +893,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 14,
   },
-  hintButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#FEF3C7",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   questionText: {
     color: "#111827",
     fontSize: 18,
     fontWeight: "500",
     lineHeight: 24,
   },
-  // Options styles
   optionsContainer: {
     paddingHorizontal: 20,
     marginTop: 24,
@@ -709,15 +939,6 @@ const styles = StyleSheet.create({
     marginRight: 16,
     backgroundColor: "#E5E7EB",
   },
-  selectedIndicator: {
-    backgroundColor: "#3B82F6",
-  },
-  correctIndicator: {
-    backgroundColor: "#10B981",
-  },
-  incorrectIndicator: {
-    backgroundColor: "#EF4444",
-  },
   optionIndicatorText: {
     fontWeight: "bold",
     color: "white",
@@ -737,7 +958,6 @@ const styles = StyleSheet.create({
   incorrectOptionText: {
     color: "#DC2626",
   },
-  // Feedback styles
   feedbackContainer: {
     marginHorizontal: 20,
     marginTop: 24,
@@ -782,7 +1002,6 @@ const styles = StyleSheet.create({
   incorrectText: {
     color: "#DC2626",
   },
-  // Footer styles
   footer: {
     padding: 20,
     backgroundColor: "white",
@@ -804,72 +1023,5 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
-  },
-  // Modal styles
-  modalOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    zIndex: 50,
-  },
-  modalContent: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 24,
-    width: "100%",
-    maxWidth: 400,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#111827",
-  },
-  modalText: {
-    color: "#374151",
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 24,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  modalCloseButton: {
-    backgroundColor: "#F3F4F6",
-  },
-  modalNextButton: {
-    backgroundColor: "#EAB308",
-  },
-  modalCloseButtonText: {
-    fontWeight: "600",
-    color: "#374151",
-  },
-  modalNextButtonText: {
-    fontWeight: "600",
-    color: "white",
-  },
-  hintCounter: {
-    textAlign: "center",
-    color: "#6B7280",
-    fontSize: 14,
-    marginTop: 12,
   },
 });
