@@ -93,13 +93,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const authData = await authService.restoreSession();
 
       if (authData.user && authData.token) {
-        setUser(authData.user);
+        // FIXED: Check if user already has 'id' field, if not transform it
+        let transformedUser = authData.user;
+
+        // If the user object has _id but no id, transform it
+        if (!authData.user.id && (authData.user as any)._id) {
+          console.log("🔄 CONTEXT: Transforming user data from _id to id");
+          transformedUser = authService.transformUserData(authData.user as any);
+        }
+
+        setUser(transformedUser);
         setToken(authData.token);
         setIsSessionHealthy(true);
 
         // TODO: Remove detailed logging before production
         console.log("✅ CONTEXT: User data loaded successfully");
-        console.log("✅ CONTEXT: User email:", authData.user.email);
+        console.log("✅ CONTEXT: User ID:", transformedUser.id);
+        console.log("✅ CONTEXT: User email:", transformedUser.email);
       } else {
         // TODO: Remove detailed logging before production
         console.log("❌ CONTEXT: No valid session found");
@@ -276,9 +286,68 @@ export function UserProvider({ children }: { children: ReactNode }) {
         sessionCheckIntervalRef.current = null;
       }
     };
-     
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, token, setupSessionMonitoring]); // Only depend on user and token existence
+
+  /**
+   * Updates user progress after quiz completion
+   */
+  const updateUserProgress = useCallback(
+    async (quizResult: {
+      score: number;
+      totalQuestions: number;
+      correctAnswers: number;
+    }) => {
+      try {
+        console.log("📊 CONTEXT: Updating user progress after quiz completion");
+
+        if (!user) {
+          console.warn("⚠️ CONTEXT: No user found, cannot update progress");
+          return;
+        }
+
+        // Calculate new progress
+        const currentProgress = user.progress;
+        const newTotalQuizzes = currentProgress.totalQuizzesTaken + 1;
+        const newTotalQuestions =
+          currentProgress.totalQuestionsAnswered + quizResult.totalQuestions;
+
+        // Calculate new average score
+        const totalPreviousScore =
+          currentProgress.averageScore * currentProgress.totalQuizzesTaken;
+        const newAverageScore = Math.round(
+          (totalPreviousScore + quizResult.score) / newTotalQuizzes
+        );
+
+        const updatedProgress = {
+          totalQuizzesTaken: newTotalQuizzes,
+          totalQuestionsAnswered: newTotalQuestions,
+          averageScore: newAverageScore,
+        };
+
+        // Update user object
+        const updatedUser = {
+          ...user,
+          progress: updatedProgress,
+        };
+
+        // Update state
+        setUser(updatedUser);
+
+        // Update stored user data
+        await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+
+        console.log("✅ CONTEXT: User progress updated successfully", {
+          oldProgress: currentProgress,
+          newProgress: updatedProgress,
+        });
+      } catch (error) {
+        console.error("❌ CONTEXT: Failed to update user progress:", error);
+      }
+    },
+    [user]
+  );
 
   const value: UserContextType = {
     user,
@@ -291,6 +360,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     handleTokenExpiration,
     refreshUserSession,
     gracefulLogout,
+    updateUserProgress,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
