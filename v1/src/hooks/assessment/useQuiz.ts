@@ -1,14 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { quizApiService } from "../../services/assessment/api.quiz.service";
 import type {
   Quiz,
   QuizFilters,
   QuizListResponse,
-  QuizSearchResponse,
   UpdateQuizStatsData,
-  PopularQuizFilters,
-  QuizAnalytics,
-  QuizComparison,
 } from "../../types/assessment/quiz.types";
 
 /**
@@ -26,33 +22,30 @@ export const useQuiz = (quizId?: string): UseQuizResult => {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
+
+  console.log("🔗 useQuiz Hook - Initialized with:", { quizId });
 
   const fetchQuiz = useCallback(async () => {
     if (!quizId) {
-      setQuiz(null);
+      setIsLoading(false);
       return;
     }
 
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    setIsLoading(true);
-    setError(null);
-
     try {
-      console.log(`🔍 useQuiz - Fetching quiz: ${quizId}`);
-      const quizData = await quizApiService.getQuizById(quizId);
-      setQuiz(quizData);
-      console.log(`✅ useQuiz - Quiz fetched successfully`);
-    } catch (error) {
+      setIsLoading(true);
+      setError(null);
+
+      console.log("🔗 useQuiz Hook - Fetching quiz:", quizId);
+
+      const data = await quizApiService.getQuizById(quizId);
+      setQuiz(data);
+
+      console.log("🔗 useQuiz Hook - Successfully loaded quiz:", data.title);
+    } catch (err) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch quiz";
-      console.error(`❌ useQuiz - Error:`, errorMessage);
+        err instanceof Error ? err.message : "Failed to fetch quiz";
       setError(errorMessage);
-      setQuiz(null);
+      console.error("🔗 useQuiz Hook - Error:", errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -86,14 +79,7 @@ export const useQuiz = (quizId?: string): UseQuizResult => {
   );
 
   useEffect(() => {
-      fetchQuiz();
-      const controller = abortControllerRef.current;
-
-    return () => {
-      if (controller) {
-        controller.abort();
-      }
-    };
+    fetchQuiz();
   }, [fetchQuiz]);
 
   return {
@@ -106,585 +92,270 @@ export const useQuiz = (quizId?: string): UseQuizResult => {
 };
 
 /**
- * Hook for managing multiple quizzes with filters
+ * Hook for managing multiple quizzes with CLIENT-SIDE filtering
  */
 interface UseQuizzesResult {
   quizzes: Quiz[];
+  allQuizzes: Quiz[]; // All loaded quizzes for reference
   pagination: QuizListResponse["pagination"] | null;
   isLoading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  loadMore: () => Promise<void>;
-  hasMore: boolean;
+  search: (query: string) => Promise<void>;
+  isSearching: boolean;
 }
 
 export const useQuizzes = (filters?: QuizFilters): UseQuizzesResult => {
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  // All quizzes from API (cached)
+  const [allQuizzes, setAllQuizzes] = useState<Quiz[]>([]);
+  // Pagination data
   const [pagination, setPagination] = useState<
     QuizListResponse["pagination"] | null
   >(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // Loading states
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const fetchQuizzes = useCallback(
-    async (page: number = 1, append: boolean = false) => {
-      // Cancel previous request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+  // Track if we've loaded initial data
+  const hasLoadedRef = useRef(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  console.log("🔗 useQuizzes Hook - Filters:", filters);
+
+  // Initial load (only once) - FIXED with safe parameters
+  const fetchAllQuizzes = useCallback(async () => {
+    if (hasLoadedRef.current) {
+      console.log("🔗 useQuizzes Hook - Skipping fetch, already loaded");
+      return;
+    }
+
+    try {
       setIsLoading(true);
-      if (!append) {
-        setError(null);
+      setError(null);
+
+      console.log("🔗 useQuizzes Hook - Initial fetch of all quizzes");
+
+      // FIXED: Use safer parameters that the backend accepts
+      const data = await quizApiService.getQuizzes({
+        isActive: true,
+        limit: 50, // Reduced from 1000 to 50
+        sortBy: "createdAt", // Changed from "stats.totalAttempts" to "createdAt"
+        sortOrder: "desc",
+      });
+
+      const quizzesArray = data?.quizzes || [];
+      const paginationData = data?.pagination || null;
+
+      console.log(
+        "🔗 useQuizzes Hook - Loaded all quizzes:",
+        quizzesArray.length
+      );
+
+      setAllQuizzes(quizzesArray);
+      setPagination(paginationData);
+      hasLoadedRef.current = true;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch quizzes";
+      setError(errorMessage);
+      console.error("🔗 useQuizzes Hook - Error:", errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Search function (makes API call) - FIXED with safe parameters
+  const search = useCallback(
+    async (query: string) => {
+      if (!query.trim()) {
+        // If empty query, reload all quizzes
+        hasLoadedRef.current = false;
+        await fetchAllQuizzes();
+        return;
       }
 
-      try {
-        console.log(
-          `🧩 useQuizzes - Fetching quizzes (page ${page}):`,
-          filters
-        );
-        const response = await quizApiService.getQuizzes({
-          ...filters,
-          page,
-        });
-
-        if (append) {
-          setQuizzes((prev) => [...prev, ...response.quizzes]);
-        } else {
-          setQuizzes(response.quizzes);
-        }
-
-        setPagination(response.pagination);
-        setCurrentPage(page);
-        console.log(
-          `✅ useQuizzes - Quizzes fetched successfully (${response.quizzes.length} items)`
-        );
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Failed to fetch quizzes";
-        console.error(`❌ useQuizzes - Error:`, errorMessage);
-        setError(errorMessage);
-        if (!append) {
-          setQuizzes([]);
-          setPagination(null);
-        }
-      } finally {
-        setIsLoading(false);
+      // Debounce search
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
       }
+
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          setIsSearching(true);
+          setError(null);
+
+          console.log("🔗 useQuizzes Hook - Searching:", query);
+
+          // FIXED: Use safer search parameters
+          const data = await quizApiService.getQuizzes({
+            isActive: true,
+            search: query.trim(),
+            limit: 50, // Reduced from 1000 to 50
+            sortBy: "createdAt", // Changed from "stats.totalAttempts" to "createdAt"
+            sortOrder: "desc",
+          });
+
+          const searchResults = data?.quizzes || [];
+          console.log(
+            "🔗 useQuizzes Hook - Search results:",
+            searchResults.length
+          );
+
+          // Update allQuizzes with search results
+          setAllQuizzes(searchResults);
+          setPagination(data?.pagination || null);
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to search quizzes";
+          setError(errorMessage);
+          console.error("🔗 useQuizzes Hook - Search error:", errorMessage);
+        } finally {
+          setIsSearching(false);
+        }
+      }, 300); // 300ms debounce for search
     },
-    [filters]
+    [fetchAllQuizzes]
   );
 
-  const loadMore = useCallback(async () => {
-    if (pagination?.hasNextPage && !isLoading) {
-      await fetchQuizzes(currentPage + 1, true);
+  // Client-side filtering - IMPROVED sorting
+  const filteredQuizzes = useMemo(() => {
+    if (!allQuizzes.length) return [];
+
+    let filtered = [...allQuizzes];
+
+    // Apply filters
+    if (filters?.format) {
+      filtered = filtered.filter((quiz) => quiz.format === filters.format);
     }
-  }, [pagination?.hasNextPage, isLoading, currentPage, fetchQuizzes]);
 
-  const refetch = useCallback(() => {
-    setCurrentPage(1);
-    return fetchQuizzes(1, false);
-  }, [fetchQuizzes]);
+    if (filters?.difficulty) {
+      filtered = filtered.filter(
+        (quiz) => quiz.difficulty === filters.difficulty
+      );
+    }
 
+    if (filters?.educationLevel) {
+      filtered = filtered.filter(
+        (quiz) => quiz.educationLevel === filters.educationLevel
+      );
+    }
+
+    if (filters?.examType) {
+      filtered = filtered.filter((quiz) => quiz.examType === filters.examType);
+    }
+
+    if (filters?.isPremium !== undefined) {
+      filtered = filtered.filter(
+        (quiz) => quiz.isPremium === filters.isPremium
+      );
+    }
+
+    if (filters?.subjectId) {
+      filtered = filtered.filter((quiz) => {
+        if (typeof quiz.subjectId === "string") {
+          return quiz.subjectId === filters.subjectId;
+        } else if (quiz.subjectId && typeof quiz.subjectId === "object") {
+          return quiz.subjectId._id === filters.subjectId;
+        }
+        return false;
+      });
+    }
+
+    // IMPROVED: Apply client-side sorting with safe property access
+    if (filters?.sortBy) {
+      filtered.sort((a, b) => {
+        let aValue: any;
+        let bValue: any;
+
+        switch (filters.sortBy) {
+          case "title":
+            aValue = a.title?.toLowerCase() || "";
+            bValue = b.title?.toLowerCase() || "";
+            break;
+          case "createdAt":
+            aValue = new Date(a.createdAt || 0).getTime();
+            bValue = new Date(b.createdAt || 0).getTime();
+            break;
+          case "difficulty":
+            const difficultyOrder = { easy: 1, medium: 2, hard: 3, mixed: 4 };
+            aValue =
+              difficultyOrder[a.difficulty as keyof typeof difficultyOrder] ||
+              0;
+            bValue =
+              difficultyOrder[b.difficulty as keyof typeof difficultyOrder] ||
+              0;
+            break;
+          case "stats.totalAttempts":
+            aValue = a.stats?.totalAttempts || 0;
+            bValue = b.stats?.totalAttempts || 0;
+            break;
+          case "stats.averageScore":
+            aValue = a.stats?.averageScore || 0;
+            bValue = b.stats?.averageScore || 0;
+            break;
+          default:
+            // Default sort by creation date if invalid sortBy
+            aValue = new Date(a.createdAt || 0).getTime();
+            bValue = new Date(b.createdAt || 0).getTime();
+            break;
+        }
+
+        if (filters.sortOrder === "desc") {
+          return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+        } else {
+          return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+        }
+      });
+    } else {
+      // Default sort by totalAttempts descending (most popular first)
+      filtered.sort((a, b) => {
+        const aAttempts = a.stats?.totalAttempts || 0;
+        const bAttempts = b.stats?.totalAttempts || 0;
+        return bAttempts - aAttempts;
+      });
+    }
+
+    console.log("🔗 useQuizzes Hook - Client-side filtered:", {
+      total: allQuizzes.length,
+      filtered: filtered.length,
+      filters: Object.keys(filters || {}).filter(
+        (key) =>
+          filters![key as keyof QuizFilters] !== undefined &&
+          filters![key as keyof QuizFilters] !== null
+      ),
+    });
+
+    return filtered;
+  }, [allQuizzes, filters]);
+
+  // Load initial data on mount
   useEffect(() => {
-    setCurrentPage(1);
-    fetchQuizzes(1, false);
-    const controller = abortControllerRef.current;
+    fetchAllQuizzes();
+  }, [fetchAllQuizzes]);
+
+  // Cleanup timeouts
+  useEffect(() => {
     return () => {
-      
-      if (controller) {
-        controller.abort();
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [fetchQuizzes]);
+  }, []);
+
+  const refetch = useCallback(async () => {
+    hasLoadedRef.current = false;
+    await fetchAllQuizzes();
+  }, [fetchAllQuizzes]);
 
   return {
-    quizzes,
+    quizzes: filteredQuizzes,
+    allQuizzes,
     pagination,
     isLoading,
     error,
     refetch,
-    loadMore,
-    hasMore: pagination?.hasNextPage || false,
-  };
-};
-
-/**
- * Hook for searching quizzes
- */
-interface UseQuizSearchResult {
-  results: Quiz[];
-  pagination: QuizSearchResponse["pagination"] | null;
-  isLoading: boolean;
-  error: string | null;
-  search: (searchTerm: string, filters?: QuizFilters) => Promise<void>;
-  loadMore: () => Promise<void>;
-  hasMore: boolean;
-  searchTerm: string;
-  clearResults: () => void;
-}
-
-export const useQuizSearch = (): UseQuizSearchResult => {
-  const [results, setResults] = useState<Quiz[]>([]);
-  const [pagination, setPagination] = useState<
-    QuizSearchResponse["pagination"] | null
-  >(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentFilters, setCurrentFilters] = useState<
-    QuizFilters | undefined
-  >();
-  const [currentPage, setCurrentPage] = useState(1);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const search = useCallback(
-    async (
-      term: string,
-      filters?: QuizFilters,
-      page: number = 1,
-      append: boolean = false
-    ) => {
-      if (!term.trim()) {
-        setResults([]);
-        setPagination(null);
-        setSearchTerm("");
-        return;
-      }
-
-      // Cancel previous request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      setIsLoading(true);
-      if (!append) {
-        setError(null);
-        setSearchTerm(term);
-        setCurrentFilters(filters);
-      }
-
-      try {
-        console.log(`🔍 useQuizSearch - Searching quizzes:`, {
-          term,
-          filters,
-          page,
-        });
-        const response = await quizApiService.searchQuizzes(term, {
-          ...filters,
-          page,
-        });
-
-        if (append) {
-          setResults((prev) => [...prev, ...response.quizzes]);
-        } else {
-          setResults(response.quizzes);
-        }
-
-        setPagination(response.pagination);
-        setCurrentPage(page);
-        console.log(
-          `✅ useQuizSearch - Search completed (${response.quizzes.length} results)`
-        );
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Search failed";
-        console.error(`❌ useQuizSearch - Error:`, errorMessage);
-        setError(errorMessage);
-        if (!append) {
-          setResults([]);
-          setPagination(null);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    []
-  );
-
-  const loadMore = useCallback(async () => {
-    if (pagination?.hasNextPage && !isLoading && searchTerm) {
-      await search(searchTerm, currentFilters, currentPage + 1, true);
-    }
-  }, [
-    pagination?.hasNextPage,
-    isLoading,
-    searchTerm,
-    currentFilters,
-    currentPage,
     search,
-  ]);
-
-  const clearResults = useCallback(() => {
-    setResults([]);
-    setPagination(null);
-    setSearchTerm("");
-    setCurrentFilters(undefined);
-    setCurrentPage(1);
-    setError(null);
-  }, []);
-
-    useEffect(() => {
-        const controller = abortControllerRef.current;
-    return () => {
-      if (controller) {
-        controller.abort();
-      }
-    };
-  }, []);
-
-  return {
-    results,
-    pagination,
-    isLoading,
-    error,
-    search: (term: string, filters?: QuizFilters) =>
-      search(term, filters, 1, false),
-    loadMore,
-    hasMore: pagination?.hasNextPage || false,
-    searchTerm,
-    clearResults,
-  };
-};
-
-/**
- * Hook for getting popular quizzes
- */
-interface UsePopularQuizzesResult {
-  quizzes: Quiz[];
-  isLoading: boolean;
-  error: string | null;
-  getPopularQuizzes: (filters?: PopularQuizFilters) => Promise<void>;
-  refresh: () => Promise<void>;
-}
-
-export const usePopularQuizzes = (
-  initialFilters?: PopularQuizFilters
-): UsePopularQuizzesResult => {
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentFilters, setCurrentFilters] = useState<
-    PopularQuizFilters | undefined
-  >(initialFilters);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const getPopularQuizzes = useCallback(
-    async (filters?: PopularQuizFilters) => {
-      // Cancel previous request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      const filtersToUse = filters || currentFilters;
-      setCurrentFilters(filtersToUse);
-
-      try {
-        console.log(
-          `📈 usePopularQuizzes - Getting popular quizzes:`,
-          filtersToUse
-        );
-        const popularQuizzes = await quizApiService.getPopularQuizzes(
-          filtersToUse
-        );
-        setQuizzes(popularQuizzes);
-        console.log(
-          `✅ usePopularQuizzes - Popular quizzes fetched (${popularQuizzes.length} items)`
-        );
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch popular quizzes";
-        console.error(`❌ usePopularQuizzes - Error:`, errorMessage);
-        setError(errorMessage);
-        setQuizzes([]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [currentFilters]
-  );
-
-  const refresh = useCallback(() => {
-    return getPopularQuizzes(currentFilters);
-  }, [getPopularQuizzes, currentFilters]);
-
-  useEffect(() => {
-    if (initialFilters) {
-      getPopularQuizzes(initialFilters);
-    }
-    const controller = abortControllerRef.current;
-      return () => {
-       
-      if (controller) {
-       controller.abort();
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
-
-  return {
-    quizzes,
-    isLoading,
-    error,
-    getPopularQuizzes,
-    refresh,
-  };
-};
-
-/**
- * Hook for getting quizzes by subject
- */
-export const useQuizzesBySubject = (
-  subjectId?: string,
-  filters?: QuizFilters
-) => {
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const fetchQuizzesBySubject = useCallback(async () => {
-    if (!subjectId) {
-      setQuizzes([]);
-      return;
-    }
-
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      console.log(
-        `📋 useQuizzesBySubject - Fetching quizzes for subject: ${subjectId}`
-      );
-      const subjectQuizzes = await quizApiService.getQuizzesBySubject(
-        subjectId,
-        filters
-      );
-      setQuizzes(subjectQuizzes);
-      console.log(
-        `✅ useQuizzesBySubject - Quizzes fetched (${subjectQuizzes.length} items)`
-      );
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch quizzes by subject";
-      console.error(`❌ useQuizzesBySubject - Error:`, errorMessage);
-      setError(errorMessage);
-      setQuizzes([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [subjectId, filters]);
-
-  useEffect(() => {
-    fetchQuizzesBySubject();
-    const controller = abortControllerRef.current;
-    return () => {
-      if (controller) {
-        controller.abort();
-      }
-    };
-  }, [fetchQuizzesBySubject]);
-
-  return {
-    quizzes,
-    isLoading,
-    error,
-    refetch: fetchQuizzesBySubject,
-  };
-};
-
-/**
- * Hook for getting quizzes by topic
- */
-export const useQuizzesByTopic = (topicId?: string, filters?: QuizFilters) => {
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const fetchQuizzesByTopic = useCallback(async () => {
-    if (!topicId) {
-      setQuizzes([]);
-      return;
-    }
-
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      console.log(
-        `📖 useQuizzesByTopic - Fetching quizzes for topic: ${topicId}`
-      );
-      const topicQuizzes = await quizApiService.getQuizzesByTopic(
-        topicId,
-        filters
-      );
-      setQuizzes(topicQuizzes);
-      console.log(
-        `✅ useQuizzesByTopic - Quizzes fetched (${topicQuizzes.length} items)`
-      );
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch quizzes by topic";
-      console.error(`❌ useQuizzesByTopic - Error:`, errorMessage);
-      setError(errorMessage);
-      setQuizzes([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [topicId, filters]);
-
-  useEffect(() => {
-      fetchQuizzesByTopic();
-       const controller = abortControllerRef.current;
-
-    return () => {
-      if (controller) {
-        controller.abort();
-      }
-    };
-  }, [fetchQuizzesByTopic]);
-
-  return {
-    quizzes,
-    isLoading,
-    error,
-    refetch: fetchQuizzesByTopic,
-  };
-};
-
-/**
- * Hook for quiz analytics
- */
-export const useQuizAnalytics = (filters?: Record<string, any>) => {
-  const [analytics, setAnalytics] = useState<QuizAnalytics | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const fetchAnalytics = useCallback(async () => {
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      console.log(`📊 useQuizAnalytics - Fetching analytics:`, filters);
-      const analyticsData = await quizApiService.getQuizAnalytics(filters);
-      setAnalytics(analyticsData);
-      console.log(`✅ useQuizAnalytics - Analytics fetched successfully`);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch analytics";
-      console.error(`❌ useQuizAnalytics - Error:`, errorMessage);
-      setError(errorMessage);
-      setAnalytics(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filters]);
-
-  useEffect(() => {
-      fetchAnalytics();
-      const controller = abortControllerRef.current;
-
-    return () => {
-      if (controller) {
-        controller.abort();
-      }
-    };
-  }, [fetchAnalytics]);
-
-  return {
-    analytics,
-    isLoading,
-    error,
-    refetch: fetchAnalytics,
-  };
-};
-
-/**
- * Hook for comparing quizzes
- */
-export const useQuizComparison = () => {
-  const [comparison, setComparison] = useState<QuizComparison | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const compareQuizzes = useCallback(async (quizIds: string[]) => {
-    if (quizIds.length < 2) {
-      setError("At least 2 quizzes are required for comparison");
-      return;
-    }
-
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      console.log(`🔄 useQuizComparison - Comparing quizzes:`, quizIds);
-      const comparisonData = await quizApiService.compareQuizzes(quizIds);
-      setComparison(comparisonData);
-      console.log(`✅ useQuizComparison - Comparison completed successfully`);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to compare quizzes";
-      console.error(`❌ useQuizComparison - Error:`, errorMessage);
-      setError(errorMessage);
-      setComparison(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const clearComparison = useCallback(() => {
-    setComparison(null);
-    setError(null);
-  }, []);
-
-    useEffect(() => {
-        const controller = abortControllerRef.current;
-    return () => {
-      if (controller) {
-        controller.abort();
-      }
-    };
-  }, []);
-
-  return {
-    comparison,
-    isLoading,
-    error,
-    compareQuizzes,
-    clearComparison,
+    isSearching,
   };
 };
