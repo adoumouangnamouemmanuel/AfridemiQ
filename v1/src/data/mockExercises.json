@@ -1,0 +1,51 @@
+[
+  {
+    "id": "quick-math-1",
+    "title": "Quadratic Equations - Quick Practice",
+    "subject": "Mathematics",
+    "topic": "Algebra",
+    "questions": 10,
+    "duration": 15,
+    "difficulty": "Medium",
+    "type": "Quick Practice",
+    "completed": false,
+    "popularity": 95
+  },
+  {
+    "id": "physics-mechanics",
+    "title": "Laws of Motion - Practice Set",
+    "subject": "Physics",
+    "topic": "Mechanics",
+    "questions": 15,
+    "duration": 20,
+    "difficulty": "Easy",
+    "type": "Topic Practice",
+    "completed": true,
+    "score": 80,
+    "popularity": 88
+  },
+  {
+    "id": "chemistry-organic",
+    "title": "Organic Reactions - Speed Test",
+    "subject": "Chemistry",
+    "topic": "Organic Chemistry",
+    "questions": 20,
+    "duration": 25,
+    "difficulty": "Hard",
+    "type": "Speed Test",
+    "completed": false,
+    "popularity": 76
+  },
+  {
+    "id": "biology-genetics",
+    "title": "Genetics & Evolution - Quiz",
+    "subject": "Biology",
+    "topic": "Genetics",
+    "questions": 12,
+    "duration": 18,
+    "difficulty": "Medium",
+    "type": "Topic Quiz",
+    "completed": false,
+    "popularity": 82
+  }
+]

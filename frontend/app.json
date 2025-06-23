@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "ExamPrep",
+    "slug": "exam-prep-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/logo.png",
+    "userInterfaceStyle": "light",
+    "fonts": [
+      "./src/assets/fonts/Poppins-Regular.ttf",
+      "./src/assets/fonts/Poppins-Medium.ttf",
+      "./src/assets/fonts/Poppins-SemiBold.ttf",
+      "./src/assets/fonts/Poppins-Bold.ttf",
+      "./src/assets/fonts/Inter-Regular.ttf",
+      "./src/assets/fonts/Inter-Medium.ttf",
+      "./src/assets/fonts/Inter-SemiBold.ttf",
+      "./src/assets/fonts/Inter-Bold.ttf"
+    ],
+    "splash": {
+      "image": "./src/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "examprep",
+    "plugins": [
+      "expo-router",
+      "expo-web-browser"
+    ]
+  }
+}
