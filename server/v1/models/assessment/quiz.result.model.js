@@ -167,6 +167,7 @@ QuizResultSchema.index({ userId: 1, quizId: 1, createdAt: -1 });
 QuizResultSchema.index({ userId: 1, score: -1 });
 QuizResultSchema.index({ quizId: 1, isPassed: 1 });
 QuizResultSchema.index({ createdAt: -1, score: -1 });
+QuizResultSchema.index({ userId: 1, quizId: 1 }, { unique: true });
 
 // =============== VIRTUELS ===============
 QuizResultSchema.virtual("completionTime").get(function () {
