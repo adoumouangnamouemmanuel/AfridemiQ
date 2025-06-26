@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ExamPrep",
-    "slug": "exam-prep-app",
+    "name": "AfridemiQ",
+    "slug": "afridemiq",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/logo.png",
@@ -21,7 +21,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -35,6 +37,9 @@
       "favicon": "./src/assets/images/favicon.png"
     },
     "scheme": "examprep",
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router",
+      "expo-web-browser"
+    ]
   }
 }
