@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ExamPrep",
-    "slug": "exam-prep-app",
+    "name": "AfridemiQ",
+    "slug": "afridemiq",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/logo.png",
